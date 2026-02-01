@@ -1,0 +1,21 @@
+select
+b.*
+from
+(
+select
+u.Id as UsuarioId,
+p.Nome as NomePessoa,
+case 
+	when ((coalesce(u.Administrador,0)+coalesce(u.gestorfinanceiro,0)+coalesce(u.gestorreservasagendamentos,0))) > 0 then 'Funcionário'
+	else 'Cliente'
+end  as TipoUsuario,
+max(l.datahoracriacao) as DataUltimoAcesso
+from 
+logacesso l
+inner join usuario u on l.usuariocriacao = u.id 
+inner join pessoa p on u.pessoa = p.id
+group by u.Id, p.Nome,case 
+	when ((coalesce(u.Administrador,0)+coalesce(u.gestorfinanceiro,0)+coalesce(u.gestorreservasagendamentos,0))) > 0 then 'Funcionário'
+	else 'Cliente'
+end
+) b order by b.dataultimoacesso desc

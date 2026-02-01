@@ -1,0 +1,117 @@
+# Regras de Projeto - SwPortalProprietario
+
+## Stack Tecnológica
+- Next.js 14 (App Router)
+- TypeScript (strict mode)
+- Material-UI (MUI) e MUI Joy
+- React Query (@tanstack/react-query)
+- React Hook Form
+- Axios para requisições HTTP
+- Zustand para gerenciamento de estado
+
+## Convenções de Código
+
+### TypeScript
+- Sempre usar TypeScript com tipos explícitos
+- Evitar `any` - usar `unknown` quando necessário
+- Usar interfaces para tipos de objetos
+- Manter `strict: true` no tsconfig.json
+
+### Componentes React
+- Usar componentes funcionais com hooks
+- Componentes devem estar em arquivos separados dentro de pastas nomeadas
+- Usar PascalCase para nomes de componentes
+- Exportar componentes como default quando possível
+- Usar TypeScript para props: `interface ComponentProps { ... }`
+
+### Estrutura de Arquivos
+- Componentes em `src/components/`
+- Páginas em `src/app/` (App Router do Next.js)
+- Hooks customizados em `src/hooks/`
+- Serviços/API em `src/services/`
+- Utilitários em `src/utils/`
+- Contextos em `src/contexts/`
+- Store (Zustand) em `src/store/`
+
+### Estilização
+- Priorizar Material-UI (MUI) para componentes
+- Usar Tailwind CSS quando apropriado
+- Manter consistência visual com o tema do projeto
+
+### Formulários
+- Usar React Hook Form para gerenciamento de formulários
+- Validar campos com TypeScript e schemas quando necessário
+- Usar componentes de campo customizados do projeto (InputField, SelectField, etc.)
+
+### Requisições HTTP
+- Usar Axios através da instância configurada em `src/services/AxiosInstance/`
+- Usar React Query para cache e gerenciamento de estado de requisições
+- Queries devem estar em `src/services/querys/`
+- Transformações de dados em `src/services/api/transform*.ts`
+
+### Nomenclatura
+- Arquivos: camelCase para utilitários, PascalCase para componentes
+- Variáveis e funções: camelCase
+- Constantes: UPPER_SNAKE_CASE
+- Tipos/Interfaces: PascalCase
+
+### Boas Práticas
+- Sempre tratar erros adequadamente
+- Usar loading states quando necessário
+- Implementar tratamento de erros de formulário
+- Manter código limpo e legível
+- Comentar código complexo quando necessário
+- Seguir padrões já estabelecidos no projeto
+
+### Verificação de Redundâncias
+- **SEMPRE verificar redundâncias ao modificar código**
+- Identificar código duplicado antes de adicionar novas funcionalidades
+- Reutilizar componentes, hooks e utilitários existentes quando possível
+- Verificar se funções similares já existem antes de criar novas
+- Consolidar lógica duplicada em funções utilitárias ou hooks compartilhados
+- Procurar por padrões repetidos que possam ser abstraídos
+- Refatorar código redundante encontrado durante edições
+
+### Alterações e Refatoração
+- **PRINCÍPIO FUNDAMENTAL: O que está funcionando deve continuar funcionando**
+- Ao alterar ou refatorar código existente, preservar toda funcionalidade atual
+- Manter compatibilidade com código que depende das funções/componentes alterados
+- Não remover funcionalidades existentes sem autorização explícita
+- Ao refatorar, garantir que o comportamento externo permaneça idêntico
+- Testar funcionalidades existentes após qualquer alteração ou refatoração
+- Se uma alteração quebrar funcionalidade existente, isso deve ser explicitamente comunicado
+
+### Imports
+- Usar path aliases `@/*` para imports de `src/`
+- Organizar imports: externos primeiro, depois internos
+- Agrupar imports por tipo (React, bibliotecas, componentes, utilitários)
+
+### Performance
+- Usar React.memo quando apropriado
+- Evitar re-renders desnecessários
+- Usar React Query para cache de dados
+- Implementar lazy loading quando necessário
+
+### Acessibilidade
+- Usar componentes acessíveis do MUI
+- Adicionar labels apropriados
+- Manter contraste adequado
+
+## Padrões Específicos do Projeto
+
+### Componentes de Campo
+- Usar componentes customizados do projeto (InputField, SelectField, etc.)
+- Manter consistência na interface dos campos
+
+### Modais
+- Usar componentes de modal existentes (FormModal, AlertDialogModal, etc.)
+- Seguir padrão de abertura/fechamento estabelecido
+
+### Navegação
+- Usar hooks customizados (useNavigation, useAuthRedirect)
+- Seguir estrutura de rotas do Next.js App Router
+
+### Autenticação
+- Usar contexto de autenticação quando disponível
+- Validar autenticação antes de acessar rotas protegidas
+

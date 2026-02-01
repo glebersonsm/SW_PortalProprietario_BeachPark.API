@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boleto Bancário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .boleto-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .boleto-info div {
+            width: 48%;
+        }
+        .boleto-info label {
+            font-weight: bold;
+        }
+		.barcode label {
+            display: block;
+			margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .barcode {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .barcode img {
+            width: 100%;
+            max-width: 400px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Boleto Bancário Simplificado</h1>
+    
+    <div class="boleto-info">
+        <div>
+            <label>Beneficiário:</label>
+            <p>[NomeBeneficiario]</p>
+        </div>
+        <div>
+            <label>Pagador:</label>
+            <p>[NomePagador]</p>
+        </div>
+    </div>
+
+    <div class="boleto-info">
+        <div>
+            <label>Vencimento:</label>
+            <p>[VencimentoDocumento]</p>
+        </div>
+        <div>
+            <label>Valor:</label>
+            <p>[ValorDocumento]</p>
+        </div>
+    </div>
+
+    <div class="boleto-info">
+        <div>
+            <label>Número do Documento:</label>
+            <p>[NumeroDocumento]</p>
+        </div>
+        <div>
+            <label>Nosso Número:</label>
+            <p>[NossoNumero]</p>
+        </div>
+    </div>
+
+    <div class="boleto-info">
+        <div>
+            <label>Linha digitável:</label>
+            <p>[LinhaDigitavel]</p>
+        </div>
+    </div>
+
+    <div class="barcode">
+        <label>Leitura óptica</label>
+        <img src="data:image/jpeg;base64,[CodigoBarrasBoleto]" alt="Código de Barras">
+    </div>
+
+    <footer>
+        <p>[RodapeDocumento]</p>
+    </footer>
+</div>
+
+</body>
+</html>

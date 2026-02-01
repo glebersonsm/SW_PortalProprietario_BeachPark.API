@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documento Exemplo</title>
+    <style>
+        /* Estilos para posicionar as imagens */
+		#imagem-superior-esquerda {
+            position: absolute;
+            top: 10px; /* Distância do topo */
+            left: 10px; /* Distância da esquerda */
+            width: 100px; /* Largura da imagem (ajuste conforme necessário) */
+            z-index: 1; /* Para garantir que a imagem fique na frente de outros elementos, se houver */
+        }
+		
+		.texto-titulo {
+		    position: absolute;
+            top: 10px; /* Espaçamento do topo */
+            left: 50%; /* Centralizando horizontalmente */
+            transform: translateX(-50%); /* Centralizando horizontalmente */
+        }
+        
+		.texto-principal {
+            margin-top: 70px; /* Espaçamento do topo */
+            border-top: 1px solid black; /* Linha superior */
+            padding-top: 2px; /* Espaçamento acima do texto */
+        }
+		
+		/* Estilos para o campo de competência */
+        .campo-competencia {
+		    position: relative;
+            margin-top: 1px; /* Espaçamento do topo */
+            padding-top: 1px; /* Espaçamento acima do texto */
+			text-align: left;
+        }
+		
+		/* Estilos para o campo proprietário */
+        .campo-proprietario {
+		    position: relative;
+            margin-top: 1px; /* Espaçamento do topo */
+            padding-top: 1px; /* Espaçamento acima do texto */
+			text-align:left
+            
+        }
+		
+		/* Estilos para o campo cpjcnpj */
+        .campo-cpfcnpj {
+		    position: relative;
+            margin-top: 1px; /* Espaçamento do topo */
+            padding-top: 1px; /* Espaçamento acima do texto */
+			text-align:left
+        }
+		
+		/* Estilos para o campo apto */
+        .campo-apto {
+		    position: relative;
+            margin-top: 1px; /* Espaçamento do topo */
+            padding-top: 1px; /* Espaçamento acima do texto */
+			text-align:left
+        }
+		
+		/* Estilos para o campo apto */
+        .campo-torre {
+		    position: relative;
+            margin-top: 1px; /* Espaçamento do topo */
+            padding-top: 1px; /* Espaçamento acima do texto */
+			text-align:left
+        }
+		
+		/* Estilos para o campo cota */
+        .campo-cota {
+		    position: relative;
+            margin-top: 1px; /* Espaçamento do topo */
+            padding-top: 1px; /* Espaçamento acima do texto */
+			text-align:left
+        }
+		
+		/* Estilos para o campo de data */
+        .campo-data {
+		    position: absolute;
+            margin-top: 100px; /* Espaçamento do topo */
+            padding-top: 10px; /* Espaçamento acima do texto */
+			left: 50%; /* Centralizando horizontalmente */
+            transform: translateX(-50%); /* Centralizando horizontalmente */
+        }
+		
+       
+        /* Estilos para o campo de assinatura */
+        .campo-assinatura {
+		    position: absolute;
+            margin-top: 200px; /* Espaçamento do topo */
+            border-top: 1px solid black; /* Linha superior */
+            padding-top: 1px; /* Espaçamento acima do texto */
+			left: 50%; /* Centralizando horizontalmente */
+            transform: translateX(-50%); /* Centralizando horizontalmente */
+        }
+		
+		/* Estilos para o campo cnpj */
+        .campo-cnpj {
+		    position: absolute;
+            margin-top: 220px; /* Espaçamento do topo */
+            padding-top: 2px; /* Espaçamento acima do texto */
+			left: 50%; /* Centralizando horizontalmente */
+            transform: translateX(-50%); /* Centralizando horizontalmente */
+        }
+        
+        /* Estilo para o texto de marca d'água */
+        .marca-dagua {
+            position: relative;
+			margin-top: 300px;
+            bottom: 2px; /* Distância do fundo */
+			text-align: center;
+            font-size: 10px;
+            color: rgba(0, 0, 0, 0.3); /* Cor transparente */
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div>
+	<!-- Imagem no canto superior esquerdo -->
+    <img id="imagem-superior-esquerda" src="data:image/jpeg;base64,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" 
+	alt="Imagem_superior_esquerda">
+	
+	<h4 class="texto-titulo">CERTIDÃO <b>POSITIVA</b> DE DÉBITOS</h4>
+
+	<div class="texto-principal">
+    <!-- Texto -->
+    <p>[NOMEADMINISTRADORA], pessoa jurídica de direito privado, inscrita no CNPJ [CNPJADMINISTRADORA] com sede [ENDERECO]</b>, informa que ao verificar o relatório de débitos do multiproprietário(a) qualificado(a) abaixo, encontra-se com pendências totalizando <b>R$ [totalcontaspendentes]</b> nas contribuições condominiais até a competência mencionada a baixo:</p>
+    </div>
+    
+	<div class="campo-competencia">
+	<p>Competência: <b>[competencia]</b> (Nro. Protocolo: <b>[numeroprotocolo]</b>)</p>
+	</div>
+	
+	<div class="campo-proprietario">
+	<p><b>Multiproprietário: </b>[proprietario]</p>
+	</div>
+	
+	<div class="campo-cpfcnpj">
+	<p><b>[nomecampocpfcnpj]: </b>[numerocpfcnpj]</p>
+	</div>
+	
+	<div class="campo-data">
+	<p>[data]</p>
+	</div>
+
+	<!-- Campo de assinatura -->
+    <div class="campo-assinatura">
+        <p>[NOMEADMINISTRADORA]</p>
+    </div>
+	
+	<div class="campo-cnpj">
+		<p>CNPJ Nº [CNPJADMINISTRADORA]</p>
+	</div>
+    
+    <!-- Texto de marca d'água -->
+    <div class="marca-dagua">Documento gerado automaticamente pelo sistema [nomesistema]. Sua autenticidade pode ser verificada acessando o endereço [enderecovalidacaodocumento]</div>
+</body>
+</html>

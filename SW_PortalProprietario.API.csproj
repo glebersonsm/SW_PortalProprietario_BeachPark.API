@@ -1,0 +1,186 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>046e2f39-43d3-42c3-95d7-5cc6eabc5c53</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>.</DockerfileContext>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AccessCenterDomain\**" />
+    <Compile Remove="Auxiliar\**" />
+    <Compile Remove="Bd\**" />
+    <Compile Remove="Caching\**" />
+    <Compile Remove="CMDomain\**" />
+    <Compile Remove="Controllers\**" />
+    <Compile Remove="Entities\**" />
+    <Compile Remove="Enumns\**" />
+    <Compile Remove="EsolutionPortalDomain\**" />
+    <Compile Remove="Extensions\**" />
+    <Compile Remove="Filters\**" />
+    <Compile Remove="Functions\**" />
+    <Compile Remove="ModelProfiles\**" />
+    <Compile Remove="Models\**" />
+    <Compile Remove="Properties\PublishProfiles\**" />
+    <Compile Remove="RedisModels\**" />
+    <Compile Remove="Repositories\**" />
+    <Compile Remove="Services\**" />
+    <Compile Remove="Setup\**" />
+    <Compile Remove="src\AccessCenterDomain\**" />
+    <Compile Remove="src\EsolutionPortalDomain\**" />
+    <Compile Remove="src\SW_Solterra_API_Principal_Test\**" />
+    <Compile Remove="SW_PortalProprietario.Application\**" />
+    <Compile Remove="SW_PortalProprietario.Domain\**" />
+    <Compile Remove="SW_PortalProprietario.Infra.Data\**" />
+    <Compile Remove="SW_PortalProprietario.Infra.Ioc\**" />
+    <Compile Remove="SW_SolTerra_API_Mapper\**" />
+    <Compile Remove="SW_SolTerra_API_Principal.Test\**" />
+    <Compile Remove="SW_Utils\**" />
+    <Compile Remove="test\**" />
+    <Content Remove="AccessCenterDomain\**" />
+    <Content Remove="Auxiliar\**" />
+    <Content Remove="Bd\**" />
+    <Content Remove="Caching\**" />
+    <Content Remove="CMDomain\**" />
+    <Content Remove="Controllers\**" />
+    <Content Remove="Entities\**" />
+    <Content Remove="Enumns\**" />
+    <Content Remove="EsolutionPortalDomain\**" />
+    <Content Remove="Extensions\**" />
+    <Content Remove="Filters\**" />
+    <Content Remove="Functions\**" />
+    <Content Remove="ModelProfiles\**" />
+    <Content Remove="Models\**" />
+    <Content Remove="Properties\PublishProfiles\**" />
+    <Content Remove="RedisModels\**" />
+    <Content Remove="Repositories\**" />
+    <Content Remove="Services\**" />
+    <Content Remove="Setup\**" />
+    <Content Remove="src\AccessCenterDomain\**" />
+    <Content Remove="src\EsolutionPortalDomain\**" />
+    <Content Remove="src\SW_Solterra_API_Principal_Test\**" />
+    <Content Remove="SW_PortalProprietario.Application\**" />
+    <Content Remove="SW_PortalProprietario.Domain\**" />
+    <Content Remove="SW_PortalProprietario.Infra.Data\**" />
+    <Content Remove="SW_PortalProprietario.Infra.Ioc\**" />
+    <Content Remove="SW_SolTerra_API_Mapper\**" />
+    <Content Remove="SW_SolTerra_API_Principal.Test\**" />
+    <Content Remove="SW_Utils\**" />
+    <Content Remove="test\**" />
+    <EmbeddedResource Remove="AccessCenterDomain\**" />
+    <EmbeddedResource Remove="Auxiliar\**" />
+    <EmbeddedResource Remove="Bd\**" />
+    <EmbeddedResource Remove="Caching\**" />
+    <EmbeddedResource Remove="CMDomain\**" />
+    <EmbeddedResource Remove="Controllers\**" />
+    <EmbeddedResource Remove="Entities\**" />
+    <EmbeddedResource Remove="Enumns\**" />
+    <EmbeddedResource Remove="EsolutionPortalDomain\**" />
+    <EmbeddedResource Remove="Extensions\**" />
+    <EmbeddedResource Remove="Filters\**" />
+    <EmbeddedResource Remove="Functions\**" />
+    <EmbeddedResource Remove="ModelProfiles\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <EmbeddedResource Remove="Properties\PublishProfiles\**" />
+    <EmbeddedResource Remove="RedisModels\**" />
+    <EmbeddedResource Remove="Repositories\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <EmbeddedResource Remove="Setup\**" />
+    <EmbeddedResource Remove="src\AccessCenterDomain\**" />
+    <EmbeddedResource Remove="src\EsolutionPortalDomain\**" />
+    <EmbeddedResource Remove="src\SW_Solterra_API_Principal_Test\**" />
+    <EmbeddedResource Remove="SW_PortalProprietario.Application\**" />
+    <EmbeddedResource Remove="SW_PortalProprietario.Domain\**" />
+    <EmbeddedResource Remove="SW_PortalProprietario.Infra.Data\**" />
+    <EmbeddedResource Remove="SW_PortalProprietario.Infra.Ioc\**" />
+    <EmbeddedResource Remove="SW_SolTerra_API_Mapper\**" />
+    <EmbeddedResource Remove="SW_SolTerra_API_Principal.Test\**" />
+    <EmbeddedResource Remove="SW_Utils\**" />
+    <EmbeddedResource Remove="test\**" />
+    <None Remove="AccessCenterDomain\**" />
+    <None Remove="Auxiliar\**" />
+    <None Remove="Bd\**" />
+    <None Remove="Caching\**" />
+    <None Remove="CMDomain\**" />
+    <None Remove="Controllers\**" />
+    <None Remove="Entities\**" />
+    <None Remove="Enumns\**" />
+    <None Remove="EsolutionPortalDomain\**" />
+    <None Remove="Extensions\**" />
+    <None Remove="Filters\**" />
+    <None Remove="Functions\**" />
+    <None Remove="ModelProfiles\**" />
+    <None Remove="Models\**" />
+    <None Remove="Properties\PublishProfiles\**" />
+    <None Remove="RedisModels\**" />
+    <None Remove="Repositories\**" />
+    <None Remove="Services\**" />
+    <None Remove="Setup\**" />
+    <None Remove="src\AccessCenterDomain\**" />
+    <None Remove="src\EsolutionPortalDomain\**" />
+    <None Remove="src\SW_Solterra_API_Principal_Test\**" />
+    <None Remove="SW_PortalProprietario.Application\**" />
+    <None Remove="SW_PortalProprietario.Domain\**" />
+    <None Remove="SW_PortalProprietario.Infra.Data\**" />
+    <None Remove="SW_PortalProprietario.Infra.Ioc\**" />
+    <None Remove="SW_SolTerra_API_Mapper\**" />
+    <None Remove="SW_SolTerra_API_Principal.Test\**" />
+    <None Remove="SW_Utils\**" />
+    <None Remove="test\**" />
+    <_WebToolingArtifacts Remove="Properties\PublishProfiles\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="SourceConfiguration\MabuTimeSharingConfigurations.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="src\swPortal.db" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\launchSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="SourceConfiguration\MabuTimeSharingConfigurations.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="6.0.32" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.7" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
+    <PackageReference Include="Npgsql" Version="8.0.5" />
+    <PackageReference Include="RestSharp" Version="112.1.0" />
+    <PackageReference Include="RestSharp.Newtonsoft.Json" Version="1.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.7" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="ZXing.Net" Version="0.16.9" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="SW_PortalProprietario.Infra.Ioc\SW_PortalProprietario.Infra.Ioc.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="SourceConfiguration\DemonstracaoSWSolucoesConfigurations.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

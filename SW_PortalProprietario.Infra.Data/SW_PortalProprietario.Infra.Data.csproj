@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Bd\**" />
+    <EmbeddedResource Remove="Bd\**" />
+    <None Remove="Bd\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="AutoMapper.Collection" Version="10.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.EnumMapping" Version="3.2.0" />
+    <PackageReference Include="AutoMapper.Extensions.ExpressionMapping" Version="7.0.1" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="FluentNHibernate" Version="3.4.0" />
+    <PackageReference Include="NHibernate" Version="5.5.2" />
+    <PackageReference Include="Npgsql" Version="8.0.5" />
+	<PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="7.1.2" />
+    <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="10.2.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
+   
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AccessCenterDomain\AccessCenterDomain.csproj" />
+    <ProjectReference Include="..\CMDomain\CMDomain.csproj" />
+    <ProjectReference Include="..\EsolutionPortalDomain\EsolutionPortalDomain.csproj" />
+    <ProjectReference Include="..\SW_PortalProprietario.Application\SW_PortalProprietario.Application.csproj" />
+    <ProjectReference Include="..\SW_Utils\SW_Utils.csproj" />
+  </ItemGroup>
+
+</Project>

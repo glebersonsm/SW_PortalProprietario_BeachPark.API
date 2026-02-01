@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Modulos UltimoId="24">
+  
+  <!--Sistema/Cadastros-->
+  <Modulo  Id="1" AreaSistema="1" GrupoModulo="1" NomeNormalizado="Módulo" NomeInterno="Modulo" Permissoes="1,2,3" />
+  <Modulo  Id="2" AreaSistema="1" GrupoModulo="1" NomeNormalizado="Grupo de empresa" NomeInterno="companygroup" Permissoes="1,2,3" />
+  <Modulo  Id="3" AreaSistema="1" GrupoModulo="1" NomeNormalizado="Empresa" NomeInterno="company" Permissoes="1,2,3" />
+  <Modulo  Id="4" AreaSistema="1" GrupoModulo="1" NomeNormalizado="Grupo de usuários" NomeInterno="usergroup" Permissoes="1,2,3" />
+  <Modulo  Id="5" AreaSistema="1" GrupoModulo="1" NomeNormalizado="Usuário" NomeInterno="user" Permissoes="1,2,3"/>
+
+  <!--Geral/Cadastros-->
+  <Modulo  Id="6" AreaSistema="2" GrupoModulo="1" NomeNormalizado="País" NomeInterno="country" Permissoes="1,2,3"/>
+  <Modulo  Id="7" AreaSistema="2" GrupoModulo="1" NomeNormalizado="Estado" NomeInterno="state" Permissoes="1,2,3"/>
+  <Modulo  Id="8" AreaSistema="2" GrupoModulo="1" NomeNormalizado="Cidade" NomeInterno="city" Permissoes="1,2,3"/>
+  <Modulo  Id="9" AreaSistema="2" GrupoModulo="1" NomeNormalizado="Tipo Telefone" NomeInterno="tipotelefone" Permissoes="1,2,3"/>
+  <Modulo  Id="10" AreaSistema="2" GrupoModulo="1" NomeNormalizado="Tipo Endereço" NomeInterno="tipoendereco" Permissoes="1,2,3"/>
+  <Modulo  Id="11" AreaSistema="2" GrupoModulo="1" NomeNormalizado="Tipo Documento Pessoa" NomeInterno="tipodocumentopessoa" Permissoes="1,2,3"/>
+  <Modulo  Id="20" AreaSistema="2" GrupoModulo="2" NomeNormalizado="Email" NomeInterno="email" Permissoes="1,2,3"/>
+  <Modulo  Id="23" AreaSistema="2" GrupoModulo="2" NomeNormalizado="Html Template" NomeInterno="htmltemplate" Permissoes="1,2,3"/>
+  
+  
+  <!--Pessoas/Cadastros-->
+  <Modulo  Id="12" AreaSistema="4" GrupoModulo="1" NomeNormalizado="Pessoa Telefone" NomeInterno="pessoatelefone" Permissoes="1,2,3"/>
+  <Modulo  Id="13" AreaSistema="4" GrupoModulo="1" NomeNormalizado="Pessoa Endereço" NomeInterno="pessoaendereco" Permissoes="1,2,3"/>
+  <Modulo  Id="14" AreaSistema="4" GrupoModulo="1" NomeNormalizado="Pessoa Documento" NomeInterno="pessoadocumento" Permissoes="1,2,3"/>
+  <Modulo  Id="15" AreaSistema="4" GrupoModulo="1" NomeNormalizado="Pessoa" NomeInterno="pessoa" Permissoes="1,2,3"/>
+
+
+  <!--Grupo documentos/Cadastros-->
+  <Modulo  Id="16" AreaSistema="5" GrupoModulo="1" NomeNormalizado="Grupo de documentos" NomeInterno="documentgroup" Permissoes="1,2,3"/>
+  
+  <!--Documentos/Movimentações-->
+  <Modulo  Id="17" AreaSistema="5" GrupoModulo="2" NomeNormalizado="Documentos" NomeInterno="document" Permissoes="1,2,3,6"/>
+
+
+  <!--Faqs/Cadastros-->
+  <Modulo  Id="18" AreaSistema="6" GrupoModulo="1" NomeNormalizado="Grupo Faqs" NomeInterno="faqgroup" Permissoes="1,2,3"/>
+  
+  <!--Faqs/Movimentações-->
+  <Modulo  Id="19" AreaSistema="6" GrupoModulo="2" NomeNormalizado="Faqs" NomeInterno="faq" Permissoes="1,2,3"/>
+
+  <!--Imagens/Cadastros-->
+  <Modulo  Id="21" AreaSistema="7" GrupoModulo="1" NomeNormalizado="Grupo de imagens" NomeInterno="imagegroup" Permissoes="1,2,3"/>
+
+  <!--Imagens/Movimentações-->
+  <Modulo  Id="22" AreaSistema="7" GrupoModulo="2" NomeNormalizado="Imagens" NomeInterno="imagegroupimage" Permissoes="1,2,3"/>
+
+  <!--TimeSharing/Movimentações-->
+  <Modulo  Id="24" AreaSistema="8" GrupoModulo="2" NomeNormalizado="Reservas" NomeInterno="reservatimesharing" Permissoes="1,2,3"/>
+
+
+</Modulos>

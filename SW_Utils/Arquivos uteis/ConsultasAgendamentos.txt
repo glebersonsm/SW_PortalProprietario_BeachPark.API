@@ -1,0 +1,939 @@
+﻿select top 100 * from PeriodoCotaDisponibilidade order by id desc
+select * from Reserva where periodocotadisponibilidade = 77843
+
+select
+p.usuarioinclusao,
+count(1) as Qtde
+From
+PeriodoCotaDisponibilidade p
+where
+p.DataHoraExclusao is null
+and p.DataInicial >= '2025-06-01'
+group by p.UsuarioInclusao
+
+select * from GrupoCotas
+
+Select
+  gc.Empresa,
+  sd.Id,
+  s.Id as SemanaId,
+  s.DataInicial as SemanaDataInicial,
+  s.DataFinal as SemanaDataFinal,
+  ts.Id as TipoSemanaId,
+  ts.Nome as TipoSemanaNome,
+  gts.Id as GrupoTipoSemanaId,
+  gts.Nome as GrupoTipoSemanaNome,
+  pcd.UhCondominio,
+  pcd.Cota as CotaId,
+  c.PrioridadeAgendamento
+  from 
+  SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  LEFT join GrupoCotas gc on c.GrupoCotas = gc.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento  in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal) and
+  Year(s.DataInicial) = 2026
+
+  select * from prioridadeagendamentoAno
+
+  --Clientes com prioriade vigente que não agendaram
+  Select
+  distinct
+  gc.Empresa,
+  uc1.Numero,
+  c1.Id as CotaId,
+  c1.Nome as CotaNome,
+  c1.PrioridadeAgendamento,
+  pes.Nome,
+  pes.CPF
+  from 
+  CotaProprietario cp1
+  Inner Join Cota c1 on cp1.Cota = c1.Id
+  Inner Join UhCondominio uc1 on cp1.UhCondominio = uc1.Id
+  Inner Join Proprietario pr on pr.CotaProprietario = cp1.Id and pr.DataHoraExclusao is null and pr.UsuarioExclusao is null
+  Inner Join Cliente cli on pr.Cliente = cli.Id
+  inner join Pessoa pes on cli.Pessoa = pes.Id
+  left join GrupoCotas gc on c1.GrupoCotas = gc.Id
+  Where
+  pes.Nome not in ('MABU ADMINISTRADORA DE HOTEIS E CONDOMINIO','EMPRESA HOTELEIRA MABU LTDA')  and
+  cp1.DataHoraExclusao is null and cp1.UsuarioExclusao is null
+  and c1.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal)
+  and not exists(Select
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+  SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From 
+  PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal)
+  and Year(s.DataInicial) = 2026 and pcd.UhCondominio = uc1.Id and pcd.Cota = c1.Id)
+
+  select * from PrioridadeAgendamentoano where PrioridadeAgendamento in (6,7,8) and Ano = 2026
+
+
+  --Clientes com prioriade vigente ou anteriores a data atual que não agendaram
+  Select
+  distinct
+  gc.Empresa,
+  uc1.Numero,
+  c1.Id as CotaId,
+  c1.Nome as CotaNome,
+  c1.PrioridadeAgendamento,
+  pes.Nome,
+  pes.CPF,
+  Coalesce(pes.eMail,(Select Max(pe.Email) from PessoaEmail pe Where pe.Pessoa = pes.Id)) AS Email
+  from 
+  CotaProprietario cp1
+  Inner Join Cota c1 on cp1.Cota = c1.Id
+  Inner Join UhCondominio uc1 on cp1.UhCondominio = uc1.Id
+  Inner Join Proprietario pr on pr.CotaProprietario = cp1.Id and pr.DataHoraExclusao is null and pr.UsuarioExclusao is null
+  Inner Join Cliente cli on pr.Cliente = cli.Id
+  inner join Pessoa pes on cli.Pessoa = pes.Id
+  left join GrupoCotas gc on c1.GrupoCotas = gc.Id
+  Where
+  pes.Nome not in ('MABU ADMINISTRADORA DE HOTEIS E CONDOMINIO','EMPRESA HOTELEIRA MABU LTDA')  and
+  cp1.DataHoraExclusao is null and cp1.UsuarioExclusao is null
+  and c1.PrioridadeAgendamento in 
+  (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() <= paa.DataFinal and paa.DataInicial >= '2025-06-01' and paa.DataInicial <= GETDATE())
+  and not exists(Select
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+ SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento in 
+  (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() <= paa.DataFinal and paa.DataInicial >= '2025-06-01' and paa.DataInicial <= GETDATE())
+  and Year(s.DataInicial) = 2026 and pcd.UhCondominio = uc1.Id and pcd.Cota = c1.Id)
+
+  select * from Cota where id = 1464
+  select * from PrioridadeAgendamentoAno where PrioridadeAgendamento = 12 and Ano = 2026
+
+   --Clientes com prioriade vigente ou anteriores a data atual que fizeram agendamento
+  Select
+  distinct
+  gc.Empresa,
+  uc1.Numero,
+  c1.Id as CotaId,
+  c1.Nome as CotaNome,
+  c1.PrioridadeAgendamento,
+  pes.Nome,
+  pes.CPF,
+  Coalesce(pes.eMail,(Select Max(pe.Email) from PessoaEmail pe Where pe.Pessoa = pes.Id)) AS Email
+  from 
+  CotaProprietario cp1
+  Inner Join Cota c1 on cp1.Cota = c1.Id
+  Inner Join UhCondominio uc1 on cp1.UhCondominio = uc1.Id
+  Inner Join Proprietario pr on pr.CotaProprietario = cp1.Id and pr.DataHoraExclusao is null and pr.UsuarioExclusao is null
+  Inner Join Cliente cli on pr.Cliente = cli.Id
+  inner join Pessoa pes on cli.Pessoa = pes.Id
+  left join GrupoCotas gc on c1.GrupoCotas = gc.Id
+  Where
+  pes.Nome not in ('MABU ADMINISTRADORA DE HOTEIS E CONDOMINIO','EMPRESA HOTELEIRA MABU LTDA')  and
+  cp1.DataHoraExclusao is null and cp1.UsuarioExclusao is null
+  and c1.PrioridadeAgendamento in 
+  (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() <= paa.DataFinal and paa.DataInicial >= '2025-06-01' and paa.DataInicial <= GETDATE())
+  and exists(Select
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+ SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() <= paa.DataFinal and paa.DataInicial >= '2025-06-01'  and paa.DataInicial <= GETDATE())
+  and Year(s.DataInicial) = 2026 and pcd.UhCondominio = uc1.Id and pcd.Cota = c1.Id)
+
+  --Clientes dentro do período de agendamento que já agendaram
+  Select
+  distinct
+  gc.Empresa,
+  uc1.Numero,
+  c1.Id as CotaId,
+  c1.Nome as CotaNome,
+  c1.PrioridadeAgendamento,
+  pes.Nome,
+  pes.CPF
+  from 
+  CotaProprietario cp1
+  Inner Join Cota c1 on cp1.Cota = c1.Id
+  Inner Join UhCondominio uc1 on cp1.UhCondominio = uc1.Id
+  Inner Join Proprietario pr on pr.CotaProprietario = cp1.Id and pr.DataHoraExclusao is null and pr.UsuarioExclusao is null
+  Inner Join Cliente cli on pr.Cliente = cli.Id
+  inner join Pessoa pes on cli.Pessoa = pes.Id
+  Left join GrupoCotas gc on c1.GrupoCotas = gc.Id
+  Where
+  pes.Nome not in ('MABU ADMINISTRADORA DE HOTEIS E CONDOMINIO','EMPRESA HOTELEIRA MABU LTDA')  and
+  cp1.DataHoraExclusao is null and cp1.UsuarioExclusao is null
+  and c1.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal)
+  and exists(Select
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+  SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal)
+  and Year(s.DataInicial) = 2026 and pcd.UhCondominio = uc1.Id and pcd.Cota = c1.Id)
+
+
+
+
+
+  Select
+  distinct
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+  SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento = 6 and
+  Year(s.DataInicial) = 2026
+
+  --86
+
+  
+
+
+select
+distinct 
+p.Cota,
+p.UhCondominio
+--p.*
+From
+PeriodoCotaDisponibilidade p
+where
+p.DataHoraExclusao is null
+and p.DataInicial >= '2025-06-01' and
+p.UsuarioInclusao = 56 and
+YEAR(p.DataInicial) = 2026
+
+SELECT * FROM Inventario WHERE ID = 14
+
+select * from PrioridadeAgendamentoAno where PrioridadeAgendamento = 22 and Ano = 2026
+
+--Consulta contas bancárias
+SELECT
+a.*
+FROM (
+SELECT 
+DISTINCT
+to_char(ccb.DATAHORACRIACAO,'dd/MM/yyyy') AS DataCadastroConta,
+p.Id AS IdPessoa,
+p.Nome AS NomePessoa,
+b.Codigo AS CodigoBanco,
+b.Nome AS NomeBanco,
+ccb.Agencia,
+ccb.AgenciaDigito,
+ccb.CONTA AS ContaNumero,
+ccb.CONTADIGITO,
+DECODE(ccb.TIPOCONTA,'P','Poupança','Corrente') AS TipoConta,
+ccb.TIPOCHAVEPIX,
+ccb.CHAVEPIX,
+p.Email
+FROM 
+clientecontabancaria ccb
+INNER JOIN cliente cli ON ccb.Cliente = cli.Id
+INNER JOIN Pessoa p ON cli.Pessoa = p.Id
+INNER JOIN Banco b ON ccb.Banco = b.Id
+WHERE 
+ccb.banco = 161 AND
+ccb.USUARIOCRIACAO = 1 AND 
+p.Id IN (78667,
+73014,
+10465,
+14391,
+116243,
+9167,
+229134,
+232621,
+55995,
+34394,
+216407,
+221817,
+137462,
+135167,
+7296,
+164230,
+41412,
+91707,
+39478,
+216769,
+116123,
+221264,
+92843,
+206170,
+216876,
+199453,
+161623,
+141927,
+75456,
+232829,
+209755,
+23699,
+209523,
+189371,
+46788,
+122498,
+121636,
+39769,
+222080,
+13641,
+81259,
+19566,
+12470,
+112306,
+114189,
+27232,
+99294,
+203087,
+221417,
+230489,
+209858,
+208116,
+70983,
+61416,
+112194,
+186955,
+207727,
+89814,
+33818,
+54376,
+16980,
+27925,
+74617,
+62521,
+137053,
+91584,
+6530,
+221468,
+170991,
+77562,
+201772,
+58172,
+158898,
+85905,
+134982,
+228164,
+31220,
+35758,
+219138,
+65937,
+164041,
+59269,
+102322,
+92921,
+210444,
+60709,
+75151,
+201367,
+102367,
+61659,
+216746,
+234758,
+35032,
+86686,
+66691,
+236673,
+27251,
+78969,
+19868,
+17587,
+78439,
+127765,
+231889,
+231778,
+195266,
+117443,
+78829,
+112092,
+130795,
+72247,
+225669,
+228008,
+98706,
+30354,
+190059,
+175740,
+234765,
+218262,
+223354,
+216251,
+22260,
+226141,
+215418)
+) a
+ORDER BY To_date(a.DataCadastroConta,'dd/MM/yyyy') desc
+
+
+
+select top 100 * from PeriodoCotaDisponibilidade order by id desc
+select * from Reserva where periodocotadisponibilidade = 77843
+
+select
+p.usuarioinclusao,
+count(1) as Qtde
+From
+PeriodoCotaDisponibilidade p
+where
+p.DataHoraExclusao is null
+and p.DataInicial >= '2025-06-01'
+group by p.UsuarioInclusao
+
+select * from GrupoCotas
+
+Select
+  gc.Empresa,
+  sd.Id,
+  s.Id as SemanaId,
+  s.DataInicial as SemanaDataInicial,
+  s.DataFinal as SemanaDataFinal,
+  ts.Id as TipoSemanaId,
+  ts.Nome as TipoSemanaNome,
+  gts.Id as GrupoTipoSemanaId,
+  gts.Nome as GrupoTipoSemanaNome,
+  pcd.UhCondominio,
+  pcd.Cota as CotaId,
+  c.PrioridadeAgendamento
+  from 
+  SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  LEFT join GrupoCotas gc on c.GrupoCotas = gc.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento  in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal) and
+  Year(s.DataInicial) = 2026
+
+  select * from prioridadeagendamentoAno
+
+  select * from pessoaendereco
+
+  --Clientes com prioriade vigente que não agendaram
+  Select
+  distinct
+  gc.Empresa,
+  uc1.Numero,
+  c1.Id as CotaId,
+  c1.Nome as CotaNome,
+  c1.PrioridadeAgendamento,
+  pes.Nome,
+  pes.CPF,
+  Case 
+  when (Select Max(p.Nome) from PessoaEndereco pe Inner Join Cidade c on pe.Cidade = c.Id Inner Join Estado e on c.Estado = e.Id inner Join Pais p on e.Pais = p.Id Where pe.Pessoa = pes.Id) like 'BRAS%'
+  then 'N' else pes.Estrangeiro end as Estrangeiro,
+  (Select Max(p.Nome) from PessoaEndereco pe Inner Join Cidade c on pe.Cidade = c.Id Inner Join Estado e on c.Estado = e.Id inner Join Pais p on e.Pais = p.Id Where pe.Pessoa = pes.Id) as Pais,
+  Coalesce(pes.Email,(Select Max(pe.Email) From PessoaEmail pe Where pe.Pessoa = pes.Id)) as Email,
+  (Select Max(pt.Numero) From PessoaTelefone pt Where pt.Pessoa = pes.Id) as Telefone
+  from 
+  CotaProprietario cp1
+  Inner Join Cota c1 on cp1.Cota = c1.Id
+  Inner Join UhCondominio uc1 on cp1.UhCondominio = uc1.Id
+  Inner Join Proprietario pr on pr.CotaProprietario = cp1.Id and pr.DataHoraExclusao is null and pr.UsuarioExclusao is null
+  Inner Join Cliente cli on pr.Cliente = cli.Id
+  inner join Pessoa pes on cli.Pessoa = pes.Id
+  left join GrupoCotas gc on c1.GrupoCotas = gc.Id
+  Where
+  pes.Nome not in ('MABU ADMINISTRADORA DE HOTEIS E CONDOMINIO','EMPRESA HOTELEIRA MABU LTDA')  and
+  cp1.DataHoraExclusao is null and cp1.UsuarioExclusao is null
+  and c1.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal)
+  and not exists(Select
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+ SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal)
+  and Year(s.DataInicial) = 2026 and pcd.UhCondominio = uc1.Id and pcd.Cota = c1.Id)
+  --and pes.Nome = 'ABNER JOSE ELIEZER TORRES CHAVEZ'
+
+  select * from PrioridadeAgendamentoano where PrioridadeAgendamento in (6,7,8) and Ano = 2026
+
+  select * from pessoa where nome = 'ABNER JOSE ELIEZER TORRES CHAVEZ'
+  select * from PessoaEndereco where Pessoa = 189251
+  select * from Cidade where Id = 3612
+
+  --Clientes dentro do período de agendamento que já agendaram
+  Select
+  distinct
+  gc.Empresa,
+  uc1.Numero,
+  c1.Id as CotaId,
+  c1.Nome as CotaNome,
+  c1.PrioridadeAgendamento,
+  pes.Nome,
+  pes.CPF,
+  Coalesce(pes.Email,(Select Max(pe.Email) From PessoaEmail pe Where pe.Pessoa = pes.Id)) as Email
+  from 
+  CotaProprietario cp1
+  Inner Join Cota c1 on cp1.Cota = c1.Id
+  Inner Join UhCondominio uc1 on cp1.UhCondominio = uc1.Id
+  Inner Join Proprietario pr on pr.CotaProprietario = cp1.Id and pr.DataHoraExclusao is null and pr.UsuarioExclusao is null
+  Inner Join Cliente cli on pr.Cliente = cli.Id
+  inner join Pessoa pes on cli.Pessoa = pes.Id
+  Left join GrupoCotas gc on c1.GrupoCotas = gc.Id
+  Where
+  pes.Nome not in ('MABU ADMINISTRADORA DE HOTEIS E CONDOMINIO','EMPRESA HOTELEIRA MABU LTDA')  and
+  cp1.DataHoraExclusao is null and cp1.UsuarioExclusao is null
+  and c1.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal)
+  and exists(Select
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+  SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() between paa.DataInicial and paa.DataFinal)
+  and Year(s.DataInicial) = 2026 and pcd.UhCondominio = uc1.Id and pcd.Cota = c1.Id)
+
+
+
+
+
+  Select
+  distinct
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+  SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento = 6 and
+  Year(s.DataInicial) = 2026
+
+  --86
+
+  
+
+
+select
+distinct 
+p.Cota,
+p.UhCondominio
+--p.*
+From
+PeriodoCotaDisponibilidade p
+where
+p.DataHoraExclusao is null
+and p.DataInicial >= '2025-06-01' and
+p.UsuarioInclusao = 56 and
+YEAR(p.DataInicial) = 2026
+
+SELECT * FROM Inventario WHERE ID = 14
+
+
+select 
+r.Id,
+r.CheckIn,
+r.CheckOut,
+r.Status,
+pcd.DataInicial,
+pcd.DataFinal,
+pcd.Id as AgendamentoId,
+pcd.datahoraexclusao,
+pcd.usuarioexclusao,
+pcd.DataHoraInclusao
+From
+PeriodoCotaDisponibilidade pcd
+Inner Join Reserva r on r.PeriodoCotaDisponibilidade = pcd.Id
+Where
+(pcd.DataHoraInclusao >= '2025-05-30' or
+pcd.DataHoraExclusao >= '2025-05-30') and
+(pcd.DataHoraExclusao is not null or pcd.UsuarioExclusao is not null) and
+r.Status <> 'CL'
+
+update Reserva set Status = 'CL', DataHoraCancelamento = '2025-06-11 15:03:05.728', ObservacaoCancelamento = 'Cancelamento realizado pelo portal do proprietariio'
+where Id = 78171
+
+select top 100 * from PeriodoCotaDisponibilidade where DataHoraExclusao is not null order by Id desc
+
+update PeriodoCotaDisponibilidade set UsuarioExclusao = 56 where DataHoraExclusao is not null and usuarioexclusao is null
+select * from PeriodoCotaDisponibilidade where DataHoraExclusao is not null and UsuarioExclusao is not null
+Select * from SemanaDisponibilidade where DataHoraExclusao is not null and UsuarioExclusao is null
+update SemanaDisponibilidade set UsuarioExclusao = 56 where DataHoraExclusao is not null and UsuarioExclusao is null
+
+select * from Reserva where Id = 90235
+
+
+--Consulta dados do cliente na AC
+
+SELECT
+p.Nome,
+g.NOme AS NomeCota,
+i.Numero AS NumeroImovel,
+p.Email,
+tt.Nome AS TipoTelefone,
+pt.NUMERO AS Telefone
+FROM
+Cota c
+INNER JOIN GRUPOCOTATIPOCOTA g ON c.GRUPOCOTATIPOCOTA = g.ID 
+INNER JOIN Imovel i ON c.Imovel = i.ID 
+INNER JOIN Cliente cli ON c.Proprietario = cli.Id
+INNER JOIN pessoa p ON cli.Pessoa = p.Id
+INNER JOIN PessoaTelefone pt ON pt.Pessoa = p.Id AND pt.Preferencial = 'S'
+INNER JOIN TipoTelefone tt ON pt.TIPOTELEFONE = tt.Id
+WHERE
+1 = 1
+
+
+Select
+  distinct
+  gc.Empresa,
+  uc1.Numero,
+  c1.Id as CotaId,
+  c1.Nome as CotaNome,
+  c1.PrioridadeAgendamento,
+  pes.Nome,
+  pes.CPF,
+  Case 
+  when (Select Max(p.Nome) from PessoaEndereco pe Inner Join Cidade c on pe.Cidade = c.Id Inner Join Estado e on c.Estado = e.Id inner Join Pais p on e.Pais = p.Id Where pe.Pessoa = pes.Id) like 'BRAS%'
+  then 'N' else pes.Estrangeiro end as Estrangeiro,
+  (Select Max(p.Nome) from PessoaEndereco pe Inner Join Cidade c on pe.Cidade = c.Id Inner Join Estado e on c.Estado = e.Id inner Join Pais p on e.Pais = p.Id Where pe.Pessoa = pes.Id) as Pais,
+  Coalesce(pes.Email,(Select Max(pe.Email) From PessoaEmail pe Where pe.Pessoa = pes.Id)) as Email,
+  (Select Max(pt.Numero) From PessoaTelefone pt Where pt.Pessoa = pes.Id) as Telefone
+  from 
+  CotaProprietario cp1
+  Inner Join Cota c1 on cp1.Cota = c1.Id
+  Inner Join UhCondominio uc1 on cp1.UhCondominio = uc1.Id
+  Inner Join Proprietario pr on pr.CotaProprietario = cp1.Id and pr.DataHoraExclusao is null and pr.UsuarioExclusao is null
+  Inner Join Cliente cli on pr.Cliente = cli.Id
+  inner join Pessoa pes on cli.Pessoa = pes.Id
+  left join GrupoCotas gc on c1.GrupoCotas = gc.Id
+  Where
+  pes.Nome not in ('MABU ADMINISTRADORA DE HOTEIS E CONDOMINIO','EMPRESA HOTELEIRA MABU LTDA')  and
+  cp1.DataHoraExclusao is null and cp1.UsuarioExclusao is null
+  and c1.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() >= paa.DataInicial)
+  and not exists(Select
+  pcd.UhCondominio,
+  pcd.Cota as CotaId
+  from 
+ SemanaDisponibilidade sd
+  Inner Join Semana s on s.Id = sd.Semana 
+  Inner Join TipoSemana ts on s.TipoSemana = ts.Id
+  Inner Join GrupoTipoSemana gts on ts.GrupoTipoSemana = gts.Id
+  Inner Join PeriodoCotaDisponibilidade pcd on sd.PeriodoCotaDisponibilidade = pcd.Id and pcd.UsuarioExclusao is null and pcd.DataHoraExclusao is null
+  Inner Join Cota c on pcd.Cota = c.Id
+  Where
+  pcd.DataHoraExclusao is null and pcd.UsuarioExclusao is null and
+  sd.DataHoraExclusao is null and sd.UsuarioExclusao is null and
+  s.DataHoraExclusao is null and s.UsuarioExclusao is null and
+  c.PrioridadeAgendamento in (Select paa.PrioridadeAgendamento From PrioridadeAgendamentoAno paa Where paa.DataHoraExclusao is null and paa.UsuarioExclusao is null and 
+  paa.Ano = 2026 and GETDATE() >= paa.DataInicial)
+  and Year(s.DataInicial) = 2026 and pcd.UhCondominio = uc1.Id and pcd.Cota = c1.Id)
+
+  //Padrão definião de integralização e reservas
+  SELECT 
+VALOR, 
+VALIDADE, 
+NUMEROPONTOS, 
+IDTIPODCCONTRATO, 
+IDTIPODCTAXA, 
+IDTIPODCJUROS,              
+IDTIPODCMULTACANC, 
+IDTIPODCDIFDIBALC, 
+PERCINTEGRALIZA, 
+PERCTXMANUTPRIUTI,                  
+PERCPONTOSPRIUTI, 
+PERCTXMANUTSEGUTI, 
+PERCPONTOSSEGUTI, 
+TIPOVALIDADE,                       
+IDTIPODCDEBNUTIL, 
+IDTIPODCCREDNUTIL, 
+ANOINICIAL, 
+VALORPONTO, 
+FLGCONTABDIFERIDA,            
+VALORPERCPONTO, 
+FLGPRIMUTILGRATUI, 
+UTILALTATEMP, 
+FLGUTILVLRPROP, 
+FLGDTANIVERSARIO,         
+FLGTIPOCONTRATO, 
+PAGANTESREGRAFREE, 
+HOSPEDESFREE, 
+FLGADULTOSFREE, 
+FLGCRIANCA1FREE,         
+FLGCRIANCA2FREE, 
+FLGIDOSOFREE, 
+ANOSFREE, 
+MAXPAXFREERESERVA, 
+FLGDESCPONTOSFREE,             
+FLGDESCTAXAFREE, 
+FLGUSAPAXFREE, 
+OBSPADRAORESERVA, 
+IDTIPODCTAXAPENSAO,                      
+CLIENTERESERVANTE, 
+CONTRATOINICIAL, 
+FLGUTILPONTOSPROP                               
+FROM   
+CONTRATOTS                                                                          
+WHERE  IDCONTRATOTS = 37
+
+
+Select
+r.Id,
+r.DataHora as DataReserva,
+r.Checkin,
+r.Checkout,
+r.Status,
+r.TipoPensao,
+th.Nome as TipoHospede,
+tuh.Nome as TipoUhNome,
+r.QuantidadeAdulto as Adultos,
+r.QuantidadeCrianca1 as Criancas1,
+r.QuantidadeCrianca2 as Criancas2,
+h.Nome as HotelNome,
+pc.Nome as NomeHospede,
+r.ProprietarioUh as ProprietarioId,
+r.UhProprietario as UhCondominioId,
+r.PeriodoCotaDisponibilidade as PeriodoCotaDisponibilidadeId,
+procp.Nome as ProprietarioNome,
+procp.Cpf as ProprietarioCpfCnpj,
+tuh.Capacidade,
+Coalesce(pcd.TipoDisponibilizacao,'U') AS TipoDisponibilizacao
+From 
+Reserva r
+Inner Join ReservaCliente rc on rc.Reserva = r.Id and rc.Principal = 'S'
+Inner Join Cliente rcc on rc.Cliente = rcc.Id
+Inner Join Pessoa pc on rcc.Pessoa = pc.Id
+Inner Join TipoUh tuh on r.TipoUh = tuh.Id
+Inner Join Hotel h on r.Hotel = h.Id and h.Condominio in (1,15,16)
+Inner Join PeriodoCotaDisponibilidade pcd on r.PeriodoCotaDisponibilidade = pcd.Id
+Inner Join CotaProprietario cp on cp.UhCondominio = pcd.UhCondominio and cp.Cota = pcd.Cota
+Inner Join Proprietario pro on pro.CotaProprietario = cp.Id and pro.DataHoraExclusao is null
+Inner Join Cliente proca on pro.Cliente = proca.Id
+Inner Join Pessoa procp on proca.Pessoa = procp.Id
+Left Outer Join TipoHospede th on r.TipoHospede = th.Id
+Where 
+pro.Id = (Select Max(pro1.Id) From Proprietario pro1 Where pro1.CotaProprietario = cp.Id and pro1.Cliente = proca.Id and pro1.DataHoraExclusao is null and pro1.Principal = 'S')
+and r.PeriodoCotaDisponibilidade in (83463) 
+and r.Status != 'CL' 
+
+
+Select
+r.Id as ReservaId,
+r.PeriodoCotaDisponibilidade,
+r.TipoUtilizacao as TipoUtilizacaoReserva,
+Coalesce(r.TipoUtilizacao,'U') as TipoUtilzacaoReserva,
+Coalesce(pcd.TipoDisponibilizacao,'U') as TipoUtilizacaoAgendamento,
+r.DataHora as DataReserva,
+r.Checkin,
+r.Checkout,
+r.Status,
+r.TipoPensao,
+th.Nome as TipoHospede,
+tuh.Nome as TipoUhNome,
+r.QuantidadeAdulto as Adultos,
+r.QuantidadeCrianca1 as Criancas1,
+r.QuantidadeCrianca2 as Criancas2,
+h.Nome as HotelNome,
+pc.Nome as NomeHospede,
+r.ProprietarioUh as ProprietarioId,
+r.UhProprietario as UhCondominioId,
+r.PeriodoCotaDisponibilidade as PeriodoCotaDisponibilidadeId,
+procp.Nome as ProprietarioNome,
+procp.Cpf as ProprietarioCpfCnpj,
+tuh.Capacidade
+From 
+Reserva r
+Inner Join ReservaCliente rc on rc.Reserva = r.Id and rc.Principal = 'S'
+Inner Join Cliente rcc on rc.Cliente = rcc.Id
+Inner Join Pessoa pc on rcc.Pessoa = pc.Id
+Inner Join TipoUh tuh on r.TipoUh = tuh.Id
+Inner Join Hotel h on r.Hotel = h.Id and h.Condominio in (1,15,16)
+Inner Join PeriodoCotaDisponibilidade pcd on r.PeriodoCotaDisponibilidade = pcd.Id
+Inner Join CotaProprietario cp on cp.UhCondominio = pcd.UhCondominio and cp.Cota = pcd.Cota
+Inner Join Proprietario pro on pro.CotaProprietario = cp.Id and pro.DataHoraExclusao is null
+Inner Join Cliente proca on pro.Cliente = proca.Id
+Inner Join Pessoa procp on proca.Pessoa = procp.Id
+Left Outer Join TipoHospede th on r.TipoHospede = th.Id
+Where 
+pro.Id = (Select 
+Max(pro1.Id) 
+From 
+Proprietario pro1 
+Where 
+pro1.CotaProprietario = cp.Id and 
+pro1.Cliente = proca.Id and 
+pro1.DataHoraExclusao is null and 
+pro1.Principal = 'S')
+and Coalesce(pcd.TipoDisponibilizacao,'U') in ('U','C') 
+AND YEAR(pcd.datainicial) in (2025,2026)
+and pcd.DataHoraExclusao is null
+and Not Exists(Select r1.PeriodoCotaDisponibilidade from Reserva r1 Where r1.PeriodoCotaDisponibilidade = pcd.Id and r1.Status != 'CL') 
+and r.CheckIn >= GETDATE()
+and pcd.DataInicial >= '2025-06-01'
+and r.Status = 'CL' 
+and r.DataHoraCancelamento >= '2025-06-01'
+
+
+
+select * from Reserva where id = 89429
+select * from ReservaCliente where Reserva = 89429
+select * from Cliente where id = 92838
+--update reservacliente set cliente = 95910 where reserva =89429
+select * from pessoa where id = 104719
+select * from tipouh where id = 46
+select * from Hotel where id = 9
+select * from cliente where pessoa = 104719
+
+Select
+a.*
+From
+(
+select
+cl.Empresa as EmpresaClienteReserva,
+cl.Pessoa as PessoaVinculadaCliente,
+h.Condominio as EmpresaCondominio,
+rc.Cliente as ClienteVinculadoAtualId,
+pes.Nome as NomeCliente,
+(Select cl1.Id From Cliente cl1 Where cl1.Empresa = h.Condominio and cl1.Pessoa = cl.Pessoa) as ClienteVinculadoCondominioId,
+r.*
+From
+ReservaCliente rc
+Inner Join Reserva r on rc.Reserva = r.Id
+Inner Join Hotel h on r.Hotel = h.Id
+Inner Join Cliente cl on rc.Cliente = cl.Id
+Inner Join Pessoa pes on cl.Pessoa = pes.Id
+where
+exists(Select p.Id from PeriodoCotaDisponibilidade p Where r.PeriodoCotaDisponibilidade = p.Id and p.DataHoraInclusao >= '2025-06-01')
+) a Where a.ClienteVinculadoAtualId != ClienteVinculadoCondominioId
+
+
+Select
+a.*
+From
+(
+select
+h.Id as HotelId,
+h.Empresa as EmpresaHotel,
+cl.Empresa as EmpresaClienteReserva,
+cl.Pessoa as PessoaVinculadaCliente,
+h.Condominio as EmpresaCondominio,
+rc.Cliente as ClienteVinculadoAtualId,
+pes.Nome as NomeCliente,
+(Select Max(cl1.Id) From Cliente cl1 Where cl1.Empresa = h.Empresa and cl1.Pessoa = cl.Pessoa) as ClienteCorretoVinculadoAoHotelReserva,
+r.*
+From
+ReservaCliente rc
+Inner Join Reserva r on rc.Reserva = r.Id
+Inner Join Hotel h on r.Hotel = h.Id
+Inner Join Cliente cl on rc.Cliente = cl.Id
+Inner Join Pessoa pes on cl.Pessoa = pes.Id
+where
+exists(Select p.Id from PeriodoCotaDisponibilidade p Where r.PeriodoCotaDisponibilidade = p.Id and p.DataHoraInclusao >= '2025-06-01')
+and not exists(Select cli2.Id From Cliente cli2 Where cli2.Empresa = h.Empresa and cli2.Empresa = h.Empresa and cli2.Pessoa = cl.Pessoa)
+) a Where a.ClienteVinculadoAtualId != ClienteCorretoVinculadoAoHotelReserva
+
+select * from Cliente where Pessoa = 25483
+
+
+Select
+a.*
+From
+(
+select
+h.Id as HotelId,
+h.Empresa as EmpresaHotel,
+cl.Empresa as EmpresaClienteReserva,
+cl.Pessoa as PessoaVinculadaCliente,
+h.Condominio as EmpresaCondominio,
+rc.Cliente as ClienteVinculadoAtualId,
+pes.Nome as NomeCliente,
+(Select Max(cl1.Id) From Cliente cl1 Where cl1.Empresa = h.Empresa and cl1.Pessoa = cl.Pessoa) as ClienteCorretoVinculadoAoHotelReserva,
+r.*
+From
+ReservaCliente rc
+Inner Join Reserva r on rc.Reserva = r.Id
+Inner Join Hotel h on r.Hotel = h.Id
+Inner Join Cliente cl on rc.Cliente = cl.Id
+Inner Join Pessoa pes on cl.Pessoa = pes.Id
+where
+r.DataHora <= '2025-06-01'
+and exists(Select p.Id from PeriodoCotaDisponibilidade p Where r.PeriodoCotaDisponibilidade = p.Id and p.DataHoraInclusao < '2025-06-01')
+and not exists(Select cli2.Id From Cliente cli2 Where cli2.Empresa = h.Empresa and cli2.Empresa = h.Empresa and cli2.Pessoa = cl.Pessoa)
+) a Where a.ClienteVinculadoAtualId != ClienteCorretoVinculadoAoHotelReserva

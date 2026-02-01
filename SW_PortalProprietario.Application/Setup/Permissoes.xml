@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Permissoes UltimoId="6">
+	<Permissao  Id="1" NomeNormalizado="Editar" NomeInterno="edit" UsarNomeInterno="false" TipoPermissao="W" />
+  <Permissao  Id="2" NomeNormalizado="Consultar" NomeInterno="search" UsarNomeInterno="false" TipoPermissao="R" />
+  <Permissao  Id="3" NomeNormalizado="Deletar" NomeInterno="delete" UsarNomeInterno="false" TipoPermissao="D" />
+  <Permissao  Id="4" NomeNormalizado="Gerenciar usuários das empresas" NomeInterno="manageruserofcompany" UsarNomeInterno="true" TipoPermissao="W"/>
+  <Permissao  Id="5" NomeNormalizado="Full" NomeInterno="full" UsarNomeInterno="false" TipoPermissao="*" />
+  <Permissao  Id="6" NomeNormalizado="Baixar documentos" NomeInterno="document" UsarNomeInterno="false" TipoPermissao="Download" />
+</Permissoes>

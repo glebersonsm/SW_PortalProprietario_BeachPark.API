@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SW_PortalProprietario_API_Principal_Test": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:54090;http://localhost:54091"
+    }
+  }
+}

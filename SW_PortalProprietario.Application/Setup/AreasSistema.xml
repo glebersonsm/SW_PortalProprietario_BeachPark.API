@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<AreaSistema UltimoId="8">
+	<AreaSistema  Id="1" Nome="Sistema" />
+  <AreaSistema  Id="2" Nome="Geral" />
+  <AreaSistema  Id="3" Nome="Financeiro" />
+  <AreaSistema  Id="4" Nome="Pessoas" />
+  <AreaSistema  Id="5" Nome="Documentos" />
+  <AreaSistema  Id="6" Nome="Faqs" />
+  <AreaSistema  Id="7" Nome="Imagens" />
+  <AreaSistema  Id="8" Nome="TimeSharing" />
+</AreaSistema>

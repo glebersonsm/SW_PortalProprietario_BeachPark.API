@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<GrupoModulos UltimoId="3">
+	<GrupoModulo  Id="1" Nome="Cadastros" />
+  <GrupoModulo  Id="2" Nome="Movimentações" />
+  <GrupoModulo  Id="3" Nome="Relatórios" />
+</GrupoModulos>

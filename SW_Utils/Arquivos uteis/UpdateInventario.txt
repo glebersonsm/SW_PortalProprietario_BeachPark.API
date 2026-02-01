@@ -1,0 +1,13 @@
+﻿UPDATE Inventario SET GerarReservaAutomaticamente = 'S',PermitirUsoConvidado = 'S', PermitirReservaFracionada = 'N', PermitirCriarSegundaReservaAgendamento ='N',
+PermitirEfetuarReservasPortalProprietario = 'S', CriarReservaStatusConfirmada = 'S',PermitirEfetuarAgendamentoCotaCentralReservas ='S',SegmentoMercadoReserva = 9,
+OrigemReserva = 4,TipoHospedeConvidadoReserva = 16, TipoHospedeProprietarioReserva = 15,MeioComunicacaoReserva = 13
+where Hotel = 9 and Nome = 'FORA POOL'
+
+UPDATE Inventario SET GerarReservaAutomaticamente = 'S',PermitirUsoConvidado = 'S', PermitirReservaFracionada = 'N', PermitirCriarSegundaReservaAgendamento ='N',
+PermitirEfetuarReservasPortalProprietario = 'S', CriarReservaStatusConfirmada = 'S',PermitirEfetuarAgendamentoCotaCentralReservas ='S',SegmentoMercadoReserva = 9,
+OrigemReserva = 4,TipoHospedeConvidadoReserva = 29, TipoHospedeProprietarioReserva = 28,MeioComunicacaoReserva = 13
+where Hotel = 10 and Nome = 'FORA POOL'
+
+Instalação função Unaccent
+SELECT * FROM pg_available_extensions WHERE name = 'unaccent'
+CREATE EXTENSION IF NOT EXISTS unaccent

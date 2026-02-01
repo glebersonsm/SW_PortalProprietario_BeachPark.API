@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="NHibernate" Version="5.5.2" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.7" />
+    <PackageReference Include="ZXing.Net" Version="0.16.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ModelosDocumentos\Certidoes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AccessCenterDomain\AccessCenterDomain.csproj" />
+    <ProjectReference Include="..\SW_PortalProprietario.Domain\SW_PortalProprietario.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
