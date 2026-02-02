@@ -10,20 +10,28 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
+using DotNetEnv;
+using SW_PortalCliente_BeachPark.API.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var baseDirectory = Directory.GetCurrentDirectory();
+// Carrega as variáveis de ambiente do arquivo .env
+Env.Load();
 
-var configuration = builder.Configuration
-    .SetBasePath(baseDirectory)
-    .AddJsonFile(Debugger.IsAttached ? "appsettings.Development.json" : "appsettings.json", optional: false, reloadOnChange: true);
+// Carrega as configurações dos arquivos JSON
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-var additionalFile = builder.Configuration.GetValue<string>("IncludeFile");
-if (!string.IsNullOrEmpty(additionalFile))
+// Carrega o arquivo de configuração específico (BeachParkConfigurations.json ou outro)
+var includeFile = builder.Configuration["IncludeFile"];
+if (!string.IsNullOrEmpty(includeFile))
 {
-    builder.Configuration.AddJsonFile(additionalFile, optional: false, reloadOnChange: true);
+    builder.Configuration.AddJsonFile(includeFile, optional: true, reloadOnChange: true);
 }
+
+// Sobrescreve as configurações com as variáveis de ambiente do .env
+EnvironmentConfigurationHelper.OverrideConfigurationWithEnvironmentVariables(builder.Configuration);
 
 builder.Services.AddRedisCache(builder.Configuration);
 

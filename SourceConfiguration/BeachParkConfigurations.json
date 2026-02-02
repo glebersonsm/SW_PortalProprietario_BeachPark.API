@@ -1,24 +1,10 @@
 {
-  "ConnectionStrings": {
-    "CmConnection": "Data Source=(DESCRIPTION = (ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = 172.23.0.150 )(PORT = 1521))) (CONNECT_DATA = (SERVICE_NAME = cmt)));User ID=cm;Password=getic01;Connection Timeout=30",
-    "EsolAccessCenterConnection": "Data Source=172.23.0.122,1433;Initial Catalog=eSolutionPortalTreino;User ID=es;Password=a01espassdes#;TrustServerCertificate=true",
-    "EsolPortalConnection": "Data Source=172.23.0.122,1433;Initial Catalog=eSolutionPortalTreino;User ID=es;Password=a01espassdes#;TrustServerCertificate=true",
-    "DefaultConnection": "Host=172.23.10.100;Port=5432;Database=swportal_ts_dev;Username=swsolucoes;Password=@@SW!Sol#@",
-    "RedisConnection": "localhost,port: 6379,password=Redis2019!"
-  },
   "Redis": {
-    "Password": "Redis2019!",
     "AllowAdmin": false,
     "Ssl": false,
     "ConnectTimeout": 60000,
     "ConnectRetry": 2,
     "InstaceName": "portal_cliente_bp_",
-    "Hosts": [
-      {
-        "Host": "localhost",
-        "Port": "6379"
-      }
-    ],
     "Database": 0
   },
   "RabbitMqFilaDeAuditoriaNome": "auditoria_bp",
@@ -28,7 +14,7 @@
     "RetryDelaySeconds": 30
   },
   "ReservasCMApiConfig": {
-    "BaseUrl": "http://localhost:8080",
+    "BaseUrl": "",
     "CriarAlterarReserva": "/Reserva/v1/efetuarReservasAgendamento",
     "CancelarReserva": "/Reserva/v1/cancelarReservasAgendamento",
     "SegmentoReserva": "HotelId:3;SegmentoPontos:0803|HotelId:3;SegmentoCortesia:0802|HotelId:1;SegmentoPontos:0803|HotelId:1;SegmentoCortesia:0802",
@@ -38,18 +24,18 @@
     "OrigemReserva": "49",
     "DocConfirmaHotel": "7",
     "TarifaHotel": "HotelId:3;109|HotelId:1;1519",
-    "IdPromotorRci": "1259656",
-    "ReservanteRci": "BULKBANK",
-    "TelReservanteRci": "4540523011",
-    "IdHospedeBulkBank": "2194787"
+    "IdPromotorRci": "",
+    "ReservanteRci": "",
+    "TelReservanteRci": "",
+    "IdHospedeBulkBank": ""
   },
   "EmpreendimentoId": "1",
   "EmpresaSwPortalId": "1",
-  "UsuarioSistemaId": 1,
+  "UsuarioSistemaId": 0,
   "TagGeralId": 1,
   "SoFaltaEuUrl": "",
   "EmpresaCMId": 3,
-  "CMUserId": 1900693,
+  "CMUserId": 0,
   "IntegradoCom": "CM|AC|ESPORTAL",
   "ControleDeUsuarioViaSFE": false,
   "ControleDeUsuarioViaAccessCenter": false,
@@ -63,10 +49,10 @@
   "CriarUsuariosLegado": false,
   "CriarUsuariosClientesLegado": false,
   "ConsultarStatusPix": false,
-  "RabbitMqConnectionHost": "localhost",
-  "RabbitMqConnectionPort": 5672,
-  "RabbitMqConnectionUser": "swsolucoes",
-  "RabbitMqConnectionPass": "SW@dba#2024!",
+  "RabbitMqConnectionHost": "",
+  "RabbitMqConnectionPort": 0,
+  "RabbitMqConnectionUser": "",
+  "RabbitMqConnectionPass": "",
   "RabbitMqFilaDeLogNome": "gravacaoLogs_mvc",
   "RabbitMqFilaDeEmailNome": "emails_mvc",
   "BloquearCriacaoAdmForaDebugMode": true,
