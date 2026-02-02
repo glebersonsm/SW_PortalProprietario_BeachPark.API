@@ -1,6 +1,8 @@
 {
   "ConnectionStrings": {
     "CmConnection": "Data Source=(DESCRIPTION = (ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = 172.23.0.150 )(PORT = 1521))) (CONNECT_DATA = (SERVICE_NAME = cmt)));User ID=cm;Password=getic01;Connection Timeout=30",
+    "EsolAccessCenterConnection": "Data Source=172.23.0.122,1433;Initial Catalog=eSolutionPortalTreino;User ID=es;Password=a01espassdes#;TrustServerCertificate=true",
+    "EsolPortalConnection": "Data Source=172.23.0.122,1433;Initial Catalog=eSolutionPortalTreino;User ID=es;Password=a01espassdes#;TrustServerCertificate=true",
     "DefaultConnection": "Host=172.23.10.100;Port=5432;Database=swportal_ts_dev;Username=swsolucoes;Password=@@SW!Sol#@",
     "RedisConnection": "localhost,port: 6379,password=Redis2019!"
   },
@@ -10,7 +12,7 @@
     "Ssl": false,
     "ConnectTimeout": 60000,
     "ConnectRetry": 2,
-    "InstaceName": "sw_solucoes_mvc_",
+    "InstaceName": "portal_cliente_bp_",
     "Hosts": [
       {
         "Host": "localhost",
@@ -19,7 +21,7 @@
     ],
     "Database": 0
   },
-  "RabbitMqFilaDeAuditoriaNome": "auditoria",
+  "RabbitMqFilaDeAuditoriaNome": "auditoria_bp",
   "AuditLog": {
     "ConsumerConcurrency": 5,
     "RetryAttempts": 3,
@@ -27,7 +29,6 @@
   },
   "ReservasCMApiConfig": {
     "BaseUrl": "http://localhost:8080",
-    //"BaseUrl": "http://localhost:44388",
     "CriarAlterarReserva": "/Reserva/v1/efetuarReservasAgendamento",
     "CancelarReserva": "/Reserva/v1/cancelarReservasAgendamento",
     "SegmentoReserva": "HotelId:3;SegmentoPontos:0803|HotelId:3;SegmentoCortesia:0802|HotelId:1;SegmentoPontos:0803|HotelId:1;SegmentoCortesia:0802",
@@ -49,7 +50,7 @@
   "SoFaltaEuUrl": "",
   "EmpresaCMId": 3,
   "CMUserId": 1900693,
-  "IntegradoCom": "CM",
+  "IntegradoCom": "CM|AC|ESPORTAL",
   "ControleDeUsuarioViaSFE": false,
   "ControleDeUsuarioViaAccessCenter": false,
   "UpdateDataBase": true,
@@ -69,7 +70,7 @@
   "RabbitMqFilaDeLogNome": "gravacaoLogs_mvc",
   "RabbitMqFilaDeEmailNome": "emails_mvc",
   "BloquearCriacaoAdmForaDebugMode": true,
-  "ProgramId": "PORTALPROPMVC_",
+  "ProgramId": "PortalClienteBP_",
   "RestringirPeriodoPorFaltaDePontos": false,
   "AutomaticCommunicationEmailEnabled": true,
   "AutomaticCommunicationEmailIntervalHours": 24,
