@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW_PortalProprietario.Infra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW_PortalProprietario.Infra.Ioc", "SW_PortalProprietario.Infra.Ioc\SW_PortalProprietario.Infra.Ioc.csproj", "{8E8E0DCD-ACB1-4F08-985A-05FCE2FD2F1E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW_PortalProprietario.API", "SW_PortalProprietario.API.csproj", "{A0978444-967F-4014-805D-F908E8FF43CD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SW_Utils", "SW_Utils\SW_Utils.csproj", "{96A870EB-9880-4910-A23F-5B4EA177DC69}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EsolutionPortalDomain", "EsolutionPortalDomain\EsolutionPortalDomain.csproj", "{A6C50387-8CFE-415E-9138-D41334788407}"
@@ -22,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccessCenterDomain", "AccessCenterDomain\AccessCenterDomain.csproj", "{46D1C774-0858-41B0-9F8F-04BA6D00CC54}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMDomain", "CMDomain\CMDomain.csproj", "{EE3868EC-DE4F-4001-8405-827D9143E83A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SW_PortalCliente_BeachPark.API", "SW_PortalCliente_BeachPark.API.csproj", "{3A259D4B-EDD3-E237-B150-B0CECC8F996C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,10 +49,6 @@ Global
 		{8E8E0DCD-ACB1-4F08-985A-05FCE2FD2F1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E8E0DCD-ACB1-4F08-985A-05FCE2FD2F1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E8E0DCD-ACB1-4F08-985A-05FCE2FD2F1E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A0978444-967F-4014-805D-F908E8FF43CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A0978444-967F-4014-805D-F908E8FF43CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A0978444-967F-4014-805D-F908E8FF43CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A0978444-967F-4014-805D-F908E8FF43CD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{96A870EB-9880-4910-A23F-5B4EA177DC69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{96A870EB-9880-4910-A23F-5B4EA177DC69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96A870EB-9880-4910-A23F-5B4EA177DC69}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,6 +65,10 @@ Global
 		{EE3868EC-DE4F-4001-8405-827D9143E83A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE3868EC-DE4F-4001-8405-827D9143E83A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE3868EC-DE4F-4001-8405-827D9143E83A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A259D4B-EDD3-E237-B150-B0CECC8F996C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A259D4B-EDD3-E237-B150-B0CECC8F996C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A259D4B-EDD3-E237-B150-B0CECC8F996C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A259D4B-EDD3-E237-B150-B0CECC8F996C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

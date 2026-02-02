@@ -2,7 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NLog.Extensions.Logging;
-using SW_PortalProprietario.API.src.Filters;
+using SW_PortalCliente_BeachPark.API.src.Filters;
 using SW_PortalProprietario.Application.Models.Financeiro;
 using SW_PortalProprietario.Infra.Ioc.Extensions;
 using Swashbuckle.AspNetCore.Filters;
@@ -27,17 +27,17 @@ if (!string.IsNullOrEmpty(additionalFile))
 
 builder.Services.AddRedisCache(builder.Configuration);
 
-var configBrokerNameToUse = builder.Configuration.GetValue<string>("UseBrokerType", "BrokerNaoConfigurado") ?? "BrokerNaoConfigurado";
+var configBrokerNameToUse = builder.Configuration.GetValue("UseBrokerType", "BrokerNaoConfigurado") ?? "BrokerNaoConfigurado";
 
 builder.Services.Configure<BrokerModel>(builder.Configuration.GetSection(configBrokerNameToUse));
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "SW_Portal_Proprietario.Main",
         Version = "v1",
-        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        Contact = new OpenApiContact
         {
             Name = "SW Soluções Integradas Ltda",
             Email = "contato@swsolucoes.inf.br",
@@ -154,7 +154,7 @@ app.MapControllers();
 app.Run();
 
 // Torna a classe Program acessível para testes de integração
-namespace SW_PortalProprietario.API
+namespace SW_PortalCliente_BeachPark.API
 {
     public partial class Program { }
 }

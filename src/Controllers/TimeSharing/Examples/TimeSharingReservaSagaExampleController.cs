@@ -7,7 +7,7 @@ using SW_PortalProprietario.Application.Services.Core.DistributedTransactions.Ti
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 
-namespace SW_PortalProprietario.API.src.Controllers.TimeSharing.Examples
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.TimeSharing.Examples
 {
     /// <summary>
     /// EXEMPLO DE USO DO PADRÃO SAGA

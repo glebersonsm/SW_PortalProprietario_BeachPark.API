@@ -16,7 +16,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 
-namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.TimeSharing
 {
     [Authorize]
     [ApiController]
@@ -232,7 +232,7 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
         [ProducesResponseType(typeof(ResultModel<List<ReservaTimeSharingCMModel>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<List<ReservaTimeSharingCMModel>>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ResultModel<List<ReservaTimeSharingCMModel>>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Editar(Int64 numReserva)
+        public async Task<IActionResult> Editar(long numReserva)
         {
 
             try
@@ -334,17 +334,17 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
         }
 
         [HttpPost("salvarReserva"), Authorize(Roles = "Administrador, Usuario")]
-        [ProducesResponseType(typeof(ResultModel<Int64>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<long>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ResultModel<Int64>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ResultModel<Int64>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ResultModel<long>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResultModel<long>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> SalvarReserva([FromBody] InclusaoReservaInputModel model)
         {
             try
             {
                 var result = await _timeSharingProviderService.Save(model);
                 if (result > 0 || model.TipoUso == "I")
-                    return Ok(new ResultModel<Int64>(result)
+                    return Ok(new ResultModel<long>(result)
                     {
                         Errors = new List<string>(),
                         Status = StatusCodes.Status200OK,
@@ -355,7 +355,7 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new ResultModel<Int64>()
+                return BadRequest(new ResultModel<long>()
                 {
                     Data = -1,
                     Errors = err.InnerException != null ?
@@ -367,7 +367,7 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
             }
             catch (Exception err)
             {
-                return StatusCode(500, new ResultModel<Int64>()
+                return StatusCode(500, new ResultModel<long>()
                 {
                     Data = -1,
                     Errors = err.InnerException != null ?
@@ -381,17 +381,17 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
 
 
         [HttpPost("alterarReserva"), Authorize(Roles = "Administrador, Usuario")]
-        [ProducesResponseType(typeof(ResultModel<Int64>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<long>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ResultModel<Int64>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ResultModel<Int64>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ResultModel<long>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResultModel<long>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AlterarReserva([FromBody] InclusaoReservaInputModel model)
         {
             try
             {
                 var result = await _timeSharingProviderService.AlterarReserva(model);
                 if (result != null)
-                    return Ok(new ResultModel<Int64?>(result.IdReservasFront)
+                    return Ok(new ResultModel<long?>(result.IdReservasFront)
                     {
                         Errors = new List<string>(),
                         Status = StatusCodes.Status200OK,
@@ -402,7 +402,7 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new ResultModel<Int64>()
+                return BadRequest(new ResultModel<long>()
                 {
                     Data = -1,
                     Errors = err.InnerException != null ?
@@ -414,7 +414,7 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
             }
             catch (Exception err)
             {
-                return StatusCode(500, new ResultModel<Int64>()
+                return StatusCode(500, new ResultModel<long>()
                 {
                     Data = -1,
                     Errors = err.InnerException != null ?
@@ -431,7 +431,7 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
         [ProducesResponseType(typeof(ResultModel<bool?>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<bool?>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ResultModel<bool?>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> CancelarReserva(Int64 numReserva)
+        public async Task<IActionResult> CancelarReserva(long numReserva)
         {
             try
             {
@@ -571,7 +571,7 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
 
         private async Task EnviarEmailCancelamentoReserva(int reservaTimesharingId)
         {
-            var emailApenasParDestinatariosPermitidos = _configuration.GetValue<bool>("EnviarEmailApenasParaDestinatariosPermitidos", true);
+            var emailApenasParDestinatariosPermitidos = _configuration.GetValue("EnviarEmailApenasParaDestinatariosPermitidos", true);
             var emailsPermitidos = _configuration.GetValue<string>("DestinatarioEmailPermitido");
             if (emailApenasParDestinatariosPermitidos && (string.IsNullOrEmpty(emailsPermitidos) || !emailsPermitidos.Contains("@")))
                 throw new ArgumentException("O ambiente está configurado para não enviar email para qualquer destinatário.");
@@ -629,7 +629,7 @@ namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
             var conteudoEmail = PopulateHtmlTemplate(templateHtml, placeholders);
 
             // Salvar e enviar email
-            var usuarioSistemaId = _configuration.GetValue<int>("UsuarioSistemaId", 1);
+            var usuarioSistemaId = _configuration.GetValue("UsuarioSistemaId", 1);
             await _emailService.SaveInternal(new EmailInputInternalModel
             {
                 UsuarioCriacao = usuarioSistemaId,

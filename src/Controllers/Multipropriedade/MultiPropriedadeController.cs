@@ -8,7 +8,7 @@ using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.Empreendimento;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 
-namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
 {
     [Authorize]
     [ApiController]
@@ -688,7 +688,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
                 var result = await _empreendimentoService.DownloadContratoSCP(cotaId);
                 if (result != null && !string.IsNullOrEmpty(result.Path))
                 {
-                    var ext = Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
+                    var ext = SW_PortalProprietario.Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
                     if (string.IsNullOrEmpty(ext))
                         throw new Exception($"Tipo de arquivo: ({result.Path.Split("\\").Last().Split(".").Last()}) não suportado.");
 
@@ -748,14 +748,14 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
 
         [HttpGet("statusCrc"), Authorize(Roles = "Administrador, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(IActionResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResultModel<List<Application.Models.Empreendimento.StatusCrcModel>>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ResultModel<List<Application.Models.Empreendimento.StatusCrcModel>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> StatusCrc()
         {
             try
             {
                 var result = await _empreendimentoService.ConsultarStatusCrc();
-                return base.Ok(new ResultModel<List<Application.Models.Empreendimento.StatusCrcModel>>((List<Application.Models.Empreendimento.StatusCrcModel>?)result)
+                return base.Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>>((List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>?)result)
                 {
                     Errors = new List<string>(),
                     Status = StatusCodes.Status200OK,
@@ -765,9 +765,9 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             }
             catch (ArgumentException err)
             {
-                return base.BadRequest(new ResultModel<List<Application.Models.Empreendimento.StatusCrcModel>>()
+                return base.BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>>()
                 {
-                    Data = new List<Application.Models.Empreendimento.StatusCrcModel>(),
+                    Data = new List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>(),
                     Message = err.InnerException != null ?
                         $"Não foi possível consultar os status crc: {err.Message} {err.InnerException.Message}" :
                         $"Não foi possível consultar os status crc: " +
@@ -778,9 +778,9 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             }
             catch (Exception err)
             {
-                return base.StatusCode(500, new ResultModel<List<Application.Models.Empreendimento.StatusCrcModel>>()
+                return base.StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>>()
                 {
-                    Data = new List<Application.Models.Empreendimento.StatusCrcModel>(),
+                    Data = new List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>(),
                     Message = err.InnerException != null ?
                     $"Não foi possível consultar os status crc: {err.Message} {err.InnerException.Message}" :
                     $"Não foi possível consultar os status crc: {err.Message}",

@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\SW_PortalProprietario.API.csproj" />
+    <ProjectReference Include="..\..\SW_PortalCliente_BeachPark.API.csproj" />
     <ProjectReference Include="..\..\SW_PortalProprietario.Application\SW_PortalProprietario.Application.csproj" />
     <ProjectReference Include="..\..\SW_PortalProprietario.Infra.Data\SW_PortalProprietario.Infra.Data.csproj" />
     <ProjectReference Include="..\..\SW_PortalProprietario.Infra.Ioc\SW_PortalProprietario.Infra.Ioc.csproj" />

@@ -6,7 +6,7 @@ using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using System.Security.Claims;
 
-namespace SW_PortalProprietario.API.src.Controllers.Imagens
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.Imagens
 {
     [ApiController]
     [Route("[controller]")]

@@ -5,7 +5,7 @@ using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.TimeSharing;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 
-namespace SW_PortalProprietario.API.src.Controllers.TimeSharing
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.TimeSharing
 {
     [Authorize]
     [ApiController]

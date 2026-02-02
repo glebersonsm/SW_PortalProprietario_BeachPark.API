@@ -8,7 +8,7 @@ using SW_PortalProprietario.Application.Models.UsuarioFinanceiro;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 
-namespace SW_PortalProprietario.API.src.Controllers.Financeiro
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
 {
     [Authorize]
     [ApiController]
@@ -90,7 +90,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                 var result = await _financeiroProviderService.DownloadBoleto(model);
                 if (result != null && !string.IsNullOrEmpty(result.Path))
                 {
-                    var ext = Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
+                    var ext = SW_PortalProprietario.Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
                     if (string.IsNullOrEmpty(ext))
                         throw new Exception($"Tipo de arquivo: ({result.Path.Split("\\").Last().Split(".").Last()}) não suportado.");
 
@@ -149,17 +149,17 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
         }
 
         [HttpPost("tokenize"), Authorize(Roles = "Administrador, GestorFinanceiro")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<CardTokenizedModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<CardTokenizedModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<CardTokenizedModel>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<CardTokenizedModel>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<CardTokenizedModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<CardTokenizedModel>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Tokenize([FromBody] CardTokenizeRequestModel cardModel)
         {
             try
             {
                 var result = await _financeiroTransacaoService.Tokenize(cardModel);
                 if (result == null)
-                    return Ok(new Application.Models.ResultModel<CardTokenizedModel>()
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<CardTokenizedModel>()
                     {
                         Data = new CardTokenizedModel(),
                         Errors = new List<string>() { "Ops! Nenhum registro encontrado!" },
@@ -170,7 +170,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                 {
                     if (result.errors == null || !result.errors.Any())
                     {
-                        return Ok(new Application.Models.ResultModel<CardTokenizedModel>(result)
+                        return Ok(new SW_PortalProprietario.Application.Models.ResultModel<CardTokenizedModel>(result)
                         {
                             Errors = new List<string>(),
                             Status = StatusCodes.Status200OK,
@@ -179,7 +179,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                     }
                     else
                     {
-                        return BadRequest(new Application.Models.ResultModel<CardTokenizedModel>()
+                        return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<CardTokenizedModel>()
                         {
                             Data = new CardTokenizedModel(),
                             Errors = result.errors.AsList(),
@@ -192,7 +192,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<CardTokenizedModel>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<CardTokenizedModel>()
                 {
                     Data = new CardTokenizedModel(),
                     Errors = err.InnerException != null ?
@@ -203,7 +203,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<CardTokenizedModel>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<CardTokenizedModel>()
                 {
                     Data = new CardTokenizedModel(),
                     Errors = err.InnerException != null ?
@@ -215,24 +215,24 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
         }
 
         [HttpGet("gettokenizedcards"), Authorize(Roles = "Administrador, GestorFinanceiro, Usuario")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<CardTokenizedModel>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<CardTokenizedModel>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<CardTokenizedModel>>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<CardTokenizedModel>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<CardTokenizedModel>>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<CardTokenizedModel>>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetTokenizedCard([FromQuery] SearchTokenizedCardFromUserModel searchTokenizedCardModel)
         {
             try
             {
                 var result = await _financeiroTransacaoService.GetAllTokenizedCardFromUser(searchTokenizedCardModel);
                 if (result == null || !result.Any())
-                    return Ok(new Application.Models.ResultModel<List<CardTokenizedModel>>()
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<CardTokenizedModel>>()
                     {
                         Data = new List<CardTokenizedModel>(),
                         Errors = new List<string>() { "Ops! Nenhum registro encontrado!" },
                         Status = StatusCodes.Status404NotFound,
                         Success = true
                     });
-                else return Ok(new Application.Models.ResultModel<List<CardTokenizedModel>>(result.AsList())
+                else return Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<CardTokenizedModel>>(result.AsList())
                 {
                     Errors = new List<string>(),
                     Status = StatusCodes.Status200OK,
@@ -242,7 +242,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<List<CardTokenizedModel>>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<List<CardTokenizedModel>>()
                 {
                     Data = new List<CardTokenizedModel>(),
                     Errors = err.InnerException != null ?
@@ -254,7 +254,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<List<CardTokenizedModel>>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<List<CardTokenizedModel>>()
                 {
                     Data = new List<CardTokenizedModel>(),
                     Errors = err.InnerException != null ?
@@ -268,17 +268,17 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
 
 
         [HttpPost("transacionarcomcartao"), Authorize(Roles = "Administrador, GestorFinanceiro")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<TransactionCardResultModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<TransactionCardResultModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<TransactionCardResultModel>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<TransactionCardResultModel>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<TransactionCardResultModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<TransactionCardResultModel>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DoCardTransaction([FromBody] DoTransactionCardInputModel doTransactionInputModel)
         {
             try
             {
                 var result = await _financeiroTransacaoService.DoCardTransaction(doTransactionInputModel);
                 if (result == null)
-                    return Ok(new Application.Models.ResultModel<TransactionCardResultModel>()
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<TransactionCardResultModel>()
                     {
                         Data = new TransactionCardResultModel(),
                         Errors = new List<string>() { "Ops! Nenhum registro encontrado!" },
@@ -289,7 +289,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                 {
                     if (result.errors == null || !result.errors.Any())
                     {
-                        return Ok(new Application.Models.ResultModel<TransactionCardResultModel>(result)
+                        return Ok(new SW_PortalProprietario.Application.Models.ResultModel<TransactionCardResultModel>(result)
                         {
                             Errors = new List<string>(),
                             Status = StatusCodes.Status200OK,
@@ -298,7 +298,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                     }
                     else
                     {
-                        return BadRequest(new Application.Models.ResultModel<TransactionCardResultModel>()
+                        return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<TransactionCardResultModel>()
                         {
                             Data = new TransactionCardResultModel(),
                             Errors = result.errors.AsList(),
@@ -311,7 +311,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<TransactionCardResultModel>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<TransactionCardResultModel>()
                 {
                     Data = new TransactionCardResultModel(),
                     Errors = err.InnerException != null ?
@@ -322,7 +322,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<TransactionCardResultModel>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<TransactionCardResultModel>()
                 {
                     Data = new TransactionCardResultModel(),
                     Errors = err.InnerException != null ?
@@ -387,17 +387,17 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
         }
 
         [HttpPost("cancelartransacao"), Authorize(Roles = "Administrador, GestorFinanceiro")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<bool>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<bool>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<bool>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CancelarTransacaoCartao([FromQuery] string paymentId)
         {
             try
             {
                 var result = await _financeiroTransacaoService.CancelCardTransaction(paymentId);
                 if (result == null)
-                    return Ok(new Application.Models.ResultModel<bool>()
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<bool>()
                     {
                         Data = false,
                         Errors = new List<string>() { "Ops! Nenhum registro encontrado!" },
@@ -408,7 +408,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                 {
                     if (result.GetValueOrDefault(false))
                     {
-                        return Ok(new Application.Models.ResultModel<bool>(true)
+                        return Ok(new SW_PortalProprietario.Application.Models.ResultModel<bool>(true)
                         {
                             Errors = new List<string>(),
                             Status = StatusCodes.Status200OK,
@@ -417,7 +417,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                     }
                     else
                     {
-                        return StatusCode(500, new Application.Models.ResultModel<bool>(false)
+                        return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<bool>(false)
                         {
                             Errors = new List<string>() { "Não foi possível cancelar o pagamento informado" },
                             Status = StatusCodes.Status400BadRequest,
@@ -429,7 +429,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<List<TransactionCardResultModel>>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<List<TransactionCardResultModel>>()
                 {
                     Data = new List<TransactionCardResultModel>(),
                     Errors = err.InnerException != null ?
@@ -441,7 +441,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<List<TransactionCardResultModel>>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<List<TransactionCardResultModel>>()
                 {
                     Data = new List<TransactionCardResultModel>(),
                     Errors = err.InnerException != null ?
@@ -454,17 +454,17 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
         }
 
         [HttpPost("gerarQrCodePagamentoComPix"), Authorize(Roles = "Administrador, GestorFinanceiro")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<TransactionPixResultModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<TransactionPixResultModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<TransactionPixResultModel>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<TransactionPixResultModel>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<TransactionPixResultModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<TransactionPixResultModel>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GerarLinkPagamentoPix([FromBody] DoTransactionPixInputModel doTransactionInputModel)
         {
             try
             {
                 var result = await _financeiroTransacaoService.GeneratePixTransaction(doTransactionInputModel);
                 if (result == null)
-                    return Ok(new Application.Models.ResultModel<TransactionPixResultModel>()
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<TransactionPixResultModel>()
                     {
                         Data = new TransactionPixResultModel(),
                         Errors = new List<string>() { "Ops! Nenhum registro encontrado!" },
@@ -475,7 +475,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                 {
                     if (result.errors == null || !result.errors.Any())
                     {
-                        return Ok(new Application.Models.ResultModel<TransactionPixResultModel>(result)
+                        return Ok(new SW_PortalProprietario.Application.Models.ResultModel<TransactionPixResultModel>(result)
                         {
                             Errors = new List<string>(),
                             Status = StatusCodes.Status200OK,
@@ -484,7 +484,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                     }
                     else
                     {
-                        return BadRequest(new Application.Models.ResultModel<TransactionPixResultModel>()
+                        return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<TransactionPixResultModel>()
                         {
                             Data = new TransactionPixResultModel(),
                             Errors = result.errors.AsList(),
@@ -496,7 +496,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<TransactionPixResultModel>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<TransactionPixResultModel>()
                 {
                     Data = new TransactionPixResultModel(),
                     Errors = err.InnerException != null ?
@@ -507,7 +507,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<TransactionPixResultModel>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<TransactionPixResultModel>()
                 {
                     Data = new TransactionPixResultModel(),
                     Errors = err.InnerException != null ?
@@ -519,9 +519,9 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
         }
 
         [HttpPost("salvarcontabancaria")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> SalvarContaBancaria([FromBody] ClienteContaBancariaInputModel request)
         {
@@ -529,13 +529,13 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             {
                 var result = await _financeiroProviderService.SalvarContaBancaria(request);
                 if (result > 0)
-                    return Ok(new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                     {
                         Data = new ClienteContaBancariaViewModel(),
                         Errors = new List<string>(),
                         Status = StatusCodes.Status200OK,
                     });
-                else return StatusCode(500, new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                else return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = new List<string>() { $"Não foi possível salvar a conta bancária" },
@@ -544,7 +544,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = err.InnerException != null ?
@@ -555,7 +555,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = err.InnerException != null ?
@@ -568,8 +568,8 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
 
         [HttpGet("contasbancarias")]
         [ProducesResponseType(typeof(IEnumerable<ClienteContaBancariaViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> SearchContaBancariaFornecedor([FromQuery] int pessoaId)
         {
@@ -577,13 +577,13 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             {
                 var result = await _financeiroProviderService.GetContasBancarias(pessoaId);
                 if (result == null || !result.Any())
-                    return Ok(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
                     {
                         Data = new List<ClienteContaBancariaViewModel>(),
                         Errors = new List<string>() { "Ops! Nenhum registro encontrado!" },
                         Status = StatusCodes.Status404NotFound
                     });
-                return Ok(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
+                return Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
                 {
                     Errors = new List<string>(),
                     Status = StatusCodes.Status200OK,
@@ -592,7 +592,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
                 {
                     Data = new List<ClienteContaBancariaViewModel>(),
                     Errors = err.InnerException != null ?
@@ -603,7 +603,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
                 {
                     Data = new List<ClienteContaBancariaViewModel>(),
                     Errors = err.InnerException != null ?

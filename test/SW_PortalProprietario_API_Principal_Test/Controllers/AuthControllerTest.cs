@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SW_PortalProprietario.API.src.Controllers;
+using SW_PortalCliente_BeachPark.API.src.Controllers;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.AuthModels;
 using SW_PortalProprietario.Application.Models.SystemModels;

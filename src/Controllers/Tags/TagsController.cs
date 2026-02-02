@@ -5,7 +5,7 @@ using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 
-namespace SW_PortalProprietario.API.src.Controllers.Tags
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.Tags
 {
     [Authorize]
     [ApiController]

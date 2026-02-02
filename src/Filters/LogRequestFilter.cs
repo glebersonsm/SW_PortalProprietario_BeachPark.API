@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using System.Text.Json;
 
-namespace SW_PortalProprietario.API.src.Filters
+namespace SW_PortalCliente_BeachPark.API.src.Filters
 {
     public class LogRequestFilter : ActionFilterAttribute
     {

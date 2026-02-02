@@ -16,7 +16,7 @@ using SW_PortalProprietario.Domain.Enumns;
 using System.Collections.Generic;
 using System;
 
-namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
 {
     [Authorize]
     [ApiController]
@@ -438,9 +438,9 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
         }
 
         [HttpPost("salvarMinhaContaBancaria"), Authorize(Roles = "Administrador, GestorReservasAgendamentos, portalproprietariosw")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<int>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<int>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> SalvarContaBancaria([FromBody] ClienteContaBancariaInputModel request)
         {
@@ -448,13 +448,13 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             {
                 var result = await _financeiroProviderService.SalvarMinhaContaBancaria(request);
                 if (result > 0)
-                    return Ok(new Application.Models.ResultModel<int>(result)
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<int>(result)
                     {
                         Errors = new List<string>(),
                         Status = StatusCodes.Status200OK,
                         Success = true
                     });
-                else return StatusCode(500, new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                else return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = new List<string>() { $"Não foi possível salvar a conta bancária" },
@@ -464,7 +464,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = err.InnerException != null ?
@@ -476,7 +476,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = err.InnerException != null ?
@@ -490,8 +490,8 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
 
         [HttpGet("minhasContasBancarias"), Authorize(Roles = "Administrador, GestorReservasAgendamentos, portalproprietariosw")]
         [ProducesResponseType(typeof(IEnumerable<ClienteContaBancariaViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> GetMinhasContasBancarias()
         {
@@ -499,13 +499,13 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             {
                 var result = await _financeiroProviderService.GetMinhasContasBancarias();
                 if (result == null || !result.Any())
-                    return Ok(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
                     {
                         Errors = new List<string>() { "Ops! Nenhum registro encontrado!" },
                         Status = StatusCodes.Status404NotFound,
                         Success = true
                     });
-                return Ok(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
+                return Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
                 {
                     Errors = new List<string>(),
                     Status = StatusCodes.Status200OK,
@@ -515,7 +515,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
                 {
                     Data = new List<ClienteContaBancariaViewModel>(),
                     Errors = err.InnerException != null ?
@@ -527,7 +527,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
                 {
                     Data = new List<ClienteContaBancariaViewModel>(),
                     Errors = err.InnerException != null ?
@@ -540,9 +540,9 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
         }
 
         [HttpPost("enviarCodigoVerificacao"), Authorize(Roles = "Administrador, GestorReservasAgendamentos, portalproprietariosw")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<bool>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<bool>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<bool>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<bool>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> EnviarCodigoVerificacao([FromBody] ConfirmacaoLiberacaoCotaPoolInputModel model)
         {
@@ -550,13 +550,13 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             {
                 var result = await _empreendimentoService.GerarCodigoVerificacaoLiberacaoPool(model.AgendamentoId.GetValueOrDefault());
                 if (result)
-                    return Ok(new Application.Models.ResultModel<bool>(true)
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<bool>(true)
                     {
                         Success = true,
                         Errors = new List<string>(),
                         Status = StatusCodes.Status200OK,
                     });
-                else return StatusCode(500, new Application.Models.ResultModel<bool>(false)
+                else return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<bool>(false)
                 {
                     Success = false,
                     Errors = new List<string>() { $"Não foi possível gerar o código de verificação" },
@@ -565,7 +565,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<bool>(false)
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<bool>(false)
                 {
                     Success = false,
                     Errors = err.InnerException != null ?
@@ -576,7 +576,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<bool>(false)
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<bool>(false)
                 {
                     Success = false,
                     Errors = err.InnerException != null ?
@@ -759,7 +759,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
                 var result = await _empreendimentoService.DownloadContratoSCP(cotaId);
                 if (result != null && !string.IsNullOrEmpty(result.Path))
                 {
-                    var ext = Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
+                    var ext = SW_PortalProprietario.Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
                     if (string.IsNullOrEmpty(ext))
                         throw new Exception($"Tipo de arquivo: ({result.Path.Split("\\").Last().Split(".").Last()}) não suportado.");
 
@@ -816,176 +816,6 @@ namespace SW_PortalProprietario.API.src.Controllers.Multipropriedade
                 });
             }
         }
-
-        //[HttpGet("getDadosVoucher"), Authorize(Roles = "Administrador, GestorReservasAgendamentos, portalproprietariosw")]
-        //[ProducesResponseType(typeof(IActionResult), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(ResultModel<DadosImpressaoVoucherResultModel>), StatusCodes.Status400BadRequest)]
-        //[ProducesResponseType(typeof(ResultModel<DadosImpressaoVoucherResultModel>), StatusCodes.Status500InternalServerError)]
-        //public async Task<IActionResult> GetDadosVoucher([FromQuery] string agendamentoId)
-        //{
-        //    try
-        //    {
-        //        var result = await _empreendimentoService.GetDadosImpressaoVoucher(agendamentoId);
-        //        if (result != null)
-        //            return Ok(result);
-        //        else return NotFound(new ResultModel<DadosImpressaoVoucherResultModel>()
-        //        {
-        //            Status = StatusCodes.Status404NotFound,
-        //            Success = false,
-        //            Message = "Ops! não foi encontrado nenhum registro.",
-        //            Errors = new List<string>() { "Ops! não foi encontrado nenhum registro." }
-        //        });
-        //    }
-        //    catch (ArgumentException err)
-        //    {
-        //        return BadRequest(new ResultModel<DadosImpressaoVoucherResultModel>()
-        //        {
-        //            Data = new DadosImpressaoVoucherResultModel(),
-        //            Message = err.InnerException != null ?
-        //                $"Não foi possível retornar os dados: {err.Message} {err.InnerException.Message}" :
-        //                $"Não foi possível retornar os dados: " +
-        //                $" {err.Message}",
-        //            Status = StatusCodes.Status400BadRequest,
-        //            Success = false
-        //        });
-        //    }
-        //    catch (Exception err)
-        //    {
-        //        return StatusCode(500, new ResultModel<DadosImpressaoVoucherResultModel>()
-        //        {
-        //            Data = new DadosImpressaoVoucherResultModel(),
-        //            Message = err.InnerException != null ?
-        //            $"Não foi possível retornar os dados: {err.Message} {err.InnerException.Message}" :
-        //            $"Não foi possível retornar os dados: {err.Message}",
-        //            Status = StatusCodes.Status500InternalServerError,
-        //            Success = false
-        //        });
-        //    }
-        //}
-
-        //[HttpGet("getVoucherWithTemplate"), Authorize(Roles = "Administrador, GestorReservasAgendamentos, portalproprietariosw")]
-        //[ProducesResponseType(typeof(ResultModel<object>), StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(ResultModel<object>), StatusCodes.Status400BadRequest)]
-        //[ProducesResponseType(typeof(ResultModel<object>), StatusCodes.Status404NotFound)]
-        //[ProducesResponseType(typeof(ResultModel<object>), StatusCodes.Status500InternalServerError)]
-        //public async Task<IActionResult> GetVoucherWithTemplate([FromQuery] string agendamentoId, [FromQuery] int? templateId = null)
-        //{
-        //    try
-        //    {
-        //        if (string.IsNullOrWhiteSpace(agendamentoId))
-        //        {
-        //            return BadRequest(new ResultModel<object>
-        //            {
-        //                Status = StatusCodes.Status400BadRequest,
-        //                Success = false,
-        //                Message = "O ID do agendamento é obrigatório.",
-        //                Errors = new List<string> { "O ID do agendamento é obrigatório." }
-        //            });
-        //        }
-
-        //        // Buscar dados do voucher
-        //        var dadosVoucherResult = await _empreendimentoService.GetDadosImpressaoVoucher(agendamentoId);
-        //        if (dadosVoucherResult == null || dadosVoucherResult.Data == null)
-        //        {
-        //            return NotFound(new ResultModel<object>
-        //            {
-        //                Status = StatusCodes.Status404NotFound,
-        //                Success = false,
-        //                Message = "Ops! não foi encontrado nenhum registro de voucher para o agendamento informado.",
-        //                Errors = new List<string> { "Ops! não foi encontrado nenhum registro de voucher para o agendamento informado." }
-        //            });
-        //        }
-
-        //        var dadosVoucher = dadosVoucherResult.Data;
-
-        //        // Buscar template configurado
-        //        var templateHtml = await _documentTemplateService.GetTemplateContentHtmlAsync(
-        //            EnumDocumentTemplateType.VoucherAgendamentoMultiownership, 
-        //            templateId);
-
-        //        if (string.IsNullOrWhiteSpace(templateHtml))
-        //        {
-        //            return NotFound(new ResultModel<object>
-        //            {
-        //                Status = StatusCodes.Status404NotFound,
-        //                Success = false,
-        //                Message = "Nenhum template ativo encontrado para voucher de agendamento multiownership.",
-        //                Errors = new List<string> { "Nenhum template ativo encontrado para voucher de agendamento multiownership." }
-        //            });
-        //        }
-
-        //        // Processar template substituindo placeholders
-        //        var processedHtml = ProcessTemplateHtml(templateHtml, dadosVoucher);
-
-        //        return Ok(new ResultModel<object>
-        //        {
-        //            Status = StatusCodes.Status200OK,
-        //            Success = true,
-        //            Data = new { html = processedHtml }
-        //        });
-        //    }
-        //    catch (ArgumentException err)
-        //    {
-        //        return BadRequest(new ResultModel<object>
-        //        {
-        //            Message = err.InnerException != null ?
-        //                $"Não foi possível processar o voucher: {err.Message} {err.InnerException.Message}" :
-        //                $"Não foi possível processar o voucher: {err.Message}",
-        //            Status = StatusCodes.Status400BadRequest,
-        //            Success = false
-        //        });
-        //    }
-        //    catch (Exception err)
-        //    {
-        //        _logger.LogError(err, "Erro ao processar voucher com template para agendamento {AgendamentoId}", agendamentoId);
-        //        return StatusCode(500, new ResultModel<object>
-        //        {
-        //            Message = err.InnerException != null ?
-        //            $"Não foi possível processar o voucher: {err.Message} {err.InnerException.Message}" :
-        //            $"Não foi possível processar o voucher: {err.Message}",
-        //            Status = StatusCodes.Status500InternalServerError,
-        //            Success = false
-        //        });
-        //    }
-        //}
-
-        //private string ProcessTemplateHtml(string templateHtml, DadosImpressaoVoucherResultModel dados)
-        //{
-        //    if (string.IsNullOrWhiteSpace(templateHtml) || dados == null)
-        //        return templateHtml ?? string.Empty;
-
-        //    // Mapear dados do voucher para placeholders
-        //    var placeholders = new Dictionary<string, string?>(StringComparer.InvariantCultureIgnoreCase)
-        //    {
-        //        { "numeroReserva", dados.NumeroReserva ?? "----" },
-        //        { "cliente", dados.Cliente ?? "---" },
-        //        { "hospedePrincipal", dados.HospedePrincipal ?? dados.HospedePrincipalNome ?? "---" },
-        //        { "tipoUso", dados.TipoUso ?? dados.TipoUtilizacao ?? dados.TipoDisponibilizacao ?? "---" },
-        //        { "contrato", dados.Contrato ?? "---" },
-        //        { "nomeHotel", dados.NomeHotel ?? "---" },
-        //        { "observacao", dados.Observacao ?? dados.Observacoes ?? "---" },
-        //        { "tipoCliente", dados.TipoUso ?? "---" },
-        //        { "dataChegada", dados.DataChegada ?? "--/--/----" },
-        //        { "horaChegada", dados.HoraChegada ?? "--:--" },
-        //        { "dataPartida", dados.DataPartida ?? "--/--/----" },
-        //        { "horaPartida", dados.HoraPartida ?? "--:--" },
-        //        { "acomodacao", dados.Acomodacao ?? dados.TipoApartamento ?? "---" },
-        //        { "quantidadePax", dados.QuantidadePax ?? dados.OcupacaoMaxima?.ToString() ?? "---" }
-        //    };
-
-        //    // Substituir placeholders no formato {{chave}}
-        //    return Regex.Replace(
-        //        templateHtml,
-        //        @"\{\{\s*([^\}]+?)\s*\}\}",
-        //        match =>
-        //        {
-        //            var key = match.Groups[1].Value.Trim();
-        //            return placeholders.TryGetValue(key, out var value)
-        //                ? value ?? string.Empty
-        //                : match.Value;
-        //        },
-        //        RegexOptions.IgnoreCase);
-        //}
 
         [HttpGet("reservas/{agendamentoId}/voucher"), Authorize(Roles = "Administrador, OperadorSistema, GestorReservasAgendamentos, portalproprietariosw")]
         [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]

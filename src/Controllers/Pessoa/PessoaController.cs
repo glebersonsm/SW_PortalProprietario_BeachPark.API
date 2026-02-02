@@ -5,7 +5,7 @@ using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.PessoaModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 
-namespace SW_PortalProprietario.API.src.Controllers.Pessoa
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.Pessoa
 {
     [Authorize]
     [ApiController]

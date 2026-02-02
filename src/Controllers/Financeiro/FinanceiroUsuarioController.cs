@@ -10,7 +10,7 @@ using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 using System.IO.Compression;
 
-namespace SW_PortalProprietario.API.src.Controllers.Financeiro
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
 {
     [ApiController]
     [Route("[controller]")]
@@ -519,7 +519,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
                 var result = await _financeiroProviderService.DownloadBoleto(model);
                 if (result != null && !string.IsNullOrEmpty(result.Path))
                 {
-                    var ext = Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
+                    var ext = SW_PortalProprietario.Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
                     if (string.IsNullOrEmpty(ext))
                         throw new Exception($"Tipo de arquivo: ({result.Path.Split("\\").Last().Split(".").Last()}) não suportado.");
 
@@ -578,9 +578,9 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
         }
 
         [HttpPost("salvarMinhaContaBancaria")]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> SalvarContaBancaria([FromBody] ClienteContaBancariaInputModel request)
         {
@@ -588,13 +588,13 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             {
                 var result = await _financeiroProviderService.SalvarMinhaContaBancaria(request);
                 if (result > 0)
-                    return Ok(new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                     {
                         Data = new ClienteContaBancariaViewModel(),
                         Errors = new List<string>(),
                         Status = StatusCodes.Status200OK,
                     });
-                else return StatusCode(500, new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                else return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = new List<string>() { $"Não foi possível salvar a conta bancária" },
@@ -603,7 +603,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = err.InnerException != null ?
@@ -614,7 +614,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<ClienteContaBancariaViewModel>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = err.InnerException != null ?
@@ -627,8 +627,8 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
 
         [HttpGet("minhasContasBancarias")]
         [ProducesResponseType(typeof(IEnumerable<ClienteContaBancariaViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> SearchContaBancariaFornecedor()
         {
@@ -636,14 +636,14 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             {
                 var result = await _financeiroProviderService.GetMinhasContasBancarias();
                 if (result == null || !result.Any())
-                    return Ok(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
+                    return Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
                     {
                         Data = new List<ClienteContaBancariaViewModel>(),
                         Errors = new List<string>() { "Ops! Nenhum registro encontrado!" },
                         Status = StatusCodes.Status404NotFound,
                         Success = true
                     });
-                return Ok(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
+                return Ok(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>(result)
                 {
                     Errors = new List<string>(),
                     Status = StatusCodes.Status200OK,
@@ -652,7 +652,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (ArgumentException err)
             {
-                return BadRequest(new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
+                return BadRequest(new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
                 {
                     Data = new List<ClienteContaBancariaViewModel>(),
                     Errors = err.InnerException != null ?
@@ -663,7 +663,7 @@ namespace SW_PortalProprietario.API.src.Controllers.Financeiro
             }
             catch (Exception err)
             {
-                return StatusCode(500, new Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
+                return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<List<ClienteContaBancariaViewModel>>()
                 {
                     Data = new List<ClienteContaBancariaViewModel>(),
                     Errors = err.InnerException != null ?

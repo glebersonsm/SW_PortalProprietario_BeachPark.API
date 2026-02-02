@@ -5,7 +5,7 @@ using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Enumns;
 using System.Linq;
 
-namespace SW_PortalProprietario.API.src.Controllers.Configuracoes
+namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
 {
     [ApiController]
     [Route("api/configuracoes/document-templates")]

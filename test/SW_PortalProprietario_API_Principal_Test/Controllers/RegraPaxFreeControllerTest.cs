@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Moq;
-using SW_PortalProprietario.API.src.Controllers.RegraPaxFree;
+using SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
