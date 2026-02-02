@@ -1,21 +1,9 @@
 {
   "ConnectionStrings": {
-    //Homologação liberação por IP
-    //"DefaultConnection": "Host=177.220.145.116;Port=5432;Database=swportal_homolog;Username=swsolucoes;Password=@@SW!Sol#@",
-    //"EsolAccessCenterConnection": "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = 172.23.0.150 )(PORT = 1521))) (CONNECT_DATA = (SERVICE_NAME = TESTESOL)));User ID=eSolution;Password=esol123",
-    //"EsolPortalConnection": "Data Source=177.220.145.116,1441;Initial Catalog=eSolutionPortalTreino;User ID=es;Password=a01espassdes#",
-    //"BasePortalDbo": "[eSolutionPortalTreino]",
-    //Homologação via VPN
     "DefaultConnection": "Host=172.23.10.100;Port=5432;Database=swportal_homolog;Username=swsolucoes;Password=@@SW!Sol#@",
     "EsolAccessCenterConnection": "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = 172.23.0.150 )(PORT = 1521))) (CONNECT_DATA = (SERVICE_NAME = TESTESOL)));User ID=eSolution;Password=esol123",
     "EsolPortalConnection": "Data Source=172.23.0.122,1433;Initial Catalog=eSolutionPortalTreino;User ID=es;Password=a01espassdes#;TrustServerCertificate=true",
     "BasePortalDbo": "[eSolutionPortalTreino]",
-    //Oficial VPN
-    //"DefaultConnection": "Host=172.23.10.100;Port=5432;Database=swportal_mp_dev;Username=swsolucoes;Password=@@SW!Sol#@",
-    //"EsolAccessCenterConnection": "Data Source=(DESCRIPTION = (ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = 172.23.0.250 )(PORT = 1521)))(CONNECT_DATA = (SERVICE_NAME = solution)));User ID=eSolution;;Password=esol123;Connection Timeout=30",
-    //"EsolPortalConnection": "Data Source=172.23.0.122,1433;Initial Catalog=eSolutionPortal;User ID=es;Password=a01espassdes#",
-    //"RedisConnection": "localhost,port: 6379,password=Redis2019!",
-    //"BasePortalDbo": "[eSolutionPortal]",
     "ForceRollback": false
   },
   "Redis": {
@@ -53,22 +41,6 @@
     "TrocarSemana": "/Condominio/v1/agendamento/trocarsemana",
     "IncluirSemana": "/Condominio/v1/agendamento/incluirsemana"
   },
-  "UseBrokerType": "NovaXSBrokerHomolog",
-  "NovaXSBrokerHomolog": {
-    "CardCompanyId": "INCORPORADORA_2:78e8e977-4c06-43f6-8e0c-39077bb56225|CONDOMINIOPRESTIGE_61:78e8e977-4c06-43f6-8e0c-39077bb56225|CONDOMINIOMABU_81:78e8e977-4c06-43f6-8e0c-39077bb56225",
-    "CardCompanyToken": "INCORPORADORA_2:69832e16cfcf1ac3487e4f316c02bb6d5680dfd4723f5962|CONDOMINIOPRESTIGE_61:69832e16cfcf1ac3487e4f316c02bb6d5680dfd4723f5962|CONDOMINIOMABU_81:69832e16cfcf1ac3487e4f316c02bb6d5680dfd4723f5962",
-    "PixCompanyId": "INCORPORADORA_2:b0df47ef-8f39-4641-8a27-cb811a31caf4|CONDOMINIOPRESTIGE_61:b0df47ef-8f39-4641-8a27-cb811a31caf4|CONDOMINIOMABU_81:b0df47ef-8f39-4641-8a27-cb811a31caf4",
-    "PixCompanyToken": "INCORPORADORA_2:1371c24db0803de572067a80b158f420e6bd666fd55e8d3e|CONDOMINIOPRESTIGE_61:1371c24db0803de572067a80b158f420e6bd666fd55e8d3e|CONDOMINIOMABU_81:1371c24db0803de572067a80b158f420e6bd666fd55e8d3e",
-    "ApiCardTokenizeUrl": "https://api.novaxs.com.br/nxspayments/v1/token",
-    "ApiPaymentUrl": "https://api.novaxs.com.br/nxspayments/v1/payment",
-    "ApiPaymentCancelUrl": "https://api.novaxs.com.br/nxspayments/v1/cancel",
-    "ApiPaymentConsultTransactionUrl": "https://api.novaxs.com.br/nxspayments/v1/payment/{PAYMENTID}",
-    "ExpirationLinkInMinutes": 30,
-    "TipoBaixaPixId": "INCORPORADORA_2:21|CONDOMINIOPRETIGE_61:164|CONDOMINIOMABU_81:224",
-    "ContaFinanceiraVariacaoPixCondominioId": "INCORPORADORA_2:51|CONDOMINIOPRESTIGE_61:511|CONDOMINIOMABU_81:511",
-    "OperacaoFinanceiraBaixaPix": "INCORPORADORA_2:1|CONDOMINIOPRESTIGE_61:104|CONDOMINIOMABU_81:124",
-    "Production": false
-  },
   "RabbitMqFilaDeAuditoriaNome": "auditoria",
   "AuditLog": {
     "ConsumerConcurrency": 5,
@@ -76,21 +48,6 @@
     "RetryDelaySeconds": 30
   },
   "StatusCrcIgnorarFiltro": "621,421",
-  //"NovaXSBrokerProduction": {
-  //  "CardCompanyId": "INCORPORADORA_2:DESABILITADO|CONDOMINIOPRESTIGE_61:b8141f71-8d6a-4425-87d2-9fe156d4c6e5|CONDOMINIOMABU_81:3cbecdf6-5bfc-4a70-bd7e-7db405b507c9",
-  //  "CardCompanyToken": "INCORPORADORA_2:DESABILITADO|CONDOMINIOPRESTIGE_61:fc4dc1b30b07acc8a0d221d451a5a400d895e1c40be84223|CONDOMINIOMABU_81:22f5323033311c7ae182e86e60c42f3dee42d58a8c17696c",
-  //  "PixCompanyId": "DESABILITADO",
-  //  "PixCompanyToken": "DESABILITADO",
-  //  "ApiCardTokenizeUrl": "https://api.novaxs.com.br/nxspayments/v1/token",
-  //  "ApiPaymentUrl": "https://api.novaxs.com.br/nxspayments/v1/payment",
-  //  "ApiPaymentCancelUrl": "https://api.novaxs.com.br/nxspayments/v1/cancel",
-  //  "ApiPaymentConsultTransactionUrl": "https://api.novaxs.com.br/nxspayments/v1/payment/{PAYMENTID}",
-  //  "ExpirationLinkInMinutes": 30,
-  //  "TipoBaixaPixId": "INCORPORADORA_2:21|CONDOMINIOPRETIGE_61:164|CONDOMINIOMABU_81:224",
-  //  "ContaFinanceiraVariacaoPixId": "INCORPORADORA_2:51|CONDOMINIOPRESTIGE_61:511|CONDOMINIOMABU_81:511",
-  //  "OperacaoFinanceiraBaixaPix": "INCORPORADORA_2:1|CONDOMINIOPRESTIGE_61:104|CONDOMINIOMABU_81:124",
-  //  "Production": true
-  //},
   "EmpreendimentoId": "1,21",
   "QtdMaximaExibicaoFinanceiros": 1000,
   "Empresa": 2,
@@ -137,4 +94,3 @@
   "MultipropriedadeAtivada": true,
   "TimeSharingAtivado": false
 }
-

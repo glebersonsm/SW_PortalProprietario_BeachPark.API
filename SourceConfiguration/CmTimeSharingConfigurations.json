@@ -1,0 +1,78 @@
+{
+  "ConnectionStrings": {
+    "CmConnection": "Data Source=(DESCRIPTION = (ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = 172.23.0.150 )(PORT = 1521))) (CONNECT_DATA = (SERVICE_NAME = cmt)));User ID=cm;Password=getic01;Connection Timeout=30",
+    "DefaultConnection": "Host=172.23.10.100;Port=5432;Database=swportal_ts_dev;Username=swsolucoes;Password=@@SW!Sol#@",
+    "RedisConnection": "localhost,port: 6379,password=Redis2019!"
+  },
+  "Redis": {
+    "Password": "Redis2019!",
+    "AllowAdmin": false,
+    "Ssl": false,
+    "ConnectTimeout": 60000,
+    "ConnectRetry": 2,
+    "InstaceName": "sw_solucoes_mvc_",
+    "Hosts": [
+      {
+        "Host": "localhost",
+        "Port": "6379"
+      }
+    ],
+    "Database": 0
+  },
+  "RabbitMqFilaDeAuditoriaNome": "auditoria",
+  "AuditLog": {
+    "ConsumerConcurrency": 5,
+    "RetryAttempts": 3,
+    "RetryDelaySeconds": 30
+  },
+  "ReservasCMApiConfig": {
+    "BaseUrl": "http://localhost:8080",
+    //"BaseUrl": "http://localhost:44388",
+    "CriarAlterarReserva": "/Reserva/v1/efetuarReservasAgendamento",
+    "CancelarReserva": "/Reserva/v1/cancelarReservasAgendamento",
+    "SegmentoReserva": "HotelId:3;SegmentoPontos:0803|HotelId:3;SegmentoCortesia:0802|HotelId:1;SegmentoPontos:0803|HotelId:1;SegmentoCortesia:0802",
+    "MeioComunicacao": "8",
+    "VeiculoComunicacao": "81",
+    "TipoHospede": "HotelId:1;TipoHospede:41|HotelId:3;TipoHospede:40",
+    "OrigemReserva": "49",
+    "DocConfirmaHotel": "7",
+    "TarifaHotel": "HotelId:3;109|HotelId:1;1519",
+    "IdPromotorRci": "1259656",
+    "ReservanteRci": "BULKBANK",
+    "TelReservanteRci": "4540523011",
+    "IdHospedeBulkBank": "2194787"
+  },
+  "EmpreendimentoId": "1",
+  "EmpresaSwPortalId": "1",
+  "UsuarioSistemaId": 1,
+  "TagGeralId": 1,
+  "SoFaltaEuUrl": "",
+  "EmpresaCMId": 3,
+  "CMUserId": 1900693,
+  "IntegradoCom": "CM",
+  "ControleDeUsuarioViaSFE": false,
+  "ControleDeUsuarioViaAccessCenter": false,
+  "UpdateDataBase": true,
+  "UpdateFramework": false,
+  "EfetuarConfiguracoesIniciais": false,
+  "CriarPrimeiroUsuario": false,
+  "ConfigurarEmpresa": false,
+  "VincularUsuarioEmpresa": false,
+  "ImportarCidades": false,
+  "CriarUsuariosLegado": false,
+  "CriarUsuariosClientesLegado": false,
+  "ConsultarStatusPix": false,
+  "RabbitMqConnectionHost": "localhost",
+  "RabbitMqConnectionPort": 5672,
+  "RabbitMqConnectionUser": "swsolucoes",
+  "RabbitMqConnectionPass": "SW@dba#2024!",
+  "RabbitMqFilaDeLogNome": "gravacaoLogs_mvc",
+  "RabbitMqFilaDeEmailNome": "emails_mvc",
+  "BloquearCriacaoAdmForaDebugMode": true,
+  "ProgramId": "PORTALPROPMVC_",
+  "RestringirPeriodoPorFaltaDePontos": false,
+  "AutomaticCommunicationEmailEnabled": true,
+  "AutomaticCommunicationEmailIntervalHours": 24,
+  "MultipropriedadeAtivada": false,
+  "TimeSharingAtivado": true
+}
