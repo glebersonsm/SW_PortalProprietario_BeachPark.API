@@ -1,0 +1,322 @@
+# Sistema de Transações Distribuídas (Saga Pattern)
+
+## 📋 Visão Geral
+
+Este sistema implementa o **Saga Pattern** para gerenciar transações distribuídas na API, garantindo que:
+- ✅ Todas as operações sejam rastreadas
+- ✅ Em caso de falha, todas as operações anteriores sejam compensadas (desfeitas)
+- ✅ Todos os passos executados sejam registrados no banco de dados
+- ✅ Seja possível auditar e investigar problemas
+
+## 🏗️ Arquitetura
+
+### Componentes Principais
+
+1. **SagaExecution** - Entidade que representa uma execução completa de Saga
+2. **SagaStep** - Entidade que representa um passo individual dentro de uma Saga
+3. **ISagaOrchestrator** - Interface para orquestrar Sagas
+4. **SagaOrchestrator** - Implementação do orquestrador
+5. **ISagaRepository** - Interface para persistir logs de Saga
+6. **SagaRepository** - Implementação do repositório
+7. **UseSagaAttribute** - Atributo para marcar endpoints que usam Saga
+8. **SagaMiddleware** - Middleware para interceptar requisições
+
+### Fluxo de Execução
+
+```
+1. Requisição chega ao endpoint marcado com [UseSaga]
+2. Middleware detecta o atributo
+3. SagaOrchestrator cria uma nova SagaExecution
+4. Cada step é executado e registrado como SagaStep
+5. Se algum step falhar:
+   - Todos os steps anteriores são compensados (em ordem reversa)
+   - Cada compensação é registrada
+6. Status final é atualizado (Completed ou Compensated)
+```
+
+## 🚀 Como Usar
+
+### 1. Configuração Inicial
+
+No `Program.cs` ou `Startup.cs`:
+
+```csharp
+// Registrar serviços de Saga
+builder.Services.AddSagaPattern();
+
+// Adicionar middleware (após UseRouting, antes de UseEndpoints)
+app.UseSagaMiddleware();
+```
+
+### 2. Uso Básico em Controllers
+
+#### Opção A: Uso Direto com ExecuteAsync
+
+```csharp
+[HttpPost("criar-reserva")]
+[UseSaga("CriarReserva")]
+public async Task<IActionResult> CriarReserva([FromBody] ReservaRequest request)
+{
+    var result = await _sagaOrchestrator.ExecuteAsync(
+        "CriarReserva",
+        request,
+        async (input, ct) =>
+        {
+            // Step 1: Validar disponibilidade
+            await _sagaOrchestrator.ExecuteStepAsync(
+                "ValidarDisponibilidade",
+                1,
+                input,
+                async (inp, ct) => 
+                {
+                    // Lógica de validação
+                    await _servicoReserva.ValidarDisponibilidadeAsync(inp.QuartoId, inp.DataCheckIn);
+                },
+                compensateFunc: null, // Validação não precisa compensação
+                ct);
+
+            // Step 2: Processar pagamento
+            var pagamentoId = await _sagaOrchestrator.ExecuteStepAsync(
+                "ProcessarPagamento",
+                2,
+                input,
+                async (inp, ct) => 
+                {
+                    // Processar pagamento
+                    return await _servicoPagamento.ProcessarAsync(inp.CartaoId, inp.Valor);
+                },
+                compensateFunc: async (inp, pagId, ct) => 
+                {
+                    // COMPENSAÇÃO: Estornar pagamento
+                    await _servicoPagamento.EstornarAsync(pagId);
+                },
+                ct);
+
+            // Step 3: Criar reserva
+            var reservaId = await _sagaOrchestrator.ExecuteStepAsync(
+                "CriarReserva",
+                3,
+                new { input, pagamentoId },
+                async (inp, ct) => 
+                {
+                    // Criar reserva
+                    return await _servicoReserva.CriarAsync(inp.input, inp.pagamentoId);
+                },
+                compensateFunc: async (inp, resId, ct) => 
+                {
+                    // COMPENSAÇÃO: Cancelar reserva
+                    await _servicoReserva.CancelarAsync(resId);
+                },
+                ct);
+
+            // Step 4: Enviar confirmação
+            await _sagaOrchestrator.ExecuteStepAsync(
+                "EnviarConfirmacao",
+                4,
+                new { reservaId, input.Email },
+                async (inp, ct) => 
+                {
+                    // Enviar email
+                    await _servicoEmail.EnviarConfirmacaoAsync(inp.Email, inp.reservaId);
+                },
+                compensateFunc: null, // Email não precisa compensação
+                ct);
+
+            return new ReservaResponse 
+            { 
+                ReservaId = reservaId,
+                PagamentoId = pagamentoId 
+            };
+        });
+
+    return Ok(result);
+}
+```
+
+#### Opção B: Uso com SagaBuilder (Fluent API)
+
+```csharp
+[HttpPost("criar-reserva")]
+[UseSaga("CriarReserva")]
+public async Task<IActionResult> CriarReserva([FromBody] ReservaRequest request)
+{
+    var result = await _sagaOrchestrator
+        .CreateSaga("CriarReserva", request)
+        .AddStep(
+            "ValidarDisponibilidade",
+            async (input, ct) => await _servicoReserva.ValidarDisponibilidadeAsync(input.QuartoId, input.DataCheckIn))
+        .AddStep<string>(
+            "ProcessarPagamento",
+            async (input, ct) => await _servicoPagamento.ProcessarAsync(input.CartaoId, input.Valor),
+            compensateFunc: async (input, pagId, ct) => await _servicoPagamento.EstornarAsync(pagId))
+        .AddStep<int>(
+            "CriarReserva",
+            async (input, ct) => await _servicoReserva.CriarAsync(input),
+            compensateFunc: async (input, resId, ct) => await _servicoReserva.CancelarAsync(resId))
+        .ExecuteAsync(
+            async input => new ReservaResponse 
+            { 
+                Success = true,
+                Message = "Reserva criada com sucesso!" 
+            });
+
+    return Ok(result);
+}
+```
+
+### 3. Tratamento de Erros
+
+```csharp
+try
+{
+    var result = await _sagaOrchestrator.ExecuteAsync(...);
+    return Ok(result);
+}
+catch (SagaException ex)
+{
+    // Saga falhou e foi compensada
+    _logger.LogError(ex, "Saga {SagaId} falhou", ex.SagaId);
+    
+    return BadRequest(new
+    {
+        Success = false,
+        Message = "Operação falhou e foi revertida",
+        SagaId = ex.SagaId,
+        Error = ex.Message
+    });
+}
+```
+
+## 📊 Estrutura do Banco de Dados
+
+### Tabela: SagaExecution
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| Id | int | ID único |
+| SagaId | string | GUID da Saga |
+| OperationType | string | Tipo da operação |
+| Status | string | Running, Completed, Compensated, Failed |
+| InputData | string | JSON com dados de entrada |
+| OutputData | string | JSON com resultado |
+| ErrorMessage | string | Mensagem de erro |
+| DataHoraInicio | DateTime | Quando iniciou |
+| DataHoraConclusao | DateTime | Quando terminou |
+| DuracaoMs | long | Duração em milissegundos |
+| UsuarioId | int | Usuário que iniciou |
+| Endpoint | string | Endpoint da API |
+| ClientIp | string | IP do cliente |
+
+### Tabela: SagaStep
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| Id | int | ID único |
+| SagaExecutionId | int | FK para SagaExecution |
+| StepName | string | Nome do step |
+| StepOrder | int | Ordem de execução |
+| Status | string | Pending, Executing, Executed, Compensating, Compensated, Failed |
+| InputData | string | JSON com entrada do step |
+| OutputData | string | JSON com saída do step |
+| ErrorMessage | string | Mensagem de erro |
+| StackTrace | string | Stack trace do erro |
+| DataHoraInicio | DateTime | Quando iniciou |
+| DataHoraConclusao | DateTime | Quando terminou |
+| DuracaoMs | long | Duração em milissegundos |
+| DataHoraInicioCompensacao | DateTime | Quando iniciou compensação |
+| DataHoraConclusaoCompensacao | DateTime | Quando terminou compensação |
+| DuracaoCompensacaoMs | long | Duração da compensação |
+| Tentativas | int | Número de tentativas |
+| TentativasCompensacao | int | Número de tentativas de compensação |
+| PodeSerCompensado | bool | Se pode ser compensado |
+
+## 🔍 Monitoramento e Auditoria
+
+### Consultar Sagas por Status
+
+```csharp
+var sagasFalhadas = await _sagaRepository.GetSagasByStatusAsync("Failed", limit: 50);
+var sagasCompensadas = await _sagaRepository.GetSagasByStatusAsync("Compensated", limit: 50);
+```
+
+### Consultar Sagas por Tipo de Operação
+
+```csharp
+var reservas = await _sagaRepository.GetSagasByOperationTypeAsync(
+    "CriarReserva",
+    dataInicio: DateTime.Today.AddDays(-7),
+    dataFim: DateTime.Today);
+```
+
+### Obter Detalhes de uma Saga
+
+```csharp
+var saga = await _sagaRepository.GetSagaAsync(sagaId);
+var steps = await _sagaRepository.GetStepsAsync(sagaId);
+
+foreach (var step in steps)
+{
+    Console.WriteLine($"{step.StepOrder}. {step.StepName} - {step.Status}");
+    if (step.Status == "Failed")
+    {
+        Console.WriteLine($"   Erro: {step.ErrorMessage}");
+    }
+}
+```
+
+## 📝 Logs
+
+O sistema gera logs detalhados com emojis para fácil identificação:
+
+- 🚀 Saga iniciada
+- ⚙️ Step executando
+- ✓ Step executado com sucesso
+- ✗ Step falhou
+- 🔄 Iniciando compensação
+- ↩️ Compensando step
+- ✅ Saga completada / Compensação concluída
+- ❌ Erro
+
+Exemplo de log:
+```
+🚀 Iniciando Saga abc123 - Tipo: CriarReserva
+⚙️ Executando step ValidarDisponibilidade (Ordem: 1) - Saga abc123
+✓ Step ValidarDisponibilidade executado com sucesso em 45ms
+⚙️ Executando step ProcessarPagamento (Ordem: 2) - Saga abc123
+✗ Falha no step ProcessarPagamento após 120ms
+🔄 Iniciando compensação de 1 steps executados
+↩️ Compensando step ValidarDisponibilidade (Ordem: 1)
+✓ Step ValidarDisponibilidade compensado com sucesso em 20ms
+✅ Compensação concluída - 1 steps processados
+```
+
+## ⚠️ Boas Práticas
+
+1. **Sempre implemente compensação** para steps que modificam estado
+2. **Mantenha steps idempotentes** quando possível
+3. **Use ordem lógica** nos steps (1, 2, 3...)
+4. **Não compense operações de leitura** (validações, consultas)
+5. **Trate erros de compensação** - o sistema continua mesmo se uma compensação falhar
+6. **Use nomes descritivos** para steps e operações
+7. **Serialize apenas dados necessários** para evitar logs muito grandes
+
+## 🎯 Casos de Uso Ideais
+
+- ✅ Criação de reservas com pagamento
+- ✅ Processos de checkout multi-etapas
+- ✅ Transferências entre contas
+- ✅ Operações que envolvem múltiplos sistemas
+- ✅ Workflows complexos com rollback
+- ✅ Integrações com APIs externas
+
+## 🚫 Quando NÃO Usar
+
+- ❌ Operações simples de CRUD
+- ❌ Consultas sem modificação de estado
+- ❌ Operações que já têm transação de banco de dados
+- ❌ Processos síncronos muito rápidos (< 100ms)
+
+## 📚 Referências
+
+- [Saga Pattern - Microsoft](https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga)
+- [Microservices Patterns - Chris Richardson](https://microservices.io/patterns/data/saga.html)
