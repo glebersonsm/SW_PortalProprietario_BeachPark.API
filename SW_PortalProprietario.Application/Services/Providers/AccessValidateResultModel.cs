@@ -13,5 +13,6 @@ namespace SW_PortalProprietario.Application.Services.Providers
         public List<string> Erros { get; set; } = new List<string>();
         public string? ProviderName { get; set; }
         public LoginResult? LoginResult { get; set; }
+        public bool? UsuarioValido { get; set; }
     }
 }
