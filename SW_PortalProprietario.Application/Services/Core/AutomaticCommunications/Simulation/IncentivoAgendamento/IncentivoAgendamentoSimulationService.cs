@@ -18,13 +18,13 @@ public class IncentivoAgendamentoSimulationService
 {
     private readonly ILogger<IncentivoAgendamentoSimulationService> _logger;
     private readonly IServiceBase _serviceBase;
-    private readonly IEmpreendimentoProviderService _empreendimentoProviderService;
+    private readonly IEmpreendimentoHybridProviderService _empreendimentoProviderService;
     private readonly IncentivoAgendamentoGenerationService _generationService;
 
     public IncentivoAgendamentoSimulationService(
         ILogger<IncentivoAgendamentoSimulationService> logger,
         IServiceBase serviceBase,
-        IEmpreendimentoProviderService empreendimentoProviderService,
+        IEmpreendimentoHybridProviderService empreendimentoProviderService,
         IncentivoAgendamentoGenerationService generationService)
     {
         _logger = logger;

@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,13 +14,13 @@ namespace SW_PortalProprietario.Application.Hosted
         private readonly IRepositoryHosted _repository;
         private readonly ILogger<FinalizeCartaoPaymentHostedService> _logger;
         private readonly IConfiguration _configuration;
-        private readonly IFinanceiroProviderService _financeiroProviderService;
+        private readonly IFinanceiroHybridProviderService _financeiroProviderService;
 
         public FinalizeCartaoPaymentHostedService(IRepositoryHosted repository,
             ILogger<FinalizeCartaoPaymentHostedService> logger,
             IConfiguration configuration,
             IBroker broker,
-            IFinanceiroProviderService financeiroProviderService)
+            IFinanceiroHybridProviderService financeiroProviderService)
         {
             _repository = repository;
             _logger = logger;

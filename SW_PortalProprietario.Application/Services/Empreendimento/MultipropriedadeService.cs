@@ -18,7 +18,7 @@ namespace SW_PortalProprietario.Application.Services.Empreendimento
         private readonly IRepositoryNHAccessCenter _repositoryAccessCenter;
         private readonly IRepositoryNHEsolPortal _repositoryPortal;
         private readonly IRepositoryNH _repositorySystem;
-        private readonly IEmpreendimentoProviderService _empreendimentoProvider;
+        private readonly IEmpreendimentoHybridProviderService _empreendimentoProvider;
         private readonly ILogger<MultipropriedadeService> _logger;
         private readonly ILogger<SagaOrchestrator> _sagaLogger;
 
@@ -26,7 +26,7 @@ namespace SW_PortalProprietario.Application.Services.Empreendimento
             IRepositoryNHAccessCenter repositoryAccessCenter,
             IRepositoryNHEsolPortal repositoryPortal,
             IRepositoryNH repositorySystem,
-            IEmpreendimentoProviderService empreendimentoProvider,
+            IEmpreendimentoHybridProviderService empreendimentoProvider,
             ILogger<MultipropriedadeService> logger,
             ILogger<SagaOrchestrator> sagaLogger)
         {

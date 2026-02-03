@@ -1,4 +1,4 @@
-Ôªøusing Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.Empreendimento;
@@ -12,21 +12,21 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Simulation.AvisoCheckin;
 
 /// <summary>
-/// Servi√ßo auxiliar para simula√ß√£o de emails de aviso de check-in pr√≥ximo
-/// ‚≠ê USA O MESMO C√ìDIGO DO PROCESSAMENTO AUTOM√ÅTICO via AvisoCheckinGenerationService
+/// ServiÁo auxiliar para simulaÁ„o de emails de aviso de check-in prÛximo
+/// ? USA O MESMO C”DIGO DO PROCESSAMENTO AUTOM¡TICO via AvisoCheckinGenerationService
 /// </summary>
 public class AvisoCheckinSimulationService
 {
     private readonly ILogger<AvisoCheckinSimulationService> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IEmpreendimentoProviderService _empreendimentoProviderService;
+    private readonly IEmpreendimentoHybridProviderService _empreendimentoProviderService;
     private readonly IServiceBase _serviceBase;
     private readonly AvisoCheckinGenerationService _avisoGenerationService;
 
     public AvisoCheckinSimulationService(
         ILogger<AvisoCheckinSimulationService> logger,
         IConfiguration configuration,
-        IEmpreendimentoProviderService empreendimentoProviderService,
+        IEmpreendimentoHybridProviderService empreendimentoProviderService,
         IServiceBase serviceBase,
         AvisoCheckinGenerationService avisoGenerationService)
     {
@@ -43,11 +43,11 @@ public class AvisoCheckinSimulationService
         int userId)
     {
         if (config.TemplateSendMode == null)
-            throw new ArgumentException("TemplateSendMode n√£o configurado");
+            throw new ArgumentException("TemplateSendMode n„o configurado");
 
         List<EmailInputInternalModel> emailListResult = new List<EmailInputInternalModel>();
 
-        _logger.LogInformation("=== IN√çCIO SIMULA√á√ÉO AVISO CHECK-IN ===");
+        _logger.LogInformation("=== INÕCIO SIMULA«√O AVISO CHECK-IN ===");
 
         // Usar o primeiro dia configurado para buscar reservas
         var daysBefore = config.DaysBeforeCheckIn?.FirstOrDefault() ?? 0;
@@ -56,28 +56,28 @@ public class AvisoCheckinSimulationService
         _logger.LogInformation("Buscando reservas para data: {TargetDate} ({DaysBefore} dias)", 
             targetDate.ToString("dd/MM/yyyy"), daysBefore);
 
-        // Buscar reservas compat√≠veis
+        // Buscar reservas compatÌveis
         var reservaItens = await GetReservasAsync((EnumProjetoType)config.ProjetoType, config, true);
 
         if (reservaItens == null || !reservaItens.Any())
-            throw new ArgumentException($"Nenhuma reserva compat√≠vel encontrada para simula√ß√£o (check-in: {targetDate:dd/MM/yyyy}, {string.Join(",", config.DaysBeforeCheckIn ?? new List<int>())} dias)");
+            throw new ArgumentException($"Nenhuma reserva compatÌvel encontrada para simulaÁ„o (check-in: {targetDate:dd/MM/yyyy}, {string.Join(",", config.DaysBeforeCheckIn ?? new List<int>())} dias)");
 
-        _logger.LogInformation("Encontradas {Count} reservas para an√°lise", reservaItens.Count);
+        _logger.LogInformation("Encontradas {Count} reservas para an·lise", reservaItens.Count);
 
-        // Buscar o primeiro registro compat√≠vel que atenda aos filtros
+        // Buscar o primeiro registro compatÌvel que atenda aos filtros
         var resultItens = await FindCompatibleReservaAsync(reservaItens, config);
 
         if (resultItens.reserva == null || resultItens.dadosReserva == null)
-            throw new ArgumentException("Nenhuma reserva compat√≠vel encontrada que atenda aos filtros configurados");
+            throw new ArgumentException("Nenhuma reserva compatÌvel encontrada que atenda aos filtros configurados");
 
         _logger.LogInformation("Reserva selecionada: AgendamentoId={AgendamentoId}, ReservaId={ReservaId}", 
             resultItens.reserva.AgendamentoId, resultItens.reserva.ReservaId);
 
-        // ‚≠ê DETERMINAR MODO DE ENVIO
+        // ? DETERMINAR MODO DE ENVIO
         var sendMode = (EnumTemplateSendMode)config.TemplateSendMode;
         _logger.LogInformation("Modo de envio configurado: {SendMode}", sendMode);
 
-        // ‚≠ê GERAR AVISO COMPLETO USANDO SERVI√áO COMPARTILHADO (MESMA L√ìGICA DO PROCESSAMENTO AUTOM√ÅTICO)
+        // ? GERAR AVISO COMPLETO USANDO SERVI«O COMPARTILHADO (MESMA L”GICA DO PROCESSAMENTO AUTOM¡TICO)
         var avisoData = await _avisoGenerationService.GerarAvisoCompletoAsync(
             resultItens.reserva,
             resultItens.dadosReserva,
@@ -86,13 +86,13 @@ public class AvisoCheckinSimulationService
             sendMode);
 
         if (avisoData == null || string.IsNullOrEmpty(avisoData.HtmlContent))
-            throw new ArgumentException("N√£o foi poss√≠vel gerar aviso para simula√ß√£o");
+            throw new ArgumentException("N„o foi possÌvel gerar aviso para simulaÁ„o");
 
         _logger.LogInformation("Aviso gerado com sucesso");
 
-        // ‚≠ê SUBSTITUIR PLACEHOLDERS NO ASSUNTO USANDO SERVI√áO COMPARTILHADO
+        // ? SUBSTITUIR PLACEHOLDERS NO ASSUNTO USANDO SERVI«O COMPARTILHADO
         var subject = _avisoGenerationService.SubstituirPlaceholders(
-            config.Subject ?? "Aviso de Check-in Pr√≥ximo", 
+            config.Subject ?? "Aviso de Check-in PrÛximo", 
             resultItens.reserva, 
             resultItens.dadosReserva, 
             daysBefore);
@@ -100,10 +100,10 @@ public class AvisoCheckinSimulationService
         _logger.LogInformation("Assunto processado: {Subject}", subject);
         _logger.LogInformation("Corpo do email gerado - Tamanho: {Size} chars", avisoData.HtmlContent.Length);
 
-        // ‚≠ê CRIAR EMAIL COM ANEXO SE NECESS√ÅRIO (MESMO COMPORTAMENTO DO PROCESSAMENTO AUTOM√ÅTICO)
+        // ? CRIAR EMAIL COM ANEXO SE NECESS¡RIO (MESMO COMPORTAMENTO DO PROCESSAMENTO AUTOM¡TICO)
         var result = new EmailInputInternalModel
         {
-            Assunto = $"[SIMULA√á√ÉO] {subject}",
+            Assunto = $"[SIMULA«√O] {subject}",
             Destinatario = userEmail,
             ConteudoEmail = avisoData.HtmlContent,
             EmpresaId = 1,
@@ -128,7 +128,7 @@ public class AvisoCheckinSimulationService
                 avisoData.PdfFileName, avisoData.PdfBytes.Length);
         }
 
-        _logger.LogInformation("=== FIM SIMULA√á√ÉO AVISO CHECK-IN ===");
+        _logger.LogInformation("=== FIM SIMULA«√O AVISO CHECK-IN ===");
 
         emailListResult.Add(result);
 
@@ -136,7 +136,7 @@ public class AvisoCheckinSimulationService
     }
 
 
-    #region M√©todos Auxiliares (Filtros e Valida√ß√µes)
+    #region MÈtodos Auxiliares (Filtros e ValidaÁıes)
 
     private async Task<List<(ReservaInfo reserva, int intervalo)>> GetReservasAsync(EnumProjetoType projetoType, AutomaticCommunicationConfigModel config, bool simulacao = true)
     {
@@ -165,7 +165,7 @@ public class AvisoCheckinSimulationService
             if (!timeSharingAtivado)
                 throw new ArgumentException("Funcionalidade de Timesharing desativada");
 
-            // TODO: Implementar busca de reservas Timesharing quando dispon√≠vel
+            // TODO: Implementar busca de reservas Timesharing quando disponÌvel
             return default;
         }
     }
@@ -180,18 +180,18 @@ public class AvisoCheckinSimulationService
         foreach (var reservaItem in reservas.GroupBy(c=> c.reserva.AgendamentoId))
         {
             var reserva = reservaItem.First().reserva;
-            // Verificar se o cliente tem email v√°lido
+            // Verificar se o cliente tem email v·lido
             if (!IsValidEmail(reserva.EmailCliente))
             {
-                _logger.LogDebug("Email inv√°lido para reserva {ReservaId}: {Email}", 
+                _logger.LogDebug("Email inv·lido para reserva {ReservaId}: {Email}", 
                     reserva.ReservaId, reserva.EmailCliente);
                 continue;
             }
 
-            // Verificar filtros de status CRC e adimpl√™ncia
+            // Verificar filtros de status CRC e adimplÍncia
             if (!await ShouldSendEmailForReserva(reserva, config, contratos, inadimplentes))
             {
-                _logger.LogDebug("Reserva {ReservaId} n√£o atende crit√©rios de filtro", reserva.ReservaId);
+                _logger.LogDebug("Reserva {ReservaId} n„o atende critÈrios de filtro", reserva.ReservaId);
                 continue;
             }
 
@@ -238,7 +238,7 @@ public class AvisoCheckinSimulationService
 
             if (contrato == null)
             {
-                _logger.LogWarning("Contrato n√£o encontrado para reserva {ReservaId}. Considerando compat√≠vel para simula√ß√£o.", 
+                _logger.LogWarning("Contrato n„o encontrado para reserva {ReservaId}. Considerando compatÌvel para simulaÁ„o.", 
                     reserva.ReservaId);
                 return true;
             }
@@ -258,7 +258,7 @@ public class AvisoCheckinSimulationService
 
                 if (statusCrcAtivos.Any(statusId => config.ExcludedStatusCrcIds.Contains(statusId)))
                 {
-                    _logger.LogDebug("Reserva {ReservaId} possui Status CRC exclu√≠do", reserva.ReservaId);
+                    _logger.LogDebug("Reserva {ReservaId} possui Status CRC excluÌdo", reserva.ReservaId);
                     return false;
                 }
             }
@@ -278,7 +278,7 @@ public class AvisoCheckinSimulationService
 
                 if (temBloqueio || clienteInadimplente != null)
                 {
-                    _logger.LogDebug("Reserva {ReservaId} possui inadimpl√™ncia ou bloqueio", reserva.ReservaId);
+                    _logger.LogDebug("Reserva {ReservaId} possui inadimplÍncia ou bloqueio", reserva.ReservaId);
                     return false;
                 }
             }
@@ -287,7 +287,7 @@ public class AvisoCheckinSimulationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao verificar filtros para reserva {ReservaId}. Considerando compat√≠vel para simula√ß√£o.", 
+            _logger.LogError(ex, "Erro ao verificar filtros para reserva {ReservaId}. Considerando compatÌvel para simulaÁ„o.", 
                 reserva.ReservaId);
             return true;
         }

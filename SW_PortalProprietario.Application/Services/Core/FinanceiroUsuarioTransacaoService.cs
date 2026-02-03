@@ -1,4 +1,4 @@
-Ôªøusing Dapper;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -26,7 +26,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly ILogger<FinanceiroUsuarioTransacaoService> _logger;
         private readonly IConfiguration _configuration;
         private readonly IBroker _broker;
-        private readonly IFinanceiroProviderService _financeiroProviderService;
+        private readonly IFinanceiroHybridProviderService _financeiroProviderService;
         private readonly ICommunicationProvider _communicationProvider;
         private readonly IServiceBase _serviceBase;
         private readonly BrokerModel? _brokerModel;
@@ -36,7 +36,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             ILogger<FinanceiroUsuarioTransacaoService> logger,
             IConfiguration configuration,
             IBroker broker,
-            IFinanceiroProviderService financeiroUsuarioProviderService,
+            IFinanceiroHybridProviderService financeiroUsuarioProviderService,
             ICommunicationProvider communicationProvider,
             IServiceBase serviceBase,
             IOptions<BrokerModel> brokerConfig,
@@ -64,24 +64,24 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _repository.BeginTransaction();
 
                 if (doTransactionModel.PessoaId.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException("Deve ser informado o par√¢metro PessoaId");
+                    throw new ArgumentException("Deve ser informado o par‚metro PessoaId");
 
                 var vinculoPessoaProvider = (await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{doTransactionModel.PessoaId.GetValueOrDefault()}", _communicationProvider.CommunicationProviderName));
                 if (vinculoPessoaProvider == null)
-                    throw new ArgumentException($"N√£o foi encontrada a pessoa do sistema com os dados informados pessoaId: {doTransactionModel.PessoaId}");
+                    throw new ArgumentException($"N„o foi encontrada a pessoa do sistema com os dados informados pessoaId: {doTransactionModel.PessoaId}");
 
                 if (!string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
                 {
                     var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(vinculoPessoaProvider.PessoaProvider!) });
                     if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S")))
                     {
-                        throw new ArgumentException("N√£o foi poss√≠vel efetuar o pagamento em cart√£o, motivo 0001BL");
+                        throw new ArgumentException("N„o foi possÌvel efetuar o pagamento em cart„o, motivo 0001BL");
                     }
                 }
 
                 var pessoa = await _repository.FindById<Domain.Entities.Core.DadosPessoa.Pessoa>(doTransactionModel.PessoaId.GetValueOrDefault());
                 if (pessoa == null)
-                    throw new ArgumentException($"N√£o foi encontrada pessoa com o Id: {doTransactionModel.PessoaId}");
+                    throw new ArgumentException($"N„o foi encontrada pessoa com o Id: {doTransactionModel.PessoaId}");
 
                 if (doTransactionModel.CardTokenizedId.GetValueOrDefault(0) == 0)
                     throw new ArgumentException($"Deve ser informado o CardTokenizedId");
@@ -97,13 +97,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                         ct.Id = {doTransactionModel.CardTokenizedId.GetValueOrDefault()}")).FirstOrDefault();
 
                 if (cardExistente == null)
-                    throw new ArgumentException($"N√£o foi localizado o CardTokenized com o id informado: {doTransactionModel.CardTokenizedId} vinculado a pessoa id: {doTransactionModel.PessoaId.GetValueOrDefault()}");
+                    throw new ArgumentException($"N„o foi localizado o CardTokenized com o id informado: {doTransactionModel.CardTokenizedId} vinculado a pessoa id: {doTransactionModel.PessoaId.GetValueOrDefault()}");
 
 
                 var contas = await _financeiroProviderService.GetContasParaPagamentoEmCartaoDoUsuario(doTransactionModel);
                 var dadosPessoa = await _financeiroProviderService.GetDadosPessoa(Convert.ToInt32(vinculoPessoaProvider.PessoaProvider));
                 if (dadosPessoa == null)
-                    throw new ArgumentException($"N√£o foi poss√≠vel encontrar a pessoa com Id: {vinculoPessoaProvider.PessoaProvider} no provider: {_communicationProvider.CommunicationProviderName}");
+                    throw new ArgumentException($"N„o foi possÌvel encontrar a pessoa com Id: {vinculoPessoaProvider.PessoaProvider} no provider: {_communicationProvider.CommunicationProviderName}");
 
                 var cardUtilizar = await GetCardUtilizar(cardExistente.Acquirer, cardExistente.Brand, cardExistente.CardNumber, cardExistente.ClienteId, cardExistente.Pessoa, contas.First().EmpresaId);
 
@@ -153,7 +153,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 };
 
 
-                //Monto o objeto para a transa√ß√£o no cart√£o
+                //Monto o objeto para a transaÁ„o no cart„o
                 var transactionModel = new TransactionCardModel()
                 {
                     merchant_id = $"{_financeiroProviderService.PrefixoTransacaoFinanceira}PessoaId_{doTransactionModel.PessoaId}_{DateTime.Now:ddMMyyyyHHmmss}",
@@ -217,16 +217,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 catch (Exception err)
                 {
-                    _logger.LogError("Falha na grava√ß√£o da transa√ß√£o no cache", err.Message);
+                    _logger.LogError("Falha na gravaÁ„o da transaÁ„o no cache", err.Message);
                     var resultCancelamento = await _broker.CancelCardTransaction(new TransactionCancelModel() { payment_id = transactionCardResultModel!.payment_id, value = doTransactionModel.ValorTotal }, cardUtilizar.EmpresaLegadoId.GetValueOrDefault());
                     if (transactionCardResultModel.errors == null) transactionCardResultModel.errors = new List<string>();
 
-                    transactionCardResultModel.errors.Add("Prrocessamento cancelado, falha na grava√ß√£o da transa√ß√£o.");
+                    transactionCardResultModel.errors.Add("Prrocessamento cancelado, falha na gravaÁ„o da transaÁ„o.");
                 }
 
                 var result = await _repository.CommitAsync();
                 if (!result.executed)
-                    throw result.exception ?? new Exception("Erro na opera√ß√£o");
+                    throw result.exception ?? new Exception("Erro na operaÁ„o");
 
                 return transactionCardResultModel;
             }
@@ -265,7 +265,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 string.IsNullOrEmpty(clienteId) ||
                 pessoa == null || pessoa.Id == 0 ||
                 empresaId.GetValueOrDefault(0) == 0)
-                throw new ArgumentNullException($"N√£o foi localizado o CardTokenized com os dados informados, para transacionar na empresa: {empresaId.GetValueOrDefault()}");
+                throw new ArgumentNullException($"N„o foi localizado o CardTokenized com os dados informados, para transacionar na empresa: {empresaId.GetValueOrDefault()}");
 
             var cardExistente = (await _repository.FindByHql<CardTokenized>(@$"From 
                         CardTokenized ct 
@@ -281,7 +281,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         ct.Visivel = 1 ")).FirstOrDefault();
 
             if (cardExistente == null)
-                throw new ArgumentException($"N√£o foi localizado o CardTokenized com os dados informados, para transacionar na empresa: {empresaId.GetValueOrDefault()}");
+                throw new ArgumentException($"N„o foi localizado o CardTokenized com os dados informados, para transacionar na empresa: {empresaId.GetValueOrDefault()}");
 
 
             var cardsMesmaCompanyId = (await _repository.FindByHql<CardTokenized>(@$"From 
@@ -330,9 +330,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var itemFirst = itensJaPagosEmCartao.FirstOrDefault(a => !string.IsNullOrEmpty(a.PaymentCardTokenized?.Nsu));
                 if (itemFirst != null)
                 {
-                    throw new ArgumentException($"As contas de ids: {string.Join(",", itensJaPagosEmCartao.Select(b => b.ItemId))} j√° foram pagas em cart√£o cr√©dito anteriormente, transa√ß√£o em cart√£o de Id: {itemFirst?.PaymentCardTokenized?.Id}, nsu: {itemFirst?.PaymentCardTokenized?.Nsu}, autoriza√£o: {itemFirst?.PaymentCardTokenized?.Nsu}");
+                    throw new ArgumentException($"As contas de ids: {string.Join(",", itensJaPagosEmCartao.Select(b => b.ItemId))} j· foram pagas em cart„o crÈdito anteriormente, transaÁ„o em cart„o de Id: {itemFirst?.PaymentCardTokenized?.Id}, nsu: {itemFirst?.PaymentCardTokenized?.Nsu}, autoriza„o: {itemFirst?.PaymentCardTokenized?.Nsu}");
                 }
-                else throw new ArgumentException($"As contas de ids: {string.Join(",", itensJaPagosEmCartao.Select(b => b.ItemId))} j√° foram pagas em cart√£o cr√©dito anteriormente");
+                else throw new ArgumentException($"As contas de ids: {string.Join(",", itensJaPagosEmCartao.Select(b => b.ItemId))} j· foram pagas em cart„o crÈdito anteriormente");
             }
 
             var itensJaPagosEmPix = (await _repository.FindByHql<PaymentPixItem>(@$"From 
@@ -349,9 +349,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var itemFirst = itensJaPagosEmPix.FirstOrDefault(a => !string.IsNullOrEmpty(a.PaymentPix?.TransactionId));
                 if (itemFirst != null)
                 {
-                    throw new ArgumentException($"As contas de ids: {string.Join(",", itensJaPagosEmCartao.Select(b => b.ItemId))} j√° foram pagas em PIX anteriormente, transa√ß√£o Id: {itemFirst?.PaymentPix?.Id}, transa√ß√£o pix id: {itemFirst?.PaymentPix?.TransactionId}");
+                    throw new ArgumentException($"As contas de ids: {string.Join(",", itensJaPagosEmCartao.Select(b => b.ItemId))} j· foram pagas em PIX anteriormente, transaÁ„o Id: {itemFirst?.PaymentPix?.Id}, transaÁ„o pix id: {itemFirst?.PaymentPix?.TransactionId}");
                 }
-                else throw new ArgumentException($"As contas de ids: {string.Join(",", itensJaPagosEmCartao.Select(b => b.ItemId))} j√° foram pagas em PIX anteriormente");
+                else throw new ArgumentException($"As contas de ids: {string.Join(",", itensJaPagosEmCartao.Select(b => b.ItemId))} j· foram pagas em PIX anteriormente");
             }
 
         }
@@ -387,7 +387,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 await _repository.Save(paymentCardTokenized);
 
-                //Gravo os dos √≠tens pagos na opera√ß√£o
+                //Gravo os dos Ìtens pagos na operaÁ„o
                 foreach (var item in contas)
                 {
                     var itemPaid = new PaymentCardTokenizedItem()
@@ -397,7 +397,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         Valor = item.Valor,
                         Vencimento = item.Vencimento,
                         ItemId = $"{item.Id}",
-                        DescricaoDoItem = $"PessoaId:{item.PessoaId}|PessoaProviderId:{item.PessoaProviderId}|C√≥digoTipoConta:{item.CodigoTipoConta}|NomeTipoConta:{item.NomeTipoConta}|Vencimento:{item.Vencimento:dd/MM/yyyy}"
+                        DescricaoDoItem = $"PessoaId:{item.PessoaId}|PessoaProviderId:{item.PessoaProviderId}|CÛdigoTipoConta:{item.CodigoTipoConta}|NomeTipoConta:{item.NomeTipoConta}|Vencimento:{item.Vencimento:dd/MM/yyyy}"
                     };
                     await _repository.Save(itemPaid);
                 }
@@ -422,7 +422,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 Valor = doTransactionModel.ValorTotal,
                 DadosEnviados = jsonBodyRequest,
                 Retorno = jsonResponse,
-                RetornoAmigavel = transactionCartResultModel != null && transactionCartResultModel.last_acquirer_response != null ? $"{transactionCartResultModel?.last_acquirer_response?.response?.code}-{transactionCartResultModel?.last_acquirer_response?.response?.message}" : "N√£o foi poss√≠vel processar o pagamento"
+                RetornoAmigavel = transactionCartResultModel != null && transactionCartResultModel.last_acquirer_response != null ? $"{transactionCartResultModel?.last_acquirer_response?.response?.code}-{transactionCartResultModel?.last_acquirer_response?.response?.message}" : "N„o foi possÌvel processar o pagamento"
             };
             await _repository.Save(tentativa);
         }
@@ -436,21 +436,21 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var loggedUser = await _repository.GetLoggedUser();
 
                 if (doTransactionModel.PessoaId.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException("Deve ser informado o par√¢metro PessoaId");
+                    throw new ArgumentException("Deve ser informado o par‚metro PessoaId");
 
                 var vinculoPessoaProvider = (await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{doTransactionModel.PessoaId.GetValueOrDefault()}", _financeiroProviderService.ProviderName));
 
                 if (!loggedUser.Value.isAdm)
                 {
                     if (vinculoPessoaProvider == null)
-                        throw new ArgumentException("N√£o foi poss√≠vel identificar os dados no sistema legado");
+                        throw new ArgumentException("N„o foi possÌvel identificar os dados no sistema legado");
 
                     if (!string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
                     {
                         var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(vinculoPessoaProvider.PessoaProvider!) });
                         if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S")))
                         {
-                            throw new ArgumentException("N√£o foi poss√≠vel efetuar a gera√ß√£o do QRCode para pagamento, motivo 0001BL");
+                            throw new ArgumentException("N„o foi possÌvel efetuar a geraÁ„o do QRCode para pagamento, motivo 0001BL");
                         }
                     }
                 }
@@ -459,16 +459,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                 string idPessoaUtilizar = vinculoPessoaProvider != null && !string.IsNullOrEmpty(vinculoPessoaProvider.PessoaSistema) ? vinculoPessoaProvider.PessoaSistema : $"{doTransactionModel.PessoaId.GetValueOrDefault()}";
 
                 if (string.IsNullOrEmpty(idPessoaUtilizar))
-                    throw new ArgumentException($"N√£o foi encontrada a pessoa do sistema com os dados informados Pessoaid: {doTransactionModel.PessoaId}");
+                    throw new ArgumentException($"N„o foi encontrada a pessoa do sistema com os dados informados Pessoaid: {doTransactionModel.PessoaId}");
 
                 var pessoa = await _repository.FindById<Domain.Entities.Core.DadosPessoa.Pessoa>(Convert.ToInt32(idPessoaUtilizar));
                 if (pessoa == null)
-                    throw new ArgumentException($"N√£o foi encontrada pessoa com o Id: {doTransactionModel.PessoaId.GetValueOrDefault()}");
+                    throw new ArgumentException($"N„o foi encontrada pessoa com o Id: {doTransactionModel.PessoaId.GetValueOrDefault()}");
 
                 var usuarioVinculadoPessoa = (await _repository.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where p.Id = {pessoa.Id}  and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
 
                 if (usuarioVinculadoPessoa == null)
-                    throw new ArgumentException($"N√£o foi encontrado usu√°rio no sistema com a pessoa id: {doTransactionModel.PessoaId.GetValueOrDefault()}, primeiro √© necess√°rio cadastrar a pessoa como usu√°rio do sistema");
+                    throw new ArgumentException($"N„o foi encontrado usu·rio no sistema com a pessoa id: {doTransactionModel.PessoaId.GetValueOrDefault()}, primeiro È necess·rio cadastrar a pessoa como usu·rio do sistema");
 
 
                 var contas = await _financeiroProviderService.GetContasParaPagamentoEmPixDoUsuario(doTransactionModel);
@@ -476,7 +476,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var dadosPessoa = await _financeiroProviderService.GetDadosPessoa(Convert.ToInt32(vinculoPessoaProvider?.PessoaProvider));
                 if (dadosPessoa == null)
-                    throw new ArgumentException($"N√£o foi poss√≠vel encontrar a pessoa com Id: {vinculoPessoaProvider?.PessoaSistema} no provider: {_financeiroProviderService.ProviderName}");
+                    throw new ArgumentException($"N„o foi possÌvel encontrar a pessoa com Id: {vinculoPessoaProvider?.PessoaSistema} no provider: {_financeiroProviderService.ProviderName}");
 
                 var documento = dadosPessoa.TipoPessoa == 0 && !string.IsNullOrEmpty(dadosPessoa.Cpf) ? dadosPessoa.Cpf : "";
                 if (string.IsNullOrEmpty(documento) && !string.IsNullOrEmpty(dadosPessoa.Cnpj) && dadosPessoa.TipoPessoa == EnumTipoPessoa.Juridica)
@@ -576,20 +576,20 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 catch (Exception err)
                 {
-                    _logger.LogError("Falha na grava√ß√£o da transa√ß√£o no cache", err.Message);
+                    _logger.LogError("Falha na gravaÁ„o da transaÁ„o no cache", err.Message);
                     if (transactionCardResultModel != null)
                     {
                         if (transactionCardResultModel.errors == null) 
                             transactionCardResultModel.errors = new List<string>();
 
-                        transactionCardResultModel.errors.Add("Prrocessamento cancelado, falha na grava√ß√£o da transa√ß√£o.");
+                        transactionCardResultModel.errors.Add("Prrocessamento cancelado, falha na gravaÁ„o da transaÁ„o.");
                     }
                 }
 
 
                 var result = await _repository.CommitAsync();
                 if (!result.executed)
-                    throw result.exception ?? new Exception("Erro na opera√ß√£o");
+                    throw result.exception ?? new Exception("Erro na operaÁ„o");
 
                 return transactionCardResultModel;
             }
@@ -632,7 +632,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 await _repository.Save(paymentPix);
 
-                //Gravo os vinculados na opera√ß√£o
+                //Gravo os vinculados na operaÁ„o
                 foreach (var item in contas)
                 {
                     var itemPaid = new PaymentPixItem()
@@ -642,7 +642,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         ValorNaTransacao = item.ValorAtualizado,
                         Vencimento = item.Vencimento,
                         ItemId = $"{item.Id}",
-                        DescricaoDoItem = $"PessoaId:{item.PessoaId}|PessoaProviderId:{item.PessoaProviderId}|C√≥digoTipoConta:{item.CodigoTipoConta}|NomeTipoConta:{item.NomeTipoConta}|Vencimento:{item.Vencimento:dd/MM/yyyy}"
+                        DescricaoDoItem = $"PessoaId:{item.PessoaId}|PessoaProviderId:{item.PessoaProviderId}|CÛdigoTipoConta:{item.CodigoTipoConta}|NomeTipoConta:{item.NomeTipoConta}|Vencimento:{item.Vencimento:dd/MM/yyyy}"
                     };
                     await _repository.Save(itemPaid);
                 }
@@ -660,7 +660,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 await _repository.Save(paymentPix);
 
-                //Gravo os vinculados na opera√ß√£o
+                //Gravo os vinculados na operaÁ„o
                 foreach (var item in contas)
                 {
                     var itemPaid = new PaymentPixItem()
@@ -670,7 +670,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         ValorNaTransacao = item.ValorAtualizado,
                         Vencimento = item.Vencimento,
                         ItemId = $"{item.Id}",
-                        DescricaoDoItem = $"PessoaId:{item.PessoaId}|PessoaProviderId:{item.PessoaProviderId}|C√≥digoTipoConta:{item.CodigoTipoConta}|NomeTipoConta:{item.NomeTipoConta}|Vencimento:{item.Vencimento:dd/MM/yyyy}"
+                        DescricaoDoItem = $"PessoaId:{item.PessoaId}|PessoaProviderId:{item.PessoaProviderId}|CÛdigoTipoConta:{item.CodigoTipoConta}|NomeTipoConta:{item.NomeTipoConta}|Vencimento:{item.Vencimento:dd/MM/yyyy}"
                     };
                     await _repository.Save(itemPaid);
                 }
@@ -685,7 +685,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _repository.BeginTransaction();
                 var loggedUser = await _repository.GetLoggedUser();
                 if (string.IsNullOrEmpty(loggedUser.Value.userId))
-                    throw new ArgumentException("N√£o foi poss√≠vel identificar o usu√°rio logado no sistema para consultar os seus meios de pagamentos");
+                    throw new ArgumentException("N„o foi possÌvel identificar o usu·rio logado no sistema para consultar os seus meios de pagamentos");
 
                 var usuario = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {Convert.ToInt32(loggedUser.Value.userId)} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
 
@@ -762,38 +762,38 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             var loggedUser = await _repository.GetLoggedUser();
             if (string.IsNullOrEmpty(loggedUser.Value.userId))
-                throw new ArgumentException("N√£o foi poss√≠vel identificar o usu√°rio logado no sistema.");
+                throw new ArgumentException("N„o foi possÌvel identificar o usu·rio logado no sistema.");
 
             var usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
             if (usuarioLogado == null)
-                throw new ArgumentException("N√£o foi poss√≠vel identificar o usu√°rio logado no sistema");
+                throw new ArgumentException("N„o foi possÌvel identificar o usu·rio logado no sistema");
 
             var parametrosSistema = await _repository.GetParametroSistemaViewModel();
             if (parametrosSistema == null || string.IsNullOrEmpty(parametrosSistema.ExibirFinanceirosDasEmpresaIds))
-                throw new ArgumentException("N√£o foi configurado o par√¢metro: 'ExibirFinanceirosDasEmpresasIds'");
+                throw new ArgumentException("N„o foi configurado o par‚metro: 'ExibirFinanceirosDasEmpresasIds'");
 
             var vinculoPessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId), _financeiroProviderService.ProviderName);
 
             if (!loggedUser.Value.isAdm)
             {
                 if (vinculoPessoaProvider == null)
-                    throw new ArgumentException("N√£o foi poss√≠vel identificar os dados no sistema legado");
+                    throw new ArgumentException("N„o foi possÌvel identificar os dados no sistema legado");
 
                 if (!string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
                 {
                     var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(vinculoPessoaProvider.PessoaProvider!) });
                     if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
                     {
-                        throw new ArgumentException("N√£o foi poss√≠vel efetuar a tokeniza√ß√£o de cart√£o, motivo 0001BL");
+                        throw new ArgumentException("N„o foi possÌvel efetuar a tokenizaÁ„o de cart„o, motivo 0001BL");
                     }
                 }
             }
 
             if (cardModel.card == null)
-                throw new ArgumentException("Deve ser informado os dados do cart√£o");
+                throw new ArgumentException("Deve ser informado os dados do cart„o");
 
             if (string.IsNullOrEmpty(cardModel.card?.due_date))
-                throw new ArgumentException("Deve ser informada a data de validade do cart√£o");
+                throw new ArgumentException("Deve ser informada a data de validade do cart„o");
 
             if (string.IsNullOrEmpty(cardModel.card?.brand) && !string.IsNullOrEmpty(cardModel.card?.card_number))
             {
@@ -816,13 +816,13 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 if (string.IsNullOrEmpty(cardModel.card?.brand))
-                    throw new ArgumentException("N√£o foi poss√≠vel identificar a bandeira do cart√£o informado.");
+                    throw new ArgumentException("N„o foi possÌvel identificar a bandeira do cart„o informado.");
             }
 
             var numeroCartaoNormalizado = Helper.ApenasNumeros(cardModel?.card?.card_number);
 
             if (string.IsNullOrEmpty(numeroCartaoNormalizado) || (numeroCartaoNormalizado.Length != 16 && numeroCartaoNormalizado.Length != 15))
-                throw new ArgumentException("O n√∫mero do cart√£o deve ser informado com 15 ou 16 caracteres");
+                throw new ArgumentException("O n˙mero do cart„o deve ser informado com 15 ou 16 caracteres");
 
             if (cardModel != null && cardModel.card.due_date.Length == 5 && cardModel.card.due_date.Contains("/"))
             {
@@ -843,7 +843,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 if (cardModel.KeepCardData.GetValueOrDefault(false) == true)
                 {
-                    cardExistente.Visivel = Domain.Enumns.EnumSimNao.N√£o;
+                    cardExistente.Visivel = Domain.Enumns.EnumSimNao.N„o;
                     await _repository.Save(cardExistente);
                     return null;
                 }
@@ -924,28 +924,28 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var loggedUser = await _repository.GetLoggedUser();
                 if (string.IsNullOrEmpty(loggedUser.Value.userId))
-                    throw new ArgumentException("N√£o foi poss√≠vel identificar o usu√°rio logado no sistema.");
+                    throw new ArgumentException("N„o foi possÌvel identificar o usu·rio logado no sistema.");
 
                 var usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}  and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
                 if (usuarioLogado == null)
-                    throw new ArgumentException("N√£o foi poss√≠vel identificar o usu√°rio logado no sistema");
+                    throw new ArgumentException("N„o foi possÌvel identificar o usu·rio logado no sistema");
 
                 if (cardTokenizedId == 0)
-                    throw new ArgumentException("Deve ser informado o id do cart√£o a ser removido!");
+                    throw new ArgumentException("Deve ser informado o id do cart„o a ser removido!");
 
                 var vinculoPessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId), _financeiroProviderService.ProviderName);
 
                 if (!loggedUser.Value.isAdm)
                 {
                     if (vinculoPessoaProvider == null)
-                        throw new ArgumentException("N√£o foi poss√≠vel identificar os dados no sistema legado");
+                        throw new ArgumentException("N„o foi possÌvel identificar os dados no sistema legado");
 
                     if (!string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
                     {
                         var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(vinculoPessoaProvider.PessoaProvider!) });
                         if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
                         {
-                            throw new ArgumentException("N√£o foi poss√≠vel efetuar o pagamento em cart√£o, motivo 0001BL");
+                            throw new ArgumentException("N„o foi possÌvel efetuar o pagamento em cart„o, motivo 0001BL");
                         }
                     }
                 }
@@ -959,15 +959,15 @@ namespace SW_PortalProprietario.Application.Services.Core
                         ct.Id = {cardTokenizedId}")).FirstOrDefault();
 
                 if (cardToRemove == null)
-                    throw new ArgumentException($"N√£o foi encontrado o cart√£o com o id informado: {cardTokenizedId}");
+                    throw new ArgumentException($"N„o foi encontrado o cart„o com o id informado: {cardTokenizedId}");
 
 
-                cardToRemove.Visivel = Domain.Enumns.EnumSimNao.N√£o;
+                cardToRemove.Visivel = Domain.Enumns.EnumSimNao.N„o;
                 await _repository.Save(cardToRemove);
 
                 var result = await _repository.CommitAsync();
                 if (!result.executed)
-                    throw result.exception ?? new Exception("Erro na opera√ß√£o");
+                    throw result.exception ?? new Exception("Erro na operaÁ„o");
 
                 return true;
             }

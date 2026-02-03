@@ -25,13 +25,13 @@ public class IncentivoAgendamentoGenerationService
     private readonly ILogger<IncentivoAgendamentoGenerationService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IDocumentTemplateService _documentTemplateService;
-    private readonly IEmpreendimentoProviderService _empreendimentoProviderService;
+    private readonly IEmpreendimentoHybridProviderService _empreendimentoProviderService;
 
     public IncentivoAgendamentoGenerationService(
         ILogger<IncentivoAgendamentoGenerationService> logger,
         IConfiguration configuration,
         IDocumentTemplateService documentTemplateService,
-        IEmpreendimentoProviderService empreendimentoProviderService)
+        IEmpreendimentoHybridProviderService empreendimentoProviderService)
     {
         _logger = logger;
         _configuration = configuration;

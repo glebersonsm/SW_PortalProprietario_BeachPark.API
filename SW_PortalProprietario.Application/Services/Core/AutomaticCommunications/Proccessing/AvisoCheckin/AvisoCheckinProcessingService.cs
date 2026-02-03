@@ -1,4 +1,4 @@
-Ôªøusing Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NHibernate;
 using SW_PortalProprietario.Application.Interfaces;
@@ -15,15 +15,15 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Proccessing.AvisoCheckin;
 
 /// <summary>
-/// Servi√ßo respons√°vel pelo processamento em lote de avisos de check-in pr√≥ximo
-/// ‚≠ê USA O MESMO C√ìDIGO DA SIMULA√á√ÉO via AvisoCheckinGenerationService
+/// ServiÁo respons·vel pelo processamento em lote de avisos de check-in prÛximo
+/// ? USA O MESMO C”DIGO DA SIMULA«√O via AvisoCheckinGenerationService
 /// </summary>
 public class AvisoCheckinProcessingService
 {
     private readonly ILogger<AvisoCheckinProcessingService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IRepositoryHosted _repository;
-    private readonly IEmpreendimentoProviderService _empreendimentoProviderService;
+    private readonly IEmpreendimentoHybridProviderService _empreendimentoProviderService;
     private readonly IEmailService _emailService;
     private readonly IServiceBase _serviceBase;
     private readonly AvisoCheckinGenerationService _avisoGenerationService;
@@ -32,7 +32,7 @@ public class AvisoCheckinProcessingService
         ILogger<AvisoCheckinProcessingService> logger,
         IConfiguration configuration,
         IRepositoryHosted repository,
-        IEmpreendimentoProviderService empreendimentoProviderService,
+        IEmpreendimentoHybridProviderService empreendimentoProviderService,
         IEmailService emailService,
         IServiceBase serviceBase,
         AvisoCheckinGenerationService avisoGenerationService)
@@ -47,7 +47,7 @@ public class AvisoCheckinProcessingService
     }
 
     /// <summary>
-    /// Processa avisos Multipropriedade para um dia espec√≠fico antes do check-in
+    /// Processa avisos Multipropriedade para um dia especÌfico antes do check-in
     /// </summary>
     public async Task ProcessarAvisosMultiPropriedadeAsync(
         IStatelessSession session,
@@ -55,7 +55,7 @@ public class AvisoCheckinProcessingService
         int daysBefore,
         int? qtdeMaxima = null)
     {
-        _logger.LogInformation("=== IN√çCIO PROCESSAMENTO AVISOS MULTIPROPRIEDADE - {DaysBefore} dias ===", daysBefore);
+        _logger.LogInformation("=== INÕCIO PROCESSAMENTO AVISOS MULTIPROPRIEDADE - {DaysBefore} dias ===", daysBefore);
 
         var contratos = await _serviceBase.GetContratos(new List<int>());
         var inadimplentes = await _empreendimentoProviderService.Inadimplentes();
@@ -82,17 +82,17 @@ public class AvisoCheckinProcessingService
                 
                 try
                 {
-                    // ‚úÖ Verificar se j√° foi enviado
+                    // ? Verificar se j· foi enviado
                     if (await CheckIfAlreadySentAsync(session, reserva.ReservaId, daysBefore, EnumProjetoType.Multipropriedade))
                     {
-                        _logger.LogDebug("Aviso j√° enviado para reserva {ReservaId}", reserva.ReservaId);
+                        _logger.LogDebug("Aviso j· enviado para reserva {ReservaId}", reserva.ReservaId);
                         continue;
                     }
 
                     // Validar email
                     if (!IsValidEmail(reserva.EmailCliente))
                     {
-                        _logger.LogWarning("Email inv√°lido para reserva {ReservaId}: {Email}", 
+                        _logger.LogWarning("Email inv·lido para reserva {ReservaId}: {Email}", 
                             reserva.ReservaId, reserva.EmailCliente);
                         continue;
                     }
@@ -100,16 +100,16 @@ public class AvisoCheckinProcessingService
                     // Verificar filtros
                     if (!await ShouldSendAvisoAsync(reserva, config, contratos, inadimplentes))
                     {
-                        _logger.LogDebug("Reserva {ReservaId} n√£o atende crit√©rios de filtro", reserva.ReservaId);
+                        _logger.LogDebug("Reserva {ReservaId} n„o atende critÈrios de filtro", reserva.ReservaId);
                         continue;
                     }
 
-                    // ‚≠ê GERAR E ENVIAR AVISO (USA GenerationService)
+                    // ? GERAR E ENVIAR AVISO (USA GenerationService)
                     var emailId = await GerarEEnviarAvisoAsync(reserva, config, daysBefore);
                     
                     if (emailId.HasValue)
                     {
-                        // ‚úÖ Registrar envio
+                        // ? Registrar envio
                         await RegisterSentEmailAsync(session, reserva.ReservaId, daysBefore,
                             reserva.DataCheckIn, emailId, EnumProjetoType.Multipropriedade);
 
@@ -139,7 +139,7 @@ public class AvisoCheckinProcessingService
     }
 
     /// <summary>
-    /// Processa avisos Timesharing para um dia espec√≠fico antes do check-in
+    /// Processa avisos Timesharing para um dia especÌfico antes do check-in
     /// </summary>
     public async Task ProcessarAvisosTimesharingAsync(
         IStatelessSession session,
@@ -147,7 +147,7 @@ public class AvisoCheckinProcessingService
         int daysBefore,
         int? qtdeMaxima = null)
     {
-        _logger.LogInformation("=== IN√çCIO PROCESSAMENTO AVISOS TIMESHARING - {DaysBefore} dias ===", daysBefore);
+        _logger.LogInformation("=== INÕCIO PROCESSAMENTO AVISOS TIMESHARING - {DaysBefore} dias ===", daysBefore);
 
         int qtdeEnviados = 0;
 
@@ -172,13 +172,13 @@ public class AvisoCheckinProcessingService
                 {
                     if (await CheckIfAlreadySentAsync(session, reserva.ReservaId, daysBefore, EnumProjetoType.Timesharing))
                     {
-                        _logger.LogDebug("Aviso j√° enviado para reserva Timesharing {ReservaId}", reserva.ReservaId);
+                        _logger.LogDebug("Aviso j· enviado para reserva Timesharing {ReservaId}", reserva.ReservaId);
                         continue;
                     }
 
                     if (!IsValidEmail(reserva.EmailCliente))
                     {
-                        _logger.LogWarning("Email inv√°lido para reserva Timesharing {ReservaId}: {Email}", 
+                        _logger.LogWarning("Email inv·lido para reserva Timesharing {ReservaId}: {Email}", 
                             reserva.ReservaId, reserva.EmailCliente);
                         continue;
                     }
@@ -215,7 +215,7 @@ public class AvisoCheckinProcessingService
         }
     }
 
-    #region M√©todos Privados
+    #region MÈtodos Privados
 
     private async Task<List<ReservaInfo>> GetReservasMultiPropriedadeAsync(DateTime checkInDate)
     {
@@ -259,11 +259,11 @@ public class AvisoCheckinProcessingService
             var dadosReserva = await _empreendimentoProviderService.GetDadosImpressaoVoucher($"{reserva.AgendamentoId}");
             if (dadosReserva == null)
             {
-                _logger.LogWarning("Dados da reserva n√£o encontrados para reserva {ReservaId}", reserva.ReservaId);
+                _logger.LogWarning("Dados da reserva n„o encontrados para reserva {ReservaId}", reserva.ReservaId);
                 return null;
             }
 
-            // ‚≠ê USAR GenerationService para gerar aviso completo (MESMA L√ìGICA DA SIMULA√á√ÉO)
+            // ? USAR GenerationService para gerar aviso completo (MESMA L”GICA DA SIMULA«√O)
             var avisoData = await _avisoGenerationService.GerarAvisoCompletoAsync(
                 reserva,
                 dadosReserva,
@@ -273,18 +273,18 @@ public class AvisoCheckinProcessingService
 
             if (avisoData == null || string.IsNullOrEmpty(avisoData.HtmlContent))
             {
-                _logger.LogWarning("N√£o foi poss√≠vel gerar aviso para reserva {ReservaId}", reserva.ReservaId);
+                _logger.LogWarning("N„o foi possÌvel gerar aviso para reserva {ReservaId}", reserva.ReservaId);
                 return null;
             }
 
-            // ‚≠ê Substituir placeholders no assunto usando GenerationService
+            // ? Substituir placeholders no assunto usando GenerationService
             var subject = _avisoGenerationService.SubstituirPlaceholders(
-                config.Subject ?? "Aviso de Check-in Pr√≥ximo",
+                config.Subject ?? "Aviso de Check-in PrÛximo",
                 reserva,
                 dadosReserva,
                 daysBefore);
 
-            // Determinar destinat√°rio
+            // Determinar destinat·rio
             var enviarApenasPermitidos = _configuration.GetValue("EnviarEmailApenasParaDestinatariosPermitidos", true);
             var destinatarioPermitido = enviarApenasPermitidos ? _configuration.GetValue("DestinatarioEmailPermitido", "glebersonsm@gmail.com") : null;
             var destinatario = enviarApenasPermitidos ? destinatarioPermitido : reserva.EmailCliente;
@@ -350,7 +350,7 @@ public class AvisoCheckinProcessingService
 
             if (contrato == null)
             {
-                _logger.LogWarning("Contrato n√£o encontrado para reserva {ReservaId}. Enviando por padr√£o.", reserva.ReservaId);
+                _logger.LogWarning("Contrato n„o encontrado para reserva {ReservaId}. Enviando por padr„o.", reserva.ReservaId);
                 return true;
             }
 
@@ -369,7 +369,7 @@ public class AvisoCheckinProcessingService
 
                 if (statusCrcAtivos.Any(statusId => config.ExcludedStatusCrcIds.Contains(statusId)))
                 {
-                    _logger.LogDebug("Reserva {ReservaId} possui Status CRC exclu√≠do", reserva.ReservaId);
+                    _logger.LogDebug("Reserva {ReservaId} possui Status CRC excluÌdo", reserva.ReservaId);
                     return false;
                 }
             }
@@ -389,7 +389,7 @@ public class AvisoCheckinProcessingService
 
                 if (temBloqueio || clienteInadimplente != null)
                 {
-                    _logger.LogDebug("Reserva {ReservaId} possui inadimpl√™ncia ou bloqueio", reserva.ReservaId);
+                    _logger.LogDebug("Reserva {ReservaId} possui inadimplÍncia ou bloqueio", reserva.ReservaId);
                     return false;
                 }
             }
@@ -398,7 +398,7 @@ public class AvisoCheckinProcessingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao verificar filtros para reserva {ReservaId}. Enviando por padr√£o.", reserva.ReservaId);
+            _logger.LogError(ex, "Erro ao verificar filtros para reserva {ReservaId}. Enviando por padr„o.", reserva.ReservaId);
             return true;
         }
     }

@@ -21,13 +21,13 @@ namespace SW_PortalProprietario.Application.Services.Core;
 public class VoucherReservaService : IVoucherReservaService
 {
     private readonly IDocumentTemplateService _documentTemplateService;
-    private readonly IEmpreendimentoProviderService _empreendimentoProviderService;
+    private readonly IEmpreendimentoHybridProviderService _empreendimentoProviderService;
     private readonly ITimeSharingProviderService _timeSharingProviderService;
     private readonly ILogger<VoucherReservaService> _logger;
 
     public VoucherReservaService(
         IDocumentTemplateService documentTemplateService,
-        IEmpreendimentoProviderService empreendimentoProviderService, 
+        IEmpreendimentoHybridProviderService empreendimentoProviderService, 
         ITimeSharingProviderService timeSharingService,
         ILogger<VoucherReservaService> logger)
     {

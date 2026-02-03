@@ -4,13 +4,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Interfaces.ReservasApi;
 using SW_PortalProprietario.Application.Services.Providers.Cm;
-using SW_PortalProprietario.Application.Services.Providers.Default;
+using SW_PortalProprietario.Application.Services.Providers.Hybrid;
 using SW_PortalProprietario.Application.Services.Providers.Esolution;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 using SW_PortalProprietario.Application.Services.ReservasApi;
-using SW_PortalProprietario.Infra.Data.CommunicationProviders.CM;
-using SW_PortalProprietario.Infra.Data.CommunicationProviders.Default;
-using SW_PortalProprietario.Infra.Data.CommunicationProviders.Esolution;
+
 using SW_PortalProprietario.Infra.Data.Repositories.Core;
 
 namespace SW_PortalProprietario.Infra.Ioc.Extensions
@@ -23,42 +21,45 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
             var integradoCom = configuration.GetValue<string>("IntegradoCom");
-            if (!string.IsNullOrEmpty(integradoCom))
+            if (string.IsNullOrEmpty(integradoCom))
             {
-                switch (integradoCom.ToLower())
-                {
-                    case "esolution":
-                        services.AddNHbernateAccessCenter(configuration);
-                        services.AddNHbernatePortalEsol(configuration);
-                        services.TryAddScoped<IUnitOfWorkNHAccessCenter, UnitOfWorkNHAccessCenter>();
-                        services.TryAddScoped<IRepositoryNHAccessCenter, RepositoryNHAccessCenter>();
-                        services.TryAddScoped<IUnitOfWorkNHEsolPortal, UnitOfWorkNHEsolutionPortal>();
-                        services.TryAddScoped<IRepositoryNHEsolPortal, RepositoryNHEsolPortal>();
-                        services.TryAddScoped<ICommunicationProvider, EsolutionCommunicationProvider>();
-                        services.TryAddScoped<IFinanceiroProviderService, FinanceiroEsolutionService>();
-                        services.TryAddScoped<IEmpreendimentoProviderService, EmpreendimentoEsolutionService>();
-                        services.TryAddScoped<ITimeSharingProviderService, TimeSharingEsolutionService>();
-                        break;
-                    case "cm":
-                        services.AddNHbernateCM(configuration);
-                        services.TryAddScoped<IUnitOfWorkNHCm, UnitOfWorkNHCm>();
-                        services.TryAddScoped<IRepositoryNHCm, RepositoryNHCm>();
-                        services.TryAddScoped<ICommunicationProvider, CmCommunicationProvider>();
-                        services.TryAddScoped<IFinanceiroProviderService, FinanceiroCmService>();
-                        services.TryAddScoped<IEmpreendimentoProviderService, EmpreendimentoCmService>();
-                        services.TryAddScoped<ITimeSharingProviderService, TimeSharingCmService>();
-                        break;
-                    default:
-                        break;
-                }
-
+                throw new InvalidOperationException("A configuração 'IntegradoCom' é obrigatória. Configure para 'hybrid', 'cm' ou 'esolution'.");
             }
-            else
+
+            switch (integradoCom.ToLower())
             {
-                services.TryAddScoped<ICommunicationProvider, CommunicationProviderDefault>();
-                services.TryAddScoped<IFinanceiroProviderService, FinanceiroDefaultService>();
-                services.TryAddScoped<IEmpreendimentoProviderService, EmpreendimentoDefaultService>();
-                services.TryAddScoped<ITimeSharingProviderService, TimeSharingDefaultService>();
+                case "hybrid":
+                case "esolution":
+                case "cm":
+                    // AccessCenter & Esol
+                    services.AddNHbernateAccessCenter(configuration);
+                    services.AddNHbernatePortalEsol(configuration);
+                    services.TryAddScoped<IUnitOfWorkNHAccessCenter, UnitOfWorkNHAccessCenter>();
+                    services.TryAddScoped<IRepositoryNHAccessCenter, RepositoryNHAccessCenter>();
+                    services.TryAddScoped<IUnitOfWorkNHEsolPortal, UnitOfWorkNHEsolutionPortal>();
+                    services.TryAddScoped<IRepositoryNHEsolPortal, RepositoryNHEsolPortal>();
+
+                    // CM
+                    services.AddNHbernateCM(configuration);
+                    services.TryAddScoped<IUnitOfWorkNHCm, UnitOfWorkNHCm>();
+                    services.TryAddScoped<IRepositoryNHCm, RepositoryNHCm>();
+
+                    // Hybrid Provider
+                    services.TryAddScoped<IHybrid_CM_Esolution_Communication, SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid.Hybrid_CM_Esolution_Communication>();
+                    services.TryAddScoped<ICommunicationProvider>(sp => sp.GetRequiredService<IHybrid_CM_Esolution_Communication>());
+
+                    // Services
+                    services.TryAddScoped<IHybridProviderService, HybridProviderService>();
+                    services.TryAddScoped<IEmpreendimentoHybridProviderService, EmpreendimentoHybridService>();
+                    services.TryAddScoped<IFinanceiroHybridProviderService, FinanceiroHybridService>();
+
+                    // TimeSharing
+                    services.TryAddScoped<TimeSharingCmService>();
+                    services.TryAddScoped<TimeSharingEsolutionService>();
+                    services.TryAddScoped<ITimeSharingProviderService, TimeSharingEsolutionService>();
+                    break;
+                default:
+                    throw new InvalidOperationException($"Configuração 'IntegradoCom' inválida: '{integradoCom}'. Valores válidos: 'hybrid', 'cm', 'esolution'.");
             }
 
             return services;

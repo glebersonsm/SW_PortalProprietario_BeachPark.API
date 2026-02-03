@@ -23,7 +23,7 @@ public class AutomaticVoucherService : IAutomaticVoucherService
     private readonly ILogger<AutomaticVoucherService> _logger;
     private readonly IConfiguration _configuration;
     private readonly VoucherGenerationService _voucherGenerationService;
-    private readonly IEmpreendimentoProviderService _empreendimentoProviderService;
+    private readonly IEmpreendimentoHybridProviderService _empreendimentoProviderService;
     private readonly IEmailService _emailService;
     private readonly IServiceBase _serviceBase;
 
@@ -32,7 +32,7 @@ public class AutomaticVoucherService : IAutomaticVoucherService
         ILogger<AutomaticVoucherService> logger,
         IConfiguration configuration,
         VoucherGenerationService voucherGenerationService,
-        IEmpreendimentoProviderService empreendimentoProviderService,
+        IEmpreendimentoHybridProviderService empreendimentoProviderService,
         IEmailService emailService,
         IServiceBase serviceBase)
     {

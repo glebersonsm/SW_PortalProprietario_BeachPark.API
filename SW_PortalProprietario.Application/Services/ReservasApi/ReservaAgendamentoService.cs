@@ -1,4 +1,4 @@
-﻿using EsolutionPortalDomain.Portal;
+using EsolutionPortalDomain.Portal;
 using EsolutionPortalDomain.ReservasApiModels.Hotel;
 using SW_PortalProprietario.Application.Interfaces.ReservasApi;
 using SW_PortalProprietario.Application.Models;
@@ -10,10 +10,10 @@ namespace SW_PortalProprietario.Application.Services.ReservasApi
     public class ReservaAgendamentoService : IReservaAgendamentoService
     {
 
-        private readonly IEmpreendimentoProviderService _empreendimentoService;
+        private readonly IEmpreendimentoHybridProviderService _empreendimentoService;
 
 
-        public ReservaAgendamentoService(IEmpreendimentoProviderService empreendimentoService)
+        public ReservaAgendamentoService(IEmpreendimentoHybridProviderService empreendimentoService)
         {
             _empreendimentoService = empreendimentoService;
         }

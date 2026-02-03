@@ -22,7 +22,7 @@ public class IncentivoAgendamentoProcessingService
     private readonly ILogger<IncentivoAgendamentoProcessingService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IRepositoryHosted _repository;
-    private readonly IEmpreendimentoProviderService _empreendimentoProviderService;
+    private readonly IEmpreendimentoHybridProviderService _empreendimentoProviderService;
     private readonly IEmailService _emailService;
     private readonly IServiceBase _serviceBase;
     private readonly IncentivoAgendamentoGenerationService _incentivoGenerationService;
@@ -31,7 +31,7 @@ public class IncentivoAgendamentoProcessingService
         ILogger<IncentivoAgendamentoProcessingService> logger,
         IConfiguration configuration,
         IRepositoryHosted repository,
-        IEmpreendimentoProviderService empreendimentoProviderService,
+        IEmpreendimentoHybridProviderService empreendimentoProviderService,
         IEmailService emailService,
         IServiceBase serviceBase,
         IncentivoAgendamentoGenerationService incentivoGenerationService)

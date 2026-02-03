@@ -1,6 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using EsolutionPortalDomain.Portal;
 using EsolutionPortalDomain.ReservasApiModels.Hotel;
-using EsolutionPortalDomain.Portal;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -13,32 +15,27 @@ using SW_PortalProprietario.Application.Models.TimeSharing;
 using SW_PortalProprietario.Application.Services.Providers.Cm;
 using SW_PortalProprietario.Application.Services.Providers.Esolution;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
+using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 
 namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 {
     public class HybridProviderService : IHybridProviderService
     {
-        private readonly ICommunicationCmProvider _cmCommunicationProvider;
-        private readonly ICommunicationEsolutionProvider _esolCommunicationProvider;
-        private readonly EmpreendimentoCmService _cmEmpreendimentoService;
-        private readonly EmpreendimentoEsolutionService _esolEmpreendimentoService;
+        private readonly IHybrid_CM_Esolution_Communication _hybridCommunication;
+        private readonly IEmpreendimentoHybridProviderService _empreendimentoHybridService;
         private readonly TimeSharingCmService _cmTimeSharingService;
         private readonly TimeSharingEsolutionService _esolTimeSharingService;
         private readonly ILogger<HybridProviderService> _logger;
 
         public HybridProviderService(
-            ICommunicationCmProvider cmCommunicationProvider,
-            ICommunicationEsolutionProvider esolCommunicationProvider,
-            EmpreendimentoCmService cmEmpreendimentoService,
-            EmpreendimentoEsolutionService esolEmpreendimentoService,
+            IHybrid_CM_Esolution_Communication hybridCommunication,
+            IEmpreendimentoHybridProviderService empreendimentoHybridService,
             TimeSharingCmService cmTimeSharingService,
             TimeSharingEsolutionService esolTimeSharingService,
             ILogger<HybridProviderService> logger)
         {
-            _cmCommunicationProvider = cmCommunicationProvider ?? throw new ArgumentNullException(nameof(cmCommunicationProvider));
-            _esolCommunicationProvider = esolCommunicationProvider ?? throw new ArgumentNullException(nameof(esolCommunicationProvider));
-            _cmEmpreendimentoService = cmEmpreendimentoService ?? throw new ArgumentNullException(nameof(cmEmpreendimentoService));
-            _esolEmpreendimentoService = esolEmpreendimentoService ?? throw new ArgumentNullException(nameof(esolEmpreendimentoService));
+            _hybridCommunication = hybridCommunication ?? throw new ArgumentNullException(nameof(hybridCommunication));
+            _empreendimentoHybridService = empreendimentoHybridService ?? throw new ArgumentNullException(nameof(empreendimentoHybridService));
             _cmTimeSharingService = cmTimeSharingService ?? throw new ArgumentNullException(nameof(cmTimeSharingService));
             _esolTimeSharingService = esolTimeSharingService ?? throw new ArgumentNullException(nameof(esolTimeSharingService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -46,328 +43,328 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         #region Communication Methods - CM
         public Task<IAccessValidateResultModel> ValidateAccess_CM(string login, string senha, string pessoaProviderId = "")
-            => _cmCommunicationProvider.ValidateAccess(login, senha, pessoaProviderId);
+            => _hybridCommunication.ValidateAccess_Cm(login, senha, pessoaProviderId);
 
         public Task<UsuarioValidateResultModel> GerUserFromLegado_CM(UserRegisterInputModel model)
-            => _cmCommunicationProvider.GerUserFromLegado(model);
+            => _hybridCommunication.GerUserFromLegado_Cm(model);
 
         public Task<bool> GravarUsuarioNoLegado_CM(string pessoaProviderId, string login, string senha)
-            => _cmCommunicationProvider.GravarUsuarioNoLegado(pessoaProviderId, login, senha);
+            => _hybridCommunication.GravarUsuarioNoLegado_Cm(pessoaProviderId, login, senha);
 
         public Task<bool> AlterarSenhaNoLegado_CM(string pessoaProviderId, string login, string senha)
-            => _cmCommunicationProvider.AlterarSenhaNoLegado(pessoaProviderId, login, senha);
+            => _hybridCommunication.AlterarSenhaNoLegado_Cm(pessoaProviderId, login, senha);
 
         public Task<bool> IsDefault_CM()
-            => _cmCommunicationProvider.IsDefault();
+            => _hybridCommunication.IsDefault_Cm();
 
-        public string CommunicationProviderName_CM => _cmCommunicationProvider.CommunicationProviderName;
-        public string PrefixoTransacaoFinanceira_CM => _cmCommunicationProvider.PrefixoTransacaoFinanceira;
+        public string CommunicationProviderName_CM => "CM"; // Hardcoded logic as ICommunicationProvider access is limited
+        public string PrefixoTransacaoFinanceira_CM => "PORTALPROPCM_";
 
         public Task GravarVinculoUsuario_CM(IAccessValidateResultModel result, Usuario usuario)
-            => _cmCommunicationProvider.GravarVinculoUsuario(result, usuario);
+            => _hybridCommunication.GravarVinculoUsuario_Cm(result, usuario);
 
         public Task<VinculoAccessXPortalBase?> GetOutrosDadosPessoaProvider_CM(string pessoaProviderId)
-            => _cmCommunicationProvider.GetOutrosDadosPessoaProvider(pessoaProviderId);
+            => _hybridCommunication.GetOutrosDadosPessoaProvider_Cm(pessoaProviderId);
 
         public Task<EmpresaSimplificadaModel?> GetEmpresaVinculadaLegado_CM(int id)
-            => _cmCommunicationProvider.GetEmpresaVinculadaLegado(id);
+            => _hybridCommunication.GetEmpresaVinculadaLegado_Cm(id);
 
         public Task<List<PaisModel>> GetPaisesLegado_CM()
-            => _cmCommunicationProvider.GetPaisesLegado();
+            => _hybridCommunication.GetPaisesLegado_Cm();
 
         public Task<List<EstadoModel>> GetEstadosLegado_CM()
-            => _cmCommunicationProvider.GetEstadosLegado();
+            => _hybridCommunication.GetEstadosLegado_Cm();
 
         public Task<List<CidadeModel>> GetCidade_CM()
-            => _cmCommunicationProvider.GetCidade();
+            => _hybridCommunication.GetCidade_Cm();
 
         public Task<List<UserRegisterInputModel>> GetUsuariosAtivosSistemaLegado_CM()
-            => _cmCommunicationProvider.GetUsuariosAtivosSistemaLegado();
+            => _hybridCommunication.GetUsuariosAtivosSistemaLegado_Cm();
 
         public Task<List<UserRegisterInputModel>> GetClientesUsuariosLegado_CM(ParametroSistemaViewModel parametroSistema)
-            => _cmCommunicationProvider.GetClientesUsuariosLegado(parametroSistema);
+            => _hybridCommunication.GetClientesUsuariosLegado_Cm(parametroSistema);
 
         public Task<(int pageNumber, int lastPageNumber, IEnumerable<CidadeModel> cidades)?> SearchCidade_CM(CidadeSearchModel searchModel)
-            => _cmCommunicationProvider.SearchCidade(searchModel);
+            => _hybridCommunication.SearchCidade_Cm(searchModel);
 
         public Task<bool> DesativarUsuariosSemCotaOuContrato_CM()
-            => _cmCommunicationProvider.DesativarUsuariosSemCotaOuContrato();
+            => _hybridCommunication.DesativarUsuariosSemCotaOuContrato_Cm();
 
         public Task GetOutrosDadosUsuario_CM(TokenResultModel userReturn)
-            => _cmCommunicationProvider.GetOutrosDadosUsuario(userReturn);
+            => _hybridCommunication.GetOutrosDadosUsuario_Cm(userReturn);
 
         public Task<List<DadosContratoModel>?> GetContratos_CM(List<int> pessoasPesquisar)
-            => _cmCommunicationProvider.GetContratos(pessoasPesquisar);
+            => _hybridCommunication.GetContratos_Cm(pessoasPesquisar);
 
         public Task<List<EmpresaVinculadaModel>?> GetEmpresasVinculadas_CM(List<string> empresasIds)
-            => _cmCommunicationProvider.GetEmpresasVinculadas(empresasIds);
+            => _hybridCommunication.GetEmpresasVinculadas_Cm(empresasIds);
 
         public Task<List<UserRegisterInputModel>> GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_CM()
-            => _cmCommunicationProvider.GetUsuariosClientesSemCotasAtivoasNoSistemaLegado();
+            => _hybridCommunication.GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Cm();
 
         public Task<List<ClientesInadimplentes>> Inadimplentes_CM(List<int>? pessoasPesquisar = null)
-            => _cmCommunicationProvider.Inadimplentes(pessoasPesquisar);
+            => _hybridCommunication.Inadimplentes_Cm(pessoasPesquisar);
 
         public Task<List<ReservaInfo>> GetReservasWithCheckInDateMultiPropriedadeAsync_CM(DateTime checkInDate, bool simulacao = false)
-            => _cmCommunicationProvider.GetReservasWithCheckInDateMultiPropriedadeAsync(checkInDate, simulacao);
+            => _hybridCommunication.GetReservasWithCheckInDateMultiPropriedadeAsync_Cm(checkInDate, simulacao);
 
         public Task<List<ReservaInfo>> GetReservasWithCheckInDateTimeSharingAsync_CM(DateTime checkInDate, bool simulacao = false)
-            => _cmCommunicationProvider.GetReservasWithCheckInDateTimeSharingAsync(checkInDate, simulacao);
+            => _hybridCommunication.GetReservasWithCheckInDateTimeSharingAsync_Cm(checkInDate, simulacao);
 
         public bool? ShouldSendEmailForReserva_CM(ReservaInfo reserva, AutomaticCommunicationConfigModel config, List<DadosContratoModel>? contratos, List<ClientesInadimplentes>? inadimplentes)
-            => _cmCommunicationProvider.ShouldSendEmailForReserva(reserva, config, contratos, inadimplentes);
+            => _hybridCommunication.ShouldSendEmailForReserva_Cm(reserva, config, contratos, inadimplentes);
         #endregion
 
         #region Communication Methods - Esol
         public Task<IAccessValidateResultModel> ValidateAccess_Esol(string login, string senha, string pessoaProviderId = "")
-            => _esolCommunicationProvider.ValidateAccess(login, senha, pessoaProviderId);
+            => _hybridCommunication.ValidateAccess_Esol(login, senha, pessoaProviderId);
 
         public Task<UsuarioValidateResultModel> GerUserFromLegado_Esol(UserRegisterInputModel model)
-            => _esolCommunicationProvider.GerUserFromLegado(model);
+            => _hybridCommunication.GerUserFromLegado_Esol(model);
 
         public Task<bool> GravarUsuarioNoLegado_Esol(string pessoaProviderId, string login, string senha)
-            => _esolCommunicationProvider.GravarUsuarioNoLegado(pessoaProviderId, login, senha);
+            => _hybridCommunication.GravarUsuarioNoLegado_Esol(pessoaProviderId, login, senha);
 
         public Task<bool> AlterarSenhaNoLegado_Esol(string pessoaProviderId, string login, string senha)
-            => _esolCommunicationProvider.AlterarSenhaNoLegado(pessoaProviderId, login, senha);
+            => _hybridCommunication.AlterarSenhaNoLegado_Esol(pessoaProviderId, login, senha);
 
         public Task<bool> IsDefault_Esol()
-            => _esolCommunicationProvider.IsDefault();
+            => _hybridCommunication.IsDefault_Esol();
 
-        public string CommunicationProviderName_Esol => _esolCommunicationProvider.CommunicationProviderName;
-        public string PrefixoTransacaoFinanceira_Esol => _esolCommunicationProvider.PrefixoTransacaoFinanceira;
+        public string CommunicationProviderName_Esol => "ESOLUTION";
+        public string PrefixoTransacaoFinanceira_Esol => "PORTALPROPESOL_";
 
         public Task GravarVinculoUsuario_Esol(IAccessValidateResultModel result, Usuario usuario)
-            => _esolCommunicationProvider.GravarVinculoUsuario(result, usuario);
+            => _hybridCommunication.GravarVinculoUsuario_Esol(result, usuario);
 
         public Task<VinculoAccessXPortalBase?> GetOutrosDadosPessoaProvider_Esol(string pessoaProviderId)
-            => _esolCommunicationProvider.GetOutrosDadosPessoaProvider(pessoaProviderId);
+            => _hybridCommunication.GetOutrosDadosPessoaProvider_Esol(pessoaProviderId);
 
         public Task<EmpresaSimplificadaModel?> GetEmpresaVinculadaLegado_Esol(int id)
-            => _esolCommunicationProvider.GetEmpresaVinculadaLegado(id);
+            => _hybridCommunication.GetEmpresaVinculadaLegado_Esol(id);
 
         public Task<List<PaisModel>> GetPaisesLegado_Esol()
-            => _esolCommunicationProvider.GetPaisesLegado();
+            => _hybridCommunication.GetPaisesLegado_Esol();
 
         public Task<List<EstadoModel>> GetEstadosLegado_Esol()
-            => _esolCommunicationProvider.GetEstadosLegado();
+            => _hybridCommunication.GetEstadosLegado_Esol();
 
         public Task<List<CidadeModel>> GetCidade_Esol()
-            => _esolCommunicationProvider.GetCidade();
+            => _hybridCommunication.GetCidade_Esol();
 
         public Task<List<UserRegisterInputModel>> GetUsuariosAtivosSistemaLegado_Esol()
-            => _esolCommunicationProvider.GetUsuariosAtivosSistemaLegado();
+            => _hybridCommunication.GetUsuariosAtivosSistemaLegado_Esol();
 
         public Task<List<UserRegisterInputModel>> GetClientesUsuariosLegado_Esol(ParametroSistemaViewModel parametroSistema)
-            => _esolCommunicationProvider.GetClientesUsuariosLegado(parametroSistema);
+            => _hybridCommunication.GetClientesUsuariosLegado_Esol(parametroSistema);
 
         public Task<(int pageNumber, int lastPageNumber, IEnumerable<CidadeModel> cidades)?> SearchCidade_Esol(CidadeSearchModel searchModel)
-            => _esolCommunicationProvider.SearchCidade(searchModel);
+            => _hybridCommunication.SearchCidade_Esol(searchModel);
 
         public Task<bool> DesativarUsuariosSemCotaOuContrato_Esol()
-            => _esolCommunicationProvider.DesativarUsuariosSemCotaOuContrato();
+            => _hybridCommunication.DesativarUsuariosSemCotaOuContrato_Esol();
 
         public Task GetOutrosDadosUsuario_Esol(TokenResultModel userReturn)
-            => _esolCommunicationProvider.GetOutrosDadosUsuario(userReturn);
+            => _hybridCommunication.GetOutrosDadosUsuario_Esol(userReturn);
 
         public Task<List<DadosContratoModel>?> GetContratos_Esol(List<int> pessoasPesquisar)
-            => _esolCommunicationProvider.GetContratos(pessoasPesquisar);
+            => _hybridCommunication.GetContratos_Esol(pessoasPesquisar);
 
         public Task<List<EmpresaVinculadaModel>?> GetEmpresasVinculadas_Esol(List<string> empresasIds)
-            => _esolCommunicationProvider.GetEmpresasVinculadas(empresasIds);
+            => _hybridCommunication.GetEmpresasVinculadas_Esol(empresasIds);
 
         public Task<List<UserRegisterInputModel>> GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Esol()
-            => _esolCommunicationProvider.GetUsuariosClientesSemCotasAtivoasNoSistemaLegado();
+            => _hybridCommunication.GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Esol();
 
         public Task<List<ClientesInadimplentes>> Inadimplentes_Esol(List<int>? pessoasPesquisar = null)
-            => _esolCommunicationProvider.Inadimplentes(pessoasPesquisar);
+            => _hybridCommunication.Inadimplentes_Esol(pessoasPesquisar);
 
         public Task<List<ReservaInfo>> GetReservasWithCheckInDateMultiPropriedadeAsync_Esol(DateTime checkInDate, bool simulacao = false)
-            => _esolCommunicationProvider.GetReservasWithCheckInDateMultiPropriedadeAsync(checkInDate, simulacao);
+            => _hybridCommunication.GetReservasWithCheckInDateMultiPropriedadeAsync_Esol(checkInDate, simulacao);
 
         public Task<List<ReservaInfo>> GetReservasWithCheckInDateTimeSharingAsync_Esol(DateTime checkInDate, bool simulacao = false)
-            => _esolCommunicationProvider.GetReservasWithCheckInDateTimeSharingAsync(checkInDate, simulacao);
+            => _hybridCommunication.GetReservasWithCheckInDateTimeSharingAsync_Esol(checkInDate, simulacao);
 
         public bool? ShouldSendEmailForReserva_Esol(ReservaInfo reserva, AutomaticCommunicationConfigModel config, List<DadosContratoModel>? contratos, List<ClientesInadimplentes>? inadimplentes)
-            => _esolCommunicationProvider.ShouldSendEmailForReserva(reserva, config, contratos, inadimplentes);
+            => _hybridCommunication.ShouldSendEmailForReserva_Esol(reserva, config, contratos, inadimplentes);
         #endregion
 
         #region Empreendimento Methods - CM
         public Task<(int pageNumber, int lastPageNumber, List<ImovelSimplificadoModel> imoveis)?> GetImoveis_CM(SearchImovelModel searchModel)
-            => _cmEmpreendimentoService.GetImoveis(searchModel);
+            => _empreendimentoHybridService.GetImoveis_CM(searchModel);
 
         public Task<(int pageNumber, int lastPageNumber, List<ProprietarioSimplificadoModel> proprietarios)?> GetProprietarios_CM(SearchProprietarioModel searchModel)
-            => _cmEmpreendimentoService.GetProprietarios(searchModel);
+            => _empreendimentoHybridService.GetProprietarios_CM(searchModel);
 
         public Task<(int pageNumber, int lastPageNumber, List<ProprietarioSimplificadoModel> contratos)?> GetMyContracts_CM(SearchMyContractsModel searchModel)
-            => _cmEmpreendimentoService.GetMyContracts(searchModel);
+            => _empreendimentoHybridService.GetMyContracts_CM(searchModel);
 
         public Task<bool> GerarCodigoVerificacaoLiberacaoPool_CM(int agendamentoId)
-            => _cmEmpreendimentoService.GerarCodigoVerificacaoLiberacaoPool(agendamentoId);
+            => _empreendimentoHybridService.GerarCodigoVerificacaoLiberacaoPool_CM(agendamentoId);
 
         public Task<bool> ValidarCodigo_CM(int agendamentoId, string codigoVerificacao, bool? controlarTransacao = true)
-            => _cmEmpreendimentoService.ValidarCodigo(agendamentoId, codigoVerificacao, controlarTransacao);
+            => _empreendimentoHybridService.ValidarCodigo_CM(agendamentoId, codigoVerificacao, controlarTransacao);
 
         public Task<ResultModel<int>?> SalvarReservaEmAgendamento_CM(CriacaoReservaAgendamentoInputModel modelReserva)
-            => _cmEmpreendimentoService.SalvarReservaEmAgendamento(modelReserva);
+            => _empreendimentoHybridService.SalvarReservaEmAgendamento_CM(modelReserva);
 
         public Task<ResultWithPaginationModel<List<SemanaModel>>?> ConsultarAgendamentosGerais_CM(ReservasMultiPropriedadeSearchModel model)
-            => _cmEmpreendimentoService.ConsultarAgendamentosGerais(model);
+            => _empreendimentoHybridService.ConsultarAgendamentosGerais_CM(model);
 
         public Task<ResultWithPaginationModel<List<SemanaModel>>?> ConsultarMeusAgendamentos_CM(PeriodoCotaDisponibilidadeUsuarioSearchModel model)
-            => _cmEmpreendimentoService.ConsultarMeusAgendamentos(model);
+            => _empreendimentoHybridService.ConsultarMeusAgendamentos_CM(model);
 
         public Task<ResultModel<List<ReservaModel>>?> ConsultarReservaByAgendamentoId_CM(string agendamento)
-            => _cmEmpreendimentoService.ConsultarReservaByAgendamentoId(agendamento);
+            => _empreendimentoHybridService.ConsultarReservaByAgendamentoId_CM(agendamento);
 
         public Task<ResultModel<List<ReservaModel>>?> ConsultarMinhasReservaByAgendamentoId_CM(string agendamento)
-            => _cmEmpreendimentoService.ConsultarMinhasReservaByAgendamentoId(agendamento);
+            => _empreendimentoHybridService.ConsultarMinhasReservaByAgendamentoId_CM(agendamento);
 
         public Task<ResultModel<bool>?> CancelarReservaAgendamento_CM(CancelamentoReservaAgendamentoModel model)
-            => _cmEmpreendimentoService.CancelarReservaAgendamento(model);
+            => _empreendimentoHybridService.CancelarReservaAgendamento_CM(model);
 
         public Task<ResultModel<bool>?> CancelarMinhaReservaAgendamento_CM(CancelamentoReservaAgendamentoModel model)
-            => _cmEmpreendimentoService.CancelarMinhaReservaAgendamento(model);
+            => _empreendimentoHybridService.CancelarMinhaReservaAgendamento_CM(model);
 
         public Task<ResultModel<ReservaForEditModel>?> EditarMinhaReserva_CM(int id)
-            => _cmEmpreendimentoService.EditarMinhaReserva(id);
+            => _empreendimentoHybridService.EditarMinhaReserva_CM(id);
 
         public Task<ResultModel<ReservaForEditModel>?> EditarReserva_CM(int id)
-            => _cmEmpreendimentoService.EditarReserva(id);
+            => _empreendimentoHybridService.EditarReserva_CM(id);
 
         public Task<ResultModel<List<InventarioModel>>?> ConsultarInventarios_CM(InventarioSearchModel searchModel)
-            => _cmEmpreendimentoService.ConsultarInventarios(searchModel);
+            => _empreendimentoHybridService.ConsultarInventarios_CM(searchModel);
 
         public Task<ResultModel<bool>?> RetirarSemanaPool_CM(AgendamentoInventarioModel modelAgendamentoPool)
-            => _cmEmpreendimentoService.RetirarSemanaPool(modelAgendamentoPool);
+            => _empreendimentoHybridService.RetirarSemanaPool_CM(modelAgendamentoPool);
 
         public Task<ResultModel<bool>?> LiberarSemanaPool_CM(LiberacaoAgendamentoInputModel modelAgendamentoPool)
-            => _cmEmpreendimentoService.LiberarSemanaPool(modelAgendamentoPool);
+            => _empreendimentoHybridService.LiberarSemanaPool_CM(modelAgendamentoPool);
 
         public Task<ResultModel<bool>?> LiberarMinhaSemanaPool_CM(LiberacaoMeuAgendamentoInputModel modelAgendamentoPool)
-            => _cmEmpreendimentoService.LiberarMinhaSemanaPool(modelAgendamentoPool);
+            => _empreendimentoHybridService.LiberarMinhaSemanaPool_CM(modelAgendamentoPool);
 
         public Task<ResultModel<List<AgendamentoHistoryModel>>?> ConsultarHistoricos_CM(int agendamentoId)
-            => _cmEmpreendimentoService.ConsultarHistoricos(agendamentoId);
+            => _empreendimentoHybridService.ConsultarHistoricos_CM(agendamentoId);
 
         public Task<ResultModel<List<SemanaDisponibilidadeModel>>?> ConsultarDisponibilidadeCompativel_CM(DispobilidadeSearchModel searchModel)
-            => _cmEmpreendimentoService.ConsultarDisponibilidadeCompativel(searchModel);
+            => _empreendimentoHybridService.ConsultarDisponibilidadeCompativel_CM(searchModel);
 
         public Task<ResultModel<int>?> TrocarSemana_CM(TrocaSemanaInputModel model)
-            => _cmEmpreendimentoService.TrocarSemana(model);
+            => _empreendimentoHybridService.TrocarSemana_CM(model);
 
         public Task<ResultModel<int>?> TrocarTipoUso_CM(TrocaSemanaInputModel model)
-            => _cmEmpreendimentoService.TrocarTipoUso(model);
+            => _empreendimentoHybridService.TrocarTipoUso_CM(model);
 
         public Task<ResultModel<int>?> IncluirSemana_CM(IncluirSemanaInputModel model)
-            => _cmEmpreendimentoService.IncluirSemana(model);
+            => _empreendimentoHybridService.IncluirSemana_CM(model);
 
         public Task<List<KeyValueModel>> GetKeyValueListFromContratoSCP_CM(GetHtmlValuesModel model, string codigoVerificacao, DateTime? dataAssinatura, bool espanhol = false)
-            => _cmEmpreendimentoService.GetKeyValueListFromContratoSCP(model, codigoVerificacao, dataAssinatura, espanhol);
+            => _empreendimentoHybridService.GetKeyValueListFromContratoSCP_CM(model, codigoVerificacao, dataAssinatura, espanhol);
 
         public Task<DownloadContratoResultModel?> DownloadContratoSCP_CM(int cotaId)
-            => _cmEmpreendimentoService.DownloadContratoSCP(cotaId);
+            => _empreendimentoHybridService.DownloadContratoSCP_CM(cotaId);
 
         public Task<DadosImpressaoVoucherResultModel?> GetDadosImpressaoVoucher_CM(string agendamentoId)
-            => _cmEmpreendimentoService.GetDadosImpressaoVoucher(agendamentoId);
+            => _empreendimentoHybridService.GetDadosImpressaoVoucher_CM(agendamentoId);
 
         public Task<List<StatusCrcModel>?> ConsultarStatusCrc_CM()
-            => _cmEmpreendimentoService.ConsultarStatusCrc();
+            => _empreendimentoHybridService.ConsultarStatusCrc_CM();
 
         public Task<List<PosicaoAgendamentoViewModel>> GetPosicaoAgendamentoAnoAsync_CM(int ano, int? uhCondominioId = null, int? cotaPortalId = null)
-            => _cmEmpreendimentoService.GetPosicaoAgendamentoAnoAsync(ano, uhCondominioId, cotaPortalId);
+            => _empreendimentoHybridService.GetPosicaoAgendamentoAnoAsync_CM(ano, uhCondominioId, cotaPortalId);
 
         public DadosContratoModel? GetContrato_CM(DadosImpressaoVoucherResultModel dadosReserva, List<DadosContratoModel> contratos)
-            => _cmEmpreendimentoService.GetContrato(dadosReserva, contratos);
+            => _empreendimentoHybridService.GetContrato_CM(dadosReserva, contratos);
         #endregion
 
         #region Empreendimento Methods - Esol
         public Task<(int pageNumber, int lastPageNumber, List<ImovelSimplificadoModel> imoveis)?> GetImoveis_Esol(SearchImovelModel searchModel)
-            => _esolEmpreendimentoService.GetImoveis(searchModel);
+            => _empreendimentoHybridService.GetImoveis_Esol(searchModel);
 
         public Task<(int pageNumber, int lastPageNumber, List<ProprietarioSimplificadoModel> proprietarios)?> GetProprietarios_Esol(SearchProprietarioModel searchModel)
-            => _esolEmpreendimentoService.GetProprietarios(searchModel);
+            => _empreendimentoHybridService.GetProprietarios_Esol(searchModel);
 
         public Task<(int pageNumber, int lastPageNumber, List<ProprietarioSimplificadoModel> contratos)?> GetMyContracts_Esol(SearchMyContractsModel searchModel)
-            => _esolEmpreendimentoService.GetMyContracts(searchModel);
+            => _empreendimentoHybridService.GetMyContracts_Esol(searchModel);
 
         public Task<bool> GerarCodigoVerificacaoLiberacaoPool_Esol(int agendamentoId)
-            => _esolEmpreendimentoService.GerarCodigoVerificacaoLiberacaoPool(agendamentoId);
+            => _empreendimentoHybridService.GerarCodigoVerificacaoLiberacaoPool_Esol(agendamentoId);
 
         public Task<bool> ValidarCodigo_Esol(int agendamentoId, string codigoVerificacao, bool? controlarTransacao = true)
-            => _esolEmpreendimentoService.ValidarCodigo(agendamentoId, codigoVerificacao, controlarTransacao);
+            => _empreendimentoHybridService.ValidarCodigo_Esol(agendamentoId, codigoVerificacao, controlarTransacao);
 
         public Task<ResultModel<int>?> SalvarReservaEmAgendamento_Esol(CriacaoReservaAgendamentoInputModel modelReserva)
-            => _esolEmpreendimentoService.SalvarReservaEmAgendamento(modelReserva);
+            => _empreendimentoHybridService.SalvarReservaEmAgendamento_Esol(modelReserva);
 
         public Task<ResultWithPaginationModel<List<SemanaModel>>?> ConsultarAgendamentosGerais_Esol(ReservasMultiPropriedadeSearchModel model)
-            => _esolEmpreendimentoService.ConsultarAgendamentosGerais(model);
+            => _empreendimentoHybridService.ConsultarAgendamentosGerais_Esol(model);
 
         public Task<ResultWithPaginationModel<List<SemanaModel>>?> ConsultarMeusAgendamentos_Esol(PeriodoCotaDisponibilidadeUsuarioSearchModel model)
-            => _esolEmpreendimentoService.ConsultarMeusAgendamentos(model);
+            => _empreendimentoHybridService.ConsultarMeusAgendamentos_Esol(model);
 
         public Task<ResultModel<List<ReservaModel>>?> ConsultarReservaByAgendamentoId_Esol(string agendamento)
-            => _esolEmpreendimentoService.ConsultarReservaByAgendamentoId(agendamento);
+            => _empreendimentoHybridService.ConsultarReservaByAgendamentoId_Esol(agendamento);
 
         public Task<ResultModel<List<ReservaModel>>?> ConsultarMinhasReservaByAgendamentoId_Esol(string agendamento)
-            => _esolEmpreendimentoService.ConsultarMinhasReservaByAgendamentoId(agendamento);
+            => _empreendimentoHybridService.ConsultarMinhasReservaByAgendamentoId_Esol(agendamento);
 
         public Task<ResultModel<bool>?> CancelarReservaAgendamento_Esol(CancelamentoReservaAgendamentoModel model)
-            => _esolEmpreendimentoService.CancelarReservaAgendamento(model);
+            => _empreendimentoHybridService.CancelarReservaAgendamento_Esol(model);
 
         public Task<ResultModel<bool>?> CancelarMinhaReservaAgendamento_Esol(CancelamentoReservaAgendamentoModel model)
-            => _esolEmpreendimentoService.CancelarMinhaReservaAgendamento(model);
+            => _empreendimentoHybridService.CancelarMinhaReservaAgendamento_Esol(model);
 
         public Task<ResultModel<ReservaForEditModel>?> EditarMinhaReserva_Esol(int id)
-            => _esolEmpreendimentoService.EditarMinhaReserva(id);
+            => _empreendimentoHybridService.EditarMinhaReserva_Esol(id);
 
         public Task<ResultModel<ReservaForEditModel>?> EditarReserva_Esol(int id)
-            => _esolEmpreendimentoService.EditarReserva(id);
+            => _empreendimentoHybridService.EditarReserva_Esol(id);
 
         public Task<ResultModel<List<InventarioModel>>?> ConsultarInventarios_Esol(InventarioSearchModel searchModel)
-            => _esolEmpreendimentoService.ConsultarInventarios(searchModel);
+            => _empreendimentoHybridService.ConsultarInventarios_Esol(searchModel);
 
         public Task<ResultModel<bool>?> RetirarSemanaPool_Esol(AgendamentoInventarioModel modelAgendamentoPool)
-            => _esolEmpreendimentoService.RetirarSemanaPool(modelAgendamentoPool);
+            => _empreendimentoHybridService.RetirarSemanaPool_Esol(modelAgendamentoPool);
 
         public Task<ResultModel<bool>?> LiberarSemanaPool_Esol(LiberacaoAgendamentoInputModel modelAgendamentoPool)
-            => _esolEmpreendimentoService.LiberarSemanaPool(modelAgendamentoPool);
+            => _empreendimentoHybridService.LiberarSemanaPool_Esol(modelAgendamentoPool);
 
         public Task<ResultModel<bool>?> LiberarMinhaSemanaPool_Esol(LiberacaoMeuAgendamentoInputModel modelAgendamentoPool)
-            => _esolEmpreendimentoService.LiberarMinhaSemanaPool(modelAgendamentoPool);
+            => _empreendimentoHybridService.LiberarMinhaSemanaPool_Esol(modelAgendamentoPool);
 
         public Task<ResultModel<List<AgendamentoHistoryModel>>?> ConsultarHistoricos_Esol(int agendamentoId)
-            => _esolEmpreendimentoService.ConsultarHistoricos(agendamentoId);
+            => _empreendimentoHybridService.ConsultarHistoricos_Esol(agendamentoId);
 
         public Task<ResultModel<List<SemanaDisponibilidadeModel>>?> ConsultarDisponibilidadeCompativel_Esol(DispobilidadeSearchModel searchModel)
-            => _esolEmpreendimentoService.ConsultarDisponibilidadeCompativel(searchModel);
+            => _empreendimentoHybridService.ConsultarDisponibilidadeCompativel_Esol(searchModel);
 
         public Task<ResultModel<int>?> TrocarSemana_Esol(TrocaSemanaInputModel model)
-            => _esolEmpreendimentoService.TrocarSemana(model);
+            => _empreendimentoHybridService.TrocarSemana_Esol(model);
 
         public Task<ResultModel<int>?> TrocarTipoUso_Esol(TrocaSemanaInputModel model)
-            => _esolEmpreendimentoService.TrocarTipoUso(model);
+            => _empreendimentoHybridService.TrocarTipoUso_Esol(model);
 
         public Task<ResultModel<int>?> IncluirSemana_Esol(IncluirSemanaInputModel model)
-            => _esolEmpreendimentoService.IncluirSemana(model);
+            => _empreendimentoHybridService.IncluirSemana_Esol(model);
 
         public Task<List<KeyValueModel>> GetKeyValueListFromContratoSCP_Esol(GetHtmlValuesModel model, string codigoVerificacao, DateTime? dataAssinatura, bool espanhol = false)
-            => _esolEmpreendimentoService.GetKeyValueListFromContratoSCP(model, codigoVerificacao, dataAssinatura, espanhol);
+            => _empreendimentoHybridService.GetKeyValueListFromContratoSCP_Esol(model, codigoVerificacao, dataAssinatura, espanhol);
 
         public Task<DownloadContratoResultModel?> DownloadContratoSCP_Esol(int cotaId)
-            => _esolEmpreendimentoService.DownloadContratoSCP(cotaId);
+            => _empreendimentoHybridService.DownloadContratoSCP_Esol(cotaId);
 
         public Task<DadosImpressaoVoucherResultModel?> GetDadosImpressaoVoucher_Esol(string agendamentoId)
-            => _esolEmpreendimentoService.GetDadosImpressaoVoucher(agendamentoId);
+            => _empreendimentoHybridService.GetDadosImpressaoVoucher_Esol(agendamentoId);
 
         public Task<List<StatusCrcModel>?> ConsultarStatusCrc_Esol()
-            => _esolEmpreendimentoService.ConsultarStatusCrc();
+            => _empreendimentoHybridService.ConsultarStatusCrc_Esol();
 
         public Task<List<PosicaoAgendamentoViewModel>> GetPosicaoAgendamentoAnoAsync_Esol(int ano, int? uhCondominioId = null, int? cotaPortalId = null)
-            => _esolEmpreendimentoService.GetPosicaoAgendamentoAnoAsync(ano, uhCondominioId, cotaPortalId);
+            => _empreendimentoHybridService.GetPosicaoAgendamentoAnoAsync_Esol(ano, uhCondominioId, cotaPortalId);
 
         public DadosContratoModel? GetContrato_Esol(DadosImpressaoVoucherResultModel dadosReserva, List<DadosContratoModel> contratos)
-            => _esolEmpreendimentoService.GetContrato(dadosReserva, contratos);
+            => _empreendimentoHybridService.GetContrato_Esol(dadosReserva, contratos);
         #endregion
 
         #region TimeSharing Methods - CM
@@ -429,3 +426,5 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
         #endregion
     }
 }
+
+

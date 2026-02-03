@@ -1,4 +1,4 @@
-ï»¿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -18,7 +18,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly ILogger<HtmlTemplateService> _logger;
         private readonly IProjectObjectMapper _mapper;
         private readonly IServiceBase _serviceBase;
-        private readonly IEmpreendimentoProviderService _empreendimentoService;
+        private readonly IEmpreendimentoHybridProviderService _empreendimentoService;
 
 
         private List<(int, string)> filesPath = new List<(int, string)>()
@@ -31,7 +31,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             IProjectObjectMapper mapper,
             IServiceBase serviceBase,
             ICommunicationProvider communicationProvider,
-            IEmpreendimentoProviderService empreendimentoProviderService)
+            IEmpreendimentoHybridProviderService empreendimentoProviderService)
         {
             _repository = repository;
             _logger = logger;
@@ -51,7 +51,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var htmlTemlate = await _repository.FindById<HtmlTemplate>(id);
                 if (htmlTemlate is null)
                 {
-                    throw new ArgumentException($"NÃ£o foi encontrado o HtmlTemplate com Id: {id}!");
+                    throw new ArgumentException($"Não foi encontrado o HtmlTemplate com Id: {id}!");
                 }
 
 
@@ -65,7 +65,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
+                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
                 }
 
                 return result;
@@ -74,7 +74,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o HtmlTemplate: {id}");
+                _logger.LogError(err, $"Não foi possível deletar o HtmlTemplate: {id}");
                 throw;
             }
         }
@@ -82,7 +82,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         public async Task<List<KeyValueModel>> GetKeyValueListFromContratoSCP(GetHtmlValuesModel model)
         {
 
-            var result = await _empreendimentoService.GetKeyValueListFromContratoSCP(model,"AGUARDANDO CONFIRMAÃ‡ÃƒO",DateTime.Today);
+            var result = await _empreendimentoService.GetKeyValueListFromContratoSCP(model,"AGUARDANDO CONFIRMAÇÃO",DateTime.Today);
             return result;
         }
 
@@ -105,12 +105,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                     var tipo = filesPath.FirstOrDefault(a => a.Item1 == (int)htmlTemplateSalvar.TipoComunicacao.GetValueOrDefault());
                     if (string.IsNullOrEmpty(tipo.Item2))
                     {
-                        throw new ArgumentException($"NÃ£o foi encontrado o tipo de arquivo: {htmlTemplateSalvar.TipoComunicacao}");
+                        throw new ArgumentException($"Não foi encontrado o tipo de arquivo: {htmlTemplateSalvar.TipoComunicacao}");
                     }
 
                     var exist = File.Exists(tipo.Item2);
                     if (!exist)
-                        throw new ArgumentException($"NÃ£o foi encontrado o tipo de arquivo: {htmlTemplateSalvar.TipoComunicacao} no caminho: '{tipo.Item2}'");
+                        throw new ArgumentException($"Não foi encontrado o tipo de arquivo: {htmlTemplateSalvar.TipoComunicacao} no caminho: '{tipo.Item2}'");
                 }
 
                 if (!string.IsNullOrEmpty(model.Consulta) && !string.IsNullOrEmpty(htmlTemplateSalvar.Consulta))
@@ -119,17 +119,17 @@ namespace SW_PortalProprietario.Application.Services.Core
                     htmlTemplateSalvar.ColunasDeRetorno = "";
 
                     if (htmlTemplateSalvar.Consulta.Contains("Like", StringComparison.CurrentCultureIgnoreCase))
-                        throw new ArgumentException("NÃ£o Ã© permitida a palavra Like nas consulta, todos os filtros deverÃ£o ser relizados pelo Id do objeto no formato: ObjetoId =:idDoObjeto");
+                        throw new ArgumentException("Não é permitida a palavra Like nas consulta, todos os filtros deverão ser relizados pelo Id do objeto no formato: ObjetoId =:idDoObjeto");
                     if (htmlTemplateSalvar.Consulta.Contains("delete", StringComparison.CurrentCultureIgnoreCase))
-                        throw new ArgumentException("NÃ£o Ã© permitida a palavra delete");
+                        throw new ArgumentException("Não é permitida a palavra delete");
                     if (htmlTemplateSalvar.Consulta.Contains("update", StringComparison.CurrentCultureIgnoreCase))
-                        throw new ArgumentException("NÃ£o Ã© permitida a palavra update");
+                        throw new ArgumentException("Não é permitida a palavra update");
                     if (htmlTemplateSalvar.Consulta.Contains("insert", StringComparison.CurrentCultureIgnoreCase))
-                        throw new ArgumentException("NÃ£o Ã© permitida a palavra insert");
+                        throw new ArgumentException("Não é permitida a palavra insert");
                     if (htmlTemplateSalvar.Consulta.Contains("truncate", StringComparison.CurrentCultureIgnoreCase))
-                        throw new ArgumentException("NÃ£o Ã© permitida a palavra truncate");
+                        throw new ArgumentException("Não é permitida a palavra truncate");
                     if (htmlTemplateSalvar.Consulta.Contains("table", StringComparison.CurrentCultureIgnoreCase))
-                        throw new ArgumentException("NÃ£o Ã© permitida a palavra table");
+                        throw new ArgumentException("Não é permitida a palavra table");
 
                     string patternFiltros = @"(\S+)\s*=\s*(?::'?(\w+)'?)";
                     MatchCollection matches = Regex.Matches(htmlTemplateSalvar.Consulta, patternFiltros, RegexOptions.IgnoreCase);
@@ -150,26 +150,26 @@ namespace SW_PortalProprietario.Application.Services.Core
                     //foreach (Match item in replacesTitulo)
                     //{
                     //    if (!htmlTemplateSalvar.ColunasDeRetorno.Split('|').Any(b => b.EndsWith($"{item.Groups[1].Value}", StringComparison.CurrentCultureIgnoreCase)))
-                    //        throw new ArgumentException($"NÃ£o foi encontrada a coluna: '{item.Groups[1].Value}' na consulta vinculada");
+                    //        throw new ArgumentException($"Não foi encontrada a coluna: '{item.Groups[1].Value}' na consulta vinculada");
                     //}
 
                     //MatchCollection replacesHeader = Regex.Matches(htmlTemplateSalvar.Header, patternConteudos, RegexOptions.IgnoreCase);
                     //foreach (Match item in replacesHeader)
                     //{
                     //    if (!htmlTemplateSalvar.ColunasDeRetorno.Split('|').Any(b => b.EndsWith(item.Groups[1].Value, StringComparison.CurrentCultureIgnoreCase)))
-                    //        throw new ArgumentException($"NÃ£o foi encontrada a coluna: '{item.Groups[1].Value}' na consulta vinculada");
+                    //        throw new ArgumentException($"Não foi encontrada a coluna: '{item.Groups[1].Value}' na consulta vinculada");
                     //}
 
                     //MatchCollection replacesConteudo = Regex.Matches(htmlTemplateSalvar.Content, patternConteudos, RegexOptions.IgnoreCase);
                     //foreach (Match item in replacesConteudo)
                     //{
                     //    if (!htmlTemplateSalvar.ColunasDeRetorno.Split('|').Any(b => b.EndsWith(item.Groups[1].Value, StringComparison.CurrentCultureIgnoreCase)))
-                    //        throw new ArgumentException($"NÃ£o foi encontrada a coluna: '{item.Groups[1].Value}' na consulta vinculada");
+                    //        throw new ArgumentException($"Não foi encontrada a coluna: '{item.Groups[1].Value}' na consulta vinculada");
                     //}
                 }
 
-                //Desafios, pegar as colunas do prÃ³prio retorno da consulta
-                //Considerar usar Hql, por causa das funÃ§Ãµes exemplo GetDate()
+                //Desafios, pegar as colunas do próprio retorno da consulta
+                //Considerar usar Hql, por causa das funções exemplo GetDate()
 
                 var parametros = new List<Parameter>();
                 foreach (var itemParametro in htmlTemplateSalvar.ParametrosConsulta.Split('|'))
@@ -184,7 +184,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 catch (Exception err)
                 {
-                    throw new ArgumentException($"NÃ£o foi possÃ­vel executar a consulta: {htmlTemplateSalvar.Consulta} - Erro: {err.Message} - Inner: {err.InnerException?.Message}");
+                    throw new ArgumentException($"Não foi possível executar a consulta: {htmlTemplateSalvar.Consulta} - Erro: {err.Message} - Inner: {err.InnerException?.Message}");
                 }
 
                 var result = await _repository.Save(htmlTemplateSalvar);
@@ -199,11 +199,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                         return _mapper.Map<HtmlTemplateModel>(result);
 
                 }
-                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o HtmlTemplate: ({htmlTemplateSalvar.Titulo})");
+                throw exception ?? new Exception($"Não foi possível salvar o HtmlTemplate: ({htmlTemplateSalvar.Titulo})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o HtmlTemplate: ({model.Titulo})");
+                _logger.LogError(err, $"Não foi possível salvar o HtmlTemplate: ({model.Titulo})");
                 _repository.Rollback();
                 throw;
             }
