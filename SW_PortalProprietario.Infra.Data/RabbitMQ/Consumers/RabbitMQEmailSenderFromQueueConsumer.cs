@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -18,7 +19,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
         private readonly IConfiguration _configuration;
         private readonly IEmailSenderHostedService _emailSenderService;
         private readonly ILogger<RabbitMQEmailSenderFromQueueConsumer> _logger;
-        private readonly IRepositoryHosted _repository;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         private IConnection? _connection;
         private IChannel? _channel;
@@ -29,12 +30,12 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
             IConfiguration configuration,
             IEmailSenderHostedService emailSenderService,
             ILogger<RabbitMQEmailSenderFromQueueConsumer> logger,
-            IRepositoryHosted repository)
+            IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
             _emailSenderService = emailSenderService;
             _logger = logger;
-            _repository = repository;
+            _scopeFactory = scopeFactory;
 
         }
 
@@ -54,11 +55,11 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
 
                 var factory = new ConnectionFactory
                 {
-                    HostName = _configuration.GetValue<string>("RabbitMqConnectionHost"),
-                    Password = _configuration.GetValue<string>("RabbitMqConnectionPass"),
-                    UserName = _configuration.GetValue<string>("RabbitMqConnectionUser"),
-                    Port = _configuration.GetValue<int>("RabbitMqConnectionPort"),
-                    ClientProvidedName = _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "ProcessamentoFilaEmail"),
+                    HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost"),
+                    Password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass"),
+                    UserName = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser"),
+                    Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : _configuration.GetValue<int>("RabbitMqConnectionPort"),
+                    ClientProvidedName = Environment.GetEnvironmentVariable("RABBITMQ_EMAIL_FILA") ?? "FilaEmailPortalClienteBP_",
                     ConsumerDispatchConcurrency = 1,
                     AutomaticRecoveryEnabled = true,
                     NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
@@ -70,9 +71,9 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                 // Configurar QoS para processar uma mensagem por vez
                 await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
 
-                var queueName = $"{_configuration.GetValue<string>("ProgramId", "PORTALPROP_")}{_configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "ProcessamentoFilaEmail")}";
+                var queueName = factory.ClientProvidedName;
                 queueName = queueName.Replace(" ", "");
-                
+
                 await _channel.ExchangeDeclareAsync(
                     exchange: queueName,
                     type: ExchangeType.Direct,
@@ -105,11 +106,11 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                         {
                             // Carregar anexos do banco de dados antes de enviar
                             await CarregarAnexosDoEmail(emailModel);
-                            
+
                             await _emailSenderService.Send(emailModel);
                             await _channel.BasicAckAsync(deliveryTag: tag, multiple: false);
                             await MarcarComoEnviado(emailModel.Id.GetValueOrDefault());
-                            
+
                             _logger.LogInformation($"Email {emailModel.Id} enviado e marcado como enviado com sucesso");
                         }
                         else
@@ -125,7 +126,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                         await _channel.BasicNackAsync(deliveryTag: tag, multiple: false, requeue: false);
                     }
                 };
-                
+
                 await _channel.BasicConsumeAsync(
                     queue: queueName,
                     autoAck: false,
@@ -148,42 +149,46 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
 
         private async Task MarcarComoEnviado(int id)
         {
-            using (var session = _repository.CreateSession())
+            using (var scope = _scopeFactory.CreateScope())
             {
-                try
+                var repository = scope.ServiceProvider.GetRequiredService<IRepositoryHosted>();
+                using (var session = repository.CreateSession())
                 {
-                    _repository.BeginTransaction(session);
-
-                    var usuarioDefault = _configuration.GetValue<int>("UsuarioSistemaId", 1);
-
-                    Email email = await _repository.FindById<Email>(id, session);
-                    if (email == null)
+                    try
                     {
-                        _logger.LogWarning($"Email com id: {id} não encontrado no banco de dados");
-                        return;
-                    }
+                        repository.BeginTransaction(session);
 
-                    if (email.Enviado == EnumSimNao.Sim)
+                        var usuarioDefault = _configuration.GetValue<int>("UsuarioSistemaId", 1);
+
+                        Email email = await repository.FindById<Email>(id, session);
+                        if (email == null)
+                        {
+                            _logger.LogWarning($"Email com id: {id} não encontrado no banco de dados");
+                            return;
+                        }
+
+                        if (email.Enviado == EnumSimNao.Sim)
+                        {
+                            _logger.LogInformation($"O email id: {id} já foi enviado anteriormente em: {email.DataHoraEnvio.GetValueOrDefault():dd/MM/yyyy HH:mm:ss}");
+                            return;
+                        }
+
+                        email.Enviado = EnumSimNao.Sim;
+                        email.NaFila = EnumSimNao.Não;
+                        email.DataHoraEnvio = DateTime.Now;
+                        email.UsuarioAlteracao = email.UsuarioCriacao.GetValueOrDefault(usuarioDefault);
+
+                        var result = await repository.ForcedSave(email, session);
+
+                        await repository.CommitAsync(session);
+
+                        _logger.LogInformation($"Email: ({result.Id}) marcado como enviado com sucesso!");
+                    }
+                    catch (Exception err)
                     {
-                        _logger.LogInformation($"O email id: {id} já foi enviado anteriormente em: {email.DataHoraEnvio.GetValueOrDefault():dd/MM/yyyy HH:mm:ss}");
-                        return;
+                        _logger.LogError(err, $"Erro ao marcar email {id} como enviado");
+                        repository.Rollback(session);
                     }
-
-                    email.Enviado = EnumSimNao.Sim;
-                    email.NaFila = EnumSimNao.Não;
-                    email.DataHoraEnvio = DateTime.Now;
-                    email.UsuarioAlteracao = email.UsuarioCriacao.GetValueOrDefault(usuarioDefault);
-
-                    var result = await _repository.ForcedSave(email, session);
-
-                    await _repository.CommitAsync(session);
-                    
-                    _logger.LogInformation($"Email: ({result.Id}) marcado como enviado com sucesso!");
-                }
-                catch (Exception err)
-                {
-                    _logger.LogError(err, $"Erro ao marcar email {id} como enviado");
-                    _repository.Rollback(session);
                 }
             }
         }
@@ -193,31 +198,35 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
             if (emailModel?.Id == null)
                 return;
 
-            using (var session = _repository.CreateSession())
+            using (var scope = _scopeFactory.CreateScope())
             {
-                try
+                var repository = scope.ServiceProvider.GetRequiredService<IRepositoryHosted>();
+                using (var session = repository.CreateSession())
                 {
-                    var anexos = await _repository.FindBySql<EmailAnexoModel>(
-                        @"SELECT 
+                    try
+                    {
+                        var anexos = await repository.FindBySql<EmailAnexoModel>(
+                            @"SELECT 
                             ea.Id,
                             ea.NomeArquivo,
                             ea.TipoMime,
                             ea.Arquivo
                           FROM EmailAnexo ea
                           WHERE ea.Email = :emailId",
-                        session,
-                        new SW_Utils.Auxiliar.Parameter("emailId", emailModel.Id.Value));
+                            session,
+                            new SW_Utils.Auxiliar.Parameter("emailId", emailModel.Id.Value));
 
-                    if (anexos != null && anexos.Any())
-                    {
-                        emailModel.Anexos = anexos.ToList();
-                        _logger.LogInformation($"Carregados {anexos.Count()} anexo(s) para o email {emailModel.Id}");
+                        if (anexos != null && anexos.Any())
+                        {
+                            emailModel.Anexos = anexos.ToList();
+                            _logger.LogInformation($"Carregados {anexos.Count()} anexo(s) para o email {emailModel.Id}");
+                        }
                     }
-                }
-                catch (Exception err)
-                {
-                    _logger.LogError(err, $"Erro ao carregar anexos do email {emailModel.Id}");
-                    // Não lançar exceção para não impedir o envio do email
+                    catch (Exception err)
+                    {
+                        _logger.LogError(err, $"Erro ao carregar anexos do email {emailModel.Id}");
+                        // Não lançar exceção para não impedir o envio do email
+                    }
                 }
             }
         }
@@ -230,12 +239,12 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                 _channel?.Dispose();
                 _connection?.CloseAsync().GetAwaiter().GetResult();
                 _connection?.Dispose();
-                
+
                 lock (_lock)
                 {
                     _isRunning = false;
                 }
-                
+
                 _logger.LogInformation("Consumer de email finalizado e recursos liberados");
             }
             catch (Exception err)

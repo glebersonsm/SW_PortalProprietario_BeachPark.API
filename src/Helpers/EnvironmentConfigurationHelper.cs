@@ -43,6 +43,7 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             OverrideIfNotEmpty(configuration, "Redis:Hosts:0:Host", "REDIS_HOST");
             OverrideIfNotEmpty(configuration, "Redis:Hosts:0:Port", "REDIS_PORT");
             OverrideIfNotEmpty(configuration, "Redis:Database", "REDIS_DATABASE");
+            OverrideIfNotEmpty(configuration, "ProgramId", "PROGRAM_ID");
 
             // RabbitMQ
             OverrideIfNotEmpty(configuration, "RabbitMqConnectionHost", "RABBITMQ_HOST");

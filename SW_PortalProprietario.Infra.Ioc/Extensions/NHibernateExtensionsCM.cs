@@ -16,26 +16,24 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             ArgumentNullException.ThrowIfNull(services, nameof(services));
             ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
-            var connectionString = configuration.GetValue<string>("ConnectionStrings:CmConnection") ??
-            configuration.GetValue<string>("CmConnection");
-
-            if (!string.IsNullOrEmpty(connectionString))
+            var connectionString = System.Environment.GetEnvironmentVariable("CM_CONNECTION");
+            if (string.IsNullOrEmpty(connectionString))
             {
-                if (connectionString.Contains("Initial Catalog", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    CreateSqlServerConnection(services, connectionString);
-                }
-                else if (connectionString.Contains("Host=", StringComparison.InvariantCultureIgnoreCase) && connectionString.Contains("PORT=", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    CreatePostgreSqlConnection(services, connectionString);
-                }
-                else if (connectionString.Contains("CONNECT_DATA", StringComparison.InvariantCultureIgnoreCase) && connectionString.Contains("DESCRIPTION", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    ConfigureOracleConnection(services, connectionString);
-                }
+                throw new ArgumentException("Não foi configurada a string de conexão CM_CONNECTION.");
             }
 
-
+            if (connectionString.Contains("Initial Catalog", StringComparison.InvariantCultureIgnoreCase))
+            {
+                CreateSqlServerConnection(services, connectionString);
+            }
+            else if (connectionString.Contains("Host=", StringComparison.InvariantCultureIgnoreCase) && connectionString.Contains("PORT=", StringComparison.CurrentCultureIgnoreCase))
+            {
+                CreatePostgreSqlConnection(services, connectionString);
+            }
+            else if (connectionString.Contains("CONNECT_DATA", StringComparison.InvariantCultureIgnoreCase) && connectionString.Contains("DESCRIPTION", StringComparison.CurrentCultureIgnoreCase))
+            {
+                ConfigureOracleConnection(services, connectionString);
+            }
 
             return services;
         }

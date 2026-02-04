@@ -22,10 +22,10 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
         {
             var factory = new ConnectionFactory
             {
-                HostName = _configuration.GetValue<string>("RabbitMqConnectionHost"),
-                Password = _configuration.GetValue<string>("RabbitMqConnectionPass"),
-                UserName = _configuration.GetValue<string>("RabbitMqConnectionUser"),
-                Port = _configuration.GetValue<int>("RabbitMqConnectionPort"),
+                HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost"),
+                Password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass"),
+                UserName = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser"),
+                Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : _configuration.GetValue<int>("RabbitMqConnectionPort"),
                 ClientProvidedName = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "ProcessamentoFilaLog"),
                 ConsumerDispatchConcurrency = 1
             };
@@ -34,7 +34,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
             using var channel = await connection.CreateChannelAsync();
 
             var exchangeAndQueueName = $"{_configuration.GetValue<string>("ProgramId", "PORTALPROP_")}{_configuration.GetValue<string>("RabbitMqFilaDeLogNome", "ProcessamentoFilaLog")}";
-            exchangeAndQueueName = exchangeAndQueueName.Replace(" ","");
+            exchangeAndQueueName = exchangeAndQueueName.Replace(" ", "");
             await channel.ExchangeDeclareAsync(exchange: exchangeAndQueueName, type: ExchangeType.Direct, durable: true);
 
             var messagesToPublish = new List<OperationSystemLogModelEvent>();
@@ -57,10 +57,10 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
         {
             var factory = new ConnectionFactory
             {
-                HostName = _configuration.GetValue<string>("RabbitMqConnectionHost"),
-                Password = _configuration.GetValue<string>("RabbitMqConnectionPass"),
-                UserName = _configuration.GetValue<string>("RabbitMqConnectionUser"),
-                Port = _configuration.GetValue<int>("RabbitMqConnectionPort"),
+                HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost"),
+                Password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass"),
+                UserName = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser"),
+                Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : _configuration.GetValue<int>("RabbitMqConnectionPort"),
                 ClientProvidedName = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "ProcessamentoFilaLog"),
                 ConsumerDispatchConcurrency = 1
             };
@@ -70,7 +70,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
             using var channel = await connection.CreateChannelAsync();
 
             var exchangeAndQueueName = $"{_configuration.GetValue<string>("ProgramId", "PORTALPROP_")}{_configuration.GetValue<string>("RabbitMqFilaDeLogNome", "ProcessamentoFilaLog")}";
-            exchangeAndQueueName = exchangeAndQueueName.Replace(" ","");
+            exchangeAndQueueName = exchangeAndQueueName.Replace(" ", "");
             await channel.ExchangeDeclareAsync(exchange: exchangeAndQueueName, type: ExchangeType.Direct, durable: true);
 
             var jsonMsg = System.Text.Json.JsonSerializer.Serialize(message);

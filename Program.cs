@@ -15,7 +15,7 @@ using SW_PortalCliente_BeachPark.API.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Carrega as variáveis de ambiente do arquivo .env
+// Carrega as variáveis de ambiente do arquivo .envas
 Env.Load();
 
 // Carrega as configurações dos arquivos JSON
@@ -43,7 +43,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "SW_Portal_Proprietario.Main",
+        Title = "SW_Portal_Cliente.Main",
         Version = "v1",
         Contact = new OpenApiContact
         {

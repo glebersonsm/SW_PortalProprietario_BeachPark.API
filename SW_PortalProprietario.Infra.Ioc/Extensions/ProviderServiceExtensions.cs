@@ -20,47 +20,33 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             ArgumentNullException.ThrowIfNull(services, nameof(services));
             ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
-            var integradoCom = configuration.GetValue<string>("IntegradoCom");
-            if (string.IsNullOrEmpty(integradoCom))
-            {
-                throw new InvalidOperationException("A configuração 'IntegradoCom' é obrigatória. Configure para 'hybrid', 'cm' ou 'esolution'.");
-            }
+            // AccessCenter & Esol
+            services.AddNHbernateAccessCenter(configuration);
+            services.AddNHbernatePortalEsol(configuration);
+            services.TryAddScoped<IUnitOfWorkNHAccessCenter, UnitOfWorkNHAccessCenter>();
+            services.TryAddScoped<IRepositoryNHAccessCenter, RepositoryNHAccessCenter>();
+            services.TryAddScoped<IUnitOfWorkNHEsolPortal, UnitOfWorkNHEsolutionPortal>();
+            services.TryAddScoped<IRepositoryNHEsolPortal, RepositoryNHEsolPortal>();
 
-            switch (integradoCom.ToLower())
-            {
-                case "hybrid":
-                case "esolution":
-                case "cm":
-                    // AccessCenter & Esol
-                    services.AddNHbernateAccessCenter(configuration);
-                    services.AddNHbernatePortalEsol(configuration);
-                    services.TryAddScoped<IUnitOfWorkNHAccessCenter, UnitOfWorkNHAccessCenter>();
-                    services.TryAddScoped<IRepositoryNHAccessCenter, RepositoryNHAccessCenter>();
-                    services.TryAddScoped<IUnitOfWorkNHEsolPortal, UnitOfWorkNHEsolutionPortal>();
-                    services.TryAddScoped<IRepositoryNHEsolPortal, RepositoryNHEsolPortal>();
+            // CM
+            services.AddNHbernateCM(configuration);
+            services.TryAddScoped<IUnitOfWorkNHCm, UnitOfWorkNHCm>();
+            services.TryAddScoped<IRepositoryNHCm, RepositoryNHCm>();
 
-                    // CM
-                    services.AddNHbernateCM(configuration);
-                    services.TryAddScoped<IUnitOfWorkNHCm, UnitOfWorkNHCm>();
-                    services.TryAddScoped<IRepositoryNHCm, RepositoryNHCm>();
+            // Hybrid Provider
+            services.TryAddScoped<IHybrid_CM_Esolution_Communication, SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid.Hybrid_CM_Esolution_Communication>();
+            services.TryAddScoped<ICommunicationProvider>(sp => sp.GetRequiredService<IHybrid_CM_Esolution_Communication>());
 
-                    // Hybrid Provider
-                    services.TryAddScoped<IHybrid_CM_Esolution_Communication, SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid.Hybrid_CM_Esolution_Communication>();
-                    services.TryAddScoped<ICommunicationProvider>(sp => sp.GetRequiredService<IHybrid_CM_Esolution_Communication>());
+            // Services
+            services.TryAddScoped<IHybridProviderService, HybridProviderService>();
+            services.TryAddScoped<IEmpreendimentoHybridProviderService, EmpreendimentoHybridService>();
+            services.TryAddScoped<IFinanceiroHybridProviderService, FinanceiroHybridService>();
 
-                    // Services
-                    services.TryAddScoped<IHybridProviderService, HybridProviderService>();
-                    services.TryAddScoped<IEmpreendimentoHybridProviderService, EmpreendimentoHybridService>();
-                    services.TryAddScoped<IFinanceiroHybridProviderService, FinanceiroHybridService>();
+            // TimeSharing
+            services.TryAddScoped<TimeSharingCmService>();
+            services.TryAddScoped<TimeSharingEsolutionService>();
+            services.TryAddScoped<ITimeSharingProviderService, TimeSharingEsolutionService>();
 
-                    // TimeSharing
-                    services.TryAddScoped<TimeSharingCmService>();
-                    services.TryAddScoped<TimeSharingEsolutionService>();
-                    services.TryAddScoped<ITimeSharingProviderService, TimeSharingEsolutionService>();
-                    break;
-                default:
-                    throw new InvalidOperationException($"Configuração 'IntegradoCom' inválida: '{integradoCom}'. Valores válidos: 'hybrid', 'cm', 'esolution'.");
-            }
 
             return services;
         }

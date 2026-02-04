@@ -19,10 +19,10 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
         {
             var factory = new ConnectionFactory
             {
-                HostName = _configuration.GetValue<string>("RabbitMqConnectionHost"),
-                Password = _configuration.GetValue<string>("RabbitMqConnectionPass"),
-                UserName = _configuration.GetValue<string>("RabbitMqConnectionUser"),
-                Port = _configuration.GetValue<int>("RabbitMqConnectionPort"),
+                HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost"),
+                Password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass"),
+                UserName = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser"),
+                Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : _configuration.GetValue<int>("RabbitMqConnectionPort"),
                 ClientProvidedName = _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "ProcessamentoFilaEmail"),
                 ConsumerDispatchConcurrency = 1
             };
