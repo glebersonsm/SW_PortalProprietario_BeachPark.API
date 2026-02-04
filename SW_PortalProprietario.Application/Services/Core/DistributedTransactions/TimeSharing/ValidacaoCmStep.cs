@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+Ôªøusing Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using System.Text.Json;
@@ -6,8 +6,8 @@ using System.Text.Json;
 namespace SW_PortalProprietario.Application.Services.Core.DistributedTransactions.TimeSharing
 {
     /// <summary>
-    /// Step 1: ValidaÁ„o inicial no sistema CM (Oracle)
-    /// Verifica disponibilidade e prÈ-requisitos antes de iniciar a transaÁ„o
+    /// Step 1: Valida√ß√£o inicial no sistema CM (Oracle)
+    /// Verifica disponibilidade e pr√©-requisitos antes de iniciar a transa√ß√£o
     /// </summary>
     public class ValidacaoCmStep : IDistributedTransactionStep
     {
@@ -32,32 +32,32 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
         {
             try
             {
-                _logger.LogInformation("[ValidacaoCM] Iniciando validaÁıes no sistema CM");
+                _logger.LogInformation("[ValidacaoCM] Iniciando valida√ß√µes no sistema CM");
 
-                // TODO: Implementar validaÁıes especÌficas do CM
+                // TODO: Implementar valida√ß√µes espec√≠ficas do CM
                 // Exemplo: verificar disponibilidade, validar dados, etc.
-                
+
                 var validationData = new
                 {
                     ValidatedAt = DateTime.Now,
                     RequestData = JsonSerializer.Serialize(_requestData)
                 };
 
-                _logger.LogInformation("[ValidacaoCM] ValidaÁıes concluÌdas com sucesso");
-                
+                _logger.LogInformation("[ValidacaoCM] Valida√ß√µes conclu√≠das com sucesso");
+
                 return (true, string.Empty, validationData);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[ValidacaoCM] Erro durante validaÁ„o");
-                return (false, $"Falha na validaÁ„o CM: {ex.Message}", null);
+                _logger.LogError(ex, "[ValidacaoCM] Erro durante valida√ß√£o");
+                return (false, $"Falha na valida√ß√£o CM: {ex.Message}", null);
             }
         }
 
         public async Task<bool> CompensateAsync(object? executionData)
         {
-            // N„o h· compensaÁ„o necess·ria para validaÁ„o
-            _logger.LogInformation("[ValidacaoCM] CompensaÁ„o n„o necess·ria - apenas validaÁ„o");
+            // N√£o h√° compensa√ß√£o necess√°ria para valida√ß√£o
+            _logger.LogInformation("[ValidacaoCM] Compensa√ß√£o n√£o necess√°ria - apenas valida√ß√£o");
             return await Task.FromResult(true);
         }
     }

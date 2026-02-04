@@ -80,7 +80,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 // Definir Ordem padrão se for uma nova imagem e Ordem não foi informada
                 if (model.Id.GetValueOrDefault(0) == 0 && (model.Ordem == null || model.Ordem == 0))
                 {
-                    var maxOrdem = await _repository.CountTotalEntry($"Select Max(i.Ordem) as Ordem From ImagemGrupoImagem i Where i.GrupoImagem = {model.ImageGroupId}", []);
+                    var maxOrdem = await _repository.CountTotalEntry($"Select Max(i.Ordem) as Ordem From ImagemGrupoImagem i Where i.GrupoImagem = {model.ImageGroupId}", session: null);
                     imageGroupImage.Ordem = Convert.ToInt32(maxOrdem) + 1;
                 }
 
@@ -186,7 +186,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"EmpresaID: {tagParaRemover.ImagemGrupoImagem?.GrupoImagem?.Empresa?.Id} | " +
                                           $"TipoRemocao: Sincronização");
 
-                    await _repository.Remove(tagParaRemover);
+                    _repository.Remove(tagParaRemover);
                 }
             }
 
@@ -305,7 +305,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     await _repository.Save(tagRelacionada);
                 }
 
-                await _repository.Remove(image);
+                _repository.Remove(image);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -413,7 +413,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             sb.AppendLine(" Order by i.Ordem, i.Nome");
 
-            var imagens = await _repository.FindByHql<ImagemGrupoImagem>(sb.ToString(), parameters.ToArray());
+            var imagens = await _repository.FindByHql<ImagemGrupoImagem>(sb.ToString(), session: null, parameters.ToArray());
             var itensRetorno = imagens.Select(a => _mapper.Map<ImageGroupImageModel>(a)).ToList();
 
             if (itensRetorno.Any())

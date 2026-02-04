@@ -1093,7 +1093,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             var strConsulta = sqlTransactionsCartao.ToString();
 
-            var totalRegistros = await _repository.CountTotalEntry(strConsulta, parameters.ToArray());
+            var totalRegistros = await _repository.CountTotalEntry(strConsulta, session: null, parameters.ToArray());
 
             if (searchTransacoesModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
                 searchTransacoesModel.NumeroDaPagina.GetValueOrDefault(0) >

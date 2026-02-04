@@ -447,7 +447,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
 
             sb.AppendLine(" Order By Coalesce(d.Ordem, 999999), d.Id ");
-            var documentos = await _repository.FindByHql<Documento>(sb.ToString(), parameters.ToArray());
+            var documentos = await _repository.FindByHql<Documento>(sb.ToString(), session: null, parameters.ToArray());
 
             var listDocumentosRetorno = documentos.Select(a => _mapper.Map(a, new DocumentoModel())).ToList();
 

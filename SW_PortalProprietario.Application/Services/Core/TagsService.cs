@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(tags);
+                _repository.Remove(tags);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -140,7 +140,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 sb.AppendLine($" and t.UsuarioCriacao = {searchModel.UsuarioCriacao.GetValueOrDefault()}");
             }
 
-            var tags = await _repository.FindByHql<Tags>(sb.ToString(), parameters.ToArray());
+            var tags = await _repository.FindByHql<Tags>(sb.ToString(), session: null, parameters.ToArray());
 
             if (tags.Any())
                 return await _serviceBase.SetUserName(tags.Select(a => _mapper.Map<TagsModel>(a)).AsList());

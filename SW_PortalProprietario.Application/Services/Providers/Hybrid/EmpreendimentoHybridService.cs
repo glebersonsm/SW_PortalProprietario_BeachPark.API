@@ -4736,7 +4736,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                             and r.Status <> 'CL' ");
 
 
-            var dados = (await _repositoryPortal.FindBySql<DadosImpressaoVoucherResultModel>(sb.ToString(), null)).FirstOrDefault();
+            var dados = (await _repositoryPortal.FindBySql<DadosImpressaoVoucherResultModel>(sb.ToString())).FirstOrDefault();
             if (dados != null)
             {
                 dados.QuantidadePax += " PAX";
@@ -4772,7 +4772,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                                                                 Inner Join Cliente proca on pro.Cliente = proca.Id
                                                                                 Inner Join Pessoa procp on proca.Pessoa = procp.Id
                                                                                 Where 
-                                                                                rc.Reserva = {dados.NumeroReserva}", null)).AsList();
+                                                                                rc.Reserva = {dados.NumeroReserva}")).AsList();
 
                 dados.Hospedes = hospedes ?? new List<VoucherHospedeModel>();
             }
@@ -5249,7 +5249,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             }
 
 
-            var resultado = (await _repositoryPortal.FindBySql<PosicaoAgendamentoViewModel>(sb.ToString(), parameters.ToArray())).AsList();
+            var resultado = (await _repositoryPortal.FindBySql<PosicaoAgendamentoViewModel>(sb.ToString(),null, parameters.ToArray())).AsList();
 
             if (resultado != null && resultado.Any())
             {

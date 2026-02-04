@@ -213,13 +213,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                 sb.AppendLine($" and r.UsuarioCriacao = {searchModel.UsuarioCriacao.GetValueOrDefault()}");
             }
 
-            var regras = await _repository.FindByHql<RegraPaxFree>(sb.ToString(), parameters.ToArray());
+            var regras = await _repository.FindByHql<RegraPaxFree>(sb.ToString(), session: null, parameters.ToArray());
 
             var listRegrasRetorno = regras.Select(a => _mapper.Map(a, new RegraPaxFreeModel())).ToList();
 
             if (listRegrasRetorno != null && listRegrasRetorno.Any())
             {
-                var configuracoes = (await _repository.FindByHql<RegraPaxFreeConfiguracao>($"From RegraPaxFreeConfiguracao rpc Inner Join Fetch rpc.RegraPaxFree r Where rpc.UsuarioRemocao is null and rpc.DataHoraRemocao is null and r.Id in ({string.Join(",", listRegrasRetorno.Select(a => a.Id).AsList())})")).AsList();
+                var configuracoes = (await _repository.FindByHql<RegraPaxFreeConfiguracao>($"From RegraPaxFreeConfiguracao rpc Inner Join Fetch rpc.RegraPaxFree r Where rpc.UsuarioRemocao is null and rpc.DataHoraRemocao is null and r.Id in ({string.Join(",", listRegrasRetorno.Select(a => a.Id).AsList())})", session: null)).AsList();
                 foreach (var item in listRegrasRetorno)
                 {
                     var configsRelacionadas = configuracoes.Where(b => b.RegraPaxFree.Id == item.Id).AsList();
@@ -295,7 +295,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             
 
 
-            var regra = (await _repository.FindByHql<RegraPaxFree>(sb.ToString(), parameters.ToArray())).FirstOrDefault();
+            var regra = (await _repository.FindByHql<RegraPaxFree>(sb.ToString(), session: null, parameters.ToArray())).FirstOrDefault();
 
             if (regra != null)
             {

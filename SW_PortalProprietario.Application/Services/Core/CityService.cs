@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 var city = await _repository.FindById<Cidade>(id) ?? throw new ArgumentException($"Não foi encontrado a cidade com Id: {id}!");
                 _repository.BeginTransaction();
-                await _repository.Remove(city);
+                _repository.Remove(city);
 
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
@@ -192,7 +192,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0)
             {
-                totalRegistros = Convert.ToInt32(await _repository.CountTotalEntry(sql, parameters.ToArray()));
+                totalRegistros = Convert.ToInt32(await _repository.CountTotalEntry(sql, session: null, parameters.ToArray()));
             }
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
@@ -207,7 +207,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             var cidades = searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0 ?
                 await _repository.FindBySql<CidadeModel>(sb.ToString(), searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1), searchModel.NumeroDaPagina.GetValueOrDefault(1), parameters.ToArray())
-                : await _repository.FindBySql<CidadeModel>(sb.ToString(), parameters.ToArray());
+                : await _repository.FindBySql<CidadeModel>(sb.ToString(), session: null, parameters.ToArray());
 
             if (cidades.Any())
             {

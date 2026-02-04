@@ -66,7 +66,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 // Definir Ordem padrão se for um novo grupo e Ordem não foi informada
                 if (grupoImagemOriginal == null && (model.Ordem == null || model.Ordem == 0))
                 {
-                    var maxOrdem = await _repository.CountTotalEntry("Select Max(gd.Ordem) as Ordem From GrupoImagem gd", []);
+                    var maxOrdem = await _repository.CountTotalEntry("Select Max(gd.Ordem) as Ordem From GrupoImagem gd", session: null, parameters: Array.Empty<Parameter>());
                     grupoImagem.Ordem = Convert.ToInt32(maxOrdem) + 1;
                 }
 
@@ -145,7 +145,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"EmpresaID: {tagParaRemover.GrupoImagem?.Empresa?.Id} | " +
                                           $"TipoRemocao: Sincronização");
 
-                    await _repository.Remove(tagParaRemover);
+                    _repository.Remove(tagParaRemover);
                 }
             }
 
@@ -221,10 +221,10 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"EmpresaID: {tagRelacionada.GrupoImagem?.Empresa?.Id} | " +
                                           $"TipoRemocao: Exclusão do grupo");
 
-                    await _repository.Remove(tagRelacionada);
+                    _repository.Remove(tagRelacionada);
                 }
 
-                await _repository.Remove(grupoImagem);
+                _repository.Remove(grupoImagem);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -331,7 +331,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             sb.AppendLine(" Order by gd.Ordem, gd.Nome ");
 
-            var gruposImagens = await _repository.FindByHql<GrupoImagem>(sb.ToString(), parameters.ToArray());
+            var gruposImagens = await _repository.FindByHql<GrupoImagem>(sb.ToString(), session: null, parameters.ToArray());
 
 
             var itensRetorno = gruposImagens.Select(a => _mapper.Map<ImageGroupModel>(a)).ToList();

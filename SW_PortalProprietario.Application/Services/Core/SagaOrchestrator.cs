@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Logging;
+ï»¿using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 
 namespace SW_PortalProprietario.Application.Services.Core
 {
     /// <summary>
-    /// Orquestrador de transações distribuídas usando o padrão Saga
-    /// Garante atomicidade entre múltiplos bancos de dados e APIs externas
+    /// Orquestrador de transaÃ§Ãµes distribuÃ­das usando o padrÃ£o Saga
+    /// Garante atomicidade entre mÃºltiplos bancos de dados e APIs externas
     /// </summary>
     public class SagaOrchestrator
     {
@@ -19,10 +19,10 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         /// <summary>
         /// Executa uma saga com os steps fornecidos
-        /// Em caso de falha, executa compensação em ordem reversa
+        /// Em caso de falha, executa compensaÃ§Ã£o em ordem reversa
         /// </summary>
         /// <param name="steps">Steps a serem executados</param>
-        /// <param name="operationId">ID único da operação para rastreamento</param>
+        /// <param name="operationId">ID Ãºnico da operaÃ§Ã£o para rastreamento</param>
         /// <returns>Tupla indicando sucesso e mensagem de erro</returns>
         public async Task<(bool Success, string ErrorMessage)> ExecuteAsync(
             IEnumerable<IDistributedTransactionStep> steps,
@@ -68,12 +68,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                     operationId);
                 
                 await CompensateAllAsync(operationId);
-                return (false, $"Erro inesperado na transação distribuída: {ex.Message}");
+                return (false, $"Erro inesperado na transaÃ§Ã£o distribuÃ­da: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Executa compensação de todos os steps executados em ordem reversa
+        /// Executa compensaÃ§Ã£o de todos os steps executados em ordem reversa
         /// </summary>
         private async Task CompensateAllAsync(string operationId)
         {

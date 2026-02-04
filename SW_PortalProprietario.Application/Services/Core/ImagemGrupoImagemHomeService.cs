@@ -164,10 +164,10 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"GrupoImagemHomeNome: {tagRelacionada.ImagemGrupoImagemHome?.GrupoImagemHome?.Nome} | " +
                                           $"TipoRemocao: Exclusão da imagem");
 
-                    await _repository.Remove(tagRelacionada);
+                    _repository.Remove(tagRelacionada);
                 }
 
-                await _repository.Remove(imagemGrupoImagemHome);
+                _repository.Remove(imagemGrupoImagemHome);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -221,7 +221,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             sb.AppendLine(" Order by i.Ordem, i.Id");
 
-            var imagens = await _repository.FindByHql<ImagemGrupoImagemHome>(sb.ToString(), parameters.ToArray());
+            var imagens = await _repository.FindByHql<ImagemGrupoImagemHome>(sb.ToString(), session: null, parameters.ToArray());
             var itensRetorno = imagens.Select(a => _mapper.Map<ImagemGrupoImagemHomeModel>(a)).ToList();
 
             if (itensRetorno.Any())
@@ -257,7 +257,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             List<Parameter> parameters = new();
             parameters.Add(new Parameter("dataAtual", dataAtual));
 
-            var imagens = await _repository.FindByHql<ImagemGrupoImagemHome>(sb.ToString(), parameters.ToArray());
+            var imagens = await _repository.FindByHql<ImagemGrupoImagemHome>(sb.ToString(), session: null, parameters.ToArray());
 
             if (!imagens.Any())
                 return new List<ImagemGrupoImagemHomeModel>();
@@ -400,7 +400,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"GrupoImagemHomeNome: {tagParaRemover.ImagemGrupoImagemHome?.GrupoImagemHome?.Nome} | " +
                                           $"TipoRemocao: Sincronização");
 
-                    await _repository.Remove(tagParaRemover);
+                    _repository.Remove(tagParaRemover);
                 }
             }
 

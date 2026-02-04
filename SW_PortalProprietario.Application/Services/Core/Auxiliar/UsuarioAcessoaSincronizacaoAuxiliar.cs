@@ -45,7 +45,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                         empresasIdsList = new List<int>();
 
                     if (!empresasIdsList.Any(c => c == empresaUsuario.Empresa?.Id))
-                        await _repository.Remove(empresaUsuario);
+                        _repository.Remove(empresaUsuario);
 
                 }
             }
@@ -79,7 +79,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                         grupoUsuariosIdsList = new List<int>();
 
                     if (!grupoUsuariosIdsList.Any(c => c == grupoUsuario.GrupoUsuario?.Id))
-                        await _repository.Remove(grupoUsuario);
+                        _repository.Remove(grupoUsuario);
 
                 }
             }

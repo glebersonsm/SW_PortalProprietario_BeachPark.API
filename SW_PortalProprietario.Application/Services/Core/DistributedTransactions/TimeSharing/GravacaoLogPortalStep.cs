@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+ï»¿using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
@@ -7,8 +7,8 @@ using System.Text.Json;
 namespace SW_PortalProprietario.Application.Services.Core.DistributedTransactions.TimeSharing
 {
     /// <summary>
-    /// Step 2: Gravação de log no sistema PostgreSQL (Portal)
-    /// Registra a tentativa de operação para auditoria
+    /// Step 2: GravaÃ§Ã£o de log no sistema PostgreSQL (Portal)
+    /// Registra a tentativa de operaÃ§Ã£o para auditoria
     /// </summary>
     public class GravacaoLogPortalStep : IDistributedTransactionStep
     {
@@ -39,12 +39,12 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
         {
             try
             {
-                _logger.LogInformation("[GravacaoLogPortal] Iniciando gravação de log - OperationId: {OperationId}", _operationId);
+                _logger.LogInformation("[GravacaoLogPortal] Iniciando gravaÃ§Ã£o de log - OperationId: {OperationId}", _operationId);
 
-                _repositorySystem.BeginTransaction();
+                _repositorySystem.BeginTransaction(null);
 
                 var loggedUser = await _repositorySystem.GetLoggedUser();
-                var userId = loggedUser.HasValue ? int.Parse(loggedUser.Value.userId) : (int?)null;
+                var userId = !string.IsNullOrEmpty(loggedUser?.userId) ? int.Parse(loggedUser?.userId!) : (int?)null;
 
                 var transactionLog = new DistributedTransactionLog
                 {
@@ -58,13 +58,13 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
                     UsuarioCriacao = userId
                 };
 
-                await _repositorySystem.Save(transactionLog);
-                
-                var commitResult = await _repositorySystem.CommitAsync();
-                
+                await _repositorySystem.Save(transactionLog, null);
+
+                var commitResult = await _repositorySystem.CommitAsync(null);
+
                 if (!commitResult.executed)
                 {
-                    throw commitResult.exception ?? new Exception("Falha ao commitar transação");
+                    throw commitResult.exception ?? new Exception("Falha ao commitar transaÃ§Ã£o");
                 }
 
                 _logger.LogInformation("[GravacaoLogPortal] Log gravado com sucesso - ID: {LogId}", transactionLog.Id);
@@ -73,7 +73,7 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
             }
             catch (Exception ex)
             {
-                _repositorySystem.Rollback();
+                _repositorySystem.Rollback(null);
                 _logger.LogError(ex, "[GravacaoLogPortal] Erro ao gravar log");
                 return (false, $"Falha ao gravar log: {ex.Message}", null);
             }
@@ -87,23 +87,23 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
                 {
                     _logger.LogInformation("[GravacaoLogPortal] Compensando - atualizando status do log ID: {LogId}", logId);
 
-                    _repositorySystem.BeginTransaction();
+                    _repositorySystem.BeginTransaction(null);
 
                     var log = (await _repositorySystem.FindByHql<DistributedTransactionLog>(
-                        $"From DistributedTransactionLog dtl Where dtl.Id = {logId}")).FirstOrDefault();
+                        $"From DistributedTransactionLog dtl Where dtl.Id = {logId}", null)).FirstOrDefault();
 
                     if (log != null)
                     {
                         log.Status = "Compensated";
                         log.DataHoraCompensacao = DateTime.Now;
-                        await _repositorySystem.Save(log);
+                        await _repositorySystem.Save(log, null);
                     }
 
-                    var commitResult = await _repositorySystem.CommitAsync();
-                    
+                    var commitResult = await _repositorySystem.CommitAsync(null);
+
                     if (commitResult.executed)
                     {
-                        _logger.LogInformation("[GravacaoLogPortal] Compensação concluída");
+                        _logger.LogInformation("[GravacaoLogPortal] CompensaÃ§Ã£o concluÃ­da");
                         return true;
                     }
                 }

@@ -40,7 +40,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(tipoEndereco);
+                _repository.Remove(tipoEndereco);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -120,7 +120,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 sb.AppendLine($" and ge.UsuarioCriacao = {searchModel.UsuarioCriacao.GetValueOrDefault()}");
             }
 
-            var tipoEndereco = await _repository.FindByHql<TipoEndereco>(sb.ToString(), parameters.ToArray());
+            var tipoEndereco = await _repository.FindByHql<TipoEndereco>(sb.ToString(), session: null, parameters.ToArray());
 
             if (tipoEndereco.Any())
                 return await _serviceBase.SetUserName(tipoEndereco.Select(a => (TipoEnderecoModel)a).AsList());
@@ -133,7 +133,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             _repository.BeginTransaction();
             try
             {
-                var tipoendereco = (await _repository.FindByHql<TipoEndereco>("From TipoEndereco ge Where ge.Id = :id", new Parameter[]
+                var tipoendereco = (await _repository.FindByHql<TipoEndereco>("From TipoEndereco ge Where ge.Id = :id", session: null, new Parameter[]
                 { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o Tipo Endereço: {model.Id}");
 
                 tipoendereco.Nome = model.Nome ?? tipoendereco.Nome;

@@ -54,7 +54,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 _repository.BeginTransaction();
                 await _repository.ExecuteSqlCommand($"Delete From GrupoFaqTags Where GrupoFaq = {id}");
-                await _repository.Remove(grupoFaq);
+                _repository.Remove(grupoFaq);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -210,7 +210,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
 
 
-            var grupoFaqs = await _repository.FindByHql<GrupoFaq>(sb.ToString(), parameters.ToArray());
+            var grupoFaqs = await _repository.FindByHql<GrupoFaq>(sb.ToString(), null, parameters.ToArray());
             var itensRetorno = grupoFaqs.Select(a => _mapper.Map(a, new GrupoFaqModel())).AsList();
 
             var groupFaqsTags = (await _repository.FindByHql<GrupoFaqTags>(@$"From 

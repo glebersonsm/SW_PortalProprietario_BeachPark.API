@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(pessoaTelefone);
+                _repository.Remove(pessoaTelefone);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -166,7 +166,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 sb.AppendLine($" and ge.UsuarioCriacao = {searchModel.UsuarioCriacao.GetValueOrDefault()}");
             }
 
-            var tipoTelefone = await _repository.FindByHql<PessoaTelefone>(sb.ToString(), parameters.ToArray());
+            var tipoTelefone = await _repository.FindByHql<PessoaTelefone>(sb.ToString(), session: null, parameters.ToArray());
 
             if (tipoTelefone.Any())
                 return await _serviceBase.SetUserName(tipoTelefone.Select(a => _mapper.Map<PessoaTelefoneModel>(a)).AsList());

@@ -5,8 +5,8 @@ using SW_PortalProprietario.Application.Services.Core.Interfaces;
 namespace SW_PortalProprietario.Application.Services.Core.DistributedTransactions.TimeSharing
 {
     /// <summary>
-    /// Step 4: Confirmação final no sistema CM (Oracle)
-    /// Atualiza status e confirma a operação
+    /// Step 4: Confirma��o final no sistema CM (Oracle)
+    /// Atualiza status e confirma a opera��o
     /// </summary>
     public class ConfirmacaoCmStep : IDistributedTransactionStep
     {
@@ -31,29 +31,29 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
         {
             try
             {
-                _logger.LogInformation("[ConfirmacaoCM] Iniciando confirmação no sistema CM");
+                _logger.LogInformation("[ConfirmacaoCM] Iniciando confirma��o no sistema CM");
 
-                _repositoryCm.BeginTransaction(null);
+                _repositoryCm.BeginTransaction();
 
-                // TODO: Implementar confirmação real no CM
-                // Exemplo: atualizar status de reserva, gravar histórico, etc.
+                // TODO: Implementar confirma��o real no CM
+                // Exemplo: atualizar status de reserva, gravar hist�rico, etc.
 
-                var commitResult = await _repositoryCm.CommitAsync(null);
+                var commitResult = await _repositoryCm.CommitAsync();
 
                 if (!commitResult.executed)
                 {
-                    throw commitResult.exception ?? new Exception("Falha ao commitar transação CM");
+                    throw commitResult.exception ?? new Exception("Falha ao commitar transa��o CM");
                 }
 
-                _logger.LogInformation("[ConfirmacaoCM] Confirmação concluída com sucesso");
+                _logger.LogInformation("[ConfirmacaoCM] Confirma��o conclu�da com sucesso");
 
                 return (true, string.Empty, new { ConfirmedAt = DateTime.Now });
             }
             catch (Exception ex)
             {
-                _repositoryCm.Rollback(null);
+                _repositoryCm.Rollback();
                 _logger.LogError(ex, "[ConfirmacaoCM] Erro ao confirmar no CM");
-                return (false, $"Falha na confirmação CM: {ex.Message}", null);
+                return (false, $"Falha na confirma��o CM: {ex.Message}", null);
             }
         }
 
@@ -61,18 +61,18 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
         {
             try
             {
-                _logger.LogInformation("[ConfirmacaoCM] Compensando - revertendo confirmação");
+                _logger.LogInformation("[ConfirmacaoCM] Compensando - revertendo confirma��o");
 
-                _repositoryCm.BeginTransaction(null);
+                _repositoryCm.BeginTransaction();
 
-                // TODO: Implementar reversão real
+                // TODO: Implementar revers�o real
                 // Exemplo: reverter status, adicionar flag de cancelado, etc.
 
-                var commitResult = await _repositoryCm.CommitAsync(null);
+                var commitResult = await _repositoryCm.CommitAsync();
 
                 if (commitResult.executed)
                 {
-                    _logger.LogInformation("[ConfirmacaoCM] Compensação concluída");
+                    _logger.LogInformation("[ConfirmacaoCM] Compensa��o conclu�da");
                     return true;
                 }
 

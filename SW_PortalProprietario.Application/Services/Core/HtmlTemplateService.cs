@@ -56,7 +56,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(htmlTemlate);
+                _repository.Remove(htmlTemlate);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -179,7 +179,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 try
                 {
-                    var resultConsulta = await _repository.FindBySql<dynamic>(htmlTemplateSalvar.Consulta, parametros.ToArray());
+                    var resultConsulta = await _repository.FindBySql<dynamic>(htmlTemplateSalvar.Consulta, session: null, parametros.ToArray());
 
                 }
                 catch (Exception err)
@@ -229,7 +229,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 parameters.Add(new Parameter("tipoComunicacao", (int)searchModel.TipoComunicacao.GetValueOrDefault()));
             }
 
-            var htmlTemplates = await _repository.FindByHql<HtmlTemplate>(sb.ToString(), parameters.ToArray());
+            var htmlTemplates = await _repository.FindByHql<HtmlTemplate>(sb.ToString(), session: null, parameters.ToArray());
 
             if (htmlTemplates.Any())
             {

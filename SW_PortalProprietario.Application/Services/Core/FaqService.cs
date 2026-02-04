@@ -54,7 +54,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 _repository.BeginTransaction();
                 await _repository.ExecuteSqlCommand($"Delete From FaqTags Where Faq = {id}");
-                await _repository.Remove(faq);
+                _repository.Remove(faq);
                 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -307,7 +307,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 sb.AppendLine(" and Coalesce(f.Disponivel,0) = 1 ");
             }
 
-            var faqs = await _repository.FindByHql<Faq>(sb.ToString(), parameters.ToArray());
+            var faqs = await _repository.FindByHql<Faq>(sb.ToString(), session: null, parameters.ToArray());
 
             List<FaqModelSimplificado> faqsRetorno = new();
 

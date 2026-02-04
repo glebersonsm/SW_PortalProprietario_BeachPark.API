@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Models.TimeSharing;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace SW_PortalProprietario.Application.Services.Core.DistributedTransactions.TimeSharing
 {
     /// <summary>
-    /// Step 3: Criação de reserva via API externa (CM ou eSolution)
+    /// Step 3: CriaÃ§Ã£o de reserva via API externa (CM ou eSolution)
     /// </summary>
     public class CriacaoReservaApiStep : IDistributedTransactionStep
     {
@@ -32,11 +32,11 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
         {
             try
             {
-                _logger.LogInformation("[CriacaoReservaAPI] Iniciando criação de reserva via API");
+                _logger.LogInformation("[CriacaoReservaAPI] Iniciando criaÃ§Ã£o de reserva via API");
 
-                // Chamar o serviço para criar a reserva
+                // Chamar o serviÃ§o para criar a reserva
                 var reservaId = await _timeSharingService.Save(_reservaData as InclusaoReservaInputModel 
-                    ?? throw new InvalidOperationException("Dados de reserva inválidos"));
+                    ?? throw new InvalidOperationException("Dados de reserva invÃ¡lidos"));
                 
                 var resultData = new
                 {

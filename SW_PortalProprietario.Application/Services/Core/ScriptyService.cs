@@ -78,7 +78,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 List<(string key, string value)> listKeysValue = new List<(string key, string value)>();
 
-                var consultaResult = await _repository.FindBySql<dynamic>(template.Consulta, parameters.ToArray());
+                var consultaResult = await _repository.FindBySql<dynamic>(template.Consulta, session: null, parameters.ToArray());
                 foreach (var item in consultaResult)
                 {
                     foreach (var itemLookup in item)

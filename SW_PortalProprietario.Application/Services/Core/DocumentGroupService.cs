@@ -249,7 +249,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
 
             sb.AppendLine(" Order By Coalesce(gd.Ordem, 999999), gd.Id ");
-            var grupoDocumentos = await _repository.FindByHql<GrupoDocumento>(sb.ToString(), parameters.ToArray());
+            var grupoDocumentos = await _repository.FindByHql<GrupoDocumento>(sb.ToString(), session: null, parameters.ToArray());
 
 
             var itensRetorno = grupoDocumentos.Select(a => _mapper.Map(a, new GrupoDocumentoModel())).ToList();
@@ -299,7 +299,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         sbDocumentos.AppendLine("Order By Coalesce(d.Ordem, 999999), d.Id ");
 
                         // Projeção direta para DocumentoModelSimplificado (sem Arquivo)
-                        var documentosDosGrupos = await _repository.FindBySql<DocumentoModelSimplificado>(sbDocumentos.ToString(), parametersDoc.ToArray());
+                        var documentosDosGrupos = await _repository.FindBySql<DocumentoModelSimplificado>(sbDocumentos.ToString(), session: null, parametersDoc.ToArray());
                         var itensRetornoDocumentos = documentosDosGrupos.AsList();
 
                         List<DocumentoTagRow> tagsDosDocumentos = new List<DocumentoTagRow>();

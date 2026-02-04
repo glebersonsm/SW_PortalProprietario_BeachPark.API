@@ -40,7 +40,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(tipoTelefone);
+                _repository.Remove(tipoTelefone);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -119,7 +119,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 sb.AppendLine($" and ge.UsuarioCriacao = {searchModel.UsuarioCriacao.GetValueOrDefault()}");
             }
 
-            var tipoTelefone = await _repository.FindByHql<TipoTelefone>(sb.ToString(), parameters.ToArray());
+            var tipoTelefone = await _repository.FindByHql<TipoTelefone>(sb.ToString(), session: null, parameters.ToArray());
 
             if (tipoTelefone.Any())
                 return await _serviceBase.SetUserName(tipoTelefone.Select(a => (TipoTelefoneModel)a).AsList());
@@ -132,7 +132,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             _repository.BeginTransaction();
             try
             {
-                var tipotelefone = (await _repository.FindByHql<TipoTelefone>("From TipoTelefone ge Where ge.Id = :id", new Parameter[]
+                var tipotelefone = (await _repository.FindByHql<TipoTelefone>("From TipoTelefone ge Where ge.Id = :id", session: null, new Parameter[]
                 { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o Tipo Telefone: {model.Id}");
 
                 tipotelefone.Nome = model.Nome ?? tipotelefone.Nome;

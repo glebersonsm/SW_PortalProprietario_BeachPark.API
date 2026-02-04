@@ -1,35 +1,35 @@
-namespace SW_PortalProprietario.Application.Services.Core.Interfaces
+Ôªønamespace SW_PortalProprietario.Application.Services.Core.Interfaces
 {
     /// <summary>
-    /// Interface para definir um step de transaÁ„o distribuÌda no padr„o Saga
+    /// Interface para definir um step de transa√ß√£o distribu√≠da no padr√£o Saga
     /// </summary>
     public interface IDistributedTransactionStep
     {
         /// <summary>
-        /// Nome do step para identificaÁ„o e logs
+        /// Nome do step para identifica√ß√£o e logs
         /// </summary>
         string StepName { get; }
 
         /// <summary>
-        /// Ordem de execuÁ„o do step (menor = primeiro)
+        /// Ordem de execu√ß√£o do step (menor = primeiro)
         /// </summary>
         int Order { get; }
 
         /// <summary>
-        /// Executa o step da transaÁ„o
+        /// Executa o step da transa√ß√£o
         /// </summary>
         /// <returns>
         /// Tupla contendo:
         /// - Success: true se executado com sucesso
         /// - ErrorMessage: mensagem de erro caso Success = false
-        /// - Data: dados necess·rios para compensaÁ„o posterior
+        /// - Data: dados necess√°rios para compensa√ß√£o posterior
         /// </returns>
         Task<(bool Success, string ErrorMessage, object? Data)> ExecuteAsync();
 
         /// <summary>
-        /// Executa a compensaÁ„o (rollback) do step em caso de falha
+        /// Executa a compensa√ß√£o (rollback) do step em caso de falha
         /// </summary>
-        /// <param name="executionData">Dados retornados durante a execuÁ„o</param>
+        /// <param name="executionData">Dados retornados durante a execu√ß√£o</param>
         /// <returns>true se compensado com sucesso</returns>
         Task<bool> CompensateAsync(object? executionData);
     }

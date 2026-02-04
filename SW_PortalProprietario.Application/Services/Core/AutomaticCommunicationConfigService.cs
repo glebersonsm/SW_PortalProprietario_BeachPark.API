@@ -49,7 +49,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     parameters.Add(new SW_Utils.Auxiliar.Parameter("projetoType", (int)projetoType.Value));
                 }
 
-                var configs = await _repository.FindByHql<AutomaticCommunicationConfig>(hql, parameters.ToArray());
+                var configs = await _repository.FindByHql<AutomaticCommunicationConfig>(hql, session: null, parameters.ToArray());
                
 
                 var config = configs.FirstOrDefault();
@@ -85,7 +85,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 hql += " Order by a.CommunicationType, a.ProjetoType";
 
-                var configs = await _repository.FindByHql<AutomaticCommunicationConfig>(hql, parameters.ToArray());
+                var configs = await _repository.FindByHql<AutomaticCommunicationConfig>(hql, session: null, parameters.ToArray());
 
                 var models = new List<AutomaticCommunicationConfigModel>();
                 foreach (var config in configs)
@@ -135,7 +135,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 // Verificar se o template existe
                 var documentTemplate = (await _repository.FindByHql<DocumentTemplate>(
-                    $"From DocumentTemplate a Where a.Id = :templateId", new SW_Utils.Auxiliar.Parameter("templateId", model.TemplateId.Value))).FirstOrDefault();
+                    $"From DocumentTemplate a Where a.Id = :templateId", session: null, new SW_Utils.Auxiliar.Parameter("templateId", model.TemplateId.Value))).FirstOrDefault();
 
                 if (documentTemplate == null)
                     throw new ArgumentException($"Template com ID {model.TemplateId} não encontrado");
@@ -219,7 +219,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 // Verificar se o template existe
                 var documentTemplate = (await _repository.FindByHql<DocumentTemplate>(
-                    $"From DocumentTemplate a Where a.Id = :templateId", new SW_Utils.Auxiliar.Parameter("templateId", model.TemplateId.Value))).FirstOrDefault();
+                    $"From DocumentTemplate a Where a.Id = :templateId", session: null, new SW_Utils.Auxiliar.Parameter("templateId", model.TemplateId.Value))).FirstOrDefault();
 
                 if (documentTemplate == null)
                     throw new ArgumentException($"Template com ID {model.TemplateId} não encontrado");
@@ -280,7 +280,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (config == null)
                     throw new ArgumentException($"Configuração com ID {id} não encontrada");
 
-                await _repository.Remove(config);
+                _repository.Remove(config);
                 await _repository.CommitAsync();
 
                 return true;

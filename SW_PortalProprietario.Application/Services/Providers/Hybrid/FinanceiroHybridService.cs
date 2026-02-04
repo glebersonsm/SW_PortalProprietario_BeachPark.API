@@ -575,7 +575,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
             if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0)
             {
-                totalRegistros = await _repositoryAccessCenter.CountTotalEntry(sql, parameters.ToArray());
+                totalRegistros = await _repositoryAccessCenter.CountTotalEntry(sql, session: null, parameters.ToArray());
             }
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
@@ -1023,7 +1023,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
             if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0)
             {
-                totalRegistros = await _repositoryAccessCenter.CountTotalEntry(sql, parameters.ToArray());
+                totalRegistros = await _repositoryAccessCenter.CountTotalEntry(sql, session: null, parameters.ToArray());
             }
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
@@ -2113,7 +2113,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                         Where 
                         crpb.ContaReceberParcela = crp.Id and 
                         crpb.AgrupamConRecParcBai = {agrupamentoBaixaContaReceberVinculada.Id} 
-                        Group by crp.AplicacaoCaixa ", null)).ToList();
+                        Group by crp.AplicacaoCaixa ")).ToList();
 
                 foreach (var rateio in rateioAplicacaoCaixa)
                 {
@@ -3227,7 +3227,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
             var sql = sb.ToString();
 
-            var totalRegistros = await _repositoryNHCm.CountTotalEntry(sql, parametros.ToArray());
+            var totalRegistros = await _repositoryNHCm.CountTotalEntry(sql, session: null, parametros.ToArray());
             if (totalRegistros == 0)
                 return (1, 1, new List<ContaPendenteModel>());
 
@@ -3391,7 +3391,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
             var sql = sb.ToString();
 
-            var totalRegistros = await _repositoryNHCm.CountTotalEntry(sql, parametros.ToArray());
+            var totalRegistros = await _repositoryNHCm.CountTotalEntry(sql, session: null, parametros.ToArray());
             if (totalRegistros == 0)
                 return (1, 1, new List<ContaPendenteModel>());
 

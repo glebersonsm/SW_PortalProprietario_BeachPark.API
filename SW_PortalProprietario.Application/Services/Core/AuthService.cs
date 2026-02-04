@@ -1495,7 +1495,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var user = (await _repository.FindByHql<Usuario>(@$"From Usuario us 
                                                                 Inner Join Fetch us.Pessoa p 
                                                         Where 
-                                                            us.Id = :usuarioId and us.DataHoraRemocao is null and Coalesce(us.Removido,0) = 0 " , new Parameter[] {
+                                                            us.Id = :usuarioId and us.DataHoraRemocao is null and Coalesce(us.Removido,0) = 0 " , session: null, new Parameter[] {
                                                             new Parameter("usuarioId",loggedUser.userId)})).FirstOrDefault();
 
                 if (user == null || user.Status != EnumStatus.Ativo)

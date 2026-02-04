@@ -339,7 +339,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var sql = sb.ToString();
 
-            var totalRegistros = await _repository.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repository.CountTotalEntry(sql, session: null, parameters.ToArray());
 
             if (totalRegistros == 0)
                 return (1, 1, new List<ContratoTimeSharingModel>());
@@ -691,7 +691,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var sql = sb.ToString();
 
-            var totalRegistros = await _repository.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repository.CountTotalEntry(sql, session: null, parameters.ToArray());
 
             if (totalRegistros == 0)
                 return (1, 1, new List<ContratoTimeSharingModel>());
@@ -1065,7 +1065,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var sql = sb.ToString();
 
-            var totalRegistros = await _repository.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repository.CountTotalEntry(sql, session: null, parameters.ToArray());
             if (totalRegistros == 0)
                 return (1, 1, new List<ReservaTsModel>());
 
@@ -1868,7 +1868,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var sql = sb.ToString();
 
-            var totalRegistros = await _repository.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repository.CountTotalEntry(sql, session: null, parameters.ToArray());
             if (totalRegistros == 0)
                 return (1, 1, new List<ReservaGeralTsModel>());
 
@@ -2313,7 +2313,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var sql = sb.ToString();
 
-            var totalRegistros = await _repository.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repository.CountTotalEntry(sql, session: null, parameters.ToArray());
             if (totalRegistros == 0)
                 return (1, 1, new List<ReservaTsModel>());
 
@@ -3114,7 +3114,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             var sql = sb.ToString();
 
 
-            var totalRegistros = await _repository.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repository.CountTotalEntry(sql, session: null, parameters.ToArray());
 
             // Usa IdCliente se fornecido, senão usa a pessoa vinculada ao usuário logado
             var clienteIdParaReservaTimeSharing = searchModel.IdCliente.HasValue
@@ -3131,7 +3131,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                                                                 IdReservasFront is null and 
                                                                                                 TipoUtilizacao like 'RCI%INTER%' AND 
                                                                                                 (Checkin between :chegadaInicial and :chegadaFinal) ",
-                                                                                                 parameters.Where(a => a.Name == "chegadaInicial" || a.Name == "chegadaFinal").ToArray())).AsList() : new();
+                                                                                                 session: null, parameters.Where(a => a.Name == "chegadaInicial" || a.Name == "chegadaFinal").ToArray())).AsList() : new();
 
 
             if (totalRegistros == 0 && (reservaTimeSharing == null || !reservaTimeSharing.Any()))
@@ -6995,7 +6995,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         {
                             fracionamentoVinculado = (await _repository.FindByHql<FracionamentoTs>("From FracionamentoTs f Where f.IdFracionamentoTs = :id",new Parameter("id", fracionamentoVinculado.IdFracionamentoTs.GetValueOrDefault()))).FirstOrDefault();
                             if (fracionamentoVinculado != null)
-                                await _repository.Remove(fracionamentoVinculado);
+                                _repository.Remove(fracionamentoVinculado);
                         }
                     }
 
@@ -7507,7 +7507,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 if (lancamentoTs != null && lancamentoTs.Any())
                 {
                     _repository.RemoveRange(lancamentoTs);
-                    await _repository.Remove(lancPontosTsBase);
+                    _repository.Remove(lancPontosTsBase);
                 }
             }
 
@@ -7818,19 +7818,19 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         throw new ArgumentException("A reserva de abertura de fracionamento não pode ser cancelada, quando já possuir reserva de fechamento vinculada.");
 
                     
-                    await _repository.Remove(fracionamentoTs);
+                    _repository.Remove(fracionamentoTs);
                 }
 
                 var reservaTs = (await _repository.FindByHql<ReservasTs>($"From ReservasTs fr Where fr.IdReservasFront = {idReservasFront}")).FirstOrDefault();
                 if (reservaTs != null)
                 {
-                    await _repository.Remove(reservaTs);
+                    _repository.Remove(reservaTs);
                 }
 
                 var reservaRci = (await _repository.FindByHql<ReservasRci>($"From ReservasRci fr Where fr.IdReservasFront = {idReservasFront}")).FirstOrDefault();
                 if (reservaRci != null)
                 {
-                    await _repository.Remove(reservaRci);
+                    _repository.Remove(reservaRci);
                 }
 
             }

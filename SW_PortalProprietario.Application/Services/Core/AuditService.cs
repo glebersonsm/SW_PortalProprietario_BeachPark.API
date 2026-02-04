@@ -168,7 +168,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 // 🔥 MELHORIA: Calcular total de registros para paginação usando CountTotalEntry
                 var countSql = "Select * From AuditLog a Where 1=1" + whereClause;
-                var totalRecords = await _repository.CountTotalEntry(countSql, parameters.ToArray());
+                var totalRecords = await _repository.CountTotalEntry(countSql, session: null, parameters.ToArray());
 
                 // Calcular última página
                 var lastPageNumber = totalRecords > 0 
@@ -274,7 +274,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     "Order By a.Timestamp Desc";
 
                 var logs = await _repository.FindBySql<AuditLogSearchModel>(
-                    sql,
+                    sql,session:null,
                     new Parameter("entityType", entityType),
                     new Parameter("entityId", entityId));
 
@@ -364,7 +364,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var logs = await _repository.FindBySql<AuditLogSearchModel>(
                     sql,
-                    new Parameter("id", id));
+                    session: null, new Parameter("id", id));
 
                 var log = logs.FirstOrDefault();
                 if (log == null)
@@ -435,7 +435,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     "From Usuario u " +
                     "Inner Join Pessoa p on u.Pessoa = p.Id " +
                     "Where u.Id = :userId",
-                    new Parameter("userId", userId));
+                    session: null, new Parameter("userId", userId));
                 
                 var usuario = usuarios.FirstOrDefault();
                 return usuario?.NomePessoa;

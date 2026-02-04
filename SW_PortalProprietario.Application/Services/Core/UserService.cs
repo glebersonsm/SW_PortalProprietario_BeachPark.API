@@ -71,7 +71,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var user = (await _repository.FindByHql<Usuario>(@"From Usuario us 
                                                         Where 
                                                             us.Id = :usuarioLogado and us.DataHoraRemocao is null and coalesce(us.Removido,0) = 0 ",
-                                                            new Parameter("usuarioLogado", loggedUser.userId))).FirstOrDefault() ?? throw new Exception($"Falha na alteração da senha");
+                                                            session: null, new Parameter("usuarioLogado", loggedUser.userId))).FirstOrDefault() ?? throw new Exception($"Falha na alteração da senha");
 
                 if (!BCrypt.Net.BCrypt.Verify(changePasswordInputModel.ActualPassword, user.PasswordHash))
                     throw new ArgumentException($"A senha atual informada não está correta para o usuário: {user.Login}");
@@ -189,7 +189,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             var sql = sb.ToString();
 
-            var totalRegistros = await _repository.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repository.CountTotalEntry(sql, session: null, parameters.ToArray());
             if (totalRegistros == 0)
                 return (1, 1, new List<UsuarioModel>());
 
@@ -354,7 +354,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             sb.AppendLine("ORDER BY u.Id");
 
 
-            var users = await _repository.FindBySql<UsuarioModel>(sb.ToString(), parameters.ToArray());
+            var users = await _repository.FindBySql<UsuarioModel>(sb.ToString(), session: null, parameters.ToArray());
             if (searchModel.CarregarPermissoes.GetValueOrDefault(false))
             {
                 await PopulatePemissionsOfUsers(users);

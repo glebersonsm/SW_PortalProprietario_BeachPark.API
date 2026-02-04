@@ -123,11 +123,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"EmpresaID: {tagRelacionada.GrupoImagemHome?.Empresa?.Id} | " +
                                           $"TipoRemocao: Exclusão do grupo");
 
-                    await _repository.Remove(tagRelacionada);
+                    _repository.Remove(tagRelacionada);
                 }
 
                 await _repository.ExecuteSqlCommand($"Delete From ImagemGrupoImagemHome Where GrupoImagemHome = {id}");
-                await _repository.Remove(grupoImagemHome);
+                _repository.Remove(grupoImagemHome);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -175,7 +175,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             sb.AppendLine(" Order by gd.Ordem, gd.Nome");
 
-            var gruposImagens = await _repository.FindByHql<GrupoImagemHome>(sb.ToString(), parameters.ToArray());
+            var gruposImagens = await _repository.FindByHql<GrupoImagemHome>(sb.ToString(), session: null, parameters.ToArray());
             var itensRetorno = gruposImagens.Select(a => _mapper.Map<GrupoImagemHomeModel>(a)).ToList();
 
             if (itensRetorno.Any())
@@ -276,7 +276,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"EmpresaID: {tagParaRemover.GrupoImagemHome?.Empresa?.Id} | " +
                                           $"TipoRemocao: Sincronização");
 
-                    await _repository.Remove(tagParaRemover);
+                     _repository.Remove(tagParaRemover);
                 }
             }
 

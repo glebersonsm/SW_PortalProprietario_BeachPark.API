@@ -1,24 +1,27 @@
 using Microsoft.Extensions.Logging;
 using Moq;
+using NHibernate;
 using SW_PortalProprietario.Application.Interfaces;
+using SW_PortalProprietario.Application.Models.AuthModels;
 using SW_PortalProprietario.Application.Models.TimeSharing;
 using SW_PortalProprietario.Application.Services.Core;
 using SW_PortalProprietario.Application.Services.Core.DistributedTransactions.TimeSharing;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
+using System.Collections.Generic;
 using Xunit;
 
 namespace SW_PortalProprietario.Test.Services.Core.Integration
 {
     /// <summary>
-    /// Testes de integra��o para validar comportamento de Two-Phase Commit
-    /// Simula cen�rios reais com m�ltiplos bancos de dados e APIs
+    /// Testes de integração para validar comportamento de Two-Phase Commit
+    /// Simula cenários reais com múltiplos bancos de dados e APIs
     /// </summary>
     public class SagaIntegrationTests
     {
-        private readonly Mock<IRepositoryNHCm> _repositoryCmMock;
-        private readonly Mock<IRepositoryNH> _repositorySystemMock;
+        private readonly Mock<IRepositoryHosted> _repositoryHostedCmMock;
+        private readonly Mock<IRepositoryHosted> _repositoryHostedPortalMock;
         private readonly Mock<ITimeSharingProviderService> _timeSharingServiceMock;
         private readonly Mock<ILogger<SagaOrchestrator>> _sagaLoggerMock;
         private readonly Mock<ILogger<ValidacaoCmStep>> _validacaoLoggerMock;
@@ -28,8 +31,8 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
         public SagaIntegrationTests()
         {
-            _repositoryCmMock = new Mock<IRepositoryNHCm>();
-            _repositorySystemMock = new Mock<IRepositoryNH>();
+            _repositoryHostedCmMock = new Mock<IRepositoryHosted>();
+            _repositoryHostedPortalMock = new Mock<IRepositoryHosted>();
             _timeSharingServiceMock = new Mock<ITimeSharingProviderService>();
             _sagaLoggerMock = new Mock<ILogger<SagaOrchestrator>>();
             _validacaoLoggerMock = new Mock<ILogger<ValidacaoCmStep>>();
@@ -38,7 +41,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             _confirmacaoLoggerMock = new Mock<ILogger<ConfirmacaoCmStep>>();
         }
 
-        #region Cen�rios de Sucesso Total
+        #region Cenários de Sucesso Total
 
         [Fact]
         public async Task CenarioReal_TodosOsBancosComSucesso_DeveCommitarTudo()
@@ -52,28 +55,28 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             };
 
             // Mock CM - Begin, Execute, Commit
-            _repositoryCmMock.Setup(r => r.BeginTransaction())
+            _repositoryHostedCmMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()))
                 .Callback(() => transactionStates["CM_Transaction"] = "BEGUN");
-            
-            _repositoryCmMock.Setup(r => r.CommitAsync())
+
+            _repositoryHostedCmMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .ReturnsAsync((executed: true, exception: (Exception?)null));
-            
-            _repositoryCmMock.Setup(r => r.Rollback());
+
+            _repositoryHostedCmMock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()));
 
             // Mock Portal - Begin, Execute, Commit
-            _repositorySystemMock.Setup(r => r.BeginTransaction())
+            _repositoryHostedPortalMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()))
                 .Callback(() => transactionStates["Portal_Transaction"] = "BEGUN");
-            
-            _repositorySystemMock.Setup(r => r.GetLoggedUser())
-                .ReturnsAsync((userId: "1", providerKeyUser: "test@test.com", companyId: "1", isAdm: false));
-            
-            _repositorySystemMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>()))
-                .ReturnsAsync((DistributedTransactionLog entity) => { entity.Id = 1; return entity; });
-            
-            _repositorySystemMock.Setup(r => r.CommitAsync())
+
+            _repositoryHostedPortalMock.Setup(r => r.GetLoggedToken())
+                .ReturnsAsync(new TokenResultModel { UserId = 1, Login = "test@test.com", CompanyId = "1" });
+
+            _repositoryHostedPortalMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>(), It.IsAny<IStatelessSession>()))
+                .ReturnsAsync((DistributedTransactionLog entity, NHibernate.IStatelessSession session) => { entity.Id = 1; return entity; });
+
+            _repositoryHostedPortalMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .ReturnsAsync((executed: true, exception: (Exception?)null));
-            
-            _repositorySystemMock.Setup(r => r.Rollback());
+
+            _repositoryHostedPortalMock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()));
 
             // Mock API - Sucesso
             _timeSharingServiceMock.Setup(s => s.Save(It.IsAny<InclusaoReservaInputModel>()))
@@ -88,11 +91,11 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             var steps = new List<IDistributedTransactionStep>
             {
-                new ValidacaoCmStep(_repositoryCmMock.Object, _validacaoLoggerMock.Object, model),
-                new GravacaoLogPortalStep(_repositorySystemMock.Object, _gravacaoLoggerMock.Object, 
+                new ValidacaoCmStep(_repositoryHostedCmMock.Object, _validacaoLoggerMock.Object, model),
+                new GravacaoLogPortalStep(_repositoryHostedPortalMock.Object, _gravacaoLoggerMock.Object,
                     operationId, "Test", model),
                 // CriacaoReservaApiStep removido pois tem dependência IServiceBase não configurada
-                new ConfirmacaoCmStep(_repositoryCmMock.Object, _confirmacaoLoggerMock.Object, model)
+                new ConfirmacaoCmStep(_repositoryHostedCmMock.Object, _confirmacaoLoggerMock.Object, model)
             };
 
             var orchestrator = new SagaOrchestrator(_sagaLoggerMock.Object);
@@ -107,7 +110,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
         #endregion
 
-        #region Cen�rios de Falha no Oracle (CM)
+        #region Cenários de Falha no Oracle (CM)
 
         [Fact]
         public async Task CenarioReal_FalhaNoOracleDepoisDePostgreSQL_DeveRollbackPostgreSQL()
@@ -121,31 +124,32 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             };
 
             // Mock Portal - Sucesso no commit
-            _repositorySystemMock.Setup(r => r.BeginTransaction());
-            _repositorySystemMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>()))
-                .ReturnsAsync((DistributedTransactionLog entity) => { entity.Id = 1; return entity; });
-            _repositorySystemMock.Setup(r => r.CommitAsync())
-                .Returns(Task.FromResult<(bool, Exception?)>((true, null)));
-            _repositorySystemMock.Setup(r => r.Rollback())
+            _repositoryHostedPortalMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()));
+            _repositoryHostedPortalMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>(), It.IsAny<IStatelessSession>()))
+                .ReturnsAsync((DistributedTransactionLog entity, NHibernate.IStatelessSession session) => { entity.Id = 1; return entity; });
+            _repositoryHostedPortalMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
+                .Returns(Task.FromResult<(bool, Exception?)>((true, null)))
+                .Callback(() => transactionStates["Portal_Commit"] = "SUCCESS");
+            _repositoryHostedPortalMock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()))
                 .Callback(() =>
                 {
                     transactionStates["Portal_Rollback"] = "EXECUTED";
                 });
 
             // Mock CM - Falha no commit
-            _repositoryCmMock.Setup(r => r.BeginTransaction());
-            _repositoryCmMock.Setup(r => r.CommitAsync())
+            _repositoryHostedCmMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()));
+            _repositoryHostedCmMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Callback(() => transactionStates["CM_Commit"] = "FAILED")
-                .Returns(Task.FromResult<(bool, Exception?)>((false, new Exception("Erro de conex�o Oracle"))));
+                .Returns(Task.FromResult<(bool, Exception?)>((false, new Exception("Erro de conexão Oracle"))));
 
             var model = new InclusaoReservaInputModel();
             var operationId = Guid.NewGuid().ToString();
 
             var steps = new List<IDistributedTransactionStep>
             {
-                new GravacaoLogPortalStep(_repositorySystemMock.Object, _gravacaoLoggerMock.Object, 
+                new GravacaoLogPortalStep(_repositoryHostedPortalMock.Object, _gravacaoLoggerMock.Object,
                     operationId, "Test", model),
-                new ConfirmacaoCmStep(_repositoryCmMock.Object, _confirmacaoLoggerMock.Object, model)
+                new ConfirmacaoCmStep(_repositoryHostedCmMock.Object, _confirmacaoLoggerMock.Object, model)
             };
 
             var orchestrator = new SagaOrchestrator(_sagaLoggerMock.Object);
@@ -155,8 +159,8 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             // Assert
             Assert.False(success);
-            
-            // PostgreSQL deve ter feito rollback (compensa��o)
+
+            // PostgreSQL deve ter feito rollback (compensação)
             Assert.Equal("SUCCESS", transactionStates["Portal_Commit"]);
             Assert.Equal("EXECUTED", transactionStates["Portal_Rollback"]);
             Assert.Equal("FAILED", transactionStates["CM_Commit"]);
@@ -164,7 +168,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
         #endregion
 
-        #region Cen�rios de Falha na API Externa
+        #region Cenários de Falha na API Externa
 
         [Fact]
         public async Task CenarioReal_FalhaAPIExterna_DeveRollbackTudoQueJaFoi()
@@ -173,33 +177,33 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             var executionLog = new List<string>();
 
             // Mock CM
-            _repositoryCmMock.Setup(r => r.BeginTransaction())
+            _repositoryHostedCmMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()))
                 .Callback(() => executionLog.Add("CM-BEGIN"));
-            _repositoryCmMock.Setup(r => r.CommitAsync())
+            _repositoryHostedCmMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Returns(() =>
                 {
                     executionLog.Add("CM-COMMIT");
                     return Task.FromResult((executed: true, exception: (Exception?)null));
                 });
-            _repositoryCmMock.Setup(r => r.Rollback())
+            _repositoryHostedCmMock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()))
                 .Callback(() => executionLog.Add("CM-ROLLBACK"));
 
             // Mock Portal
-            _repositorySystemMock.Setup(r => r.BeginTransaction())
+            _repositoryHostedPortalMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()))
                 .Callback(() => executionLog.Add("PORTAL-BEGIN"));
-            _repositorySystemMock.Setup(r => r.GetLoggedUser())
-                .ReturnsAsync((userId: "1", providerKeyUser: "test@test.com", companyId: "1", isAdm: false));
-            _repositorySystemMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>()))
-                .ReturnsAsync((DistributedTransactionLog entity) => { entity.Id = 1; return entity; });
-            _repositorySystemMock.Setup(r => r.CommitAsync())
+            _repositoryHostedPortalMock.Setup(r => r.GetLoggedToken())
+                .ReturnsAsync(new TokenResultModel { UserId = 1, Login = "test@test.com", CompanyId = "1" });
+            _repositoryHostedPortalMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>(), It.IsAny<IStatelessSession>()))
+                .ReturnsAsync((DistributedTransactionLog entity, NHibernate.IStatelessSession session) => { entity.Id = 1; return entity; });
+            _repositoryHostedPortalMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Returns(() =>
                 {
                     executionLog.Add("PORTAL-COMMIT");
                     return Task.FromResult((executed: true, exception: (Exception?)null));
                 });
-            _repositorySystemMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<SW_Utils.Auxiliar.Parameter[]>()))
+            _repositoryHostedPortalMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<SW_Utils.Auxiliar.Parameter[]>()))
                 .ReturnsAsync(new List<object>());
-            _repositorySystemMock.Setup(r => r.Rollback())
+            _repositoryHostedPortalMock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()))
                 .Callback(() => executionLog.Add("PORTAL-ROLLBACK"));
 
             // Mock API - FALHA
@@ -215,8 +219,8 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             var steps = new List<IDistributedTransactionStep>
             {
-                new ValidacaoCmStep(_repositoryCmMock.Object, _validacaoLoggerMock.Object, model),
-                new GravacaoLogPortalStep(_repositorySystemMock.Object, _gravacaoLoggerMock.Object, 
+                new ValidacaoCmStep(_repositoryHostedCmMock.Object, _validacaoLoggerMock.Object, model),
+                new GravacaoLogPortalStep(_repositoryHostedPortalMock.Object, _gravacaoLoggerMock.Object,
                     operationId, "Test", model),
                 new CriacaoReservaApiStep(_timeSharingServiceMock.Object, _criacaoLoggerMock.Object, model)
             };
@@ -229,20 +233,20 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             // Assert
             Assert.False(success);
             Assert.Contains("API-FAILED", executionLog);
-            
+
             // Deve ter rollback do Portal
             Assert.Contains("PORTAL-ROLLBACK", executionLog);
-            
-            // API falhou, ent�o Portal tentou compensar
+
+            // API falhou, então Portal tentou compensar
             var portalRollbackIndex = executionLog.IndexOf("PORTAL-ROLLBACK");
             var apiFailedIndex = executionLog.IndexOf("API-FAILED");
-            Assert.True(apiFailedIndex < portalRollbackIndex, 
-                "Rollback deve ocorrer AP�S a falha da API");
+            Assert.True(apiFailedIndex < portalRollbackIndex,
+                "Rollback deve ocorrer APÓS a falha da API");
         }
 
         #endregion
 
-        #region Cen�rios de Inconsist�ncia de Dados
+        #region Cenários de Inconsistência de Dados
 
         [Fact]
         public async Task CenarioReal_DadosInconsistentesEntreOracleEPostgreSQL_DeveDetectarEreverter()
@@ -253,25 +257,25 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             var inconsistencyDetected = false;
 
-            // Simular valida��o que detecta inconsist�ncia
-            _repositoryCmMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<SW_Utils.Auxiliar.Parameter>()))
+            // Simular validação que detecta inconsistência
+            _repositoryHostedCmMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<SW_Utils.Auxiliar.Parameter[]>()))
                 .ReturnsAsync(new[] { oracleData });
 
-            _repositorySystemMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<SW_Utils.Auxiliar.Parameter>()))
+            _repositoryHostedPortalMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<SW_Utils.Auxiliar.Parameter[]>()))
                 .ReturnsAsync(new[] { postgresData });
 
-            // Step que valida consist�ncia
+            // Step que valida consistência
             var validationStep = new Mock<IDistributedTransactionStep>();
             validationStep.Setup(s => s.StepName).Returns("ConsistencyValidation");
             validationStep.Setup(s => s.Order).Returns(1);
             validationStep.Setup(s => s.ExecuteAsync())
                 .ReturnsAsync(() =>
                 {
-                    // Simular detec��o de inconsist�ncia
+                    // Simular detecção de inconsistência
                     if (oracleData.ContratoId != postgresData.ContratoId)
                     {
                         inconsistencyDetected = true;
-                        return (false, "Inconsist�ncia de dados detectada!", null);
+                        return (false, "Inconsistência de dados detectada!", null);
                     }
                     return (true, string.Empty, null);
                 });
@@ -287,12 +291,12 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             // Assert
             Assert.False(success);
             Assert.True(inconsistencyDetected);
-            Assert.Contains("Inconsist�ncia", errorMessage);
+            Assert.Contains("Inconsistência", errorMessage);
         }
 
         #endregion
 
-        #region Cen�rios de Timeout
+        #region Cenários de Timeout
 
         [Fact]
         public async Task CenarioReal_TimeoutNoOracle_DeveAbortarECompensarOutros()
@@ -301,28 +305,28 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             var executionLog = new List<string>();
 
             // Mock Portal - sucesso
-            _repositorySystemMock.Setup(r => r.BeginTransaction())
+            _repositoryHostedPortalMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()))
                 .Callback(() => executionLog.Add("PORTAL-BEGIN"));
-            _repositorySystemMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>()))
-                .ReturnsAsync((DistributedTransactionLog entity) => { entity.Id = 1; return entity; });
-            _repositorySystemMock.Setup(r => r.CommitAsync())
+            _repositoryHostedPortalMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>(), It.IsAny<IStatelessSession>()))
+                .ReturnsAsync((DistributedTransactionLog entity, NHibernate.IStatelessSession session) => { entity.Id = 1; return entity; });
+            _repositoryHostedPortalMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Returns(() =>
                 {
                     executionLog.Add("PORTAL-COMMIT");
                     return Task.FromResult<(bool, Exception?)>((true, null));
                 });
-            _repositorySystemMock.Setup(r => r.Rollback())
+            _repositoryHostedPortalMock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()))
                 .Callback(() => executionLog.Add("PORTAL-ROLLBACK"));
 
             // Mock CM - TIMEOUT
-            _repositoryCmMock.Setup(r => r.BeginTransaction())
+            _repositoryHostedCmMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()))
                 .Callback(() =>
                 {
                     executionLog.Add("CM-BEGIN");
-                    Thread.Sleep(100); // Simular opera��o lenta
+                    Thread.Sleep(100); // Simular operação lenta
                 });
-            
-            _repositoryCmMock.Setup(r => r.CommitAsync())
+
+            _repositoryHostedCmMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Returns(async () =>
                 {
                     executionLog.Add("CM-TIMEOUT");
@@ -335,9 +339,9 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             var steps = new List<IDistributedTransactionStep>
             {
-                new GravacaoLogPortalStep(_repositorySystemMock.Object, _gravacaoLoggerMock.Object, 
+                new GravacaoLogPortalStep(_repositoryHostedPortalMock.Object, _gravacaoLoggerMock.Object,
                     operationId, "Test", model),
-                new ConfirmacaoCmStep(_repositoryCmMock.Object, _confirmacaoLoggerMock.Object, model)
+                new ConfirmacaoCmStep(_repositoryHostedCmMock.Object, _confirmacaoLoggerMock.Object, model)
             };
 
             var orchestrator = new SagaOrchestrator(_sagaLoggerMock.Object);
@@ -348,17 +352,17 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             // Assert
             Assert.False(success);
             Assert.Contains("PORTAL-ROLLBACK", executionLog);
-            
+
             // Compensação deve ocorrer
-            _repositorySystemMock.Verify(r => r.Rollback(), Times.AtLeastOnce);
-            
-            // Compensa��o deve ocorrer
-            _repositorySystemMock.Verify(r => r.Rollback(), Times.AtLeastOnce);
+            _repositoryHostedPortalMock.Verify(r => r.Rollback(It.IsAny<IStatelessSession>()), Times.AtLeastOnce);
+
+            // Compensação deve ocorrer
+            _repositoryHostedPortalMock.Verify(r => r.Rollback(It.IsAny<IStatelessSession>()), Times.AtLeastOnce);
         }
 
         #endregion
 
-        #region Cen�rios de Compensa��o Parcial
+        #region Cenários de Compensação Parcial
 
         [Fact]
         public async Task CenarioReal_CompensacaoFalhaEmUmBanco_DeveContinuarCompensandoOutros()
@@ -367,20 +371,20 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             var compensationLog = new List<string>();
 
             // Mock Portal - commit OK, mas rollback FALHA
-            _repositorySystemMock.Setup(r => r.BeginTransaction());
-            _repositorySystemMock.Setup(r => r.GetLoggedUser())
-                .ReturnsAsync((userId: "1", providerKeyUser: "test@test.com", companyId: "1", isAdm: false));
-            _repositorySystemMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>()))
-                .ReturnsAsync((DistributedTransactionLog entity) => { entity.Id = 1; return entity; });
-            _repositorySystemMock.Setup(r => r.CommitAsync())
+            _repositoryHostedPortalMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()));
+            _repositoryHostedPortalMock.Setup(r => r.GetLoggedToken())
+                .ReturnsAsync(new TokenResultModel { UserId = 1, Login = "test@test.com", CompanyId = "1" });
+            _repositoryHostedPortalMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>(), It.IsAny<IStatelessSession>()))
+                .ReturnsAsync((DistributedTransactionLog entity, NHibernate.IStatelessSession session) => { entity.Id = 1; return entity; });
+            _repositoryHostedPortalMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Returns(() =>
                 {
                     compensationLog.Add("PORTAL-COMMIT-OK");
                     return Task.FromResult((executed: true, exception: (Exception?)null));
                 });
-            _repositorySystemMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<SW_Utils.Auxiliar.Parameter[]>()))
+            _repositoryHostedPortalMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<SW_Utils.Auxiliar.Parameter[]>()))
                 .ReturnsAsync(new List<object>());
-            _repositorySystemMock.Setup(r => r.Rollback())
+            _repositoryHostedPortalMock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()))
                 .Callback(() =>
                 {
                     compensationLog.Add("PORTAL-ROLLBACK-FAILED");
@@ -388,14 +392,14 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
                 });
 
             // Mock CM - commit OK, rollback OK
-            _repositoryCmMock.Setup(r => r.BeginTransaction());
-            _repositoryCmMock.Setup(r => r.CommitAsync())
+            _repositoryHostedCmMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()));
+            _repositoryHostedCmMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Returns(() =>
                 {
                     compensationLog.Add("CM-COMMIT-OK");
                     return Task.FromResult((executed: true, exception: (Exception?)null));
                 });
-            _repositoryCmMock.Setup(r => r.Rollback())
+            _repositoryHostedCmMock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()))
                 .Callback(() => compensationLog.Add("CM-ROLLBACK-OK"));
 
             // Step que falha
@@ -411,9 +415,9 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             var steps = new List<IDistributedTransactionStep>
             {
-                new GravacaoLogPortalStep(_repositorySystemMock.Object, _gravacaoLoggerMock.Object, 
+                new GravacaoLogPortalStep(_repositoryHostedPortalMock.Object, _gravacaoLoggerMock.Object,
                     operationId, "Test", model),
-                new ConfirmacaoCmStep(_repositoryCmMock.Object, _confirmacaoLoggerMock.Object, model),
+                new ConfirmacaoCmStep(_repositoryHostedCmMock.Object, _confirmacaoLoggerMock.Object, model),
                 failingStep.Object
             };
 
@@ -424,49 +428,49 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             // Assert
             Assert.False(success);
-            
+
             // Deve ter tentado compensar ambos, mesmo com falha no Portal
             Assert.Contains("PORTAL-ROLLBACK-FAILED", compensationLog);
             Assert.Contains("CM-ROLLBACK-OK", compensationLog);
-            
+
             // CM deve ter sido compensado com sucesso
-            _repositoryCmMock.Verify(r => r.Rollback(), Times.Once);
+            _repositoryHostedCmMock.Verify(r => r.Rollback(It.IsAny<IStatelessSession>()), Times.Once);
         }
 
         #endregion
 
-        #region Cen�rios de Race Condition
+        #region Cenários de Race Condition
 
         [Fact]
         public async Task CenarioReal_ExecutacaoSimultanea_DeveIniciarECompensarAtomicamente()
         {
-            // Arrange - Simular 2 opera��es simult�neas
+            // Arrange - Simular 2 operações simultâneas
             var operation1Log = new List<string>();
             var operation2Log = new List<string>();
 
-            var repo1Mock = new Mock<IRepositoryNH>();
-            repo1Mock.Setup(r => r.BeginTransaction())
+            var repo1Mock = new Mock<IRepositoryHosted>();
+            repo1Mock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()))
                 .Callback(() => operation1Log.Add("OP1-BEGIN"));
-            repo1Mock.Setup(r => r.GetLoggedUser())
-                .ReturnsAsync((userId: "1", providerKeyUser: "test@test.com", companyId: "1", isAdm: false));
-            repo1Mock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>()))
-                .ReturnsAsync((DistributedTransactionLog entity) => { entity.Id = 1; return entity; });
-            repo1Mock.Setup(r => r.CommitAsync())
+            repo1Mock.Setup(r => r.GetLoggedToken())
+                .ReturnsAsync(new TokenResultModel { UserId = 1, Login = "test@test.com", CompanyId = "1" });
+            repo1Mock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>(), It.IsAny<IStatelessSession>()))
+                .ReturnsAsync((DistributedTransactionLog entity, NHibernate.IStatelessSession session) => { entity.Id = 1; return entity; });
+            repo1Mock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Callback(() => operation1Log.Add("OP1-COMMIT"))
                 .ReturnsAsync((executed: true, exception: (Exception?)null));
-            repo1Mock.Setup(r => r.Rollback());
+            repo1Mock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()));
 
-            var repo2Mock = new Mock<IRepositoryNH>();
-            repo2Mock.Setup(r => r.BeginTransaction())
+            var repo2Mock = new Mock<IRepositoryHosted>();
+            repo2Mock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()))
                 .Callback(() => operation2Log.Add("OP2-BEGIN"));
-            repo2Mock.Setup(r => r.GetLoggedUser())
-                .ReturnsAsync((userId: "2", providerKeyUser: "test2@test.com", companyId: "1", isAdm: false));
-            repo2Mock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>()))
-                .ReturnsAsync((DistributedTransactionLog entity) => { entity.Id = 2; return entity; });
-            repo2Mock.Setup(r => r.CommitAsync())
+            repo2Mock.Setup(r => r.GetLoggedToken())
+                .ReturnsAsync(new TokenResultModel { UserId = 2, Login = "test2@test.com", CompanyId = "1" });
+            repo2Mock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>(), It.IsAny<IStatelessSession>()))
+                .ReturnsAsync((DistributedTransactionLog entity, NHibernate.IStatelessSession session) => { entity.Id = 2; return entity; });
+            repo2Mock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Callback(() => operation2Log.Add("OP2-COMMIT"))
                 .ReturnsAsync((executed: true, exception: (Exception?)null));
-            repo2Mock.Setup(r => r.Rollback());
+            repo2Mock.Setup(r => r.Rollback(It.IsAny<IStatelessSession>()));
 
             var model = new InclusaoReservaInputModel();
             var operationId1 = Guid.NewGuid().ToString();
@@ -474,13 +478,13 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             var steps1 = new List<IDistributedTransactionStep>
             {
-                new GravacaoLogPortalStep(repo1Mock.Object, _gravacaoLoggerMock.Object, 
+                new GravacaoLogPortalStep(repo1Mock.Object, _gravacaoLoggerMock.Object,
                     operationId1, "Test", model)
             };
 
             var steps2 = new List<IDistributedTransactionStep>
             {
-                new GravacaoLogPortalStep(repo2Mock.Object, _gravacaoLoggerMock.Object, 
+                new GravacaoLogPortalStep(repo2Mock.Object, _gravacaoLoggerMock.Object,
                     operationId2, "Test", model)
             };
 
@@ -503,4 +507,3 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
         #endregion
     }
 }
-

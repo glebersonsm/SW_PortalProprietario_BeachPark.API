@@ -39,7 +39,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                     throw new FileNotFoundException($"Não foi encontrado o tipo de documento com Id: {id}!");
                 }
 
-                var pessoaDocumentoUsing = (await _repository.FindBySql<TipoDocumentoPessoaModel>("Select s.Id, s.Numero From PessoaDocumento s Where s.TipoDocumento =:tipodocumentoId", new Parameter("tipodocumentoId", id))).Take(5).ToList();
+                var pessoaDocumentoUsing = (await _repository.FindBySql<TipoDocumentoPessoaModel>("Select s.Id, s.Numero From PessoaDocumento s Where s.TipoDocumento =:tipodocumentoId", session: null, new Parameter("tipodocumentoId", id))).Take(5).ToList();
                 if (pessoaDocumentoUsing.Any())
                 {
                     foreach (var itempessoaDocumentoUsing in pessoaDocumentoUsing)
@@ -49,7 +49,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
 
                 _repository.BeginTransaction();
-                await _repository.Remove(tipoDocumentoPessoa);
+                _repository.Remove(tipoDocumentoPessoa);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -138,7 +138,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
             }
 
-            var tipoDocumento = await _repository.FindByHql<TipoDocumentoPessoa>(sb.ToString(), parameters.ToArray());
+            var tipoDocumento = await _repository.FindByHql<TipoDocumentoPessoa>(sb.ToString(), session: null, parameters.ToArray());
 
             if (tipoDocumento.Any())
                 return await _serviceBase.SetUserName(tipoDocumento.Select(a => (TipoDocumentoPessoaModel)a).AsList());
@@ -151,7 +151,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             _repository.BeginTransaction();
             try
             {
-                var tipodocumento = (await _repository.FindByHql<TipoDocumentoPessoa>("From TipoDocumentoPessoa ge Where ge.Id = :id", new Parameter[]
+                var tipodocumento = (await _repository.FindByHql<TipoDocumentoPessoa>("From TipoDocumentoPessoa ge Where ge.Id = :id", session: null, new Parameter[]
                 { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o Tipo Documento: {model.Id}");
 
                 tipodocumento.Nome = model.Nome ?? tipodocumento.Nome;

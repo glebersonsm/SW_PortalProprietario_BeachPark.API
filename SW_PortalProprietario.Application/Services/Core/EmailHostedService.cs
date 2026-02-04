@@ -108,7 +108,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0)
             {
-                totalRegistros = Convert.ToInt32(await _repository.CountTotalEntry(sql, parameters.ToArray()));
+                totalRegistros = Convert.ToInt32(await _repository.CountTotalEntry(sql, session: null, parameters.ToArray()));
             }
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
@@ -121,10 +121,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             sb.AppendLine(" Order by e.Id ");
 
-            var emails = searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0 ?
-                await _repository.FindBySql<EmailModel>(sb.ToString(), searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1), searchModel.NumeroDaPagina.GetValueOrDefault(1), parameters.ToArray())
-                : await _repository.FindBySql<EmailModel>(sb.ToString(), parameters.ToArray());
-
+            var emails = await _repository.FindBySql<EmailModel>(sb.ToString(), session: null, parameters.ToArray());
 
             if (emails.Any())
             {
@@ -158,7 +155,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(email);
+                _repository.Remove(email);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)

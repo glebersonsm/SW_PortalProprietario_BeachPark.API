@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(pessoaEndereco);
+                _repository.Remove(pessoaEndereco);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -157,7 +157,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 sb.AppendLine($" and ge.UsuarioCriacao = {searchModel.UsuarioCriacao.GetValueOrDefault()}");
             }
 
-            var tipoEndereco = await _repository.FindByHql<PessoaEndereco>(sb.ToString(), parameters.ToArray());
+            var tipoEndereco = await _repository.FindByHql<PessoaEndereco>(sb.ToString(), session: null, parameters.ToArray());
 
             if (tipoEndereco.Any())
             {

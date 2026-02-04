@@ -97,7 +97,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 parameters.Add(new Parameter("statusName", searchModel.Status.GetValueOrDefault() == Domain.Enumns.EnumStatus.Ativo ? "Ativo" : "Inativo"));
             }
 
-            var companiesGroup = await _repository.FindByHql<GrupoEmpresa>(sb.ToString(), parameters.ToArray());
+            var companiesGroup = await _repository.FindByHql<GrupoEmpresa>(sb.ToString(), session: null, parameters.ToArray());
 
             listGrupoEmpresaRetorno = companiesGroup.Any() ? companiesGroup.Select(a => _mapper.Map(a, new GrupoEmpresaModel())).AsList() : new();
 
@@ -151,7 +151,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 parameters.Add(new Parameter("id", searchModel.Id.GetValueOrDefault()));
             }
 
-            var modules = await _repository.FindBySql<ModuloModel>(sb.ToString(), parameters.ToArray());
+            var modules = await _repository.FindBySql<ModuloModel>(sb.ToString(), session: null, parameters.ToArray());
             if (searchModel.CarregarPermissoes.GetValueOrDefault(false))
             {
                 foreach (var module in modules)
@@ -305,7 +305,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 parameters.Add(new Parameter("grupoEmpresaId", searchModel.Id));
             }
 
-            var empresas = await _repository.FindByHql<Empresa>(sb.ToString(), parameters.ToArray());
+            var empresas = await _repository.FindByHql<Empresa>(sb.ToString(), session: null, parameters.ToArray());
 
             listEmpresaRetorno = empresas.Any() ? empresas.Select(a => _mapper.Map(a, new EmpresaModel())).AsList() : new();
 

@@ -43,7 +43,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(country);
+                _repository.Remove(country);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -117,7 +117,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 parameters.Add(new Parameter("codeibgecountry", searchModel.CodeIbgeCountry));
             }
 
-            var country = await _repository.FindByHql<Pais>(sb.ToString(), parameters.ToArray());
+            var country = await _repository.FindByHql<Pais>(sb.ToString(), session: null, parameters.ToArray());
 
             if (country.Any())
                 return await _serviceBase.SetUserName(country.Select(a => _mapper.Map<PaisModel>(a)).AsList());
@@ -130,7 +130,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             _repository.BeginTransaction();
             try
             {
-                var country = (await _repository.FindByHql<Pais>("From Pais ge Where ge.Id = :id", new Parameter[] { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o país: {model.Id}");
+                var country = (await _repository.FindByHql<Pais>("From Pais ge Where ge.Id = :id", session: null, new Parameter[] { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o país: {model.Id}");
                 country = _mapper.Map(model, country);
                 await _repository.Save(country);
 

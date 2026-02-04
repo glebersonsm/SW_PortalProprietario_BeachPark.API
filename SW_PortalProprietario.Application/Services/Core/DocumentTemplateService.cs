@@ -116,7 +116,7 @@ public class DocumentTemplateService : IDocumentTemplateService
             // Buscar template existente pelo ID dele
             var itemToUpdate = (await _repository.FindByHql<DocumentTemplate>(
                 "from DocumentTemplate dt where dt.TemplateType = :templateType and dt.Id = :templateId",
-                parameters)).FirstOrDefault();
+                session: null, parameters)).FirstOrDefault();
 
             if (itemToUpdate == null)
                 throw new ArgumentException($"Não foi encontrado o template de Id: {model.TemplateId}");
@@ -193,7 +193,7 @@ public class DocumentTemplateService : IDocumentTemplateService
         {
             var templateById = await _repository.FindByHql<DocumentTemplate>(
                 "from DocumentTemplate dt where dt.Id = :templateId",
-                new[] { new Parameter("templateId", templateId.Value) });
+                session: null, new[] { new Parameter("templateId", templateId.Value) });
             
             var entity = templateById.FirstOrDefault();
             if (entity != null && entity.Active)
@@ -215,7 +215,7 @@ public class DocumentTemplateService : IDocumentTemplateService
         // Buscar template ativo por tipo (sem templateId ou se não encontrou pelo ID)
         var resultado = await _repository.FindByHql<DocumentTemplate>(
             "from DocumentTemplate dt where dt.TemplateType = :templateType and dt.Active = :active order by dt.Version desc",
-            parameters.ToArray());
+            session: null, parameters.ToArray());
 
         var entityByType = resultado.FirstOrDefault();
         if (entityByType == null)
@@ -247,7 +247,7 @@ public class DocumentTemplateService : IDocumentTemplateService
 
         sb.Append(" order by dt.Id");
 
-        var entidades = await _repository.FindByHql<DocumentTemplate>(sb.ToString(), parameters.ToArray());
+        var entidades = await _repository.FindByHql<DocumentTemplate>(sb.ToString(), session: null, parameters.ToArray());
 
         // Retornar todos os templates sem filtragem por grupo ou por active
         var models = entidades.Select(e => _mapper.Map<DocumentTemplateSummaryModel>(e)).ToList();
@@ -269,7 +269,7 @@ public class DocumentTemplateService : IDocumentTemplateService
         {
             var templateById = await _repository.FindByHql<DocumentTemplate>(
                 "from DocumentTemplate dt where dt.Id = :templateId",
-                new[] { new Parameter("templateId", templateId.Value) });
+                session: null, new[] { new Parameter("templateId", templateId.Value) });
             
             var entity = templateById.FirstOrDefault();
             if (entity != null && entity.Active)
@@ -281,7 +281,7 @@ public class DocumentTemplateService : IDocumentTemplateService
         // Buscar template ativo por tipo (sem templateId ou se não encontrou pelo ID)
         var resultado = await _repository.FindByHql<DocumentTemplate>(
             "from DocumentTemplate dt where dt.TemplateType = :templateType and dt.Active = :active order by dt.Version desc",
-            parameters.ToArray());
+            session: null, parameters.ToArray());
 
         return resultado.FirstOrDefault()?.ContentHtml ?? string.Empty;
     }
@@ -366,7 +366,7 @@ public class DocumentTemplateService : IDocumentTemplateService
 
             var template = (await _repository.FindByHql<DocumentTemplate>(
                 "from DocumentTemplate dt where dt.Id = :templateId",
-                new[] { new Parameter("templateId", templateId) })).FirstOrDefault();
+                session: null, new[] { new Parameter("templateId", templateId) })).FirstOrDefault();
 
             if (template == null)
                 throw new ArgumentException($"Template com ID {templateId} não encontrado.");

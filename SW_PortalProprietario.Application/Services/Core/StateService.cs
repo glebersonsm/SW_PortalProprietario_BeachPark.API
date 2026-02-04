@@ -43,7 +43,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(state);
+                _repository.Remove(state);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -114,7 +114,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 parameters.Add(new Parameter("ibgestatecode", searchModel.CodigoEstadoIbge));
             }
 
-            var state = await _repository.FindByHql<Estado>(sb.ToString(), parameters.ToArray());
+            var state = await _repository.FindByHql<Estado>(sb.ToString(), session: null, parameters.ToArray());
 
             if (state.Any())
                 return await _serviceBase.SetUserName(state.Select(a => _mapper.Map<EstadoModel>(a)).AsList());
@@ -127,7 +127,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             _repository.BeginTransaction();
             try
             {
-                var state = (await _repository.FindByHql<Estado>("From Estado ge Inner Join Fetch ge.Pais p Where ge.Id = :id", new Parameter[]
+                var state = (await _repository.FindByHql<Estado>("From Estado ge Inner Join Fetch ge.Pais p Where ge.Id = :id", session: null, new Parameter[]
                 { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o estado: {model.Id}");
 
                 state = _mapper.Map(model, state);

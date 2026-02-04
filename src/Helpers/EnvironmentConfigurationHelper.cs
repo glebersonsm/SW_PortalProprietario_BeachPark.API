@@ -82,6 +82,7 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             OverrideIfNotEmpty(configuration, "UsarSenhaPadraoAmbienteHomologacao", "USAR_SENHA_PADRAO_AMBIENTE_HOMOLOGACAO");
             OverrideIfNotEmpty(configuration, "EnviarEmailApenasParaDestinatariosPermitidos", "ENVIAR_EMAIL_APENAS_PARA_DESTINATARIOS_PERMITIDOS");
             OverrideIfNotEmpty(configuration, "DestinatarioEmailPermitido", "DESTINATARIO_EMAIL_PERMITIDO");
+            OverrideIfNotEmpty(configuration, "ConnectionStrings:ForceRollback", "FORCE_ROLLBACK");
 
             // CORS
             OverrideIfNotEmpty(configuration, "OrigensPermitidas", "ORIGENS_PERMITIDAS");
@@ -89,6 +90,51 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             // Other
             OverrideIfNotEmpty(configuration, "SoFaltaEuUrl", "SO_FALTA_EU_URL");
             OverrideIfNotEmpty(configuration, "UsuarioSistemaId", "USUARIO_SISTEMA_ID");
+            OverrideIfNotEmpty(configuration, "EmpresaSwPortalId", "EMPRESA_SW_PORTAL_ID");
+            OverrideIfNotEmpty(configuration, "EmpresaCMId", "EMPRESA_CM_ID");
+            OverrideIfNotEmpty(configuration, "ControleDeUsuarioViaSFE", "CONTROLE_USUARIO_SFE");
+            OverrideIfNotEmpty(configuration, "ControleDeUsuarioViaAccessCenter", "CONTROLE_USUARIO_ACCESS_CENTER");
+            OverrideIfNotEmpty(configuration, "IntegradoCom", "INTEGRADO_COM");
+            OverrideIfNotEmpty(configuration, "TagGeralId", "TAG_GERAL_ID");
+            OverrideIfNotEmpty(configuration, "TagTropicalId", "TAG_TROPICAL_ID");
+            OverrideIfNotEmpty(configuration, "TagHomesId", "TAG_HOMES_ID");
+            OverrideIfNotEmpty(configuration, "BloquearCriacaoAdmForaDebugMode", "BLOQUEAR_CRIACAO_ADM_FORA_DEBUG");
+            OverrideIfNotEmpty(configuration, "AdmGroupDefaultName", "ADM_GROUP_DEFAULT_NAME");
+            // Audit Log
+            OverrideIfNotEmpty(configuration, "AuditLog:ConsumerConcurrency", "AUDIT_LOG_CONSUMER_CONCURRENCY");
+            OverrideIfNotEmpty(configuration, "AuditLog:RetryAttempts", "AUDIT_LOG_RETRY_ATTEMPTS");
+            OverrideIfNotEmpty(configuration, "AuditLog:RetryDelaySeconds", "AUDIT_LOG_RETRY_DELAY_SECONDS");
+
+            // Processing Queues
+            OverrideIfNotEmpty(configuration, "SendOperationsToProcessingLogQueue", "SEND_OPERATIONS_TO_LOG_QUEUE");
+            OverrideIfNotEmpty(configuration, "SaveLogOperationsFromProcessingLogQueue", "SAVE_LOG_FROM_QUEUE");
+            OverrideIfNotEmpty(configuration, "SendEmailFromProcessingQueue", "SEND_EMAIL_FROM_QUEUE");
+            OverrideIfNotEmpty(configuration, "AutomaticCommunicationEmailEnabled", "AUTOMATIC_EMAIL_ENABLED");
+
+            // Wait Times
+            OverrideIfNotEmpty(configuration, "TimeWaitInMinutesSendOperationsToPorcessingLogQueue", "WAIT_SEND_LOG_QUEUE");
+            OverrideIfNotEmpty(configuration, "TimeWaitInMinutesSaveOperationsFromPorcessingLogQueueConsumer", "WAIT_SAVE_LOG_QUEUE");
+            OverrideIfNotEmpty(configuration, "TimeWaitInMinutesSandEmailFromPorcessingQueueConsumer", "WAIT_SEND_EMAIL_QUEUE");
+            OverrideIfNotEmpty(configuration, "TimeWaitInSecondsSearchPixResult", "WAIT_SEARCH_PIX");
+            OverrideIfNotEmpty(configuration, "TimeWaitInSecondsFinalizeCartaoResult", "WAIT_FINALIZE_CARTAO");
+
+            // Specific Certidões Config
+            OverrideIfNotEmpty(configuration, "CertidoesConfig:PositivaConfigPorUnidade", "CERTIDOES_POSITIVA_UNIDADE");
+            OverrideIfNotEmpty(configuration, "CertidoesConfig:NegativaConfigPorUnidade", "CERTIDOES_NEGATIVA_UNIDADE");
+            OverrideIfNotEmpty(configuration, "CertidoesConfig:PositivaConfigPorCliente", "CERTIDOES_POSITIVA_CLIENTE");
+            OverrideIfNotEmpty(configuration, "CertidoesConfig:NegativaConfigPorCliente", "CERTIDOES_NEGATIVA_CLIENTE");
+            OverrideIfNotEmpty(configuration, "CertidoesConfig:ContratoSCPPorEmpresa", "CERTIDOES_CONTRATO_SCP_EMPRESA");
+            OverrideIfNotEmpty(configuration, "CertidoesConfig:ContratoSCPEspanhol", "CERTIDOES_CONTRATO_SCP_ESPANHOL");
+            OverrideIfNotEmpty(configuration, "CertidoesConfig:AgruparCertidaoPorCliente", "CERTIDOES_AGRUPAR_CLIENTE");
+            OverrideIfNotEmpty(configuration, "CertidoesConfig:PathValidacaoProtocolo", "CERTIDOES_PATH_VALIDACAO");
+
+            // Broker & Others
+            OverrideIfNotEmpty(configuration, "UseBrokerType", "USE_BROKER_TYPE");
+            OverrideIfNotEmpty(configuration, "PodeInformarDadosDePixParaRecebimentoSCP", "PODE_INFORMAR_PIX_SCP");
+            OverrideIfNotEmpty(configuration, "TimeSharingAtivado", "TIME_SHARING_ATIVADO");
+            OverrideIfNotEmpty(configuration, "MultipropriedadeAtivada", "MULTIPROPRIEDADE_ATIVADA");
+            OverrideIfNotEmpty(configuration, "UpdateDataBase", "UPDATE_DATABASE");
+            OverrideIfNotEmpty(configuration, "UpdateFramework", "UPDATE_FRAMEWORK");
         }
 
         private static void OverrideIfNotEmpty(IConfiguration configuration, string configKey, string envKey)

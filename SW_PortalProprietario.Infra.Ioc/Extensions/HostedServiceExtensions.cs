@@ -33,9 +33,9 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             services.AddNHbernateHosted(configuration);
             services.TryAddSingleton<ILogOperationService, LogOperationService>();
 
-            services.TryAddSingleton<IUnitOfWorkHosted, UnitOfWorkHosted>();
-            services.TryAddSingleton<IAuthenticatedBaseHostedService, AuthenticatedBaseHostedService>();
-            services.TryAddSingleton<IRepositoryHosted, RepositoryHosted>();
+            services.TryAddScoped<IUnitOfWorkHosted, UnitOfWorkHosted>();
+            services.TryAddScoped<IAuthenticatedBaseHostedService, AuthenticatedBaseHostedService>();
+            services.TryAddScoped<IRepositoryHosted, RepositoryHosted>();
             services.TryAddSingleton<IEmailSenderHostedService, EmailSenderHostedService>();
 
 

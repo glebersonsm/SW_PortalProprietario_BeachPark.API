@@ -43,7 +43,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
 
                 _repository.BeginTransaction();
-                await _repository.Remove(pessoa);
+                _repository.Remove(pessoa);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -192,7 +192,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             }
 
 
-            var pessoas = await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.Pessoa>(sb.ToString(), parameters.ToArray());
+            var pessoas = await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.Pessoa>(sb.ToString(), session: null, parameters.ToArray());
 
             if (pessoas.Any())
             {
