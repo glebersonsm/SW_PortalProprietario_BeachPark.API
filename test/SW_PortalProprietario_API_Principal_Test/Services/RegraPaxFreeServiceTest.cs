@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NHibernate;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.GeralModels;
@@ -87,7 +88,7 @@ namespace SW_PortalProprietario.Test.Services
             };
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFree>(It.IsAny<string>()))
+                .Setup(x => x.FindByHql<RegraPaxFree>(It.IsAny<string>(), It.IsAny<IStatelessSession>(), It.IsAny<object[]>()))
                 .ReturnsAsync(new List<RegraPaxFree>());
 
             _repositoryMock
@@ -381,7 +382,7 @@ namespace SW_PortalProprietario.Test.Services
             var regraModel1 = new RegraPaxFreeModel { Id = 1, Nome = "Regra 1" };
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFree>(It.IsAny<string>(), It.IsAny<Parameter[]>()))
+                .Setup(x => x.FindByHql<RegraPaxFree>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFree> { regra1 });
 
             _mapperMock
@@ -390,15 +391,15 @@ namespace SW_PortalProprietario.Test.Services
 
  
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFreeConfiguracao>(It.IsAny<string>()))
+                .Setup(x => x.FindByHql<RegraPaxFreeConfiguracao>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFreeConfiguracao>());
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFreeHotel>(It.Is<string>(s => s.Contains("r.Id = 1"))))
+                .Setup(x => x.FindByHql<RegraPaxFreeHotel>(It.Is<string>(s => s.Contains("r.Id = 1")), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFreeHotel> { hotel1 });
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFreeHotel>(It.Is<string>(s => s.Contains("r.Id = 2"))))
+                .Setup(x => x.FindByHql<RegraPaxFreeHotel>(It.Is<string>(s => s.Contains("r.Id = 2")), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFreeHotel>());
 
             _serviceBaseMock
@@ -461,7 +462,7 @@ namespace SW_PortalProprietario.Test.Services
             };
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFree>(It.IsAny<string>(), It.IsAny<Parameter[]>()))
+                .Setup(x => x.FindByHql<RegraPaxFree>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFree> { regraVigente });
 
             _mapperMock
@@ -469,11 +470,11 @@ namespace SW_PortalProprietario.Test.Services
                 .Returns(regraModel);
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFreeConfiguracao>(It.IsAny<string>()))
+                .Setup(x => x.FindByHql<RegraPaxFreeConfiguracao>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFreeConfiguracao>());
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFreeHotel>(It.IsAny<string>()))
+                .Setup(x => x.FindByHql<RegraPaxFreeHotel>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFreeHotel> { hotel1 });
 
             // Act
@@ -512,11 +513,11 @@ namespace SW_PortalProprietario.Test.Services
             var regraModel = new RegraPaxFreeModel { Id = 1, Nome = inputModel.Nome };
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFree>(It.IsAny<string>()))
+                .Setup(x => x.FindByHql<RegraPaxFree>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFree>());
 
             _repositoryMock
-                .Setup(x => x.Save(It.IsAny<RegraPaxFree>()))
+                .Setup(x => x.Save(It.IsAny<RegraPaxFree>(), It.IsAny<NHibernate.IStatelessSession>()))
                 .ReturnsAsync(regraSalva);
 
             _repositoryMock
@@ -524,15 +525,15 @@ namespace SW_PortalProprietario.Test.Services
                 .ReturnsAsync((("1", "provider", "1", false)) as (string userId, string providerKeyUser, string companyId, bool isAdm)?);
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFreeHotel>(It.IsAny<string>()))
+                .Setup(x => x.FindByHql<RegraPaxFreeHotel>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFreeHotel>());
 
             _repositoryMock
-                .Setup(x => x.CommitAsync())
+                .Setup(x => x.CommitAsync(It.IsAny<NHibernate.IStatelessSession>()))
                 .ReturnsAsync((true, (Exception?)null));
 
             _repositoryMock
-                .Setup(x => x.FindByHql<RegraPaxFreeConfiguracao>(It.IsAny<string>()))
+                .Setup(x => x.FindByHql<RegraPaxFreeConfiguracao>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                 .ReturnsAsync(new List<RegraPaxFreeConfiguracao>());
 
             _mapperMock
@@ -549,8 +550,8 @@ namespace SW_PortalProprietario.Test.Services
             // Assert
             result.Should().NotBeNull();
             // Apenas 1 hotel válido deve ser salvo
-            _repositoryMock.Verify(x => x.Save(It.Is<RegraPaxFreeHotel>(h => h.HotelId == 1)), Times.Once);
-            _repositoryMock.Verify(x => x.Save(It.Is<RegraPaxFreeHotel>(h => h.HotelId == null || h.HotelId <= 0)), Times.Never);
+            _repositoryMock.Verify(x => x.Save(It.Is<RegraPaxFreeHotel>(h => h.HotelId == 1), It.IsAny<NHibernate.IStatelessSession>()), Times.Once);
+            _repositoryMock.Verify(x => x.Save(It.Is<RegraPaxFreeHotel>(h => h.HotelId == null || h.HotelId <= 0), It.IsAny<NHibernate.IStatelessSession>()), Times.Never);
         }
 
         #endregion

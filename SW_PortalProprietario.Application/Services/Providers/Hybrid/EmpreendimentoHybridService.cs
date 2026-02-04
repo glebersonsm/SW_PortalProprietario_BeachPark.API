@@ -156,7 +156,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0)
                 searchModel.NumeroDaPagina = 1;
 
-            var totalRegistros = await _repositoryNHAccessCenter.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repositoryNHAccessCenter.CountTotalEntry(sql, session: null, parameters.ToArray());
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
                 totalRegistros < (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault() * searchModel.NumeroDaPagina.GetValueOrDefault()) - searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1))
@@ -293,7 +293,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0)
                 searchModel.NumeroDaPagina = 1;
 
-            var totalRegistros = await _repositoryNHAccessCenter.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repositoryNHAccessCenter.CountTotalEntry(sql, session: null, parameters.ToArray());
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
                 totalRegistros < (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault() * searchModel.NumeroDaPagina.GetValueOrDefault()) - searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1))
@@ -603,7 +603,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0)
                 searchModel.NumeroDaPagina = 1;
 
-            var totalRegistros = await _repositoryNHAccessCenter.CountTotalEntry(sql, parameters.ToArray());
+            var totalRegistros = await _repositoryNHAccessCenter.CountTotalEntry(sql, session: null, parameters.ToArray());
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
                 totalRegistros < (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault() * searchModel.NumeroDaPagina.GetValueOrDefault()) - searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1))
@@ -794,7 +794,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                         emp.Id = {empresa.Id} and 
                         clp.AgendamentoId = {agendamentoId} and
                         ((clp.LiberacaoConfirmada != {(int)EnumSimNao.Sim} and clp.DataConfirmacao is null) or (clp.DataConfirmacao >= :ultimos10minutos))
-                    Order by clp.Id Desc", new Parameter("ultimos10minutos", DateTime.Now.AddMinutes(-10)))).FirstOrDefault();
+                    Order by clp.Id Desc", session: null, new Parameter("ultimos10minutos", DateTime.Now.AddMinutes(-10)))).FirstOrDefault();
 
 
                 if (lastCodigoVerificacaoGerado == null || string.IsNullOrEmpty(lastCodigoVerificacaoGerado.CodigoEnviadoAoCliente))

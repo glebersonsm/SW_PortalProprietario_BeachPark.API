@@ -8,18 +8,18 @@ namespace SW_PortalProprietario.Application.Services.Core.DistributedTransaction
     /// Step 4: Confirma��o final no sistema CM (Oracle)
     /// Atualiza status e confirma a opera��o
     /// </summary>
-    public class ConfirmacaoCmStep : IDistributedTransactionStep
+    public class ConfirmacaoCmStep_utf8 : IDistributedTransactionStep
     {
         private readonly IRepositoryNHCm _repositoryCm;
-        private readonly ILogger<ConfirmacaoCmStep> _logger;
+        private readonly ILogger<ConfirmacaoCmStep_utf8> _logger;
         private readonly object _confirmationData;
 
         public string StepName => "ConfirmacaoCM";
         public int Order => 4;
 
-        public ConfirmacaoCmStep(
+        public ConfirmacaoCmStep_utf8(
             IRepositoryNHCm repositoryCm,
-            ILogger<ConfirmacaoCmStep> logger,
+            ILogger<ConfirmacaoCmStep_utf8> logger,
             object confirmationData)
         {
             _repositoryCm = repositoryCm;

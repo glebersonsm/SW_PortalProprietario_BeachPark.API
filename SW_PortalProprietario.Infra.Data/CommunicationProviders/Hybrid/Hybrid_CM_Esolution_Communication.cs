@@ -306,7 +306,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
 
             if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0)
             {
-                totalRegistros = Convert.ToInt32((await _repositoryCm.CountTotalEntry(sql, new List<Parameter>().ToArray())));
+                totalRegistros = Convert.ToInt32((await _repositoryCm.CountTotalEntry(sql, null, new List<Parameter>().ToArray())));
             }
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
@@ -1370,7 +1370,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
 
             if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0)
             {
-                totalRegistros = Convert.ToInt32(await _repositoryPortalEsol.CountTotalEntry(sql, new List<Parameter>().ToArray()));
+                totalRegistros = Convert.ToInt32(await _repositoryPortalEsol.CountTotalEntry(sql, null, new List<Parameter>().ToArray()));
             }
 
             if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||

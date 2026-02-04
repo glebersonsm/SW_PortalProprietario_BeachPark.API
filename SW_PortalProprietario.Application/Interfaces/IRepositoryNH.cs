@@ -32,6 +32,6 @@ namespace SW_PortalProprietario.Application.Interfaces
         Task<ParametroSistemaViewModel?> GetParametroSistemaViewModel();
         Task ExecuteSqlCommand(string command);
         Task<string> GetToken();
-
+        Task<TokenResultModel> GetLoggedToken();
     }
 }

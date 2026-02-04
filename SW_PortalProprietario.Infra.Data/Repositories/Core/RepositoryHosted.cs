@@ -5,11 +5,17 @@ using Microsoft.Extensions.Logging;
 using NHibernate;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.AuthModels;
+using SW_PortalProprietario.Application.Models.SystemModels;
+using SW_PortalProprietario.Application.Services.Core;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core;
+using SW_PortalProprietario.Domain.Entities.Core.Framework;
 using SW_Utils.Auxiliar;
 using SW_Utils.Enum;
+using SW_Utils.Functions;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
+using System.Text;
 
 namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 {
@@ -38,217 +44,124 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             _forceRollback = _configuration.GetValue<bool>("ConnectionStrings:ForceRollback", false) && Debugger.IsAttached;
         }
 
-        public async Task<T> FindById<T>(int id, IStatelessSession? session)
+        public async Task<T> FindById<T>(int id, IStatelessSession? session = null)
         {
-            if (session == null)
-            {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-                return await Session.GetAsync<T>(id, CancellationToken);
-            }
-            else
-            {
-                return await session.GetAsync<T>(id, CancellationToken);
-            }
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            return await sessionToUse.GetAsync<T>(id, CancellationToken);
         }
 
-        public void Remove<T>(T entity, IStatelessSession? session)
+        public void Remove<T>(T entity, IStatelessSession? session = null)
         {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
             var usuario = _authenticatedBaseHostedService.GetLoggedUserAsync().Result;
             if (entity is EntityBaseCore objEntity)
             {
-                if (session == null)
-                {
-                    ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-                    objEntity.UsuarioRemocaoId = usuario?.UserId;
-                    Session.DeleteAsync(entity, CancellationToken);
-                }
-                else
-                {
-                    objEntity.UsuarioRemocaoId = usuario?.UserId;
-                    session.DeleteAsync(entity, CancellationToken);
-                }
+                objEntity.UsuarioRemocaoId = usuario?.UserId;
+                sessionToUse.DeleteAsync(entity, CancellationToken);
             }
             else throw new ArgumentException($"Objeto: {entity} não herda da EntityBaseCore");
         }
 
-        public async void RemoveRange<T>(IList<T> entities, IStatelessSession? session)
+        public async void RemoveRange<T>(IList<T> entities, IStatelessSession? session = null)
         {
-
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
             var usuario = await _authenticatedBaseHostedService.GetLoggedUserAsync();
-            if (session == null)
+            foreach (var entity in entities.Cast<EntityBaseCore>())
             {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-                foreach (var entity in entities.Cast<EntityBaseCore>())
-                {
-                    entity.UsuarioRemocaoId = usuario?.UserId;
-                    await Session.DeleteAsync(entity, CancellationToken);
-                }
+                entity.UsuarioRemocaoId = usuario?.UserId;
+                await sessionToUse.DeleteAsync(entity, CancellationToken);
             }
-            else
-            {
-                foreach (var entity in entities.Cast<EntityBaseCore>())
-                {
-                    entity.UsuarioRemocaoId = usuario?.UserId;
-                    await session.DeleteAsync(entity, CancellationToken);
-                }
-            }
-
         }
 
-        public async Task<T> Save<T>(T entity, IStatelessSession? session)
+        public async Task<T> Save<T>(T entity, IStatelessSession? session = null)
         {
-
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
             var usuario = await _authenticatedBaseHostedService.GetLoggedUserAsync();
 
-            if (session == null)
+            if (entity is EntityBaseCore objEntity)
             {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-                if (entity is EntityBaseCore objEntity)
+                if (objEntity.Id == 0)
                 {
-                    if (objEntity.Id == 0)
-                    {
-                        if (objEntity.UsuarioCriacao == null)
-                            objEntity.UsuarioCriacao = usuario?.UserId;
+                    if (objEntity.UsuarioCriacao == null)
+                        objEntity.UsuarioCriacao = usuario?.UserId;
 
-                        objEntity.DataHoraCriacao = DateTime.Now;
-                        objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await Session.InsertAsync(objEntity, CancellationToken);
-                    }
-                    else
-                    {
-                        if (objEntity.UsuarioAlteracao == null)
-                            objEntity.UsuarioAlteracao = usuario?.UserId;
-                        objEntity.DataHoraAlteracao = DateTime.Now;
-                        if (string.IsNullOrEmpty(objEntity.ObjectGuid))
-                            objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await Session.UpdateAsync(objEntity, CancellationToken);
-                    }
+                    objEntity.DataHoraCriacao = DateTime.Now;
+                    objEntity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.InsertAsync(objEntity, CancellationToken);
                 }
-            }
-            else
-            {
-                if (entity is EntityBaseCore objEntity)
+                else
                 {
-                    if (objEntity.Id == 0)
-                    {
-                        if (objEntity.UsuarioCriacao == null)
-                            objEntity.UsuarioCriacao = usuario?.UserId;
-                        objEntity.DataHoraCriacao = DateTime.Now;
+                    if (objEntity.UsuarioAlteracao == null)
+                        objEntity.UsuarioAlteracao = usuario?.UserId;
+                    objEntity.DataHoraAlteracao = DateTime.Now;
+                    if (string.IsNullOrEmpty(objEntity.ObjectGuid))
                         objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await session.InsertAsync(objEntity, CancellationToken);
-                    }
-                    else
-                    {
-                        if (objEntity.UsuarioAlteracao == null)
-                            objEntity.UsuarioAlteracao = usuario?.UserId;
-                        objEntity.DataHoraAlteracao = DateTime.Now;
-                        if (string.IsNullOrEmpty(objEntity.ObjectGuid))
-                            objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await session.UpdateAsync(objEntity, CancellationToken);
-                    }
+                    await sessionToUse.UpdateAsync(objEntity, CancellationToken);
                 }
             }
             return entity;
         }
 
-        public async Task<IList<T>> SaveRange<T>(IList<T> entities, IStatelessSession? session)
+        public async Task<IList<T>> SaveRange<T>(IList<T> entities, IStatelessSession? session = null)
         {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
             var usuario = await _authenticatedBaseHostedService.GetLoggedUserAsync();
 
-            if (session == null)
+            foreach (var entity in entities.Cast<EntityBaseCore>())
             {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-
-                foreach (var entity in entities.Cast<EntityBaseCore>())
+                if (entity.Id == 0)
                 {
-                    if (entity.Id == 0)
-                    {
-                        entity.UsuarioCriacao = usuario?.UserId;
-                        entity.DataHoraCriacao = DateTime.Now;
-                        entity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await Session.InsertAsync(entity, CancellationToken);
-                    }
-                    else
-                    {
-                        entity.UsuarioAlteracao = usuario?.UserId;
-                        entity.DataHoraAlteracao = DateTime.Now;
-                        if (string.IsNullOrEmpty(entity.ObjectGuid))
-                            entity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await Session.UpdateAsync(entity, CancellationToken);
-                    }
-
+                    entity.UsuarioCriacao = usuario?.UserId;
+                    entity.DataHoraCriacao = DateTime.Now;
+                    entity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.InsertAsync(entity, CancellationToken);
                 }
-            }
-            else
-            {
-                foreach (var entity in entities.Cast<EntityBaseCore>())
+                else
                 {
-                    if (entity.Id == 0)
-                    {
-                        entity.UsuarioCriacao = usuario?.UserId;
-                        entity.DataHoraCriacao = DateTime.Now;
+                    entity.UsuarioAlteracao = usuario?.UserId;
+                    entity.DataHoraAlteracao = DateTime.Now;
+                    if (string.IsNullOrEmpty(entity.ObjectGuid))
                         entity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await session.InsertAsync(entity, CancellationToken);
-                    }
-                    else
-                    {
-                        entity.UsuarioAlteracao = usuario?.UserId;
-                        entity.DataHoraAlteracao = DateTime.Now;
-                        if (string.IsNullOrEmpty(entity.ObjectGuid))
-                            entity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await session.UpdateAsync(entity, CancellationToken);
-                    }
-
+                    await sessionToUse.UpdateAsync(entity, CancellationToken);
                 }
             }
 
             return entities;
         }
 
-        public async Task<IList<T>> FindByHql<T>(string hql, IStatelessSession? session, params Parameter[] parameters)
+        public async Task<IList<T>> FindByHql<T>(string hql, IStatelessSession? session = null, params Parameter[] parameters)
         {
-            if (session == null)
-            {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-                var query = Session.CreateQuery(hql);
-                if (parameters != null)
-                    SetParameters(parameters, query);
-                return await query.ListAsync<T>();
-            }
-            else
-            {
-                var query = session.CreateQuery(hql);
-                if (parameters != null)
-                    SetParameters(parameters, query);
-                return await query.ListAsync<T>();
-            }
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            var query = sessionToUse.CreateQuery(hql);
+            if (parameters != null)
+                SetParameters(parameters, query);
+            return await query.ListAsync<T>();
         }
 
-        public async Task<IList<T>> FindBySql<T>(string sql, IStatelessSession? session, params Parameter[] parameters)
+        public async Task<IList<T>> FindBySql<T>(string sql, IStatelessSession? session = null, params Parameter[] parameters)
         {
-            if (session == null)
-            {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-                sql = NormalizaParameterName(sql, parameters);
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            sql = NormalizaParameterName(sql, parameters);
 
-                var dbCommand = Session.Connection.CreateCommand();
-                dbCommand.CommandText = sql;
-                _unitOfWork.PrepareCommandSql(dbCommand, Session);
+            var dbCommand = sessionToUse.Connection.CreateCommand();
+            dbCommand.CommandText = sql;
+            _unitOfWork.PrepareCommandSql(dbCommand, sessionToUse);
 
-                var dados = await Session.Connection.QueryAsync<T>(sql, SW_Utils.Functions.RepositoryUtils.GetParametersForSql(parameters), dbCommand.Transaction);
-                return dados.ToList();
-            }
-            else
-            {
-                sql = NormalizaParameterName(sql, parameters);
-
-                var dbCommand = session.Connection.CreateCommand();
-                dbCommand.CommandText = sql;
-                _unitOfWork.PrepareCommandSql(dbCommand, session);
-
-                var dados = await session.Connection.QueryAsync<T>(sql, SW_Utils.Functions.RepositoryUtils.GetParametersForSql(parameters), dbCommand.Transaction);
-                return dados.ToList();
-            }
+            var dados = await sessionToUse.Connection.QueryAsync<T>(sql, SW_Utils.Functions.RepositoryUtils.GetParametersForSql(parameters), dbCommand.Transaction);
+            return dados.ToList();
         }
 
         private static void SetParameters(Parameter[] parameters, IQuery query)
@@ -259,22 +172,16 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             }
         }
 
-        public async Task<decimal> GetValueFromSequenceName(string sequenceName, IStatelessSession? session)
+        public async Task<decimal> GetValueFromSequenceName(string sequenceName, IStatelessSession? session = null)
         {
-            if (session == null)
-            {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-                var valueRetorno = await Session.CreateSQLQuery($"Select {sequenceName}.NextVal From Dual").UniqueResultAsync();
-                return (decimal)valueRetorno;
-            }
-            else
-            {
-                var valueRetorno = await session.CreateSQLQuery($"Select {sequenceName}.NextVal From Dual").UniqueResultAsync();
-                return (decimal)valueRetorno;
-            }
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            var valueRetorno = await sessionToUse.CreateSQLQuery($"Select {sequenceName}.NextVal From Dual").UniqueResultAsync();
+            return (decimal)valueRetorno;
         }
 
-        public void BeginTransaction(IStatelessSession? session)
+        public void BeginTransaction(IStatelessSession? session = null)
         {
             try
             {
@@ -285,7 +192,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 else
                 {
                     var currentTransaction = session.GetCurrentTransaction();
-                    if (currentTransaction == null || !currentTransaction.IsActive || currentTransaction.WasCommitted && currentTransaction.WasCommitted)
+                    if (currentTransaction == null || !currentTransaction.IsActive || (currentTransaction.WasCommitted && currentTransaction.WasCommitted))
                         session?.BeginTransaction(System.Data.IsolationLevel.ReadCommitted);
                 }
             }
@@ -295,7 +202,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             }
         }
 
-        public async Task<(bool executed, Exception? exception)> CommitAsync(IStatelessSession? session)
+        public async Task<(bool executed, Exception? exception)> CommitAsync(IStatelessSession? session = null)
         {
             try
             {
@@ -304,7 +211,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                     if (_forceRollback)
                     {
                         _unitOfWork.Rollback();
-                        return (true, null); ;
+                        return (true, null);
                     }
                     else return await _unitOfWork.CommitAsync();
                 }
@@ -322,14 +229,13 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                             if (_forceRollback)
                             {
                                 currentTransaction.Rollback();
-                                return (true,null);
+                                return (true, null);
                             }
-                            else 
-                            { 
+                            else
+                            {
                                 await currentTransaction.CommitAsync();
                                 return (true, null);
                             }
-
                         }
                         return (false, new Exception("A transação não estava ativa"));
                     }
@@ -346,7 +252,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             }
         }
 
-        public async void Rollback(IStatelessSession? session)
+        public async void Rollback(IStatelessSession? session = null)
         {
             try
             {
@@ -374,89 +280,50 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             return await _authenticatedBaseHostedService.GetLoggedUserAsync();
         }
 
-        public async Task<T> ForcedSave<T>(T entity, IStatelessSession? session)
+        public async Task<T> ForcedSave<T>(T entity, IStatelessSession? session = null)
         {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
 
             var usuario = await _authenticatedBaseHostedService.GetLoggedUserAsync(false);
             if (usuario != null && usuario.UserId.GetValueOrDefault(0) > 0)
                 throw new Exception("O ForcedSave só pode ser utilizado quando não existir um usuário logado!");
 
-            if (session == null)
+            if (entity is EntityBaseCore objEntity)
             {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
-
-                if (entity is EntityBaseCore objEntity)
+                if (objEntity.Id == 0)
                 {
-                    if (objEntity.Id == 0)
-                    {
-                        if (objEntity.UsuarioCriacao == null)
-                            objEntity.UsuarioCriacao = usuario?.UserId;
-                        objEntity.DataHoraCriacao = DateTime.Now;
-                        objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await Session.InsertAsync(objEntity, CancellationToken);
-                    }
-                    else
-                    {
-                        if (objEntity.UsuarioAlteracao == null)
-                            objEntity.UsuarioAlteracao = usuario?.UserId;
-
-                        objEntity.DataHoraAlteracao = DateTime.Now;
-                        if (string.IsNullOrEmpty(objEntity.ObjectGuid))
-                            objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-
-                        await Session.UpdateAsync(objEntity, CancellationToken);
-                    }
+                    if (objEntity.UsuarioCriacao == null)
+                        objEntity.UsuarioCriacao = usuario?.UserId;
+                    objEntity.DataHoraCriacao = DateTime.Now;
+                    objEntity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.InsertAsync(objEntity, CancellationToken);
                 }
-            }
-            else
-            {
-                if (entity is EntityBaseCore objEntity)
+                else
                 {
-                    if (objEntity.Id == 0)
-                    {
-                        if (objEntity.UsuarioCriacao == null)
-                            objEntity.UsuarioCriacao = usuario?.UserId;
-                        objEntity.DataHoraCriacao = DateTime.Now;
+                    if (objEntity.UsuarioAlteracao == null)
+                        objEntity.UsuarioAlteracao = usuario?.UserId;
+
+                    objEntity.DataHoraAlteracao = DateTime.Now;
+                    if (string.IsNullOrEmpty(objEntity.ObjectGuid))
                         objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-                        await session.InsertAsync(objEntity, CancellationToken);
-                    }
-                    else
-                    {
-                        if (objEntity.UsuarioAlteracao == null)
-                            objEntity.UsuarioAlteracao = usuario?.UserId;
 
-                        objEntity.DataHoraAlteracao = DateTime.Now;
-                        if (string.IsNullOrEmpty(objEntity.ObjectGuid))
-                            objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-
-                        await session.UpdateAsync(objEntity, CancellationToken);
-                    }
+                    await sessionToUse.UpdateAsync(objEntity, CancellationToken);
                 }
             }
             return entity;
         }
 
-        public async Task<T> Insert<T>(T entity, IStatelessSession? session)
+        public async Task<T> Insert<T>(T entity, IStatelessSession? session = null)
         {
-            if (session == null)
-            {
-                ArgumentNullException.ThrowIfNull(Session, nameof(Session));
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
 
-                if (entity is EntityBaseCore objEntity)
-                {
-                    objEntity.DataHoraAlteracao = DateTime.Now;
-                    objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-                    await Session.InsertAsync(objEntity, CancellationToken);
-                }
-            }
-            else
+            if (entity is EntityBaseCore objEntity)
             {
-                if (entity is EntityBaseCore objEntity)
-                {
-                    objEntity.DataHoraAlteracao = DateTime.Now;
-                    objEntity.ObjectGuid = $"{Guid.NewGuid()}";
-                    await session.InsertAsync(objEntity, CancellationToken);
-                }
+                objEntity.DataHoraAlteracao = DateTime.Now;
+                objEntity.ObjectGuid = $"{Guid.NewGuid()}";
+                await sessionToUse.InsertAsync(objEntity, CancellationToken);
             }
 
             return entity;
@@ -533,6 +400,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 
         }
 
+        public bool IsAdm => throw new NotImplementedException();
+
         public async Task<bool> Lock<T>(T entity, LockMode? lockMode)
         {
             ArgumentNullException.ThrowIfNull(Session, nameof(Session));
@@ -557,6 +426,128 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             {
                 throw;
             }
+        }
+
+        public async Task<IList<T>> FindBySql<T>(string sql, int pageSize, int pageNumber, params Parameter[] parameters)
+        {
+            return await FindBySql<T>(sql, null, parameters);
+        }
+
+        public async Task<long> CountTotalEntry(string sql, IStatelessSession? session = null, Parameter[]? parameters = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            sql = NormalizaParameterName(sql, parameters);
+            
+            var sqlPronto = $"Select COUNT(1) FROM ({sql}) a ";
+            
+            var dbCommand = sessionToUse.Connection.CreateCommand();
+            dbCommand.CommandText = sqlPronto;
+            _unitOfWork.PrepareCommandSql(dbCommand, sessionToUse);
+            
+            var valueRetorno = await sessionToUse.Connection.ExecuteScalarAsync(sqlPronto, SW_Utils.Functions.RepositoryUtils.GetParametersForSql(parameters), dbCommand.Transaction);
+            return Convert.ToInt64(valueRetorno);
+        }
+
+        public async Task<ParametroSistemaViewModel?> GetParametroSistemaViewModel()
+        {
+            var empresas = (await FindByHql<Empresa>("From Empresa e Inner Join Fetch e.Pessoa p")).AsList();
+            if (empresas.Count() > 1 || empresas.Count() == 0)
+                throw new ArgumentException($"Não foi possível salvar os parâmetros do sistema empCount = {empresas.Count()}");
+
+            var empFirst = empresas.First();
+
+            List<Parameter> parameters = new();
+            StringBuilder sb = new(@$"Select 
+                                    p.Id, 
+                                    p.SiteParaReserva,
+                                    p.Empresa as EmpresaId,
+                                    p.AgruparCertidaoPorCliente,
+                                    p.EmitirCertidaoPorUnidCliente,
+                                    p.HabilitarBaixarBoleto,
+                                    p.HabilitarPagamentosOnLine,
+                                    p.HabilitarPagamentoEmPix,
+                                    p.HabilitarPagamentoEmCartao,
+                                    p.ExibirContasVencidas,
+                                    p.QtdeMaximaDiasContasAVencer,
+                                    p.PermitirUsuarioAlterarSeuEmail,
+                                    p.PermitirUsuarioAlterarSeuDoc,
+                                    Coalesce(p.IntegradoComMultiPropriedade,0) as IntegradoComMultiPropriedade,
+                                    Coalesce(p.IntegradoComTimeSharing,0) as IntegradoComTimeSharing,
+                                    p.NomeCondominio,
+                                    p.CnpjCondominio,
+                                    p.EnderecoCondominio,
+                                    p.NomeAdministradoraCondominio,
+                                    p.CnpjAdministradoraCondominio,
+                                    p.EnderecoAdministradoraCondominio,
+                                    p.ExibirFinanceirosDasEmpresaIds,
+                                    p.ImagemHomeUrl1,
+                                    p.ImagemHomeUrl2,
+                                    p.ImagemHomeUrl3,
+                                    p.ImagemHomeUrl4,
+                                    p.ImagemHomeUrl5,
+                                    p.ImagemHomeUrl6,
+                                    p.ImagemHomeUrl7,
+                                    p.ImagemHomeUrl8,
+                                    p.ImagemHomeUrl9,
+                                    p.ImagemHomeUrl10,
+                                    p.ImagemHomeUrl11,
+                                    p.ImagemHomeUrl12,
+                                    p.ImagemHomeUrl13,
+                                    p.ImagemHomeUrl14,
+                                    p.ImagemHomeUrl15,
+                                    p.ImagemHomeUrl16,
+                                    p.ImagemHomeUrl17,
+                                    p.ImagemHomeUrl18,
+                                    p.ImagemHomeUrl19,
+                                    p.ImagemHomeUrl20,
+                                    p.PontosRci,
+                                    p.ExigeEnderecoHospedeConvidado,
+                                    p.ExigeTelefoneHospedeConvidado,
+                                    p.ExigeDocumentoHospedeConvidado,
+                                    p.PermiteReservaRciApenasClientesComContratoRci,
+                                    p.ExibirMensagemLogin,
+                                    p.MensagemLogin
+                                    From 
+                                    ParametroSistema p
+                                    Where 1 = 1 ");
+
+            sb.AppendLine($" and p.Empresa = {empFirst.Id}");
+
+
+            var parametroSistema = (await FindBySql<ParametroSistemaViewModel>(sb.ToString())).FirstOrDefault();
+            if (parametroSistema == null)
+                return parametroSistema;
+
+            parametroSistema.HabilitarPagamentosOnLine =
+                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim ||
+                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Não;
+
+
+            return parametroSistema;
+        }
+
+        public async Task ExecuteSqlCommand(string command)
+        {
+            Flush();
+
+            var dbCommand = Session.Connection.CreateCommand();
+            command = RepositoryUtils.NormalizeFunctions(DataBaseType, command);
+            dbCommand.CommandText = command;
+            _unitOfWork.PrepareCommandSql(dbCommand);
+
+            await Session?.Connection?.ExecuteAsync(command, null, dbCommand.Transaction);
+        }
+
+        public async Task<string> GetToken()
+        {
+            return await Task.FromResult("");
+        }
+
+        public void Flush()
+        {
+            Session?.GetSessionImplementation()?.Flush();
         }
     }
 

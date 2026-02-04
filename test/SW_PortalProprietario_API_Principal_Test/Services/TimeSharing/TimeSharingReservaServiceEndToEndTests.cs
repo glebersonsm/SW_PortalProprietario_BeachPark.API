@@ -11,6 +11,7 @@ using SW_PortalProprietario.Application.Services.TimeSharing;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 using SW_Utils.Auxiliar;
 using Xunit;
+using AppConfirmacaoCmStep = SW_PortalProprietario.Application.Services.Core.DistributedTransactions.TimeSharing.ConfirmacaoCmStep;
 
 namespace SW_PortalProprietario.Test.Services.TimeSharing
 {
@@ -27,7 +28,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
         private readonly Mock<ILogger<ValidacaoCmStep>> _validacaoLoggerMock;
         private readonly Mock<ILogger<GravacaoLogPortalStep>> _gravacaoLoggerMock;
         private readonly Mock<ILogger<CriacaoReservaApiStep>> _criacaoLoggerMock;
-        private readonly Mock<ILogger<ConfirmacaoCmStep>> _confirmacaoLoggerMock;
+        private readonly Mock<ILogger<AppConfirmacaoCmStep>> _confirmacaoLoggerMock;
         private readonly Mock<ILogger<SagaOrchestrator>> _sagaLoggerMock;
 
         private readonly TimeSharingReservaService _service;
@@ -41,7 +42,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
             _validacaoLoggerMock = new Mock<ILogger<ValidacaoCmStep>>();
             _gravacaoLoggerMock = new Mock<ILogger<GravacaoLogPortalStep>>();
             _criacaoLoggerMock = new Mock<ILogger<CriacaoReservaApiStep>>();
-            _confirmacaoLoggerMock = new Mock<ILogger<ConfirmacaoCmStep>>();
+            _confirmacaoLoggerMock = new Mock<ILogger<AppConfirmacaoCmStep>>();
             _sagaLoggerMock = new Mock<ILogger<SagaOrchestrator>>();
 
             _service = new TimeSharingReservaService(
@@ -271,22 +272,22 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
                 else
                 {
                     // API deve falhar, nenhum deve commitar
-                    _repositorySystemMock.Setup(r => r.BeginTransaction());
+                    _repositorySystemMock.Setup(r => r.BeginTransaction(It.IsAny<NHibernate.IStatelessSession>()));
                     _repositorySystemMock.Setup(r => r.GetLoggedUser())
                         .ReturnsAsync((userId: "1", providerKeyUser: "test@test.com", companyId: "1", isAdm: false));
-                    _repositorySystemMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>()))
+                    _repositorySystemMock.Setup(r => r.Save(It.IsAny<DistributedTransactionLog>(), It.IsAny<NHibernate.IStatelessSession>()))
                         .ReturnsAsync((DistributedTransactionLog entity) => { entity.Id = 1; return entity; });
-                    _repositorySystemMock.Setup(r => r.CommitAsync())
+                    _repositorySystemMock.Setup(r => r.CommitAsync(It.IsAny<NHibernate.IStatelessSession>()))
                         .ReturnsAsync((executed: true, exception: (Exception?)null));
-                    _repositorySystemMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<Parameter[]>()))
+                    _repositorySystemMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(),It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<Parameter[]>()))
                         .ReturnsAsync(new List<object>());
-                    _repositorySystemMock.Setup(r => r.Rollback());
+                    _repositorySystemMock.Setup(r => r.Rollback(It.IsAny<NHibernate.IStatelessSession>()));
 
                     _timeSharingProviderMock.Setup(s => s.Save(It.IsAny<InclusaoReservaInputModel>()))
                         .ThrowsAsync(new Exception("Falha simulada"));
 
-                    _repositoryCmMock.Setup(r => r.BeginTransaction());
-                    _repositoryCmMock.Setup(r => r.Rollback());
+                    _repositoryCmMock.Setup(r => r.BeginTransaction(It.IsAny<NHibernate.IStatelessSession>()));
+                    _repositoryCmMock.Setup(r => r.Rollback(It.IsAny<NHibernate.IStatelessSession>()));
                 }
 
                 var model = new InclusaoReservaInputModel();
@@ -323,12 +324,12 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
             var sucessos = 0;
             var falhas = 0;
 
-            _repositorySystemMock.Setup(r => r.BeginTransaction());
-            _repositorySystemMock.Setup(r => r.Save(It.IsAny<object>())).ReturnsAsync(1);
-            _repositorySystemMock.Setup(r => r.CommitAsync()).ReturnsAsync((true, null));
+            _repositorySystemMock.Setup(r => r.BeginTransaction(It.IsAny<NHibernate.IStatelessSession>()));
+            _repositorySystemMock.Setup(r => r.Save(It.IsAny<object>(), It.IsAny<NHibernate.IStatelessSession>())).ReturnsAsync(1);
+            _repositorySystemMock.Setup(r => r.CommitAsync(It.IsAny<NHibernate.IStatelessSession>())).ReturnsAsync((true, null));
 
-            _repositoryCmMock.Setup(r => r.BeginTransaction());
-            _repositoryCmMock.Setup(r => r.CommitAsync()).ReturnsAsync((true, null));
+            _repositoryCmMock.Setup(r => r.BeginTransaction(It.IsAny<NHibernate.IStatelessSession>()));
+            _repositoryCmMock.Setup(r => r.CommitAsync(It.IsAny<NHibernate.IStatelessSession>())).ReturnsAsync((true, null));
 
             _timeSharingProviderMock.Setup(s => s.Save(It.IsAny<InclusaoReservaInputModel>()))
                 .ReturnsAsync(12345);
@@ -363,8 +364,8 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
             // Arrange
             var operationIds = new HashSet<string>();
 
-            _repositorySystemMock.Setup(r => r.BeginTransaction());
-            _repositorySystemMock.Setup(r => r.Save(It.IsAny<object>()))
+            _repositorySystemMock.Setup(r => r.BeginTransaction(It.IsAny<NHibernate.IStatelessSession>()));
+            _repositorySystemMock.Setup(r => r.Save(It.IsAny<object>(), It.IsAny<NHibernate.IStatelessSession>()))
                 .Callback<object>(obj =>
                 {
                     // Capturar OperationId do log
@@ -381,10 +382,10 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
                     }
                 })
                 .ReturnsAsync(1);
-            _repositorySystemMock.Setup(r => r.CommitAsync()).ReturnsAsync((true, null));
+            _repositorySystemMock.Setup(r => r.CommitAsync(It.IsAny<NHibernate.IStatelessSession>())).ReturnsAsync((true, null));
 
-            _repositoryCmMock.Setup(r => r.BeginTransaction());
-            _repositoryCmMock.Setup(r => r.CommitAsync()).ReturnsAsync((true, null));
+            _repositoryCmMock.Setup(r => r.BeginTransaction(It.IsAny<NHibernate.IStatelessSession>()));
+            _repositoryCmMock.Setup(r => r.CommitAsync(It.IsAny<NHibernate.IStatelessSession>())).ReturnsAsync((true, null));
 
             _timeSharingProviderMock.Setup(s => s.Save(It.IsAny<InclusaoReservaInputModel>()))
                 .ReturnsAsync(12345);

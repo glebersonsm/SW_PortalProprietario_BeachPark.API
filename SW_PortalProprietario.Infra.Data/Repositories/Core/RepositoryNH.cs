@@ -3,6 +3,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using NHibernate;
 using SW_PortalProprietario.Application.Interfaces;
+using SW_PortalProprietario.Application.Models.AuthModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core;
@@ -723,6 +724,378 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             {
                 throw;
             }
+        }
+
+        public IStatelessSession? CreateSession()
+        {
+            throw new NotImplementedException("CreateSession não está disponível para este repositório");
+        }
+
+        public async Task<T> Save<T>(T entity, IStatelessSession? session = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            var usuario = await _authenticatedBaseService.GetLoggedUserAsync();
+            if (entity is EntityBaseCore objEntity)
+            {
+                if (entity is IEntityValidateCore validate)
+                    await validate.SaveValidate();
+
+                if (objEntity.Id == 0)
+                {
+                    if (objEntity.UsuarioCriacao.GetValueOrDefault(0) == 0)
+                        objEntity.UsuarioCriacao = !string.IsNullOrEmpty(usuario.userId) ? Convert.ToInt32(usuario.userId) : null;
+
+                    objEntity.DataHoraCriacao = DateTime.Now;
+                    objEntity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.InsertAsync(objEntity, CancellationToken);
+
+                    if (_auditHelper != null)
+                    {
+                        _ = Task.Run(async () => await _auditHelper.LogCreateAsync(objEntity));
+                    }
+                }
+                else
+                {
+                    EntityBaseCore? oldEntity = null;
+                    if (_auditHelper != null)
+                    {
+                        try
+                        {
+                            oldEntity = await FindEntityWithRelationships<T>(objEntity.Id) as EntityBaseCore;
+                            
+                            if (oldEntity == null)
+                            {
+                                oldEntity = await sessionToUse.GetAsync<T>(objEntity.Id, CancellationToken) as EntityBaseCore;
+                            }
+                            
+                            if (oldEntity != null)
+                            {
+                                var entityType = oldEntity.GetType();
+                                var properties = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                                foreach (var prop in properties)
+                                {
+                                    if (prop.CanRead && (prop.PropertyType.IsPrimitive || prop.PropertyType == typeof(string) || 
+                                        prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?) ||
+                                        (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))))
+                                    {
+                                        try
+                                        {
+                                            _ = prop.GetValue(oldEntity);
+                                        }
+                                        catch
+                                        {
+                                        }
+                                    }
+                                }
+                                
+                                oldEntity = CloneEntityForAudit(oldEntity);
+                            }
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                oldEntity = await sessionToUse.GetAsync<T>(objEntity.Id, CancellationToken) as EntityBaseCore;
+                                
+                                if (oldEntity != null)
+                                {
+                                    oldEntity = CloneEntityForAudit(oldEntity);
+                                }
+                            }
+                            catch
+                            {
+                            }
+                        }
+                    }
+
+                    objEntity.UsuarioAlteracao = !string.IsNullOrEmpty(usuario.userId) ? Convert.ToInt32(usuario.userId) : objEntity.UsuarioAlteracao;
+                    objEntity.DataHoraAlteracao = DateTime.Now;
+                    if (string.IsNullOrEmpty(objEntity.ObjectGuid))
+                        objEntity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.UpdateAsync(objEntity, CancellationToken);
+
+                    if (_auditHelper != null && oldEntity != null)
+                    {
+                        _ = Task.Run(async () => await _auditHelper.LogUpdateAsync(oldEntity, objEntity));
+                    }
+                }
+            }
+            return entity;
+        }
+
+        public async Task<T> ForcedSave<T>(T entity, IStatelessSession? session = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+
+            var usuario = await _authenticatedBaseService.GetLoggedUserAsync(false);
+            if (entity is EntityBaseCore objEntity)
+            {
+                if (objEntity.Id == 0)
+                {
+                    objEntity.UsuarioCriacao = !string.IsNullOrEmpty(usuario.userId) ? Convert.ToInt32(usuario.userId) : null;
+                    objEntity.DataHoraCriacao = DateTime.Now;
+                    objEntity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.InsertAsync(objEntity, CancellationToken);
+                }
+                else
+                {
+                    objEntity.UsuarioAlteracao = !string.IsNullOrEmpty(usuario.userId) ? Convert.ToInt32(usuario.userId) : null;
+                    objEntity.DataHoraAlteracao = DateTime.Now;
+                    if (string.IsNullOrEmpty(objEntity.ObjectGuid))
+                        objEntity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.UpdateAsync(objEntity, CancellationToken);
+                }
+            }
+            return entity;
+        }
+
+        public async Task<T> Insert<T>(T entity, IStatelessSession? session = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+
+            if (entity is EntityBaseCore objEntity)
+            {
+                objEntity.DataHoraAlteracao = DateTime.Now;
+                objEntity.ObjectGuid = $"{Guid.NewGuid()}";
+                await sessionToUse.InsertAsync(objEntity, CancellationToken);
+            }
+
+            return entity;
+        }
+
+        public async Task<decimal> GetValueFromSequenceName(string sequenceName, IStatelessSession? session = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            var valueRetorno = await sessionToUse.CreateSQLQuery($"Select {sequenceName}.NextVal From Dual").UniqueResultAsync();
+            return (decimal)valueRetorno;
+        }
+
+        public async Task<IList<T>> SaveRange<T>(IList<T> entities, IStatelessSession? session = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+
+            var usuario = await _authenticatedBaseService.GetLoggedUserAsync();
+            foreach (var entity in entities.Cast<EntityBaseCore>())
+            {
+                if (entity is IEntityValidateCore validate)
+                    await validate.SaveValidate();
+
+                if (entity.Id == 0)
+                {
+                    if (entity.UsuarioCriacao.GetValueOrDefault(0) == 0)
+                        entity.UsuarioCriacao = !string.IsNullOrEmpty(usuario.userId) ? Convert.ToInt32(usuario.userId) : null;
+
+                    entity.DataHoraCriacao = DateTime.Now;
+                    entity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.InsertAsync(entity, CancellationToken);
+                }
+                else
+                {
+                    entity.UsuarioAlteracao = !string.IsNullOrEmpty(usuario.userId) ? Convert.ToInt32(usuario.userId) : entity.UsuarioAlteracao;
+                    entity.DataHoraAlteracao = DateTime.Now;
+                    if (string.IsNullOrEmpty(entity.ObjectGuid))
+                        entity.ObjectGuid = $"{Guid.NewGuid()}";
+                    await sessionToUse.UpdateAsync(entity, CancellationToken);
+                }
+            }
+            return entities;
+        }
+
+        public void Remove<T>(T entity, IStatelessSession? session = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            var usuario = _authenticatedBaseService.GetLoggedUserAsync().Result;
+            if (entity is EntityBaseCore objEntity)
+            {
+                objEntity.UsuarioRemocaoId = !string.IsNullOrEmpty(usuario.userId) ? int.Parse(usuario.userId) : null;
+                if (_auditHelper != null)
+                    _ = Task.Run(async () => await _auditHelper.LogDeleteAsync(objEntity));
+
+                sessionToUse.DeleteAsync(entity, CancellationToken);
+            }
+        }
+
+        public async void RemoveRange<T>(IList<T> entities, IStatelessSession? session = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            var usuario = await _authenticatedBaseService.GetLoggedUserAsync();
+            foreach (var entity in entities.Cast<EntityBaseCore>())
+            {
+                entity.UsuarioRemocaoId = !string.IsNullOrEmpty(usuario.userId) ? int.Parse(usuario.userId) : null;
+                if (_auditHelper != null)
+                    _ = Task.Run(async () => await _auditHelper.LogDeleteAsync(entity));
+
+                await sessionToUse.DeleteAsync(entity, CancellationToken);
+            }
+        }
+
+        public async Task<T> FindById<T>(int id, IStatelessSession? session = null)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            return await sessionToUse.GetAsync<T>(id, CancellationToken);
+        }
+
+        public async Task<IList<T>> FindByHql<T>(string hql, IStatelessSession? session = null, params Parameter[] parameters)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            hql = RepositoryUtils.NormalizeFunctions(DataBaseType, hql);
+
+            var query = sessionToUse.CreateQuery(hql);
+            if (parameters != null)
+                SetParameters(parameters, query);
+            return await query.ListAsync<T>(CancellationToken);
+        }
+
+        public async Task<IList<T>> FindBySql<T>(string sql, IStatelessSession? session = null, params Parameter[] parameters)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            sql = RepositoryUtils.NormalizeFunctions(DataBaseType, sql);
+            sql = NormalizaParameterName(sql, parameters);
+
+            var dbCommand = sessionToUse.Connection.CreateCommand();
+            dbCommand.CommandText = sql;
+            _unitOfWork.PrepareCommandSql(dbCommand);
+
+            var dados = await sessionToUse.Connection.QueryAsync<T>(sql, SW_Utils.Functions.RepositoryUtils.GetParametersForSql(parameters), dbCommand.Transaction);
+            return dados.ToList();
+        }
+
+        public async Task<long> CountTotalEntry(string sql, IStatelessSession? session = null, params Parameter[] parameters)
+        {
+            var sessionToUse = session ?? Session;
+            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
+            
+            sql = RepositoryUtils.NormalizeFunctions(DataBaseType, sql);
+            sql = NormalizaParameterName(sql, parameters);
+            
+            var sqlPronto = $"Select COUNT(1) FROM ({sql}) a ";
+            
+            var dbCommand = sessionToUse.Connection.CreateCommand();
+            dbCommand.CommandText = sqlPronto;
+            _unitOfWork.PrepareCommandSql(dbCommand);
+            
+            var valueRetorno = await sessionToUse.Connection.ExecuteScalarAsync(sqlPronto, SW_Utils.Functions.RepositoryUtils.GetParametersForSql(parameters), dbCommand.Transaction);
+            return Convert.ToInt64(valueRetorno);
+        }
+
+        public void BeginTransaction(IStatelessSession? session = null)
+        {
+            try
+            {
+                if (session == null)
+                {
+                    _unitOfWork?.BeginTransaction();
+                }
+                else
+                {
+                    var currentTransaction = session.GetCurrentTransaction();
+                    if (currentTransaction == null || !currentTransaction.IsActive || (currentTransaction.WasCommitted && currentTransaction.WasCommitted))
+                        session?.BeginTransaction(System.Data.IsolationLevel.ReadCommitted);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<(bool executed, Exception? exception)> CommitAsync(IStatelessSession? session = null)
+        {
+            try
+            {
+                if (session == null)
+                {
+                    if (_forceRollback)
+                    {
+                        _unitOfWork.Rollback();
+                        return (true, null);
+                    }
+                    else return await _unitOfWork.CommitAsync();
+                }
+                else
+                {
+                    var token = CancellationToken;
+                    token.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        var currentTransaction = session.GetCurrentTransaction();
+
+                        if (currentTransaction != null && currentTransaction.IsActive && !currentTransaction.WasCommitted && !currentTransaction.WasRolledBack)
+                        {
+                            if (_forceRollback)
+                            {
+                                currentTransaction.Rollback();
+                                return (true, null);
+                            }
+                            else
+                            {
+                                await currentTransaction.CommitAsync();
+                                return (true, null);
+                            }
+                        }
+                        return (false, new Exception("A transação não estava ativa"));
+                    }
+                    catch (Exception err)
+                    {
+                        return (false, err);
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                return (false, err);
+            }
+        }
+
+        public async void Rollback(IStatelessSession? session = null)
+        {
+            try
+            {
+                if (session == null)
+                {
+                    _unitOfWork?.Rollback();
+                }
+                else
+                {
+                    var currentTransaction = session.GetCurrentTransaction();
+                    if (currentTransaction != null && currentTransaction.IsActive && !currentTransaction.WasCommitted && !currentTransaction.WasRolledBack)
+                    {
+                        await currentTransaction.RollbackAsync();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<TokenResultModel> GetLoggedToken()
+        {
+            var usuario = await _authenticatedBaseService.GetLoggedUserAsync();
+            return new TokenResultModel
+            {
+                UserId = !string.IsNullOrEmpty(usuario.userId) ? int.Parse(usuario.userId) : null,
+                ProviderKeyUser = usuario.providerChaveUsuario,
+                CompanyId = usuario.companyId
+            };
         }
     }
 
