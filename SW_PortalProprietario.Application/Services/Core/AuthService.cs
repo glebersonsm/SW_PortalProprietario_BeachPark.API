@@ -1335,7 +1335,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                                                         Usuario u 
                                                                         Inner Join Fetch u.Pessoa p 
                                                                       Where 
-                                                                         (p.EmailPreferencial is not null and p.EmailPreferencial like '%@%' and Lower(split_part(p.EmailPreferencial,';',1)) = '{userLoginInputModel.Login.ToLower()}')
+                                                                         (p.EmailPreferencial is not null and p.EmailPreferencial like '%@%' and Lower(p.EmailPreferencial) = '{userLoginInputModel.Login.ToLower()}')
                                                                          and Coalesce(u.Removido,0) = 0 and u.DataHoraRemocao is null
                                                                       ")).AsList();
 

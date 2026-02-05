@@ -22,34 +22,34 @@ using System.Text;
 using System.Text.Json;
 using System.Xml;
 using ZXing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SW_PortalProprietario.Application.Hosted
 {
     public class FrameworkInitialService : IFrameworkInitialService
     {
-        private readonly IRepositoryHosted _repository;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<FrameworkInitialService> _logger;
         private readonly IConfiguration _configuration;
-        private readonly ICommunicationProvider _communicationProvider;
-        private readonly IProjectObjectMapper _mapper;
         private const string _PATH = "C:\\SW_Solucoes\\Projetos\\SW_PortalProprietario.API\\SW_PortalProprietario.Application";
-        public FrameworkInitialService(IRepositoryHosted repository,
+        public FrameworkInitialService(IServiceScopeFactory serviceScopeFactory,
             ILogger<FrameworkInitialService> logger,
-            ICommunicationProvider communicationProvider,
-            IConfiguration configuration,
-            IProjectObjectMapper mapper)
+            IConfiguration configuration)
         {
-            _repository = repository;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
             _configuration = configuration;
-            _communicationProvider = communicationProvider;
-            _mapper = mapper;
         }
 
         public async Task UpdateFramework()
         {
-            using (var session = _repository.CreateSession())
+            using (var scope = _serviceScopeFactory.CreateScope())
             {
+                var _repository = scope.ServiceProvider.GetRequiredService<IRepositoryHosted>();
+                var _communicationProvider = scope.ServiceProvider.GetRequiredService<ICommunicationProvider>();
+                var _mapper = scope.ServiceProvider.GetRequiredService<IProjectObjectMapper>();
+                using (var session = _repository.CreateSession())
+                {
 
                 //if (Debugger.IsAttached && DateTime.Today.Date == new DateTime(2025, 8, 14).Date)
                 //{
@@ -63,51 +63,52 @@ namespace SW_PortalProprietario.Application.Hosted
                 //}
 
 
-                await UpdatePermissions(session);
-                await UpdateAreasSistema(session);
-                await UpdateGrupoModulos(session);
-                await UpdateModules(session);
+                await UpdatePermissions(_repository, session);
+                await UpdateAreasSistema(_repository, session);
+                await UpdateGrupoModulos(_repository, session);
+                await UpdateModules(_repository, session);
 
                 if (_configuration.GetValue<bool>("InativarUsuariosSemCota"))
                 {
                     //await InativarUsuariosSemCota();
-                    await InativarClienteLegadoSemContratosAtivos(session);
+                    await InativarClienteLegadoSemContratosAtivos(_repository, _communicationProvider, session);
 
                 }
 
                 if (_configuration.GetValue<bool>("CriarPrimeiroUsuario"))
                 {
-                    await CriarUsuarioDefault(session);
+                    await CriarUsuarioDefault(_repository, _communicationProvider, _mapper, session);
                 }
 
                 if (_configuration.GetValue<bool>("EfetuarConfiguracoesIniciais"))
                 {
-                    await ConfigurarDadosPadroes(session);
+                    await ConfigurarDadosPadroes(_repository, session);
                     if (_configuration.GetValue<bool>("ConfigurarEmpresa"))
                     {
-                        await ConfigurarEmpresa(session);
-                        await GravarParametroSistema(session);
+                        await ConfigurarEmpresa(_repository, _communicationProvider, session);
+                        await GravarParametroSistema(_repository, session);
                     }
                     if (_configuration.GetValue<bool>("VincularUsuarioEmpresa"))
-                        await VincularUsuarioEmpresa(session);
+                        await VincularUsuarioEmpresa(_repository, session);
 
                 }
 
                 if (_configuration.GetValue<bool>("CriarUsuariosLegado", false))
                 {
-                    await CriarUsuariosLegado(session);
+                    await CriarUsuariosLegado(_repository, _communicationProvider, _mapper, session);
                 }
 
                 if (_configuration.GetValue<bool>("CriarUsuariosClientesLegado", false))
                 {
-                    await CriarUsuariosClientesLegado(session);
+                    await CriarUsuariosClientesLegado(_repository, _communicationProvider, _mapper, session);
                 }
 
+                }
             }
 
         }
 
-        private async Task ImportarFaqs(IStatelessSession? session)
+        private async Task ImportarFaqs(IRepositoryHosted _repository, IStatelessSession? session)
         {
             // Define o caminho do arquivo
             string caminhoArquivo = "C:\\Users\\glebe\\OneDrive\\Área de Trabalho\\Faq.csv";
@@ -162,7 +163,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task ImportarDocumentos(IStatelessSession? session)
+        private async Task ImportarDocumentos(IRepositoryHosted _repository, IStatelessSession? session)
         {
             try
             {
@@ -216,12 +217,12 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task InativarUsuariosSemCota()
+        private async Task InativarUsuariosSemCota(ICommunicationProvider _communicationProvider)
         {
             await _communicationProvider.DesativarUsuariosSemCotaOuContrato();
         }
 
-        private async Task CriarUsuarioDefault(IStatelessSession? session)
+        private async Task CriarUsuarioDefault(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, IStatelessSession? session)
         {
 
             try
@@ -261,7 +262,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         item.CpfCnpj = "76473430172";
                         item.PasswordConfirmation = item.Password;
                         item.Administrator = EnumSimNao.Sim;
-                        await RegistrarUsuarioExecute(item, session);
+                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, session);
                         usuariosSistema.Add(item);
 
                         var resultCommit = await _repository.CommitAsync(session);
@@ -282,7 +283,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task CriarUsuariosLegado(IStatelessSession? session)
+        private async Task CriarUsuariosLegado(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, IStatelessSession? session)
         {
 
             try
@@ -362,7 +363,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         item.PasswordConfirmation = pass;
                         item.Administrator = EnumSimNao.Sim;
                         item.Login = item.Login?.Trim(' ').RemoveAccents();
-                        await RegistrarUsuarioExecute(item, session);
+                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, session);
                         usuariosSistema.Add(item);
 
                         if (_repository != null)
@@ -386,7 +387,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task InativarClienteLegadoSemContratosAtivos(IStatelessSession? session)
+        private async Task InativarClienteLegadoSemContratosAtivos(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IStatelessSession? session)
         {
             var pessoasProvider = await _repository.FindBySql<PessoaSistemaXProvider>(@$"Select 
                                                                                                 psp.* 
@@ -422,7 +423,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task CriarUsuariosClientesLegado(IStatelessSession? session)
+        private async Task CriarUsuariosClientesLegado(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, IStatelessSession? session)
         {
             StringBuilder sbParametros = new(@$"Select 
                                     p.Id, 
@@ -524,7 +525,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         item.Password = pass;
                         item.PasswordConfirmation = pass;
                         item.Administrator = EnumSimNao.Sim;
-                        await RegistrarUsuarioExecute(item, session);
+                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, session);
                         usuariosSistema.Add(item);
 
                         var resultCommit = await _repository.CommitAsync(session);
@@ -545,7 +546,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task<Usuario?> RegistrarUsuarioExecute(UserRegisterInputModel userInputModel, NHibernate.IStatelessSession? session)
+        private async Task<Usuario?> RegistrarUsuarioExecute(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, UserRegisterInputModel userInputModel, NHibernate.IStatelessSession? session)
         {
             if (userInputModel == null) return null;
 
@@ -669,7 +670,7 @@ namespace SW_PortalProprietario.Application.Hosted
                     if (tipoDocumentosPessoa != null && (!string.IsNullOrEmpty(userInputModel?.CpfCnpj) && (Helper.IsCnpj(userInputModel.CpfCnpj) || Helper.IsCpf(userInputModel.CpfCnpj) || (!string.IsNullOrEmpty(userInputModel.TipoDocumentoClienteNome) && 
                         userInputModel.TipoDocumentoClienteNome.ToLower().Contains("passaport",StringComparison.CurrentCultureIgnoreCase)))))
                     {
-                        var retorno = await SincronizarDocumentos(pessoa, session, true, new PessoaDocumentoInputModel() { TipoDocumentoId = tipoDocumentosPessoa.Id, Numero = $"{apenasNumeros}", PessoaId = pessoa.Id });
+                        var retorno = await SincronizarDocumentos(_repository, _mapper, pessoa, session, true, new PessoaDocumentoInputModel() { TipoDocumentoId = tipoDocumentosPessoa.Id, Numero = $"{apenasNumeros}", PessoaId = pessoa.Id });
                     }
                     if (string.IsNullOrEmpty(usu.Login))
                     {
@@ -699,8 +700,8 @@ namespace SW_PortalProprietario.Application.Hosted
                     await _repository.ForcedSave(psxpp, session);
                 }
 
-                await VincularEmpresasAoUsuario(usu, session);
-                await CriarOuVincularTagGeral(usu,session);
+                await VincularEmpresasAoUsuario(_repository, usu, session);
+                await CriarOuVincularTagGeral(_repository, usu,session);
 
                 return usu;
             }
@@ -710,7 +711,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task CriarOuVincularTagGeral(Usuario user, NHibernate.IStatelessSession? session)
+        private async Task CriarOuVincularTagGeral(IRepositoryHosted _repository, Usuario user, NHibernate.IStatelessSession? session)
         {
             var tagId = _configuration.GetValue<int>("TagGeralId");
 
@@ -744,7 +745,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task VincularEmpresasAoUsuario(Usuario? user, NHibernate.IStatelessSession? session)
+        private async Task VincularEmpresasAoUsuario(IRepositoryHosted _repository, Usuario? user, NHibernate.IStatelessSession? session)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
 
@@ -775,7 +776,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        public async Task<List<int>> SincronizarDocumentos(Domain.Entities.Core.DadosPessoa.Pessoa? pessoa, IStatelessSession? session, bool validarAlteracaoDocumento = false, params PessoaDocumentoInputModel[] documentos)
+        public async Task<List<int>> SincronizarDocumentos(IRepositoryHosted _repository, IProjectObjectMapper _mapper, Domain.Entities.Core.DadosPessoa.Pessoa? pessoa, IStatelessSession? session, bool validarAlteracaoDocumento = false, params PessoaDocumentoInputModel[] documentos)
         {
             if (pessoa == null) throw new ArgumentNullException(nameof(pessoa));
             List<int> result = new List<int>();
@@ -844,7 +845,7 @@ namespace SW_PortalProprietario.Application.Hosted
             return result;
         }
 
-        public async Task<List<int>> SincronizarTelefones(Domain.Entities.Core.DadosPessoa.Pessoa? pessoa, IStatelessSession? session, params PessoaTelefoneInputModel[] telefones)
+        public async Task<List<int>> SincronizarTelefones(IRepositoryHosted _repository, IProjectObjectMapper _mapper, Domain.Entities.Core.DadosPessoa.Pessoa? pessoa, IStatelessSession? session, params PessoaTelefoneInputModel[] telefones)
         {
             if (pessoa == null) throw new ArgumentNullException(nameof(pessoa));
             List<int> result = new List<int>();
@@ -900,7 +901,7 @@ namespace SW_PortalProprietario.Application.Hosted
             return result;
         }
 
-        public async Task<List<int>> SincronizarEnderecos(Pessoa? pessoa, IStatelessSession? session, params PessoaEnderecoInputModel[] enderecos)
+        public async Task<List<int>> SincronizarEnderecos(IRepositoryHosted _repository, IProjectObjectMapper _mapper, Pessoa? pessoa, IStatelessSession? session, params PessoaEnderecoInputModel[] enderecos)
         {
             if (pessoa == null) throw new ArgumentNullException(nameof(pessoa));
 
@@ -948,7 +949,7 @@ namespace SW_PortalProprietario.Application.Hosted
             return result;
         }
 
-        private async Task GravarParametroSistema(NHibernate.IStatelessSession? session)
+        private async Task GravarParametroSistema(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             try
             {
@@ -989,7 +990,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task VincularUsuarioEmpresa(NHibernate.IStatelessSession? session)
+        private async Task VincularUsuarioEmpresa(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             try
             {
@@ -1029,16 +1030,16 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task ConfigurarDadosPadroes(NHibernate.IStatelessSession? session)
+        private async Task ConfigurarDadosPadroes(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
 
             try
             {
-                await TiposEnderecos(session);
-                await TiposTelefones(session);
-                await TiposDocumentos(session);
+                await TiposEnderecos(_repository, session);
+                await TiposTelefones(_repository, session);
+                await TiposDocumentos(_repository, session);
                 if (_configuration.GetValue<bool>("ImportarCidades"))
-                    await ImportarCidades(session);
+                    await ImportarCidades(_repository, session);
             }
             catch (Exception err)
             {
@@ -1046,7 +1047,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task TiposEnderecos(NHibernate.IStatelessSession? session)
+        private async Task TiposEnderecos(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             try
             {
@@ -1081,7 +1082,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task TiposTelefones(NHibernate.IStatelessSession? session)
+        private async Task TiposTelefones(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             try
             {
@@ -1124,7 +1125,7 @@ namespace SW_PortalProprietario.Application.Hosted
         }
 
 
-        private async Task TiposDocumentos(NHibernate.IStatelessSession? session)
+        private async Task TiposDocumentos(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             try
             {
@@ -1205,7 +1206,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
         }
 
-        private async Task ConfigurarEmpresa(NHibernate.IStatelessSession? session)
+        private async Task ConfigurarEmpresa(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, NHibernate.IStatelessSession? session)
         {
             var empresaExistente = (await _repository.FindByHql<Empresa>("From Empresa e", session)).FirstOrDefault();
             if (empresaExistente == null)
@@ -1285,7 +1286,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
         }
 
-        private async Task ImportarCidades(NHibernate.IStatelessSession? session)
+        private async Task ImportarCidades(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             string url = "https://servicodados.ibge.gov.br/api/v1/localidades/distritos?orderBy=nome";
             using HttpClient client = new();
@@ -1441,7 +1442,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task UpdatePermissions(NHibernate.IStatelessSession? session)
+        private async Task UpdatePermissions(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
 
             try
@@ -1492,7 +1493,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task UpdateAreasSistema(NHibernate.IStatelessSession? session)
+        private async Task UpdateAreasSistema(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             try
             {
@@ -1539,7 +1540,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task UpdateGrupoModulos(NHibernate.IStatelessSession? session)
+        private async Task UpdateGrupoModulos(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             try
             {
@@ -1586,7 +1587,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task UpdateModules(NHibernate.IStatelessSession? session)
+        private async Task UpdateModules(IRepositoryHosted _repository, NHibernate.IStatelessSession? session)
         {
             try
             {

@@ -15,19 +15,16 @@ namespace SW_PortalProprietario.Application.Hosted;
 /// </summary>
 public class AutomaticCommunicationEmailHostedService : BackgroundService
 {
-    private readonly IRepositoryHosted _repository;
     private readonly ILogger<AutomaticCommunicationEmailHostedService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private static bool isRunning = false;
 
     public AutomaticCommunicationEmailHostedService(
-        IRepositoryHosted repository,
         ILogger<AutomaticCommunicationEmailHostedService> logger,
         IConfiguration configuration,
         IServiceScopeFactory serviceScopeFactory)
     {
-        _repository = repository;
         _logger = logger;
         _configuration = configuration;
         _serviceScopeFactory = serviceScopeFactory;
@@ -122,6 +119,7 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
         {
             var configService = scope.ServiceProvider.GetRequiredService<IAutomaticCommunicationConfigService>();
             var handlerFactory = scope.ServiceProvider.GetRequiredService<ICommunicationHandlerFactory>();
+            var _repository = scope.ServiceProvider.GetRequiredService<IRepositoryHosted>();
             
             using (var session = _repository.CreateSession())
             {
