@@ -141,8 +141,8 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             if (!string.IsNullOrEmpty(searchModel.NomePessoa))
                 sb.AppendLine($@" and (
-                                        (translate(Lower(p.Nome),'áàãâäéèêëíìîïóòõôöúùûüç','aaaaaeeeeiiiiooooouuuuc') like '%{searchModel.NomePessoa.ToLower().RemoveAccents()}%') or 
-                                        (translate(Lower(u.Login),'áàãâäéèêëíìîïóòõôöúùûüç','aaaaaeeeeiiiiooooouuuuc') like '%{searchModel.NomePessoa.ToLower().RemoveAccents()}%') 
+                                        (Lower(p.Nome) like '%{searchModel.NomePessoa.ToLower().RemoveAccents()}%') or 
+                                        (Lower(u.Login) like '%{searchModel.NomePessoa.ToLower().RemoveAccents()}%') 
                                       )");
 
 
@@ -297,18 +297,18 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             
             if (!string.IsNullOrEmpty(searchModel.NomePessoa))
-                sb.AppendLine($" and Translate(Lower(p.Nome),'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc') like '{searchModel.NomePessoa.ToLower().RemoveAccents()}%' ");
+                sb.AppendLine($" and Lower(p.Nome) like '{searchModel.NomePessoa.ToLower().RemoveAccents()}%' ");
 
             if (!string.IsNullOrEmpty(searchModel.Login))
             {
-                sb.AppendLine($" and Translate(Lower(u.Login),'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc') like '{searchModel.Login.TrimEnd().ToLower().RemoveAccents()}%' ");
+                sb.AppendLine($" and Lower(u.Login) like '{searchModel.Login.TrimEnd().ToLower().RemoveAccents()}%' ");
             }
 
 
             if (!string.IsNullOrEmpty(searchModel.LoginNomeEmail))
             {
 
-                sb.AppendLine(@$" and (Translate(Lower(u.Login),'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc') like '{searchModel.LoginNomeEmail.TrimEnd().ToLower().RemoveAccents()}%') or 
+                sb.AppendLine(@$" and (Lower(u.Login) like '{searchModel.LoginNomeEmail.TrimEnd().ToLower().RemoveAccents()}%') or 
                     Lower(p.EmailPreferencial) like '{searchModel.LoginNomeEmail.TrimEnd().ToLower()}%' or  
                     Lower(p.EmailAlternativo) like '{searchModel.LoginNomeEmail.TrimEnd().ToLower()}%' or  
                     Lower(p.Nome) like '{searchModel.LoginNomeEmail.TrimEnd().ToLower()}%')");
@@ -1122,12 +1122,11 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         private async Task<List<Usuario>?> GetUsuario(LoginInputModel userLoginInputModel)
         {
-            //'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc'
             var resultNew = (await _repository.FindByHql<Usuario>(@$"From 
                                                                         Usuario u 
                                                                         Inner Join Fetch u.Pessoa p 
                                                                       Where 
-                                                                         (Translate(Lower(u.Login),'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc') = '{userLoginInputModel.Login.ToLower().RemoveAccents().TrimEnd().TrimStart()}') 
+                                                                         (Lower(u.Login) = '{userLoginInputModel.Login.ToLower().RemoveAccents().TrimEnd().TrimStart()}') 
                                                                          and Coalesce(u.Removido,0) = 0 and u.DataHoraRemocao is null")).AsList();
 
             if (resultNew == null || resultNew.Count() == 0)
@@ -1163,23 +1162,6 @@ namespace SW_PortalProprietario.Application.Services.Core
                                                                       ")).AsList();
             }
                 
-
-            //if (userLoginInputModel.Login.Contains("@"))
-            //{
-            //    var users = (await _repository.FindBySql<UsuarioModel>(@$"Select 
-            //                                                                u.Id as UsuarioId, p.Id as PessoaId 
-            //                                                              From 
-            //                                                                Usuario u 
-            //                                                                Inner Join Pessoa p on u.Pessoa = p.Id
-            //                                                          Where 
-            //                                                                 p.EmailPreferencial is not null and 
-            //                                                                p.EmailPreferencial like '%@%' and 
-            //                                                                Lower(Coalesce(split_part(p.EmailPreferencial,';',1),p.EmailPreferencial)) = '{userLoginInputModel.Login.ToLower()}'")).AsList();
-
-            //    if (users != null && users.Count() > 1)
-            //        throw new ArgumentException("Não foi possível resetar a senha pelo seu email, utilize o login ou o CPF/CNPJ/Passaporte para realizar a operação.");
-
-            //}
 
             return resultNew;
 

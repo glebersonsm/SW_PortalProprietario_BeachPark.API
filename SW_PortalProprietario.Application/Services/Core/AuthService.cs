@@ -1322,14 +1322,11 @@ namespace SW_PortalProprietario.Application.Services.Core
         private async Task<List<Usuario>?> GetUsuario(LoginInputModel userLoginInputModel)
         {
 
-            //await _repository.ExecuteSqlCommand("Update Pessoa Set EmailPreferencial = Replace(EmailPreferencial,' ','') Where EmailPreferencial is not null and EmailPreferencial like '% %'");
-
-            //'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc'
             var resultNew = (await _repository.FindByHql<Usuario>(@$"From 
                                                                         Usuario u 
                                                                         Inner Join Fetch u.Pessoa p 
                                                                       Where 
-                                                                         (Replace(Translate(Lower(u.Login),'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc'),' ','') = '{userLoginInputModel.Login.ToLower().RemoveAccents()}') 
+                                                                         Lower(u.Login) = '{userLoginInputModel.Login.ToLower().RemoveAccents()}'
                                                                          and Coalesce(u.Removido,0) = 0 and u.DataHoraRemocao is null")).AsList();
 
             if (resultNew == null || resultNew.Count() == 0)
@@ -1377,22 +1374,6 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
 
 
-            //if (userLoginInputModel.Login.Contains("@"))
-            //{
-            //    var users = (await _repository.FindBySql<UsuarioModel>(@$"Select 
-            //                                                                u.Id as UsuarioId, p.Id as PessoaId 
-            //                                                              From 
-            //                                                                Usuario u 
-            //                                                                Inner Join Pessoa p on u.Pessoa = p.Id
-            //                                                          Where 
-            //                                                                 p.EmailPreferencial is not null and 
-            //                                                                p.EmailPreferencial like '%@%' and 
-            //                                                                Lower(Coalesce(split_part(p.EmailPreferencial,';',1),p.EmailPreferencial)) = '{userLoginInputModel.Login.ToLower()}'")).AsList();
-
-            //    if (users != null && users.Count() > 1)
-            //        throw new ArgumentException("Não foi possível resetar a senha pelo seu email, utilize o login ou o CPF/CNPJ/Passaporte para realizar a operação.");
-
-            //}
 
             return resultNew;
 
