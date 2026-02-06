@@ -132,7 +132,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 pprov.pessoaprovider as PessoaProviderId,
                 pprov.nomeprovider,
                 u.LoginPms,
-                u.LoginSistemaVenda
+                u.LoginSistemaVenda,
+                u.AvatarBase64
                 From 
                 Usuario u
                 Inner Join Pessoa p on u.Pessoa = p.Id
@@ -210,7 +211,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             await PopulateCompaniesOfUser(users);
 
             var integradoWith = _configuration.GetValue<string>("IntegradoCom", "eSolution");
-            
+
 
             if (!string.IsNullOrEmpty(integradoWith))
             {
@@ -289,13 +290,14 @@ namespace SW_PortalProprietario.Application.Services.Core
                                     Coalesce(u.GestorReservasAgendamentos,0) as GestorReservasAgendamentos,                                    
                                     p.Id as PessoaId,
                                     u.LoginPms,
-                                    u.LoginSistemaVenda
+                                    u.LoginSistemaVenda,
+                                    u.AvatarBase64
                                     From 
                                     Usuario u
                                     Inner Join Pessoa p on u.Pessoa = p.Id
                                     Where 1 = 1 and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0 ");
 
-            
+
             if (!string.IsNullOrEmpty(searchModel.NomePessoa))
                 sb.AppendLine($" and Lower(p.Nome) like '{searchModel.NomePessoa.ToLower().RemoveAccents()}%' ");
 
@@ -482,7 +484,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                         UsuarioAlteracao = permission.UsuarioAlteracao,
                         UsuarioCriacao = permission.UsuarioCriacao
                     });
-                };
+                }
+                ;
 
 
             }
@@ -667,7 +670,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     var arr = userInputModel.Pessoa.Nome.Split(' ');
                     if (arr.Length > 1)
                     {
-                        userInputModel.Login = (arr.First().Substring(0,1) + "." + arr.Last()).ToLower();
+                        userInputModel.Login = (arr.First().Substring(0, 1) + "." + arr.Last()).ToLower();
                     }
                     else if (userInputModel.Pessoa.Documentos != null && userInputModel.Pessoa.Documentos.Any(c => c.TipoDocumentoId == 1 || c.TipoDocumentoId == 2))
                     {
@@ -871,7 +874,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             if (user == null)
             {
-               
+
                 if (userInputModel != null && string.IsNullOrEmpty(userInputModel.Login) && userInputModel.Id == 0)
                 {
                     if (userInputModel.Pessoa != null && userInputModel.Pessoa.Documentos != null && userInputModel.Pessoa.Documentos.Any(b => !string.IsNullOrEmpty(b.Numero)))
@@ -901,7 +904,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     GestorFinanceiro = userInputModel != null ? userInputModel.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não,
                     GestorReservasAgendamentos = userInputModel != null ? userInputModel.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não,
                     LoginPms = userInputModel?.LoginPms,
-                    LoginSistemaVenda = userInputModel?.LoginSistemaVenda
+                    LoginSistemaVenda = userInputModel?.LoginSistemaVenda,
+                    AvatarBase64 = userInputModel?.AvatarBase64
                 };
 
 
@@ -930,6 +934,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
                     user.LoginPms = userInputModel.LoginPms;
                     user.LoginSistemaVenda = userInputModel.LoginSistemaVenda;
+                    user.AvatarBase64 = userInputModel.AvatarBase64;
                 }
 
             }
@@ -1041,9 +1046,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                         await _repository.ForcedSave(usuario);
                     }
                     model.Login = usuario.Pessoa?.EmailPreferencial.Split(';')[0];
-                    
+
                 }
-            
+
 
                 var users = await GetUsuario(new LoginInputModel { Login = model.Login });
                 if (users != null && users.Any())
@@ -1161,7 +1166,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                                                         and Coalesce(u.Removido,0) = 0 and u.DataHoraRemocao is null
                                                                       ")).AsList();
             }
-                
+
 
             return resultNew;
 

@@ -50,15 +50,17 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                     Password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass"),
                     UserName = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser"),
                     Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : _configuration.GetValue<int>("RabbitMqConnectionPort"),
-                    ClientProvidedName = Environment.GetEnvironmentVariable("RABBITMQ_LOG_AUDIT_FILA") ?? "FilaLogAuditPortalClienteBP_",
+                    ClientProvidedName = _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "ProcessamentoFilaAuditoria"),
                     ConsumerDispatchConcurrency = maximaConcorrencia
                 };
 
                 var connection = await factory.CreateConnectionAsync();
                 var channel = await connection.CreateChannelAsync();
 
-                var queueName =factory.ClientProvidedName;
+                var queueName = $"{_configuration.GetValue<string>("ProgramId", "PORTALPROP_")}{_configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "ProcessamentoFilaAuditoria")}";
                 queueName = queueName.Replace(" ", "");
+
+                _logger.LogInformation("Configurando fila de auditoria: {QueueName}", queueName);
 
                 await channel.ExchangeDeclareAsync(
                     exchange: queueName,
@@ -77,8 +79,12 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                 await channel.QueueBindAsync(queue: queueName, exchange: queueName, routingKey: queueName);
 
                 var consumerCount = await channel.ConsumerCountAsync(queueName);
+                _logger.LogInformation("Quantidade de consumers na fila {QueueName}: {ConsumerCount}", queueName, consumerCount);
+                
                 if (consumerCount == 0)
                 {
+                    _logger.LogInformation("Registrando consumer na fila {QueueName}", queueName);
+                    
                     var consumer = new AsyncEventingBasicConsumer(channel);
                     consumer.ReceivedAsync += async (model, ea) =>
                     {
@@ -88,6 +94,8 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
 
                         try
                         {
+                            _logger.LogDebug("Recebido log de auditoria da fila: {Message}", message);
+                            
                             var auditLogMessage = System.Text.Json.JsonSerializer.Deserialize<AuditLogMessageEvent>(message);
                             if (auditLogMessage != null)
                             {
@@ -96,6 +104,9 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                                     var auditService = scope.ServiceProvider.GetRequiredService<IAuditService>();
                                     await auditService.SaveAuditLogAsync(auditLogMessage);
                                 }
+                                
+                                _logger.LogDebug("Log de auditoria salvo com sucesso: EntityType={EntityType}, EntityId={EntityId}", 
+                                    auditLogMessage.EntityType, auditLogMessage.EntityId);
                             }
 
                             await channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
@@ -111,6 +122,12 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                     await channel.BasicConsumeAsync(queue: queueName,
                                          autoAck: false,
                                          consumer: consumer);
+                    
+                    _logger.LogInformation("Consumer registrado com sucesso na fila {QueueName}", queueName);
+                }
+                else
+                {
+                    _logger.LogWarning("Fila {QueueName} já possui {ConsumerCount} consumer(s) ativo(s)", queueName, consumerCount);
                 }
 
                 _isRunning = true;

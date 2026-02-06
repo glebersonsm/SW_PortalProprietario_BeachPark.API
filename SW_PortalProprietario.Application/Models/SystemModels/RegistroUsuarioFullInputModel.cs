@@ -19,6 +19,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public List<int>? TagsRequeridas { get; set; }
         public string? LoginPms { get; set; }
         public string? LoginSistemaVenda { get; set; }
+        public string? AvatarBase64 { get; set; }
 
 
     }

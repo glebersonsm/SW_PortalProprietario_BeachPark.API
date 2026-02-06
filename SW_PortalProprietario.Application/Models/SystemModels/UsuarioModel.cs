@@ -27,6 +27,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public EnumSimNao? IntegradoComMultiPropriedade { get; set; }
         public string? LoginPms { get; set; }
         public string? LoginSistemaVenda { get; set; }
+        public string? AvatarBase64 { get; set; }
 
         public static explicit operator UsuarioModel(Usuario model)
         {
@@ -40,7 +41,8 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
                 Status = model.Status,
                 Administrador = model.Administrador,
                 LoginPms = model.LoginPms,
-                LoginSistemaVenda = model.LoginSistemaVenda
+                LoginSistemaVenda = model.LoginSistemaVenda,
+                AvatarBase64 = model.AvatarBase64
             };
         }
 

@@ -18,6 +18,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual EnumSimNao? Removido { get; set; }
         public virtual string? LoginPms { get; set; }
         public virtual string? LoginSistemaVenda { get; set; }
+        public virtual string? AvatarBase64 { get; set; }
 
         public virtual async Task SaveValidate()
         {
