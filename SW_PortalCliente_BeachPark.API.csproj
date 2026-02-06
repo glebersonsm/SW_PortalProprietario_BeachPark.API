@@ -32,6 +32,7 @@
     <Compile Remove="Setup\**" />
     <Compile Remove="src\AccessCenterDomain\**" />
     <Compile Remove="src\EsolutionPortalDomain\**" />
+    <Compile Remove="src\SW_PortalProprietario.API\**" />
     <Compile Remove="src\SW_Solterra_API_Principal_Test\**" />
     <Compile Remove="SW_PortalProprietario.Application\**" />
     <Compile Remove="SW_PortalProprietario.Domain\**" />
@@ -62,6 +63,7 @@
     <Content Remove="Setup\**" />
     <Content Remove="src\AccessCenterDomain\**" />
     <Content Remove="src\EsolutionPortalDomain\**" />
+    <Content Remove="src\SW_PortalProprietario.API\**" />
     <Content Remove="src\SW_Solterra_API_Principal_Test\**" />
     <Content Remove="SW_PortalProprietario.Application\**" />
     <Content Remove="SW_PortalProprietario.Domain\**" />
@@ -92,6 +94,7 @@
     <EmbeddedResource Remove="Setup\**" />
     <EmbeddedResource Remove="src\AccessCenterDomain\**" />
     <EmbeddedResource Remove="src\EsolutionPortalDomain\**" />
+    <EmbeddedResource Remove="src\SW_PortalProprietario.API\**" />
     <EmbeddedResource Remove="src\SW_Solterra_API_Principal_Test\**" />
     <EmbeddedResource Remove="SW_PortalProprietario.Application\**" />
     <EmbeddedResource Remove="SW_PortalProprietario.Domain\**" />
@@ -122,6 +125,7 @@
     <None Remove="Setup\**" />
     <None Remove="src\AccessCenterDomain\**" />
     <None Remove="src\EsolutionPortalDomain\**" />
+    <None Remove="src\SW_PortalProprietario.API\**" />
     <None Remove="src\SW_Solterra_API_Principal_Test\**" />
     <None Remove="SW_PortalProprietario.Application\**" />
     <None Remove="SW_PortalProprietario.Domain\**" />
