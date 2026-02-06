@@ -11,6 +11,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual int? Ordem { get; set; }
         public virtual DateTime? DataHoraRemocao { get; set; }
         public virtual int? UsuarioRemocao { get; set; }
+        public virtual GrupoDocumento? GrupoDocumentoPai { get; set; }
 
         public virtual async Task SaveValidate()
         {

@@ -10,6 +10,6 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public int? Ordem { get; set; }
         public bool? RemoverTagsNaoEnviadas { get; set; } = false;
         public List<int>? TagsRequeridas { get; set; }
-
+        public int? GrupoDocumentoPaiId { get; set; }
     }
 }

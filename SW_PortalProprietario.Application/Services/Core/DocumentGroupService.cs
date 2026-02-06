@@ -125,6 +125,15 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var grupoDocumento = grupoDocumentoOriginal != null ? _mapper.Map(model, grupoDocumentoOriginal) : _mapper.Map(model, new GrupoDocumento());
                 grupoDocumento.Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.First().Id };
 
+                if (model.GrupoDocumentoPaiId.GetValueOrDefault(0) > 0)
+                {
+                    grupoDocumento.GrupoDocumentoPai = await _repository.FindById<GrupoDocumento>(model.GrupoDocumentoPaiId.Value);
+                }
+                else
+                {
+                    grupoDocumento.GrupoDocumentoPai = null;
+                }
+
                 // Se for uma inclusão e não tiver ordem definida, definir ordem padrão
                 if (grupoDocumentoOriginal == null && (model.Ordem == null || model.Ordem == 0))
                 {
@@ -199,12 +208,23 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         }
 
+        private GrupoDocumentoModel MapWithParent(GrupoDocumento entity)
+        {
+            var model = _mapper.Map(entity, new GrupoDocumentoModel());
+            model.GrupoDocumentoPaiId = entity.GrupoDocumentoPai?.Id;
+            if (entity.GrupoDocumentoPai != null)
+            {
+                model.Parent = MapWithParent(entity.GrupoDocumentoPai);
+            }
+            return model;
+        }
+
         public async Task<IEnumerable<GrupoDocumentoModel>?> Search(SearchGrupoDocumentoModel searchModel)
         {
             var loggedUser = await _repository.GetLoggedUser();
             if (!loggedUser.HasValue)
                 throw new ArgumentException("Não foi possível retornar os grupos de documentos");
-            
+
             if (!loggedUser.Value.isAdm)
             {
                 if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
@@ -221,7 +241,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             List<SW_Utils.Auxiliar.Parameter> parameters = new();
             List<SW_Utils.Auxiliar.Parameter> parameters1 = new();
-            StringBuilder sb = new("From GrupoDocumento gd Inner Join Fetch gd.Empresa emp Inner Join Fetch emp.Pessoa ep Where 1 = 1 and gd.UsuarioRemocao is null and gd.DataHoraRemocao is null ");
+            StringBuilder sb = new("From GrupoDocumento gd Inner Join Fetch gd.Empresa emp Inner Join Fetch emp.Pessoa ep Left Join Fetch gd.GrupoDocumentoPai gdp Left Join Fetch gdp.GrupoDocumentoPai gdpp Where 1 = 1 and gd.UsuarioRemocao is null and gd.DataHoraRemocao is null ");
             if (!string.IsNullOrEmpty(searchModel.Nome))
                 sb.AppendLine($" and Lower(gd.Nome) like '%{searchModel.Nome.ToLower()}%'");
 
@@ -241,6 +261,14 @@ namespace SW_PortalProprietario.Application.Services.Core
                 sb.AppendLine($" and gd.UsuarioCriacao = {searchModel.UsuarioCriacao.GetValueOrDefault()}");
             }
 
+            if (searchModel.IdGrupoDocumentoPai.HasValue)
+            {
+                if (searchModel.IdGrupoDocumentoPai.Value > 0)
+                    sb.AppendLine($" and gd.GrupoDocumentoPai.Id = {searchModel.IdGrupoDocumentoPai.Value}");
+                else
+                    sb.AppendLine($" and gd.GrupoDocumentoPai.Id is null");
+            }
+
             if (!loggedUser.Value.isAdm)
             {
                 sb.AppendLine(" and Coalesce(gd.Disponivel,0) = 1 ");
@@ -252,7 +280,10 @@ namespace SW_PortalProprietario.Application.Services.Core
             var grupoDocumentos = await _repository.FindByHql<GrupoDocumento>(sb.ToString(), session: null, parameters.ToArray());
 
 
-            var itensRetorno = grupoDocumentos.Select(a => _mapper.Map(a, new GrupoDocumentoModel())).ToList();
+            var itensRetorno = grupoDocumentos.Select(a =>
+            {
+                return MapWithParent(a);
+            }).ToList();
             if (itensRetorno.Any())
             {
 
@@ -347,9 +378,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                                         Id = b.Id,
                                         Tags = new TagsModel
                                         {
-                                            Id       = b.TagsId,
-                                            Nome     = b.TagsNome,
-                                            Path     = b.TagsPath,
+                                            Id = b.TagsId,
+                                            Nome = b.TagsNome,
+                                            Path = b.TagsPath,
                                             ParentId = b.TagsParentId
                                         }
                                     }).AsList();

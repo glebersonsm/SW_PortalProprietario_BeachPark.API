@@ -18,6 +18,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(p => p.DataHoraRemocao).Nullable();
 
             References(b => b.Empresa, "Empresa");
+            References(b => b.GrupoDocumentoPai, "IdGrupoDocumentoPai").Nullable();
             Map(b => b.Nome).Length(100);
             Map(b => b.Disponivel).CustomType<EnumSimNao>();
             Map(b => b.Ordem).Nullable();

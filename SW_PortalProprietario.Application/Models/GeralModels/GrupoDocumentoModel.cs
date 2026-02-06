@@ -10,5 +10,7 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public int? Ordem { get; set; }
         public List<GrupoDocumentoTagsModel>? TagsRequeridas { get; set; }
         public List<DocumentoModelSimplificado>? Documentos { get; set; }
+        public int? GrupoDocumentoPaiId { get; set; }
+        public GrupoDocumentoModel? Parent { get; set; }
     }
 }
