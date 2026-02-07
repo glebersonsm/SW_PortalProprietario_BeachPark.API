@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Entities.Core.Framework;
+using SW_PortalProprietario.Domain.Entities.Core.Framework;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Geral
@@ -9,6 +9,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual string? Nome { get; set; }
         public virtual EnumSimNao? Disponivel { get; set; }
         public virtual int? Ordem { get; set; }
+        public virtual GrupoFaq? GrupoFaqPai { get; set; }
 
         public virtual async Task SaveValidate()
         {

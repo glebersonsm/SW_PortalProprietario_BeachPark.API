@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NHibernate;
@@ -96,6 +96,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var grupoFaq = grupoFaqOriginal != null ? _mapper.Map(model, grupoFaqOriginal) : _mapper.Map(model, new GrupoFaq());
                 grupoFaq.Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = emp.Id.GetValueOrDefault() };
 
+                // Definir grupo pai (subgrupo)
+                if (model.GrupoFaqPaiId.GetValueOrDefault(0) > 0)
+                {
+                    grupoFaq.GrupoFaqPai = await _repository.FindById<GrupoFaq>(model.GrupoFaqPaiId.Value);
+                }
+                else
+                {
+                    grupoFaq.GrupoFaqPai = null;
+                }
+
                 // Se for uma inclusão e não tiver ordem definida, definir ordem padrão
                 if (grupoFaqOriginal == null && (model.Ordem == null || model.Ordem == 0))
                 {
@@ -112,7 +122,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     _logger.LogInformation($"Grupo de FAQ: ({result.Id} - {grupoFaq.Nome}) salvo com sucesso!");
 
                     if (result != null)
-                        return _mapper.Map(result, new GrupoFaqModel());
+                        return MapWithParent(result);
 
                 }
                 throw exception ?? new Exception($"Não foi possível salvar o Grupo de FAQ: ({grupoFaq.Nome})");
@@ -188,13 +198,21 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             List<Parameter> parameters = new();
             List<Parameter> parameters1 = new();
-            StringBuilder sb = new("From GrupoFaq gf Inner Join Fetch gf.Empresa emp Where 1 = 1");
+            StringBuilder sb = new("From GrupoFaq gf Inner Join Fetch gf.Empresa emp Left Join Fetch gf.GrupoFaqPai gfp Left Join Fetch gfp.GrupoFaqPai gfpp Where 1 = 1");
             sb.AppendLine(" Order By Coalesce(gf.Ordem, 999999), gf.Id");
 
             if (searchModel.Id.GetValueOrDefault(0) > 0)
             {
                 sb.AppendLine($" and gf.Id = :id");
                 parameters.Add(new Parameter("id", searchModel.Id.GetValueOrDefault()));
+            }
+
+            if (searchModel.IdGrupoFaqPai.HasValue)
+            {
+                if (searchModel.IdGrupoFaqPai.Value > 0)
+                    sb.AppendLine($" and gf.GrupoFaqPai.Id = {searchModel.IdGrupoFaqPai.Value}");
+                else
+                    sb.AppendLine($" and gf.GrupoFaqPai.Id is null");
             }
 
             if (!string.IsNullOrEmpty(searchModel.TextoPergunta))
@@ -211,7 +229,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
             var grupoFaqs = await _repository.FindByHql<GrupoFaq>(sb.ToString(), null, parameters.ToArray());
-            var itensRetorno = grupoFaqs.Select(a => _mapper.Map(a, new GrupoFaqModel())).AsList();
+            var itensRetorno = grupoFaqs.Select(a => MapWithParent(a)).AsList();
 
             var groupFaqsTags = (await _repository.FindByHql<GrupoFaqTags>(@$"From 
                                     GrupoFaqTags gft 
@@ -279,6 +297,17 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             return await _serviceBase.SetUserName(itensRetorno);
 
+        }
+
+        private GrupoFaqModel MapWithParent(GrupoFaq entity)
+        {
+            var model = _mapper.Map(entity, new GrupoFaqModel());
+            model.GrupoFaqPaiId = entity.GrupoFaqPai?.Id;
+            if (entity.GrupoFaqPai != null)
+            {
+                model.Parent = MapWithParent(entity.GrupoFaqPai);
+            }
+            return model;
         }
 
         public async Task<bool> ReorderGroups(List<ReorderFaqGroupModel> groups)
