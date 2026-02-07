@@ -1,4 +1,4 @@
-﻿using AccessCenterDomain;
+using AccessCenterDomain;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using NHibernate;
@@ -618,7 +618,11 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                     p.ExigeEnderecoHospedeConvidado,
                                     p.ExigeTelefoneHospedeConvidado,
                                     p.ExigeDocumentoHospedeConvidado,
-                                    p.PermiteReservaRciApenasClientesComContratoRci
+                                    p.PermiteReservaRciApenasClientesComContratoRci,
+                                    p.Habilitar2FAPorEmail,
+                                    p.Habilitar2FAPorSms,
+                                    p.Habilitar2FAParaCliente,
+                                    p.Habilitar2FAParaAdministrador
                                     From 
                                     ParametroSistema p
                                     Where 1 = 1 ");

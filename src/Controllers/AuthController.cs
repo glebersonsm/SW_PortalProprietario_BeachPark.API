@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.AuthModels;
@@ -64,6 +64,60 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
             }
         }
 
+        [HttpGet("login2FAOptions")]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status500InternalServerError)]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetLogin2FAOptions([FromQuery] string? login)
+        {
+            try
+            {
+                var result = await _authService.GetLogin2FAOptionsAsync(login ?? "");
+                return Ok(new ResultModel<Login2FAOptionsResultModel>(result)
+                {
+                    Errors = new List<string>(),
+                    Status = StatusCodes.Status200OK,
+                    Success = true
+                });
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<Login2FAOptionsResultModel>(new Login2FAOptionsResultModel())
+                {
+                    Errors = new List<string>() { err.Message },
+                    Status = StatusCodes.Status500InternalServerError,
+                    Success = false
+                });
+            }
+        }
+
+        [HttpPost("login2FAOptions")]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status500InternalServerError)]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetLogin2FAOptionsPost([FromBody] Login2FAOptionsRequestModel model)
+        {
+            try
+            {
+                var result = await _authService.GetLogin2FAOptionsAsync(model?.Login ?? "");
+                return Ok(new ResultModel<Login2FAOptionsResultModel>(result)
+                {
+                    Errors = new List<string>(),
+                    Status = StatusCodes.Status200OK,
+                    Success = true
+                });
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<Login2FAOptionsResultModel>(new Login2FAOptionsResultModel())
+                {
+                    Errors = new List<string>() { err.Message },
+                    Status = StatusCodes.Status500InternalServerError,
+                    Success = false
+                });
+            }
+        }
+
         [HttpPost("login")]
         [ProducesResponseType(typeof(ResultModel<TokenResultModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<TokenResultModel>), StatusCodes.Status400BadRequest)]
@@ -114,6 +168,42 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
+                    Status = StatusCodes.Status500InternalServerError,
+                    Success = false
+                });
+            }
+        }
+
+        [HttpPost("validateTwoFactor")]
+        [ProducesResponseType(typeof(ResultModel<TokenResultModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<TokenResultModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResultModel<TokenResultModel>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ResultModel<TokenResultModel>), StatusCodes.Status500InternalServerError)]
+        [Produces("application/json")]
+        public async Task<IActionResult> ValidateTwoFactor([FromBody] ValidateTwoFactorInputModel model)
+        {
+            try
+            {
+                var result = await _authService.ValidateTwoFactorAsync(model);
+                if (result == null)
+                    return Unauthorized(new ResultModel<TokenResultModel>(new TokenResultModel())
+                    {
+                        Errors = new List<string>() { "Código inválido ou expirado." },
+                        Status = StatusCodes.Status401Unauthorized,
+                        Success = false
+                    });
+                return Ok(new ResultModel<TokenResultModel>(result)
+                {
+                    Errors = new List<string>(),
+                    Status = StatusCodes.Status200OK,
+                    Success = true
+                });
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<TokenResultModel>(new TokenResultModel())
+                {
+                    Errors = new List<string>() { err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });

@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Entities.Core.Sistema;
+using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 
 namespace SW_PortalProprietario.Application.Models.AuthModels
 {
@@ -23,6 +23,10 @@ namespace SW_PortalProprietario.Application.Models.AuthModels
         public string? EmpreendimnentoNome { get; set; }
         public string? PadraoDeCor { get; set; } = "Default";
         public List<ContratoResultModel>? Contratos { get; set; } = new List<ContratoResultModel>();
+        /// <summary> Indica que o login exige validação 2FA; o token JWT só será retornado após ValidateTwoFactor. </summary>
+        public bool RequiresTwoFactor { get; set; }
+        /// <summary> Id temporário para a etapa de validação do código 2FA. </summary>
+        public Guid? TwoFactorId { get; set; }
 
         public static explicit operator TokenResultModel(Usuario usuario)
         {

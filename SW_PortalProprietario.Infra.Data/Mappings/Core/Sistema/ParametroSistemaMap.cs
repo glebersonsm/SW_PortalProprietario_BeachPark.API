@@ -1,4 +1,4 @@
-﻿using FluentNHibernate.Mapping;
+using FluentNHibernate.Mapping;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 using SW_PortalProprietario.Domain.Enumns;
 
@@ -67,6 +67,11 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(p => p.EnderecoAdministradoraCondominio);
             Map(b => b.PontosRci);
             Map(b => b.PermiteReservaRciApenasClientesComContratoRci).CustomType<EnumSimNao>();
+
+            Map(b => b.Habilitar2FAPorEmail).CustomType<EnumSimNao>();
+            Map(b => b.Habilitar2FAPorSms).CustomType<EnumSimNao>();
+            Map(b => b.Habilitar2FAParaCliente).CustomType<EnumSimNao>();
+            Map(b => b.Habilitar2FAParaAdministrador).CustomType<EnumSimNao>();
 
             Table("ParametroSistema");
         }

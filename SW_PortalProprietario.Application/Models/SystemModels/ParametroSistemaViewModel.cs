@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Enumns;
+using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.SystemModels
 {
@@ -59,6 +59,13 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
 
         #region Configurações de Reserva RCI
         public EnumSimNao? PermiteReservaRciApenasClientesComContratoRci { get; set; }
+        #endregion
+
+        #region Autenticação em duas etapas (2FA)
+        public EnumSimNao? Habilitar2FAPorEmail { get; set; }
+        public EnumSimNao? Habilitar2FAPorSms { get; set; }
+        public EnumSimNao? Habilitar2FAParaCliente { get; set; }
+        public EnumSimNao? Habilitar2FAParaAdministrador { get; set; }
         #endregion
 
     }

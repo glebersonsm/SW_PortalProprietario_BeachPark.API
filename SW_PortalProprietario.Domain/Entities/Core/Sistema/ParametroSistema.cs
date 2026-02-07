@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Entities.Core.Framework;
+using SW_PortalProprietario.Domain.Entities.Core.Framework;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
@@ -62,6 +62,13 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
 
         #region Configurações de Reserva RCI
         public virtual EnumSimNao? PermiteReservaRciApenasClientesComContratoRci { get; set; } = EnumSimNao.Não;
+        #endregion
+
+        #region Autenticação em duas etapas (2FA)
+        public virtual EnumSimNao? Habilitar2FAPorEmail { get; set; } = EnumSimNao.Não;
+        public virtual EnumSimNao? Habilitar2FAPorSms { get; set; } = EnumSimNao.Não;
+        public virtual EnumSimNao? Habilitar2FAParaCliente { get; set; } = EnumSimNao.Não;
+        public virtual EnumSimNao? Habilitar2FAParaAdministrador { get; set; } = EnumSimNao.Não;
         #endregion
 
         public virtual async Task SaveValidate()

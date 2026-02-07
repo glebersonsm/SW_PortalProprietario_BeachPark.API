@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -140,6 +140,23 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (!model.PermiteReservaRciApenasClientesComContratoRci.HasValue)
                 {
                     model.PermiteReservaRciApenasClientesComContratoRci = psBd != null ? psBd.PermiteReservaRciApenasClientesComContratoRci : Domain.Enumns.EnumSimNao.Não;
+                }
+
+                if (!model.Habilitar2FAPorEmail.HasValue)
+                {
+                    model.Habilitar2FAPorEmail = psBd != null ? psBd.Habilitar2FAPorEmail : Domain.Enumns.EnumSimNao.Não;
+                }
+                if (!model.Habilitar2FAPorSms.HasValue)
+                {
+                    model.Habilitar2FAPorSms = psBd != null ? psBd.Habilitar2FAPorSms : Domain.Enumns.EnumSimNao.Não;
+                }
+                if (!model.Habilitar2FAParaCliente.HasValue)
+                {
+                    model.Habilitar2FAParaCliente = psBd != null ? psBd.Habilitar2FAParaCliente : Domain.Enumns.EnumSimNao.Não;
+                }
+                if (!model.Habilitar2FAParaAdministrador.HasValue)
+                {
+                    model.Habilitar2FAParaAdministrador = psBd != null ? psBd.Habilitar2FAParaAdministrador : Domain.Enumns.EnumSimNao.Não;
                 }
 
                 var outroParametroMesmaEmpresa = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}")).FirstOrDefault();

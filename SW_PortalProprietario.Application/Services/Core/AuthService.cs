@@ -1,4 +1,4 @@
-﻿using CMDomain.Models.AuthModels;
+using CMDomain.Models.AuthModels;
 using Dapper;
 using EsolutionPortalDomain.ReservasApiModels;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +9,7 @@ using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.AuthModels;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
+using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Core.Auxiliar;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Providers;
@@ -37,6 +38,8 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly ICommunicationProvider _communicationProvider;
         private readonly IProjectObjectMapper _mapper;
         private readonly ITokenBodyService _tokenService;
+        private readonly IEmailService _emailService;
+        private readonly ISmsProvider _smsProvider;
 
         public AuthService(IRepositoryNH repository,
             ICacheStore cacheStore,
@@ -45,7 +48,9 @@ namespace SW_PortalProprietario.Application.Services.Core
             IServiceBase serviceBase,
             ICommunicationProvider communicationProvider,
             IProjectObjectMapper mapper,
-            ITokenBodyService tokenService)
+            ITokenBodyService tokenService,
+            IEmailService emailService,
+            ISmsProvider smsProvider)
         {
             _repository = repository;
             _cache = cacheStore;
@@ -55,6 +60,8 @@ namespace SW_PortalProprietario.Application.Services.Core
             _communicationProvider = communicationProvider;
             _mapper = mapper;
             _tokenService = tokenService;
+            _emailService = emailService;
+            _smsProvider = smsProvider;
         }
 
         public ICacheStore Cache => _cache;
@@ -1021,6 +1028,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                         {
                             if (BCrypt.Net.BCrypt.Verify(senha, usuarioManter.PasswordHash) || byPassPasswordValidation)
                             {
+                                var twoFAResult = await MaybeRequire2FAAsync(usuarioManter, userLoginInputModel.TwoFactorChannel);
+                                if (twoFAResult != null) { _repository.Rollback(); return twoFAResult; }
                                 userReturn = (TokenResultModel)usuarioManter;
                                 userReturn.FimValidade = DateTime.Now.AddDays(1);
                                 await GenerateToken(userReturn, usuarioManter, usuarioManter.ProviderChaveUsuario);
@@ -1176,6 +1185,8 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                     if (usuarioManter != null && userReturn == null)
                     {
+                        var twoFAResultVinculo = await MaybeRequire2FAAsync(usuarioManter, userLoginInputModel.TwoFactorChannel);
+                        if (twoFAResultVinculo != null) { _repository.Rollback(); return twoFAResultVinculo; }
                         userReturn = (TokenResultModel)usuarioManter;
                         userReturn.FimValidade = DateTime.Now.AddDays(1);
                         await GenerateToken(userReturn, usuarioManter, usuarioManter.ProviderChaveUsuario, vinculo);
@@ -1259,6 +1270,8 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                     if (BCrypt.Net.BCrypt.Verify(senha, usuarioManter.PasswordHash) || byPassPasswordValidation)
                     {
+                        var twoFAResultNormal = await MaybeRequire2FAAsync(usuarioManter, userLoginInputModel.TwoFactorChannel);
+                        if (twoFAResultNormal != null) { _repository.Rollback(); return twoFAResultNormal; }
                         userReturn = (TokenResultModel)usuarioManter;
                         userReturn.FimValidade = DateTime.Now.AddDays(1);
                         await GenerateToken(userReturn, usuarioManter, usuarioManter.ProviderChaveUsuario);
@@ -1317,6 +1330,163 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw;
             }
 
+        }
+
+        private const string TwoFactorCacheKeyPrefix = "2fa:";
+        private const int TwoFactorCodeExpirationMinutes = 10;
+        private const int TwoFactorCodeLength = 6;
+
+        public async Task<Login2FAOptionsResultModel> GetLogin2FAOptionsAsync(string login)
+        {
+            var result = new Login2FAOptionsResultModel { RequiresTwoFactor = false, UserType = null, Channels = new List<Login2FAChannelModel>() };
+            if (string.IsNullOrWhiteSpace(login)) return result;
+            login = login.Trim().RemoveAccents().Replace(" ", "");
+            var usuarios = await GetUsuario(new LoginInputModel { Login = login });
+            Usuario? usuario = usuarios?.OrderByDescending(a => a.Id).FirstOrDefault();
+            if (usuario == null || usuario.Status != EnumStatus.Ativo)
+                return result;
+            bool isAdmin = usuario.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            result.UserType = isAdmin ? "Administrador" : "Cliente";
+            ParametroSistemaViewModel? param = null;
+            try { param = await _repository.GetParametroSistemaViewModel(); } catch { /* sem empresa/sessão */ }
+            if (param == null) return result;
+            bool twoFAForProfile = isAdmin
+                ? (param.Habilitar2FAParaAdministrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                : (param.Habilitar2FAParaCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim);
+            if (!twoFAForProfile) return result;
+            result.RequiresTwoFactor = true;
+            if (param.Habilitar2FAPorEmail.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim && !string.IsNullOrEmpty(usuario.Pessoa?.EmailPreferencial) && usuario.Pessoa.EmailPreferencial.Contains("@"))
+                result.Channels.Add(new Login2FAChannelModel { Type = "email", Display = MaskEmail(usuario.Pessoa.EmailPreferencial) });
+            if (param.Habilitar2FAPorSms.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+            {
+                var celular = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
+                if (!string.IsNullOrEmpty(celular))
+                    result.Channels.Add(new Login2FAChannelModel { Type = "sms", Display = MaskPhone(celular) });
+            }
+            return result;
+        }
+
+        public async Task<TokenResultModel?> ValidateTwoFactorAsync(ValidateTwoFactorInputModel model)
+        {
+            if (model.TwoFactorId == Guid.Empty || string.IsNullOrWhiteSpace(model.Code))
+                return null;
+            var key = TwoFactorCacheKeyPrefix + model.TwoFactorId;
+            var payload = await _cache.GetAsync<TwoFactorCachePayload>(key, 0, CancellationToken);
+            await _cache.DeleteByKey(key, 0, CancellationToken);
+            if (payload == null) return null;
+            var codeTrim = model.Code?.Trim() ?? "";
+            if (codeTrim.Length != TwoFactorCodeLength || !payload.Code.Equals(codeTrim, StringComparison.Ordinal))
+                return null;
+            var usuario = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {payload.UserId} and u.DataHoraRemocao is null and Coalesce(u.Removido,0) = 0")).FirstOrDefault();
+            if (usuario == null) return null;
+            var userReturn = (TokenResultModel)usuario;
+            userReturn.FimValidade = DateTime.Now.AddDays(1);
+            await GenerateToken(userReturn, usuario, usuario.ProviderChaveUsuario);
+            await _cache.AddAsync(usuario.Id.ToString(), userReturn, new DateTimeOffset(userReturn.FimValidade.GetValueOrDefault()), 0, CancellationToken);
+            userReturn.IsAdmin = usuario.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            userReturn.IsGestorFinanceiro = usuario.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            userReturn.IsGestorReservasAgendamentos = usuario.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            return userReturn;
+        }
+
+        private async Task<TokenResultModel?> MaybeRequire2FAAsync(Usuario usuarioManter, string? twoFactorChannel)
+        {
+            ParametroSistemaViewModel? param = null;
+            try { param = await _repository.GetParametroSistemaViewModel(); } catch { return null; }
+            if (param == null) return null;
+            bool isAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            bool twoFAForProfile = isAdmin
+                ? (param.Habilitar2FAParaAdministrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                : (param.Habilitar2FAParaCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim);
+            if (!twoFAForProfile) return null;
+            var channel = twoFactorChannel?.Trim().ToLowerInvariant();
+            if (string.IsNullOrEmpty(channel) || (channel != "email" && channel != "sms"))
+                throw new ArgumentException("Para sua segurança, informe o canal (e-mail ou SMS) para receber o código de verificação.");
+            var twoFactorId = Guid.NewGuid();
+            var code = Generate2FACode();
+            var payload = new TwoFactorCachePayload { Code = code, UserId = usuarioManter.Id };
+            await _cache.AddAsync(TwoFactorCacheKeyPrefix + twoFactorId, payload, DateTimeOffset.UtcNow.AddMinutes(TwoFactorCodeExpirationMinutes), 0, CancellationToken);
+            if (channel == "email")
+                await Send2FACodeByEmailAsync(usuarioManter, code);
+            else
+                await Send2FACodeBySmsAsync(usuarioManter, code);
+            return new TokenResultModel { RequiresTwoFactor = true, TwoFactorId = twoFactorId };
+        }
+
+        private static string Generate2FACode()
+        {
+            var rnd = new Random();
+            var s = "";
+            for (int i = 0; i < TwoFactorCodeLength; i++) s += rnd.Next(0, 10).ToString();
+            return s;
+        }
+
+        private static string MaskEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email) || !email.Contains("@")) return "***@***.***";
+            var at = email.IndexOf('@');
+            var local = email.Substring(0, at);
+            var domain = email.Substring(at + 1);
+            var dot = domain.LastIndexOf('.');
+            var domainName = dot > 0 ? domain.Substring(0, dot) : domain;
+            var domainExt = dot > 0 ? domain.Substring(dot) : "";
+            var maskedLocal = local.Length <= 2 ? "***" : local.Substring(0, 1) + "***";
+            var maskedDomain = domainName.Length <= 2 ? "***" : domainName.Substring(0, 1) + "***";
+            return maskedLocal + "@" + maskedDomain + domainExt;
+        }
+
+        private static string MaskPhone(string phone)
+        {
+            var digits = new string(phone?.Where(char.IsDigit).ToArray() ?? Array.Empty<char>());
+            if (digits.Length < 4) return "(**) *********";
+            var ddd = digits.Length >= 2 ? digits.Substring(0, 2) : "**";
+            var last4 = digits.Length >= 4 ? digits.Substring(digits.Length - 4) : digits;
+            return $"({ddd}) *****{last4}";
+        }
+
+        private async Task<string?> GetFirstCelularForPessoa(int pessoaId)
+        {
+            if (pessoaId <= 0) return null;
+            var list = (await _repository.FindBySql<PessoaTelefoneNumeroModel>($@"
+                Select Top 1 pt.NumeroFormatado as Numero From PessoaTelefone pt
+                Inner Join TipoTelefone tt on pt.TipoTelefone = tt.Id
+                Where pt.Pessoa = {pessoaId} and (Lower(tt.Nome) like '%celular%' or pt.Preferencial = 1)
+                Order by Case When pt.Preferencial = 1 then 0 else 1 end")).ToList();
+            return list.FirstOrDefault()?.Numero;
+        }
+
+        private async Task Send2FACodeByEmailAsync(Usuario usuario, string code)
+        {
+            var email = usuario.Pessoa?.EmailPreferencial;
+            if (string.IsNullOrEmpty(email) || !email.Contains("@")) return;
+            var usuarioSistemaId = _configuration.GetValue<int>("UsuarioSistemaId", 1);
+            await _emailService.SaveInternal(new EmailInputInternalModel
+            {
+                UsuarioCriacao = usuario.UsuarioCriacao ?? usuarioSistemaId,
+                Assunto = "Código de verificação - Login em duas etapas",
+                Destinatario = email,
+                ConteudoEmail = $"Olá, {usuario.Pessoa?.Nome}! Seu código de acesso é: <b>{code}</b>. Válido por {TwoFactorCodeExpirationMinutes} minutos."
+            });
+        }
+
+        private async Task Send2FACodeBySmsAsync(Usuario usuario, string code)
+        {
+            var celular = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
+            if (string.IsNullOrEmpty(celular)) return;
+            var apenasNumeros = new string(celular.Where(char.IsDigit).ToArray());
+            if (apenasNumeros.Length < 10) return;
+            await _smsProvider.SendSmsAsync(apenasNumeros, $"Seu código de acesso é: {code}. Válido por {TwoFactorCodeExpirationMinutes} min.", CancellationToken);
+        }
+
+        private class TwoFactorCachePayload
+        {
+            public string Code { get; set; } = "";
+            public int UserId { get; set; }
+        }
+
+        private class PessoaTelefoneNumeroModel
+        {
+            public string? Numero { get; set; }
         }
 
         private async Task<List<Usuario>?> GetUsuario(LoginInputModel userLoginInputModel)

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using SW_PortalProprietario.Application.Models.AuditModels;
 using SW_PortalProprietario.Application.Models.DocumentTemplates;
 using SW_PortalProprietario.Application.Models.FrameworkModels;
@@ -288,7 +288,11 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
                 .ForMember(dest => dest.ExigeEnderecoHospedeConvidado, opt => opt.MapFrom(src => src.ExigeEnderecoHospedeConvidado))
                 .ForMember(dest => dest.ExigeTelefoneHospedeConvidado, opt => opt.MapFrom(src => src.ExigeTelefoneHospedeConvidado))
                 .ForMember(dest => dest.ExigeDocumentoHospedeConvidado, opt => opt.MapFrom(src => src.ExigeDocumentoHospedeConvidado))
-                .ForMember(dest => dest.PermiteReservaRciApenasClientesComContratoRci, opt => opt.MapFrom(src => src.PermiteReservaRciApenasClientesComContratoRci));
+                .ForMember(dest => dest.PermiteReservaRciApenasClientesComContratoRci, opt => opt.MapFrom(src => src.PermiteReservaRciApenasClientesComContratoRci))
+                .ForMember(dest => dest.Habilitar2FAPorEmail, opt => opt.MapFrom(src => src.Habilitar2FAPorEmail))
+                .ForMember(dest => dest.Habilitar2FAPorSms, opt => opt.MapFrom(src => src.Habilitar2FAPorSms))
+                .ForMember(dest => dest.Habilitar2FAParaCliente, opt => opt.MapFrom(src => src.Habilitar2FAParaCliente))
+                .ForMember(dest => dest.Habilitar2FAParaAdministrador, opt => opt.MapFrom(src => src.Habilitar2FAParaAdministrador));
 
 
             #endregion
@@ -921,6 +925,10 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
                 .ForMember(dest => dest.ExigeTelefoneHospedeConvidado, opt => opt.MapFrom(a => a.ExigeTelefoneHospedeConvidado))
                 .ForMember(dest => dest.ExigeDocumentoHospedeConvidado, opt => opt.MapFrom(a => a.ExigeDocumentoHospedeConvidado))
                 .ForMember(dest => dest.PermiteReservaRciApenasClientesComContratoRci, opt => opt.MapFrom(a => a.PermiteReservaRciApenasClientesComContratoRci))
+                .ForMember(dest => dest.Habilitar2FAPorEmail, opt => opt.MapFrom(a => a.Habilitar2FAPorEmail))
+                .ForMember(dest => dest.Habilitar2FAPorSms, opt => opt.MapFrom(a => a.Habilitar2FAPorSms))
+                .ForMember(dest => dest.Habilitar2FAParaCliente, opt => opt.MapFrom(a => a.Habilitar2FAParaCliente))
+                .ForMember(dest => dest.Habilitar2FAParaAdministrador, opt => opt.MapFrom(a => a.Habilitar2FAParaAdministrador))
                 .ForAllMembers(opt =>
             opt.Condition((src, dest, srcMember) => srcMember != null));
 
