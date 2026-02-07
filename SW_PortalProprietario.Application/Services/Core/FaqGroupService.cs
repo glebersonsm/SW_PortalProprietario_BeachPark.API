@@ -54,6 +54,10 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 _repository.BeginTransaction();
                 await _repository.ExecuteSqlCommand($"Delete From GrupoFaqTags Where GrupoFaq = {id}");
+                await _repository.ExecuteSqlCommand($"Delete From GrupoFaqTags Where GrupoFaq in (Select gf.Id From GrupoFaq gf Where gf.IdGrupoFaqPai is not null and gf.IdGrupoFaqPai = {id})");
+                await _repository.ExecuteSqlCommand($"Delete From FaqTags Where Faq in (Select f.Id From Faq f Where f.GrupoFaq = {id})");
+                await _repository.ExecuteSqlCommand($"Delete From Faq Where GrupoFaq is not null and GrupoFaq = {id}");
+                await _repository.ExecuteSqlCommand($"Delete From GrupoFaq Where IdGrupoFaqPai is not null and IdGrupoFaqPai = {id}");
                 _repository.Remove(grupoFaq);
 
                 var resultCommit = await _repository.CommitAsync();
@@ -87,7 +91,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 GrupoFaq grupoFaqOriginal = null;
                 if (model.Id.GetValueOrDefault(0) > 0)
-                    grupoFaqOriginal = (await _repository.FindByHql<GrupoFaq>($"From GrupoFaq gf Where gf.Id = {model.Id}")).FirstOrDefault();
+                    grupoFaqOriginal = (await _repository.FindByHql<GrupoFaq>($"From GrupoFaq gf Left Join Fetch gf.GrupoFaqPai gp Where gf.Id = {model.Id}")).FirstOrDefault();
 
                 var emp = (await _repository.FindBySql<EmpresaModel>($"Select e.Id From Empresa e Order by e.Id")).FirstOrDefault();
                 if (emp == null)
@@ -120,10 +124,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (executed)
                 {
                     _logger.LogInformation($"Grupo de FAQ: ({result.Id} - {grupoFaq.Nome}) salvo com sucesso!");
-
-                    if (result != null)
-                        return MapWithParent(result);
-
+                    return new GrupoFaqModel() { Id = result.Id };
                 }
                 throw exception ?? new Exception($"Não foi possível salvar o Grupo de FAQ: ({grupoFaq.Nome})");
             }
@@ -198,8 +199,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             List<Parameter> parameters = new();
             List<Parameter> parameters1 = new();
-            StringBuilder sb = new("From GrupoFaq gf Inner Join Fetch gf.Empresa emp Left Join Fetch gf.GrupoFaqPai gfp Left Join Fetch gfp.GrupoFaqPai gfpp Where 1 = 1");
-            sb.AppendLine(" Order By Coalesce(gf.Ordem, 999999), gf.Id");
+            StringBuilder sb = new("From GrupoFaq gf Inner Join Fetch gf.Empresa emp Left Join Fetch gf.GrupoFaqPai gfp Left Join Fetch gfp.GrupoFaqPai gfpp Left Join Fetch gfpp.GrupoFaqPai gfppp Where 1 = 1");
 
             if (searchModel.Id.GetValueOrDefault(0) > 0)
             {
@@ -227,6 +227,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     $" Lower(f.Resposta) like '%{searchModel.TextoResposta.ToLower()}%')");
             }
 
+            sb.AppendLine(" Order By Coalesce(gf.Ordem, 999999), gf.Id");
 
             var grupoFaqs = await _repository.FindByHql<GrupoFaq>(sb.ToString(), null, parameters.ToArray());
             var itensRetorno = grupoFaqs.Select(a => MapWithParent(a)).AsList();
