@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -388,6 +388,20 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _logger.LogError(err, $"Não foi possível salvar o email");
                 _repository.Rollback();
                 throw;
+            }
+        }
+
+        public async Task RecordEmailOpen(int emailId)
+        {
+            if (emailId <= 0) return;
+            try
+            {
+                await _repository.ExecuteSqlCommand(
+                    $"UPDATE Email SET DataHoraPrimeiraAbertura = GETUTCDATE() WHERE Id = {emailId} AND DataHoraPrimeiraAbertura IS NULL");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Falha ao registrar abertura do e-mail {EmailId}", emailId);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿using FluentNHibernate.Mapping;
+using FluentNHibernate.Mapping;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 using SW_PortalProprietario.Domain.Enumns;
 
@@ -20,6 +20,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Enviado).CustomType<EnumSimNao>();
             Map(b => b.NaFila).CustomType<EnumSimNao>();
             Map(p => p.DataHoraEnvio);
+            Map(p => p.DataHoraPrimeiraAbertura).Nullable();
             Map(b => b.ErroEnvio).CustomType("StringClob").CustomSqlType("Text");
             References(x => x.Empresa, "Empresa");
 

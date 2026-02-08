@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Application.Models;
+using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.GeralModels;
 
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces
@@ -12,5 +12,10 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         Task MarcarComoEnviado(int id);
         Task<DeleteResultModel> DeleteEmail(int id);
         Task<(int pageNumber, int lastPageNumber, IEnumerable<EmailModel> emails)?> Search(SearchEmailModel searchModel);
+        /// <summary>
+        /// Registra a primeira abertura do e-mail (quando o tracking pixel é carregado).
+        /// Só atualiza se DataHoraPrimeiraAbertura ainda for null.
+        /// </summary>
+        Task RecordEmailOpen(int emailId);
     }
 }

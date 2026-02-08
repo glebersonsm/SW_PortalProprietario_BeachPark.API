@@ -1567,8 +1567,10 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             var parameters = new List<Parameter>();
             var sb = new StringBuilder(@"
-                SELECT cte.Id, cte.Usuario as UsuarioId, cte.Login, cte.Canal, cte.Destinatario, cte.TextoEnviado, cte.DataHoraEnvio, cte.TwoFactorId, cte.EmailId
+                SELECT cte.Id, cte.Usuario as UsuarioId, cte.Login, cte.Canal, cte.Destinatario, cte.TextoEnviado, cte.DataHoraEnvio, cte.TwoFactorId, cte.EmailId,
+                       e.DataHoraPrimeiraAbertura as DataHoraPrimeiraAberturaEmail
                 FROM ComunicacaoTokenEnviada cte
+                LEFT JOIN Email e ON e.Id = cte.EmailId
                 WHERE 1 = 1");
             if (search.DataHoraEnvioInicial.HasValue)
             {

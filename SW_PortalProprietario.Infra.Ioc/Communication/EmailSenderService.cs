@@ -40,8 +40,18 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             if (model.Id.GetValueOrDefault() == 0)
                 throw new ArgumentException("O Email deve ser persistido no banco de dados antes de ser enviado ao cliente.");
 
-            await Send(model.Destinatario, model.Assunto, model.ConteudoEmail);
+            var html = InjectTrackingPixelIfConfigured(model.ConteudoEmail, model.Id.GetValueOrDefault());
+            await Send(model.Destinatario, model.Assunto, html);
 
+        }
+
+        private string InjectTrackingPixelIfConfigured(string html, int emailId)
+        {
+            var baseUrl = _configuration.GetValue<string>("EmailTrackingBaseUrl");
+            if (string.IsNullOrWhiteSpace(baseUrl) || emailId <= 0) return html;
+            baseUrl = baseUrl.TrimEnd('/');
+            var pixel = $"<img src=\"{baseUrl}/Email/track/open?id={emailId}\" width=\"1\" height=\"1\" alt=\"\" style=\"display:block;\" />";
+            return html + pixel;
         }
 
         private async Task Send(string destinatario, string assunto, string html)
@@ -65,6 +75,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 string pass;
                 int porta;
                 bool useSsl;
+                string? fromName = null;
                 if (smtpFromParams != null)
                 {
                     host = smtpFromParams.Host;
@@ -72,6 +83,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     pass = smtpFromParams.Pass;
                     porta = smtpFromParams.Port;
                     useSsl = smtpFromParams.UseSsl;
+                    fromName = smtpFromParams.FromName;
                 }
                 else
                 {
@@ -80,6 +92,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     pass = _configuration.GetValue<string>("SmtpPass") ?? "";
                     porta = _configuration.GetValue<int>("SmtpPort", 0);
                     useSsl = _configuration.GetValue<string>("SmtpUseSsl") == "S";
+                    fromName = _configuration.GetValue<string>("SmtpFromName");
                 }
 
                 if (string.IsNullOrEmpty(host))
@@ -93,7 +106,9 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
 
                 // create message
                 var email = new MimeMessage();
-                email.From.Add(MailboxAddress.Parse(remetente));
+                email.From.Add(!string.IsNullOrWhiteSpace(fromName)
+                    ? new MailboxAddress(fromName.Trim(), remetente)
+                    : MailboxAddress.Parse(remetente));
 
                 foreach (var item in destinatario.Split(";"))
                 {

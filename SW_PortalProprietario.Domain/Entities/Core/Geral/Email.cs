@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Entities.Core.Framework;
+using SW_PortalProprietario.Domain.Entities.Core.Framework;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Geral
@@ -13,6 +13,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
 
         public virtual EnumSimNao? NaFila { get; set; }
         public virtual DateTime? DataHoraEnvio { get; set; }
+        public virtual DateTime? DataHoraPrimeiraAbertura { get; set; }
         public virtual string? ErroEnvio { get; set; }
         public virtual IList<EmailAnexo> Anexos { get; set; } = new List<EmailAnexo>();
         public virtual async Task SaveValidate()

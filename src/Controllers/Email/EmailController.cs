@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -250,5 +250,32 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
             }
         }
 
+        /// <summary>
+        /// Endpoint usado pelo pixel de rastreio de abertura de e-mail.
+        /// Chamado quando o cliente de e-mail carrega as imagens do corpo do e-mail.
+        /// Público (sem autenticação) para o pixel poder ser carregado.
+        /// </summary>
+        [HttpGet("track/open")]
+        [AllowAnonymous]
+        [Produces("image/gif")]
+        public async Task<IActionResult> TrackOpen([FromQuery] int id)
+        {
+            if (id <= 0)
+                return File(TransparentGif1x1(), "image/gif");
+            try
+            {
+                await _emailService.RecordEmailOpen(id);
+            }
+            catch
+            {
+                // Não expor erro ao cliente; apenas retornar a imagem
+            }
+            return File(TransparentGif1x1(), "image/gif", "pixel.gif");
+        }
+
+        private static byte[] TransparentGif1x1()
+        {
+            return Convert.FromBase64String("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7");
+        }
     }
 }

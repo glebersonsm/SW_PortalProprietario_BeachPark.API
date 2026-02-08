@@ -14,6 +14,11 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public DateTime DataHoraEnvio { get; set; }
         public Guid? TwoFactorId { get; set; }
         public int? EmailId { get; set; }
+        /// <summary>
+        /// Data/hora da primeira abertura do e-mail (quando o destinatário carregou as imagens).
+        /// Null se o e-mail não foi aberto ou o canal não for e-mail.
+        /// </summary>
+        public DateTime? DataHoraPrimeiraAberturaEmail { get; set; }
     }
 
     /// <summary>

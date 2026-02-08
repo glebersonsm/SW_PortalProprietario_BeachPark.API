@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Enumns;
+using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.GeralModels
 {
@@ -9,6 +9,7 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public string? Destinatario { get; set; }
         public string? ConteudoEmail { get; set; }
         public EnumSimNao? Enviado { get; set; }
+        public DateTime? DataHoraPrimeiraAbertura { get; set; }
         public List<EmailAnexoModel>? Anexos { get; set; }
     }
 
