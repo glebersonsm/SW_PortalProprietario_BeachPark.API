@@ -7,7 +7,9 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Infra.Ioc.Communication
 {
     /// <summary>
-    /// Obtém configurações SMTP a partir de ParametroSistema (banco). Usa escopo para resolver IRepositoryHosted.
+    /// Obtém configurações SMTP a partir de ParametroSistema (banco).
+    /// Usa IRepositoryNH (mesmo repositório que grava os parâmetros na tela Configurações) para garantir
+    /// que o envio use os dados salvos pelo usuário; fallback para IRepositoryHosted se NH não estiver disponível no escopo.
     /// </summary>
     public class ParametroSistemaSmtpSettingsProvider : ISmtpSettingsProvider
     {
@@ -27,8 +29,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                var repository = scope.ServiceProvider.GetRequiredService<IRepositoryHosted>();
-                var param = await repository.GetParametroSistemaViewModel();
+                var param = await GetParametroSistemaFromRepositoryAsync(scope.ServiceProvider).ConfigureAwait(false);
                 if (param == null)
                     return null;
                 if (string.IsNullOrWhiteSpace(param.SmtpHost) || string.IsNullOrWhiteSpace(param.SmtpUser) || string.IsNullOrWhiteSpace(param.SmtpPass))
@@ -49,9 +50,37 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Não foi possível obter configurações SMTP de ParametroSistema. Será usado appsettings.");
+                _logger.LogWarning(ex, "Não foi possível obter configurações SMTP de ParametroSistema. Será usado fallback (.env / appsettings).");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Obtém ParametroSistema: tenta IRepositoryNH primeiro (mesma fonte que a tela Configurações),
+        /// depois IRepositoryHosted para cenários de hosted service.
+        /// </summary>
+        private static async Task<ParametroSistemaViewModel?> GetParametroSistemaFromRepositoryAsync(IServiceProvider serviceProvider)
+        {
+            var repoNH = serviceProvider.GetService<IRepositoryNH>();
+            if (repoNH != null)
+            {
+                try
+                {
+                    var param = await repoNH.GetParametroSistemaViewModel().ConfigureAwait(false);
+                    if (param != null)
+                        return param;
+                }
+                catch
+                {
+                    // Ignora e tenta Hosted
+                }
+            }
+
+            var repoHosted = serviceProvider.GetService<IRepositoryHosted>();
+            if (repoHosted != null)
+                return await repoHosted.GetParametroSistemaViewModel().ConfigureAwait(false);
+
+            return null;
         }
     }
 }
