@@ -184,8 +184,10 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             email.Subject = assunto;
             email.Body = new TextPart(TextFormat.Html) { Text = html };
 
+            // Porta 465 = SSL implícito. Porta 587 (ex.: Gmail) = STARTTLS.
+            var secureOption = (porta == 465) ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
-            smtp.Connect(host, porta, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls);
+            smtp.Connect(host, porta, secureOption);
             smtp.Authenticate(remetente, password: pass);
             await smtp.SendAsync(email);
             smtp.Disconnect(true);

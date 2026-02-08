@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -121,9 +121,9 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                     }
                     catch (Exception err)
                     {
-                        _logger.LogError(err, $"Erro ao processar email da fila. DeliveryTag: {tag}");
-                        // Não reenviar para a fila (requeue: false) para evitar loop infinito
-                        await _channel.BasicNackAsync(deliveryTag: tag, multiple: false, requeue: false);
+                        _logger.LogError(err, "Erro ao processar email da fila. DeliveryTag: {Tag}. Mensagem será reenfileirada para nova tentativa.", tag);
+                        // Reenfileirar para nova tentativa (requeue: true) para não descartar o email sem envio
+                        await _channel.BasicNackAsync(deliveryTag: tag, multiple: false, requeue: true);
                     }
                 };
 

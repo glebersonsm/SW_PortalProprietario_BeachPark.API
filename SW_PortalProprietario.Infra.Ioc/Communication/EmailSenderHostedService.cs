@@ -232,8 +232,10 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
 
             email.Body = bodyBuilder.ToMessageBody();
 
+            // Porta 465 = SSL implícito (SslOnConnect). Porta 587 (e outras) = STARTTLS (conexão em texto e depois upgrade).
+            var secureOption = (porta == 465) ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
-            smtp.Connect(host, porta, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls);
+            smtp.Connect(host, porta, secureOption);
             smtp.Authenticate(remetente, password: pass);
             await smtp.SendAsync(email);
             smtp.Disconnect(true);
