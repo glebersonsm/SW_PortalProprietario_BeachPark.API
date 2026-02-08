@@ -80,6 +80,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? SmtpUser { get; set; }
         public virtual string? SmtpPass { get; set; }
         public virtual string? SmtpFromName { get; set; }
+        public virtual EnumTipoEnvioEmail? TipoEnvioEmail { get; set; } = EnumTipoEnvioEmail.ClienteEmailDireto;
         #endregion
 
         public virtual async Task SaveValidate()

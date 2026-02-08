@@ -80,6 +80,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.SmtpUser).Length(500);
             Map(b => b.SmtpPass).Length(500);
             Map(b => b.SmtpFromName).Length(500);
+            Map(b => b.TipoEnvioEmail).CustomType<EnumTipoEnvioEmail>();
 
             Table("ParametroSistema");
         }

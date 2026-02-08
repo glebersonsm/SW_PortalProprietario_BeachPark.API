@@ -55,6 +55,41 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             }
         }
 
+        public async Task<SmtpContext> GetSmtpContextAsync(CancellationToken cancellationToken = default)
+        {
+            var ctx = new SmtpContext();
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var param = await GetParametroSistemaFromRepositoryAsync(scope.ServiceProvider).ConfigureAwait(false);
+                ctx.TipoEnvioEmail = param?.TipoEnvioEmail ?? EnumTipoEnvioEmail.ClienteEmailDireto;
+
+                if (param == null)
+                    return ctx;
+                if (string.IsNullOrWhiteSpace(param.SmtpHost) || string.IsNullOrWhiteSpace(param.SmtpUser) || string.IsNullOrWhiteSpace(param.SmtpPass))
+                    return ctx;
+                var port = param.SmtpPort ?? 0;
+                if (port <= 0)
+                    return ctx;
+
+                ctx.Settings = new SmtpSettingsResult
+                {
+                    Host = param.SmtpHost.Trim(),
+                    Port = port,
+                    User = param.SmtpUser.Trim(),
+                    Pass = param.SmtpPass.Trim(),
+                    UseSsl = param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
+                    FromName = string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
+                };
+                return ctx;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Não foi possível obter contexto SMTP de ParametroSistema. Será usado fallback (.env / appsettings) e ClienteEmailDireto.");
+                return ctx;
+            }
+        }
+
         /// <summary>
         /// Obtém ParametroSistema: tenta IRepositoryNH primeiro (mesma fonte que a tela Configurações),
         /// depois IRepositoryHosted para cenários de hosted service.

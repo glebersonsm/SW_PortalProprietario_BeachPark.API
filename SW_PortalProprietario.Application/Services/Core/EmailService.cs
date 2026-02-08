@@ -16,6 +16,9 @@ using ZXing;
 
 namespace SW_PortalProprietario.Application.Services.Core
 {
+    /// <summary>
+    /// Envio de e-mail sempre via fila de processamento. O consumer escolhe o cliente (MailKit ou System.Net.Mail) conforme TipoEnvioEmail.
+    /// </summary>
     public class EmailService : IEmailService
     {
         private readonly IRepositoryNH _repository;
@@ -25,6 +28,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly IConfiguration _configuration;
         private readonly IServiceBase _serviceBase;
         private readonly ICommunicationProvider _communicationProvider;
+
         public EmailService(IRepositoryNH repository,
             ILogger<EmailService> logger,
             IProjectObjectMapper mapper,
@@ -218,7 +222,6 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (executed)
                 {
                     _logger.LogInformation($"Email salvo(s) com sucesso!");
-
                     await _emailQueue.AddEmailMessageToQueue(_mapper.Map<EmailModel>(result));
                     return true;
                 }
@@ -231,7 +234,6 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw;
             }
         }
-
 
         public async Task<EmailModel> SaveInternal(EmailInputInternalModel model)
         {
@@ -275,8 +277,6 @@ namespace SW_PortalProprietario.Application.Services.Core
                     }
                 }
                 
-                // Carregar anexos para incluir no modelo
-                // Os anexos já devem estar carregados porque foram adicionados antes do Save
                 var emailModel = _mapper.Map<EmailModel>(result);
                 await _emailQueue.AddEmailMessageToQueue(emailModel);
                 emailModel.Id = email.Id;
@@ -364,6 +364,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                     throw new ArgumentException($"Não foi encontrado o email com Id: {id}");
 
                 await _repository.Lock(emailExistente, NHibernate.LockMode.UpgradeNoWait);
+
+                if (emailExistente.Enviado == EnumSimNao.Sim || emailExistente.NaFila == EnumSimNao.Sim)
+                {
+                    _repository.Rollback();
+                    return true;
+                }
 
                 emailExistente.NaFila = EnumSimNao.Sim;
                 await _repository.Save(emailExistente);

@@ -176,6 +176,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     model.SmtpPass = psBd != null ? psBd.SmtpPass : null;
                 if (string.IsNullOrEmpty(model.SmtpFromName) || model.SmtpFromName.Equals("string", StringComparison.InvariantCultureIgnoreCase))
                     model.SmtpFromName = psBd != null ? psBd.SmtpFromName : null;
+                if (!model.TipoEnvioEmail.HasValue)
+                    model.TipoEnvioEmail = psBd != null ? psBd.TipoEnvioEmail : null;
 
                 var outroParametroMesmaEmpresa = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}")).FirstOrDefault();
                 if (psBd?.Id == 0 && (outroParametroMesmaEmpresa != null && outroParametroMesmaEmpresa.Id > 0))
@@ -618,6 +620,46 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
             return parametroSistema;
+        }
+
+        /// <inheritdoc />
+        public async Task UpdateTipoEnvioEmailOnlyAsync(Domain.Enumns.EnumTipoEnvioEmail tipoEnvioEmail, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _repository.BeginTransaction();
+                var empresas = (await _repository.FindByHql<Empresa>("From Empresa e Inner Join Fetch e.Pessoa p")).AsList();
+                if (empresas.Count == 0 || empresas.Count > 1)
+                {
+                    _repository.Rollback();
+                    _logger.LogWarning("UpdateTipoEnvioEmailOnly: não foi possível identificar a empresa (count={Count}).", empresas.Count);
+                    return;
+                }
+                var empFirst = empresas.First();
+                var psList = await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}");
+                var psBd = psList.FirstOrDefault();
+                if (psBd == null)
+                {
+                    _repository.Rollback();
+                    _logger.LogWarning("UpdateTipoEnvioEmailOnly: ParametroSistema não encontrado para a empresa Id={EmpresaId}.", empFirst.Id);
+                    return;
+                }
+                psBd.TipoEnvioEmail = tipoEnvioEmail;
+                await _repository.Save(psBd);
+                var (executed, exception) = await _repository.CommitAsync();
+                if (executed)
+                    _logger.LogInformation("Tipo de envio de e-mail atualizado para {TipoEnvioEmail} (Id={ParametroId}).", tipoEnvioEmail, psBd.Id);
+                else
+                {
+                    _repository.Rollback();
+                    _logger.LogError(exception, "UpdateTipoEnvioEmailOnly: falha ao persistir.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _repository.Rollback();
+                _logger.LogError(ex, "UpdateTipoEnvioEmailOnly: exceção ao atualizar TipoEnvioEmail.");
+            }
         }
     }
 }

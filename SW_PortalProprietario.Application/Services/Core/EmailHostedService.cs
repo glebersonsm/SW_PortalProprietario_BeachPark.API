@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -15,6 +15,9 @@ using ZXing;
 
 namespace SW_PortalProprietario.Application.Services.Core
 {
+    /// <summary>
+    /// Envio de e-mail sempre via fila de processamento. O consumer escolhe o cliente (MailKit ou System.Net.Mail) conforme TipoEnvioEmail.
+    /// </summary>
     public class EmailHostedService : IEmailHostedService
     {
         private readonly IRepositoryNH _repository;
@@ -24,6 +27,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly IConfiguration _configuration;
         private readonly IServiceBase _serviceBase;
         private readonly ICommunicationProvider _communicationProvider;
+
         public EmailHostedService(IRepositoryNH repository,
             ILogger<EmailService> logger,
             IProjectObjectMapper mapper,
@@ -193,7 +197,6 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (executed)
                 {
                     _logger.LogInformation($"Email salvo(s) com sucesso!");
-
                     await _emailQueue.AddEmailMessageToQueue(_mapper.Map<EmailModel>(result));
                     return true;
                 }
@@ -206,7 +209,6 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw;
             }
         }
-
 
         public async Task<EmailModel> SaveInternal(EmailInputInternalModel model)
         {
@@ -310,11 +312,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                     _repository.Rollback();
                     return true;
                 }
-                else
-                {
-                    emailExistente.NaFila = EnumSimNao.Sim;
-                    await _repository.Save(emailExistente);
-                }
+
+                emailExistente.NaFila = EnumSimNao.Sim;
+                await _repository.Save(emailExistente);
 
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)

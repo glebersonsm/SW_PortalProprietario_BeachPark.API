@@ -1,16 +1,22 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using MimeKit.Text;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.GeralModels;
+using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Core.Interfaces.Communication;
-using System.Diagnostics;
+using SW_PortalProprietario.Domain.Enumns;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
+using System.Text.RegularExpressions;
+using MailMessage = System.Net.Mail.MailMessage;
+using SmtpClient = System.Net.Mail.SmtpClient;
 
 namespace SW_PortalProprietario.Infra.Ioc.Communication
 {
@@ -19,14 +25,17 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailSenderHostedService> _logger;
         private readonly ISmtpSettingsProvider _smtpSettingsProvider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public EmailSenderHostedService(IConfiguration configuration,
             ILogger<EmailSenderHostedService> loger,
-            ISmtpSettingsProvider smtpSettingsProvider)
+            ISmtpSettingsProvider smtpSettingsProvider,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _configuration = configuration;
             _logger = loger;
             _smtpSettingsProvider = smtpSettingsProvider;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task Send(EmailModel model)
@@ -72,21 +81,21 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 if (string.IsNullOrEmpty(destinatario) || !destinatario.Contains("@"))
                     throw new ArgumentException("Deve ser informado o destinatário do email.");
 
-                var smtpFromParams = await _smtpSettingsProvider.GetSmtpSettingsFromParametroSistemaAsync();
+                var ctx = await _smtpSettingsProvider.GetSmtpContextAsync();
                 string host;
                 string remetente;
                 string pass;
                 int porta;
                 bool useSsl;
                 string? fromName = null;
-                if (smtpFromParams != null)
+                if (ctx.Settings != null)
                 {
-                    host = smtpFromParams.Host;
-                    remetente = smtpFromParams.User;
-                    pass = smtpFromParams.Pass;
-                    porta = smtpFromParams.Port;
-                    useSsl = smtpFromParams.UseSsl;
-                    fromName = smtpFromParams.FromName;
+                    host = ctx.Settings.Host;
+                    remetente = ctx.Settings.User;
+                    pass = ctx.Settings.Pass;
+                    porta = ctx.Settings.Port;
+                    useSsl = ctx.Settings.UseSsl;
+                    fromName = ctx.Settings.FromName;
                 }
                 else
                 {
@@ -107,69 +116,173 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 if (porta == 0)
                     throw new ArgumentException("Deve ser informada a porta de saída do email (Parâmetro: 'SmtpPort' ou configuração do sistema).");
 
-                // create message
-                var email = new MimeMessage();
-                email.From.Add(!string.IsNullOrWhiteSpace(fromName)
-                    ? new MailboxAddress(fromName.Trim(), remetente)
-                    : MailboxAddress.Parse(remetente));
+                var preferSystemNetMail = ctx.TipoEnvioEmail == EnumTipoEnvioEmail.ClienteEmailApp;
+                Exception? firstException = null;
 
-                foreach (var item in destinatario.Split(";"))
+                // Tentativa pelo método configurado
+                try
                 {
-                    email.To.Add(MailboxAddress.Parse(item.TrimEnd().TrimStart().Replace(";","")));
+                    if (preferSystemNetMail)
+                        await SendViaSystemNetMailStaticAsync(destinatario, assunto, html, anexos, host, porta, useSsl, remetente, pass, fromName);
+                    else
+                        await SendViaMailKitAsync(destinatario, assunto, html, anexos, host, porta, useSsl, remetente, pass, fromName);
+                    return;
                 }
-                email.Subject = assunto;
-                
-                // Processar HTML e incorporar imagens como recursos relacionados
-                var bodyBuilder = ProcessarHtmlComImagens(html);
-                
-                // Adicionar anexos ao email
-                if (anexos != null && anexos.Any())
+                catch (Exception ex)
                 {
-                    _logger.LogInformation($"Adicionando {anexos.Count} anexo(s) ao email");
-                    
-                    foreach (var anexo in anexos)
+                    firstException = ex;
+                    _logger.LogWarning(ex, "Falha no envio por {Metodo}. Tentando método alternativo.", preferSystemNetMail ? "System.Net.Mail" : "MailKit");
+                }
+
+                // Fallback: tentar pelo outro método
+                try
+                {
+                    if (preferSystemNetMail)
+                        await SendViaMailKitAsync(destinatario, assunto, html, anexos, host, porta, useSsl, remetente, pass, fromName);
+                    else
+                        await SendViaSystemNetMailStaticAsync(destinatario, assunto, html, anexos, host, porta, useSsl, remetente, pass, fromName);
+                    _logger.LogInformation("Email enviado com sucesso pelo método alternativo (assunto: {Assunto}).", assunto);
+                    // Persistir o tipo que funcionou para evitar nova falha nos próximos envios
+                    if (ctx.Settings != null)
                     {
+                        var tipoQueFuncionou = preferSystemNetMail ? EnumTipoEnvioEmail.ClienteEmailDireto : EnumTipoEnvioEmail.ClienteEmailApp;
                         try
                         {
-                            if (anexo.Arquivo != null && anexo.Arquivo.Length > 0)
-                            {
-                                var attachment = new MimePart(anexo.TipoMime)
-                                {
-                                    Content = new MimeContent(new MemoryStream(anexo.Arquivo)),
-                                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
-                                    ContentTransferEncoding = ContentEncoding.Base64,
-                                    FileName = anexo.NomeArquivo
-                                };
-                                
-                                bodyBuilder.Attachments.Add(attachment);
-                                _logger.LogInformation($"Anexo adicionado: {anexo.NomeArquivo} ({anexo.Arquivo.Length} bytes)");
-                            }
-                            else
-                            {
-                                _logger.LogWarning($"Anexo {anexo.NomeArquivo} está vazio ou nulo");
-                            }
+                            using var scope = _serviceScopeFactory.CreateScope();
+                            var paramService = scope.ServiceProvider.GetRequiredService<IParametroSistemaService>();
+                            await paramService.UpdateTipoEnvioEmailOnlyAsync(tipoQueFuncionou);
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, $"Erro ao adicionar anexo {anexo.NomeArquivo}. Continuando sem este anexo.");
+                            _logger.LogWarning(ex, "Não foi possível atualizar TipoEnvioEmail nos parâmetros do sistema.");
                         }
                     }
                 }
-                
-                email.Body = bodyBuilder.ToMessageBody();
-
-                // send email
-                using var smtp = new SmtpClient();
-                smtp.Connect(host, porta, (useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls));
-                smtp.Authenticate(remetente, password: pass);
-                await smtp.SendAsync(email);
-                smtp.Disconnect(true);
+                catch (Exception ex2)
+                {
+                    _logger.LogError(ex2, "Falha também no método alternativo (assunto: {Assunto}).", assunto);
+                    throw firstException != null
+                        ? new InvalidOperationException("Envio falhou pelo método configurado e pelo método alternativo.", new AggregateException(firstException, ex2))
+                        : ex2;
+                }
             }
             catch (Exception err)
             {
-                _logger.LogError($"Não foi possível enviar o email com o assunto: {assunto}");
-                throw err;
+                _logger.LogError(err, "Não foi possível enviar o email com o assunto: {Assunto}", assunto);
+                throw;
             }
+        }
+
+        /// <summary>
+        /// Envio via MailKit (Cliente de email direto). Usado como método principal ou como fallback.
+        /// </summary>
+        private async Task SendViaMailKitAsync(
+            string destinatario,
+            string assunto,
+            string html,
+            List<EmailAnexoModel>? anexos,
+            string host,
+            int porta,
+            bool useSsl,
+            string remetente,
+            string pass,
+            string? fromName)
+        {
+            var email = new MimeMessage();
+            email.From.Add(!string.IsNullOrWhiteSpace(fromName)
+                ? new MailboxAddress(fromName.Trim(), remetente)
+                : MailboxAddress.Parse(remetente));
+
+            foreach (var item in destinatario.Split(";"))
+            {
+                email.To.Add(MailboxAddress.Parse(item.TrimEnd().TrimStart().Replace(";", "")));
+            }
+            email.Subject = assunto;
+
+            var bodyBuilder = ProcessarHtmlComImagens(html);
+
+            if (anexos != null && anexos.Any())
+            {
+                _logger.LogInformation("Adicionando {Count} anexo(s) ao email", anexos.Count);
+                foreach (var anexo in anexos)
+                {
+                    try
+                    {
+                        if (anexo.Arquivo != null && anexo.Arquivo.Length > 0)
+                        {
+                            var attachment = new MimePart(anexo.TipoMime)
+                            {
+                                Content = new MimeContent(new MemoryStream(anexo.Arquivo)),
+                                ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                                ContentTransferEncoding = ContentEncoding.Base64,
+                                FileName = anexo.NomeArquivo
+                            };
+                            bodyBuilder.Attachments.Add(attachment);
+                            _logger.LogInformation("Anexo adicionado: {NomeArquivo} ({Length} bytes)", anexo.NomeArquivo, anexo.Arquivo.Length);
+                        }
+                        else
+                            _logger.LogWarning("Anexo {NomeArquivo} está vazio ou nulo", anexo.NomeArquivo);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Erro ao adicionar anexo {NomeArquivo}. Continuando sem este anexo.", anexo.NomeArquivo);
+                    }
+                }
+            }
+
+            email.Body = bodyBuilder.ToMessageBody();
+
+            using var smtp = new MailKit.Net.Smtp.SmtpClient();
+            smtp.Connect(host, porta, useSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls);
+            smtp.Authenticate(remetente, password: pass);
+            await smtp.SendAsync(email);
+            smtp.Disconnect(true);
+        }
+
+        /// <summary>
+        /// Envio via System.Net.Mail (Cliente de email APP), estilo Sw_ClimberIntegration. Compartilhado com EmailSenderService.
+        /// </summary>
+        public static async Task SendViaSystemNetMailStaticAsync(
+            string destinatario,
+            string assunto,
+            string html,
+            List<EmailAnexoModel>? anexos,
+            string host,
+            int porta,
+            bool useSsl,
+            string remetente,
+            string pass,
+            string? fromName)
+        {
+            var fromAddress = string.IsNullOrWhiteSpace(fromName) ? remetente : $"{fromName.Trim()} <{remetente}>";
+            using var mensagem = new MailMessage();
+            mensagem.From = new System.Net.Mail.MailAddress(remetente, fromName ?? "");
+            foreach (var to in destinatario.Split(";", StringSplitOptions.RemoveEmptyEntries))
+            {
+                var trimmed = to.Trim();
+                if (!string.IsNullOrEmpty(trimmed))
+                    mensagem.To.Add(trimmed);
+            }
+            mensagem.Subject = assunto;
+            mensagem.Body = html;
+            mensagem.IsBodyHtml = true;
+
+            if (anexos != null)
+            {
+                foreach (var anexo in anexos)
+                {
+                    if (anexo?.Arquivo != null && anexo.Arquivo.Length > 0)
+                        mensagem.Attachments.Add(new Attachment(new MemoryStream(anexo.Arquivo), anexo.NomeArquivo, anexo.TipoMime));
+                }
+            }
+
+            using var clienteSmtp = new SmtpClient(host, porta);
+            clienteSmtp.EnableSsl = useSsl;
+            clienteSmtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+            clienteSmtp.UseDefaultCredentials = false;
+            clienteSmtp.Credentials = new NetworkCredential(remetente, pass);
+
+            await clienteSmtp.SendMailAsync(mensagem);
         }
 
         private BodyBuilder ProcessarHtmlComImagens(string html)

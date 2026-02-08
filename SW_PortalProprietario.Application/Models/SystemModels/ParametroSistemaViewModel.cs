@@ -77,6 +77,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? SmtpUser { get; set; }
         public string? SmtpPass { get; set; }
         public string? SmtpFromName { get; set; }
+        public EnumTipoEnvioEmail? TipoEnvioEmail { get; set; }
         #endregion
 
     }

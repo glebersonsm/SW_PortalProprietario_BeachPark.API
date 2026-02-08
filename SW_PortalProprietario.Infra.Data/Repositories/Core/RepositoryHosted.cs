@@ -519,7 +519,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                     p.SmtpUseSsl,
                                     p.SmtpUser,
                                     p.SmtpPass,
-                                    p.SmtpFromName
+                                    p.SmtpFromName,
+                                    p.TipoEnvioEmail
                                     From 
                                     ParametroSistema p
                                     Where 1 = 1 ");
