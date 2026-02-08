@@ -18,6 +18,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
 
         private static IConnection? _connection;
         private static bool _isRunning = false;
+        private static bool _alreadyLoggedRunning = false;
         private static readonly object _lock = new();
 
         public RabbitMQAuditLogConsumer(
@@ -34,7 +35,15 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
         {
             try
             {
-                if (_isRunning) return;
+                if (_isRunning)
+                {
+                    if (!_alreadyLoggedRunning)
+                    {
+                        _logger.LogDebug("Consumer de auditoria já está em execução");
+                        _alreadyLoggedRunning = true;
+                    }
+                    return;
+                }
 
                 lock (_lock)
                 {

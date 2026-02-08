@@ -24,6 +24,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
         private IConnection? _connection;
         private IChannel? _channel;
         private static bool _isRunning = false;
+        private static bool _alreadyLoggedRunning = false;
         private static readonly object _lock = new();
 
         public RabbitMQEmailSenderFromQueueConsumer(
@@ -47,7 +48,11 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                 {
                     if (_isRunning)
                     {
-                        _logger.LogInformation("Consumer de email já está em execução");
+                        if (!_alreadyLoggedRunning)
+                        {
+                            _logger.LogDebug("Consumer de email já está em execução");
+                            _alreadyLoggedRunning = true;
+                        }
                         return;
                     }
                     _isRunning = true;
@@ -243,6 +248,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                 lock (_lock)
                 {
                     _isRunning = false;
+                    _alreadyLoggedRunning = false;
                 }
 
                 _logger.LogInformation("Consumer de email finalizado e recursos liberados");
