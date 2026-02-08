@@ -159,6 +159,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     model.Habilitar2FAParaAdministrador = psBd != null ? psBd.Habilitar2FAParaAdministrador : Domain.Enumns.EnumSimNao.Não;
                 }
 
+                if (string.IsNullOrEmpty(model.EndpointEnvioSms2FA) || model.EndpointEnvioSms2FA.Equals("string", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    model.EndpointEnvioSms2FA = psBd != null ? psBd.EndpointEnvioSms2FA : null;
+                }
+
                 var outroParametroMesmaEmpresa = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}")).FirstOrDefault();
                 if (psBd?.Id == 0 && (outroParametroMesmaEmpresa != null && outroParametroMesmaEmpresa.Id > 0))
                     psBd.Id = outroParametroMesmaEmpresa.Id;
