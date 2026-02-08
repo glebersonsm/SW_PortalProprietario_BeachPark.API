@@ -81,6 +81,8 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? SmtpPass { get; set; }
         public virtual string? SmtpFromName { get; set; }
         public virtual EnumTipoEnvioEmail? TipoEnvioEmail { get; set; } = EnumTipoEnvioEmail.ClienteEmailDireto;
+        /// <summary> URL base para confirmação de leitura do e-mail (pixel de rastreio). Se vazio, usa .env/appsettings. </summary>
+        public virtual string? EmailTrackingBaseUrl { get; set; }
         #endregion
 
         public virtual async Task SaveValidate()

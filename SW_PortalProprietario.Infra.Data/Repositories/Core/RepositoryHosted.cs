@@ -520,7 +520,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                     p.SmtpUser,
                                     p.SmtpPass,
                                     p.SmtpFromName,
-                                    p.TipoEnvioEmail
+                                    p.TipoEnvioEmail,
+                                    p.EmailTrackingBaseUrl
                                     From 
                                     ParametroSistema p
                                     Where 1 = 1 ");

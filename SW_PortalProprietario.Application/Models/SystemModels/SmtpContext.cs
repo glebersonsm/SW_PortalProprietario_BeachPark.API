@@ -12,5 +12,8 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
 
         /// <summary> Tipo de envio: ClienteEmailDireto = MailKit, ClienteEmailApp = System.Net.Mail. </summary>
         public EnumTipoEnvioEmail TipoEnvioEmail { get; set; } = EnumTipoEnvioEmail.ClienteEmailDireto;
+
+        /// <summary> URL base para confirmação de leitura (pixel). Se null/vazio, usa IConfiguration["EmailTrackingBaseUrl"]. </summary>
+        public string? EmailTrackingBaseUrl { get; set; }
     }
 }

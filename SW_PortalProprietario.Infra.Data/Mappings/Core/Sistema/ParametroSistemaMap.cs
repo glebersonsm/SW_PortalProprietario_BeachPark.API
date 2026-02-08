@@ -81,6 +81,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.SmtpPass).Length(500);
             Map(b => b.SmtpFromName).Length(500);
             Map(b => b.TipoEnvioEmail).CustomType<EnumTipoEnvioEmail>();
+            Map(b => b.EmailTrackingBaseUrl).Length(500);
 
             Table("ParametroSistema");
         }

@@ -80,6 +80,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 using var scope = _serviceProvider.CreateScope();
                 var param = await GetParametroSistemaFromRepositoryAsync(scope.ServiceProvider).ConfigureAwait(false);
                 ctx.TipoEnvioEmail = param?.TipoEnvioEmail ?? EnumTipoEnvioEmail.ClienteEmailDireto;
+                ctx.EmailTrackingBaseUrl = !string.IsNullOrWhiteSpace(param?.EmailTrackingBaseUrl) ? param.EmailTrackingBaseUrl!.Trim() : null;
 
                 if (param == null)
                     return ctx;

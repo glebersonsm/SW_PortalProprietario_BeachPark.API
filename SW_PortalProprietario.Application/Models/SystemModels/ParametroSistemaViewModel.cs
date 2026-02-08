@@ -78,6 +78,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? SmtpPass { get; set; }
         public string? SmtpFromName { get; set; }
         public EnumTipoEnvioEmail? TipoEnvioEmail { get; set; }
+        public string? EmailTrackingBaseUrl { get; set; }
         #endregion
 
     }

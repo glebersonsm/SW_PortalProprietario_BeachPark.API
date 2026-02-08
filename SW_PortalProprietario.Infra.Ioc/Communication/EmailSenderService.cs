@@ -46,14 +46,15 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             if (model.Id.GetValueOrDefault() == 0)
                 throw new ArgumentException("O Email deve ser persistido no banco de dados antes de ser enviado ao cliente.");
 
-            var html = InjectTrackingPixelIfConfigured(model.ConteudoEmail, model.Id.GetValueOrDefault());
+            var ctx = await _smtpSettingsProvider.GetSmtpContextAsync();
+            var trackingBaseUrl = !string.IsNullOrWhiteSpace(ctx.EmailTrackingBaseUrl) ? ctx.EmailTrackingBaseUrl.Trim() : _configuration.GetValue<string>("EmailTrackingBaseUrl");
+            var html = InjectTrackingPixelIfConfigured(model.ConteudoEmail, model.Id.GetValueOrDefault(), trackingBaseUrl);
             await Send(model.Destinatario, model.Assunto, html);
 
         }
 
-        private string InjectTrackingPixelIfConfigured(string html, int emailId)
+        private static string InjectTrackingPixelIfConfigured(string html, int emailId, string? baseUrl)
         {
-            var baseUrl = _configuration.GetValue<string>("EmailTrackingBaseUrl");
             if (string.IsNullOrWhiteSpace(baseUrl) || emailId <= 0) return html;
             baseUrl = baseUrl.TrimEnd('/');
             var pixel = $"<img src=\"{baseUrl}/Email/track/open?id={emailId}\" width=\"1\" height=\"1\" alt=\"\" style=\"display:block;\" />";

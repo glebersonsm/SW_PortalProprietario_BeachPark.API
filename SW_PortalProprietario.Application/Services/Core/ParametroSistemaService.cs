@@ -178,6 +178,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     model.SmtpFromName = psBd != null ? psBd.SmtpFromName : null;
                 if (!model.TipoEnvioEmail.HasValue)
                     model.TipoEnvioEmail = psBd != null ? psBd.TipoEnvioEmail : null;
+                if (string.IsNullOrEmpty(model.EmailTrackingBaseUrl) || model.EmailTrackingBaseUrl.Equals("string", StringComparison.InvariantCultureIgnoreCase))
+                    model.EmailTrackingBaseUrl = psBd != null ? psBd.EmailTrackingBaseUrl : null;
 
                 var outroParametroMesmaEmpresa = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}")).FirstOrDefault();
                 if (psBd?.Id == 0 && (outroParametroMesmaEmpresa != null && outroParametroMesmaEmpresa.Id > 0))
