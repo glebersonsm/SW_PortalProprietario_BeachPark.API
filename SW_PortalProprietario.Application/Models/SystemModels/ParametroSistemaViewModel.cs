@@ -66,6 +66,8 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public EnumSimNao? Habilitar2FAPorSms { get; set; }
         public EnumSimNao? Habilitar2FAParaCliente { get; set; }
         public EnumSimNao? Habilitar2FAParaAdministrador { get; set; }
+        /// <summary> URL do endpoint de envio de SMS para token 2FA. </summary>
+        public string? EndpointEnvioSms2FA { get; set; }
         #endregion
 
     }

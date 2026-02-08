@@ -622,7 +622,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                     p.Habilitar2FAPorEmail,
                                     p.Habilitar2FAPorSms,
                                     p.Habilitar2FAParaCliente,
-                                    p.Habilitar2FAParaAdministrador
+                                    p.Habilitar2FAParaAdministrador,
+                                    p.EndpointEnvioSms2FA
                                     From 
                                     ParametroSistema p
                                     Where 1 = 1 ");

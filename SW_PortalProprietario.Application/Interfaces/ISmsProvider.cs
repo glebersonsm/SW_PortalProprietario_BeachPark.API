@@ -11,7 +11,8 @@ namespace SW_PortalProprietario.Application.Interfaces
         /// </summary>
         /// <param name="phoneNumber">Número do celular (com DDD, apenas dígitos ou formatado conforme exigido pelo provedor).</param>
         /// <param name="message">Texto da mensagem (ex.: código 2FA).</param>
+        /// <param name="baseUrl">URL do endpoint de envio (ex.: do cadastro ParametroSistema). Se null, usa valor de configuração (TwoFactorSms:BaseUrl).</param>
         /// <param name="cancellationToken">Cancelamento.</param>
-        Task SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken = default);
+        Task SendSmsAsync(string phoneNumber, string message, string? baseUrl = null, CancellationToken cancellationToken = default);
     }
 }

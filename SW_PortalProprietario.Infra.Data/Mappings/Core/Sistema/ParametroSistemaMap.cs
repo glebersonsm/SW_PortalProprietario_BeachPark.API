@@ -72,6 +72,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.Habilitar2FAPorSms).CustomType<EnumSimNao>();
             Map(b => b.Habilitar2FAParaCliente).CustomType<EnumSimNao>();
             Map(b => b.Habilitar2FAParaAdministrador).CustomType<EnumSimNao>();
+            Map(b => b.EndpointEnvioSms2FA).Length(500);
 
             Table("ParametroSistema");
         }

@@ -11,7 +11,7 @@ using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Core.Auxiliar;
-using SW_PortalProprietario.Application.Services.Core.Interfaces;
+using SW_PortalProprietario.Application.Services.Core.Interfaces.Communication;
 using SW_PortalProprietario.Application.Services.Providers;
 using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.DadosPessoa;
@@ -25,6 +25,7 @@ using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using SW_Utils.Auxiliar;
 
 namespace SW_PortalProprietario.Application.Services.Core
 {
@@ -39,6 +40,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly IProjectObjectMapper _mapper;
         private readonly ITokenBodyService _tokenService;
         private readonly IEmailService _emailService;
+        private readonly IEmailSenderHostedService _emailSenderHostedService;
         private readonly ISmsProvider _smsProvider;
 
         public AuthService(IRepositoryNH repository,
@@ -50,6 +52,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             IProjectObjectMapper mapper,
             ITokenBodyService tokenService,
             IEmailService emailService,
+            IEmailSenderHostedService emailSenderHostedService,
             ISmsProvider smsProvider)
         {
             _repository = repository;
@@ -61,6 +64,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             _mapper = mapper;
             _tokenService = tokenService;
             _emailService = emailService;
+            _emailSenderHostedService = emailSenderHostedService;
             _smsProvider = smsProvider;
         }
 
@@ -1366,6 +1370,27 @@ namespace SW_PortalProprietario.Application.Services.Core
             return result;
         }
 
+        public async Task<TokenResultModel?> SendTwoFactorCodeAsync(SendTwoFactorCodeInputModel model)
+        {
+            if (model == null || string.IsNullOrWhiteSpace(model.Login))
+                throw new ArgumentException("O login deve ser informado.");
+            var login = model.Login.Trim().RemoveAccents().Replace(" ", "");
+            var options = await GetLogin2FAOptionsAsync(login);
+            if (!options.RequiresTwoFactor || options.Channels == null || !options.Channels.Any())
+                throw new ArgumentException("Este usuário não está configurado para login em duas etapas.");
+            var channel = model.TwoFactorChannel?.Trim().ToLowerInvariant();
+            if (string.IsNullOrEmpty(channel) || (channel != "email" && channel != "sms"))
+                throw new ArgumentException("Para sua segurança, informe o canal (e-mail ou SMS) para receber o código de verificação.");
+            var channelAllowed = options.Channels.Any(c => string.Equals(c.Type, channel, StringComparison.OrdinalIgnoreCase));
+            if (!channelAllowed)
+                throw new ArgumentException("Canal não disponível para este usuário.");
+            var usuarios = await GetUsuario(new LoginInputModel { Login = login });
+            var usuario = usuarios?.OrderByDescending(a => a.Id).FirstOrDefault();
+            if (usuario == null || usuario.Status != EnumStatus.Ativo)
+                throw new FileNotFoundException("Usuário não encontrado.");
+            return await MaybeRequire2FAAsync(usuario, channel);
+        }
+
         public async Task<TokenResultModel?> ValidateTwoFactorAsync(ValidateTwoFactorInputModel model)
         {
             if (model.TwoFactorId == Guid.Empty || string.IsNullOrWhiteSpace(model.Code))
@@ -1407,9 +1432,9 @@ namespace SW_PortalProprietario.Application.Services.Core
             var payload = new TwoFactorCachePayload { Code = code, UserId = usuarioManter.Id };
             await _cache.AddAsync(TwoFactorCacheKeyPrefix + twoFactorId, payload, DateTimeOffset.UtcNow.AddMinutes(TwoFactorCodeExpirationMinutes), 0, CancellationToken);
             if (channel == "email")
-                await Send2FACodeByEmailAsync(usuarioManter, code);
+                await Send2FACodeByEmailAsync(usuarioManter, code, twoFactorId);
             else
-                await Send2FACodeBySmsAsync(usuarioManter, code);
+                await Send2FACodeBySmsAsync(usuarioManter, code, twoFactorId, param.EndpointEnvioSms2FA);
             return new TokenResultModel { RequiresTwoFactor = true, TwoFactorId = twoFactorId };
         }
 
@@ -1450,32 +1475,156 @@ namespace SW_PortalProprietario.Application.Services.Core
             var list = (await _repository.FindBySql<PessoaTelefoneNumeroModel>($@"
                 Select Top 1 pt.NumeroFormatado as Numero From PessoaTelefone pt
                 Inner Join TipoTelefone tt on pt.TipoTelefone = tt.Id
-                Where pt.Pessoa = {pessoaId} and (Lower(tt.Nome) like '%celular%' or pt.Preferencial = 1)
-                Order by Case When pt.Preferencial = 1 then 0 else 1 end")).ToList();
+                Where pt.Pessoa = {pessoaId} and pt.NumeroFormatado is not null and Ltrim(Rtrim(pt.NumeroFormatado)) <> ''
+                  and (Lower(tt.Nome) like '%celular%' or pt.Preferencial = 1)
+                Order by Case When Lower(tt.Nome) like '%celular%' then 0 else 1 end, Case When pt.Preferencial = 1 then 0 else 1 end")).ToList();
             return list.FirstOrDefault()?.Numero;
         }
 
-        private async Task Send2FACodeByEmailAsync(Usuario usuario, string code)
+        private async Task Send2FACodeByEmailAsync(Usuario usuario, string code, Guid twoFactorId)
         {
             var email = usuario.Pessoa?.EmailPreferencial;
             if (string.IsNullOrEmpty(email) || !email.Contains("@")) return;
             var usuarioSistemaId = _configuration.GetValue<int>("UsuarioSistemaId", 1);
-            await _emailService.SaveInternal(new EmailInputInternalModel
+            var empresaId = _configuration.GetValue<int>("EmpresaSwPortalId", 0);
+            var assunto = "Código de verificação - Login em duas etapas";
+            var conteudoEmail = $"Olá, {usuario.Pessoa?.Nome}! Seu código de acesso é: <b>{code}</b>. Válido por {TwoFactorCodeExpirationMinutes} minutos.";
+            var emailModel = await _emailService.SaveInternal(new EmailInputInternalModel
             {
                 UsuarioCriacao = usuario.UsuarioCriacao ?? usuarioSistemaId,
-                Assunto = "Código de verificação - Login em duas etapas",
+                EmpresaId = empresaId > 0 ? empresaId : null,
+                Assunto = assunto,
                 Destinatario = email,
-                ConteudoEmail = $"Olá, {usuario.Pessoa?.Nome}! Seu código de acesso é: <b>{code}</b>. Válido por {TwoFactorCodeExpirationMinutes} minutos."
+                ConteudoEmail = conteudoEmail
             });
+            try
+            {
+                if (emailModel?.Id.GetValueOrDefault(0) > 0)
+                {
+                    await _emailSenderHostedService.Send(emailModel);
+                    await _emailService.MarcarComoEnviado(emailModel.Id.GetValueOrDefault());
+                    var textoEnviado = $"[Assunto] {assunto}{Environment.NewLine}{Environment.NewLine}{conteudoEmail}";
+                    await RegistrarComunicacaoTokenEnviadaAsync(usuario, "email", email, textoEnviado, twoFactorId, emailModel.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Falha ao enviar email 2FA imediatamente; o email permanece na fila para envio posterior.");
+            }
         }
 
-        private async Task Send2FACodeBySmsAsync(Usuario usuario, string code)
+        private async Task Send2FACodeBySmsAsync(Usuario usuario, string code, Guid twoFactorId, string? endpointSms = null)
         {
             var celular = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
-            if (string.IsNullOrEmpty(celular)) return;
+            if (string.IsNullOrEmpty(celular))
+            {
+                _logger.LogWarning("2FA SMS: usuário {UserId} sem número de celular cadastrado.", usuario.Id);
+                throw new ArgumentException("Não foi possível enviar o SMS: nenhum número de celular cadastrado para este usuário. Cadastre um celular ou use o canal e-mail.");
+            }
             var apenasNumeros = new string(celular.Where(char.IsDigit).ToArray());
-            if (apenasNumeros.Length < 10) return;
-            await _smsProvider.SendSmsAsync(apenasNumeros, $"Seu código de acesso é: {code}. Válido por {TwoFactorCodeExpirationMinutes} min.", CancellationToken);
+            if (apenasNumeros.Length < 10)
+            {
+                _logger.LogWarning("2FA SMS: número inválido para usuário {UserId} (menos de 10 dígitos).", usuario.Id);
+                throw new ArgumentException("Não foi possível enviar o SMS: número de celular inválido (cadastre DDD + número com 10 ou 11 dígitos).");
+            }
+            var numeroParaEnvio = apenasNumeros.Length == 10 || apenasNumeros.Length == 11
+                ? "55" + apenasNumeros
+                : apenasNumeros;
+            var textoMensagem = $"Seu código de acesso é: {code}. Válido por {TwoFactorCodeExpirationMinutes} min.";
+            await _smsProvider.SendSmsAsync(numeroParaEnvio, textoMensagem, endpointSms, CancellationToken);
+            await RegistrarComunicacaoTokenEnviadaAsync(usuario, "sms", numeroParaEnvio, textoMensagem, twoFactorId, null);
+        }
+
+        /// <summary>
+        /// Grava o registro de comunicação de token 2FA enviada para auditoria e gerenciamento de volume.
+        /// </summary>
+        private async Task RegistrarComunicacaoTokenEnviadaAsync(Usuario usuario, string canal, string destinatario, string textoEnviado, Guid twoFactorId, int? emailId)
+        {
+            try
+            {
+                var entidade = new ComunicacaoTokenEnviada
+                {
+                    Usuario = usuario,
+                    Login = usuario.Login,
+                    Canal = canal,
+                    Destinatario = destinatario,
+                    TextoEnviado = textoEnviado,
+                    DataHoraEnvio = DateTime.UtcNow,
+                    TwoFactorId = twoFactorId,
+                    EmailId = emailId,
+                    DataHoraCriacao = DateTime.UtcNow,
+                    UsuarioCriacao = usuario.UsuarioCriacao ?? _configuration.GetValue<int>("UsuarioSistemaId", 1)
+                };
+                await _repository.Save(entidade);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Falha ao registrar comunicação de token enviada (UsuarioId: {UserId}, Canal: {Canal}).", usuario.Id, canal);
+            }
+        }
+
+        public async Task<(int pageNumber, int lastPageNumber, List<ComunicacaoTokenEnviadaViewModel> list)?> SearchComunicacoesTokenEnviadasAsync(SearchComunicacaoTokenEnviadaModel search)
+        {
+            var parameters = new List<Parameter>();
+            var sb = new StringBuilder(@"
+                SELECT cte.Id, cte.Usuario as UsuarioId, cte.Login, cte.Canal, cte.Destinatario, cte.TextoEnviado, cte.DataHoraEnvio, cte.TwoFactorId, cte.EmailId
+                FROM ComunicacaoTokenEnviada cte
+                WHERE 1 = 1");
+            if (search.DataHoraEnvioInicial.HasValue)
+            {
+                sb.Append(" AND cte.DataHoraEnvio >= :dataInicial");
+                parameters.Add(new Parameter("dataInicial", search.DataHoraEnvioInicial.Value));
+            }
+            if (search.DataHoraEnvioFinal.HasValue)
+            {
+                sb.Append(" AND cte.DataHoraEnvio <= :dataFinal");
+                parameters.Add(new Parameter("dataFinal", search.DataHoraEnvioFinal.Value.Date.AddDays(1).AddSeconds(-1)));
+            }
+            if (!string.IsNullOrWhiteSpace(search.Canal))
+            {
+                sb.Append(" AND LOWER(cte.Canal) = :canal");
+                parameters.Add(new Parameter("canal", search.Canal.Trim().ToLowerInvariant()));
+            }
+            if (!string.IsNullOrWhiteSpace(search.Login))
+            {
+                sb.Append(" AND LOWER(cte.Login) LIKE :login");
+                parameters.Add(new Parameter("login", "%" + search.Login.Trim().ToLowerInvariant() + "%"));
+            }
+            var sqlCount = sb.ToString();
+            var pageSize = search.QuantidadeRegistrosRetornar.GetValueOrDefault(0);
+            if (pageSize <= 0) pageSize = 15;
+            var page = search.NumeroDaPagina.GetValueOrDefault(1);
+            if (page <= 0) page = 1;
+            var totalRegistros = pageSize > 0 ? Convert.ToInt32(await _repository.CountTotalEntry(sqlCount, null, parameters.ToArray())) : 0;
+            var totalPages = pageSize > 0 ? (int)SW_Utils.Functions.Helper.TotalPaginas(pageSize, totalRegistros) : 1;
+            if (page > totalPages) page = totalPages;
+            sb.Append(" ORDER BY cte.DataHoraEnvio DESC, cte.Id DESC");
+            if (pageSize > 0)
+                sb.Append($" OFFSET {(page - 1) * pageSize} ROWS FETCH NEXT {pageSize} ROWS ONLY");
+            var list = (await _repository.FindBySql<ComunicacaoTokenEnviadaViewModel>(sb.ToString(), null, parameters.ToArray())).ToList();
+            return (page, totalPages, list);
+        }
+
+        public async Task<List<ResumoVolumeComunicacaoTokenModel>> GetResumoVolumeComunicacoesTokenAsync(DateTime? dataInicial, DateTime? dataFinal)
+        {
+            var parameters = new List<Parameter>();
+            var sb = new StringBuilder(@"
+                SELECT cte.Canal, COUNT(1) as TotalEnviados, MIN(cte.DataHoraEnvio) as DataHoraEnvioInicial, MAX(cte.DataHoraEnvio) as DataHoraEnvioFinal
+                FROM ComunicacaoTokenEnviada cte
+                WHERE 1 = 1");
+            if (dataInicial.HasValue)
+            {
+                sb.Append(" AND cte.DataHoraEnvio >= :dataInicial");
+                parameters.Add(new Parameter("dataInicial", dataInicial.Value));
+            }
+            if (dataFinal.HasValue)
+            {
+                sb.Append(" AND cte.DataHoraEnvio <= :dataFinal");
+                parameters.Add(new Parameter("dataFinal", dataFinal.Value.Date.AddDays(1).AddSeconds(-1)));
+            }
+            sb.Append(" GROUP BY cte.Canal");
+            var list = (await _repository.FindBySql<ResumoVolumeComunicacaoTokenModel>(sb.ToString(), null, parameters.ToArray())).ToList();
+            return list;
         }
 
         private class TwoFactorCachePayload

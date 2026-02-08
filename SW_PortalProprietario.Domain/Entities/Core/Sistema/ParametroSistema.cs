@@ -69,6 +69,8 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual EnumSimNao? Habilitar2FAPorSms { get; set; } = EnumSimNao.Não;
         public virtual EnumSimNao? Habilitar2FAParaCliente { get; set; } = EnumSimNao.Não;
         public virtual EnumSimNao? Habilitar2FAParaAdministrador { get; set; } = EnumSimNao.Não;
+        /// <summary> URL do endpoint de envio de SMS para token 2FA (ex.: http://host:porta/cxf/sms/rest/enviar). Configurável no cadastro; nada interno no código. </summary>
+        public virtual string? EndpointEnvioSms2FA { get; set; }
         #endregion
 
         public virtual async Task SaveValidate()

@@ -2,14 +2,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using System.Net.Http;
-using System.Net.Http.Headers;
 
 namespace SW_PortalProprietario.Application.Services.Core
 {
     /// <summary>
-    /// Cliente de SMS do canal Beach Park (CXF).
-    /// URL configurável em appsettings (ex.: TwoFactorSms:BaseUrl).
-    /// Contrato (método, parâmetros, autenticação) deve ser ajustado conforme WADL em ?_wadl.
+    /// Cliente de SMS do canal Beach Park (CXF REST).
+    /// Endpoint: GET .../rest/enviar/?numero=...&amp;msg=...
+    /// URL configurável em appsettings (TwoFactorSms:BaseUrl). Ex.: http://sbox2.bpark.com.br:8181/cxf/sms/rest/enviar
     /// </summary>
     public class BeachParkSmsService : ISmsProvider
     {
@@ -18,7 +17,6 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly ILogger<BeachParkSmsService> _logger;
 
         private const string ConfigBaseUrl = "TwoFactorSms:BaseUrl";
-        private const string DefaultSmsUrl = "http://sbox2.bpark.com.br:8181/cxf/sms";
 
         public BeachParkSmsService(
             HttpClient httpClient,
@@ -31,32 +29,38 @@ namespace SW_PortalProprietario.Application.Services.Core
             _httpClient.Timeout = TimeSpan.FromSeconds(15);
         }
 
-        public async Task SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken = default)
+        public async Task SendSmsAsync(string phoneNumber, string message, string? baseUrl = null, CancellationToken cancellationToken = default)
         {
-            var baseUrl = _configuration.GetValue<string>(ConfigBaseUrl)?.TrimEnd('/') ?? DefaultSmsUrl;
+            var url = (baseUrl ?? _configuration.GetValue<string>(ConfigBaseUrl))?.Trim();
+            if (string.IsNullOrEmpty(url))
+            {
+                _logger.LogError("Endpoint de envio SMS 2FA não configurado. Configure em ParametroSistema (Endpoint de envio SMS 2FA) ou em appsettings (TwoFactorSms:BaseUrl).");
+                throw new InvalidOperationException("Endpoint de envio de SMS não configurado. Configure o endpoint nas configurações do sistema ou em appsettings.");
+            }
+            var baseUrlNormalized = url.TrimEnd('/');
             if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(message))
             {
                 _logger.LogWarning("SMS ignorado: número ou mensagem vazios.");
                 return;
             }
 
-            // Contrato CXF pode exigir SOAP ou REST com parâmetros específicos; ajustar conforme WADL.
-            // Assumindo POST com form-urlencoded (numero, mensagem) como placeholder.
-            var form = new Dictionary<string, string>
-            {
-                ["numero"] = phoneNumber,
-                ["mensagem"] = message
-            };
-            using var content = new FormUrlEncodedContent(form);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+            if (phoneNumber.Length == 13)
+                phoneNumber = phoneNumber.Substring(2);
+
+            // API Beach Park CXF REST: GET .../rest/enviar/?numero=...&msg=...
+            var requestUrl = $"{baseUrlNormalized}/?numero={Uri.EscapeDataString(phoneNumber)}&msg={Uri.EscapeDataString(message)}";
 
             try
             {
-                var response = await _httpClient.PostAsync(baseUrl, content, cancellationToken).ConfigureAwait(false);
+                var response = await _httpClient.GetAsync(requestUrl, cancellationToken).ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode)
-                    _logger.LogWarning("SMS retornou status {StatusCode} para {Phone}", response.StatusCode, MaskPhone(phoneNumber));
+                {
+                    var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                    _logger.LogWarning("SMS retornou status {StatusCode} para {Phone}. Response: {Body}", response.StatusCode, MaskPhone(phoneNumber), body);
+                    throw new InvalidOperationException($"Falha ao enviar SMS: o serviço retornou {response.StatusCode}. Verifique a configuração (TwoFactorSms:BaseUrl) e o contrato da API.");
+                }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not InvalidOperationException)
             {
                 _logger.LogError(ex, "Falha ao enviar SMS para {Phone}", MaskPhone(phoneNumber));
                 throw;
