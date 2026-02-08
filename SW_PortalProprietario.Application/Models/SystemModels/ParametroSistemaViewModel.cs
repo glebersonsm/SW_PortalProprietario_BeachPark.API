@@ -70,5 +70,14 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? EndpointEnvioSms2FA { get; set; }
         #endregion
 
+        #region Configurações de envio de e-mail (SMTP)
+        public string? SmtpHost { get; set; }
+        public int? SmtpPort { get; set; }
+        public EnumSimNao? SmtpUseSsl { get; set; }
+        public string? SmtpUser { get; set; }
+        public string? SmtpPass { get; set; }
+        public string? SmtpFromName { get; set; }
+        #endregion
+
     }
 }

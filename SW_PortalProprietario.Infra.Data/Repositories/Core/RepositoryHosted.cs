@@ -1,4 +1,4 @@
-﻿using AccessCenterDomain;
+using AccessCenterDomain;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -508,7 +508,18 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                     p.ExigeDocumentoHospedeConvidado,
                                     p.PermiteReservaRciApenasClientesComContratoRci,
                                     p.ExibirMensagemLogin,
-                                    p.MensagemLogin
+                                    p.MensagemLogin,
+                                    p.Habilitar2FAPorEmail,
+                                    p.Habilitar2FAPorSms,
+                                    p.Habilitar2FAParaCliente,
+                                    p.Habilitar2FAParaAdministrador,
+                                    p.EndpointEnvioSms2FA,
+                                    p.SmtpHost,
+                                    p.SmtpPort,
+                                    p.SmtpUseSsl,
+                                    p.SmtpUser,
+                                    p.SmtpPass,
+                                    p.SmtpFromName
                                     From 
                                     ParametroSistema p
                                     Where 1 = 1 ");

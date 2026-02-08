@@ -74,6 +74,13 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.Habilitar2FAParaAdministrador).CustomType<EnumSimNao>();
             Map(b => b.EndpointEnvioSms2FA).Length(500);
 
+            Map(b => b.SmtpHost).Length(500);
+            Map(b => b.SmtpPort);
+            Map(b => b.SmtpUseSsl).CustomType<EnumSimNao>();
+            Map(b => b.SmtpUser).Length(500);
+            Map(b => b.SmtpPass).Length(500);
+            Map(b => b.SmtpFromName).Length(500);
+
             Table("ParametroSistema");
         }
     }

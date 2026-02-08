@@ -59,13 +59,7 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             OverrideIfNotEmpty(configuration, "ReservasCMApiConfig:TelReservanteRci", "RESERVAS_CM_API_TEL_RESERVANTE_RCI");
             OverrideIfNotEmpty(configuration, "ReservasCMApiConfig:IdHospedeBulkBank", "RESERVAS_CM_API_ID_HOSPEDE_BULK_BANK");
 
-            // SMTP
-            OverrideIfNotEmpty(configuration, "SmtpHost", "SMTP_HOST");
-            OverrideIfNotEmpty(configuration, "SmtpPort", "SMTP_PORT");
-            OverrideIfNotEmpty(configuration, "SmtpUseSsl", "SMTP_USE_SSL");
-            OverrideIfNotEmpty(configuration, "SmtpUser", "SMTP_USER");
-            OverrideIfNotEmpty(configuration, "SmtpPass", "SMTP_PASS");
-            OverrideIfNotEmpty(configuration, "SmtpFromName", "SMTP_FROM_NAME");
+            // SMTP: configuração movida para o sistema (ParametroSistema). Não sobrescrever por .env.
 
             // Paths
             OverrideIfNotEmpty(configuration, "WwwRootPath", "WWWROOT_PATH");

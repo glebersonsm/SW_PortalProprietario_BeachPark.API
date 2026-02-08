@@ -164,6 +164,19 @@ namespace SW_PortalProprietario.Application.Services.Core
                     model.EndpointEnvioSms2FA = psBd != null ? psBd.EndpointEnvioSms2FA : null;
                 }
 
+                if (string.IsNullOrEmpty(model.SmtpHost) || model.SmtpHost.Equals("string", StringComparison.InvariantCultureIgnoreCase))
+                    model.SmtpHost = psBd != null ? psBd.SmtpHost : null;
+                if (!model.SmtpPort.HasValue || model.SmtpPort == 0)
+                    model.SmtpPort = psBd != null ? psBd.SmtpPort : null;
+                if (!model.SmtpUseSsl.HasValue)
+                    model.SmtpUseSsl = psBd != null ? psBd.SmtpUseSsl : Domain.Enumns.EnumSimNao.Não;
+                if (string.IsNullOrEmpty(model.SmtpUser) || model.SmtpUser.Equals("string", StringComparison.InvariantCultureIgnoreCase))
+                    model.SmtpUser = psBd != null ? psBd.SmtpUser : null;
+                if (string.IsNullOrEmpty(model.SmtpPass) || model.SmtpPass.Equals("string", StringComparison.InvariantCultureIgnoreCase))
+                    model.SmtpPass = psBd != null ? psBd.SmtpPass : null;
+                if (string.IsNullOrEmpty(model.SmtpFromName) || model.SmtpFromName.Equals("string", StringComparison.InvariantCultureIgnoreCase))
+                    model.SmtpFromName = psBd != null ? psBd.SmtpFromName : null;
+
                 var outroParametroMesmaEmpresa = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}")).FirstOrDefault();
                 if (psBd?.Id == 0 && (outroParametroMesmaEmpresa != null && outroParametroMesmaEmpresa.Id > 0))
                     psBd.Id = outroParametroMesmaEmpresa.Id;

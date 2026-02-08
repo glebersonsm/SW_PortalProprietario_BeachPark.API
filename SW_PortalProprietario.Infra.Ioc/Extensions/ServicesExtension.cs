@@ -60,6 +60,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             services.TryAddScoped<IEmailHostedService, EmailHostedService>();
             services.AddHttpClient<ISmsProvider, BeachParkSmsService>();
             services.AddHttpClient();
+            services.TryAddSingleton<ISmtpSettingsProvider, ParametroSistemaSmtpSettingsProvider>();
             services.TryAddScoped<IBroker, NovaXSPaymentBroker>();
             services.TryAddScoped<IFinanceiroTransacaoService, FinanceiroTransacaoService>();
             services.TryAddScoped<IFinanceiroTransacaoUsuarioService, FinanceiroUsuarioTransacaoService>();

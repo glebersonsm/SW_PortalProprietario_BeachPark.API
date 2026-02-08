@@ -1,9 +1,10 @@
-﻿using MailKit.Net.Smtp;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using MimeKit.Text;
+using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces.Communication;
 using System.Diagnostics;
@@ -14,12 +15,15 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailSenderService> _logger;
+        private readonly ISmtpSettingsProvider _smtpSettingsProvider;
 
         public EmailSenderService(IConfiguration configuration,
-            ILogger<EmailSenderService> loger)
+            ILogger<EmailSenderService> loger,
+            ISmtpSettingsProvider smtpSettingsProvider)
         {
             _configuration = configuration;
             _logger = loger;
+            _smtpSettingsProvider = smtpSettingsProvider;
         }
 
         public async Task Send(EmailModel model)
@@ -55,26 +59,41 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 if (string.IsNullOrEmpty(destinatario) || !destinatario.Contains("@"))
                     throw new ArgumentException("Deve ser informado o destinatário do email.");
 
-                var host = _configuration.GetValue<string>("SmtpHost");
+                var smtpFromParams = await _smtpSettingsProvider.GetSmtpSettingsFromParametroSistemaAsync();
+                string host;
+                string remetente;
+                string pass;
+                int porta;
+                bool useSsl;
+                if (smtpFromParams != null)
+                {
+                    host = smtpFromParams.Host;
+                    remetente = smtpFromParams.User;
+                    pass = smtpFromParams.Pass;
+                    porta = smtpFromParams.Port;
+                    useSsl = smtpFromParams.UseSsl;
+                }
+                else
+                {
+                    host = _configuration.GetValue<string>("SmtpHost") ?? "";
+                    remetente = _configuration.GetValue<string>("SmtpUser") ?? "";
+                    pass = _configuration.GetValue<string>("SmtpPass") ?? "";
+                    porta = _configuration.GetValue<int>("SmtpPort", 0);
+                    useSsl = _configuration.GetValue<string>("SmtpUseSsl") == "S";
+                }
+
                 if (string.IsNullOrEmpty(host))
-                    throw new ArgumentException("Deve ser informado o host para envio do email (Parâmetro: 'SmtpHost').");
-
-                var remetente = _configuration.GetValue<string>("SmtpUser");
+                    throw new ArgumentException("Deve ser informado o host para envio do email (Parâmetro: 'SmtpHost' ou configuração do sistema).");
                 if (string.IsNullOrEmpty(remetente))
-                    throw new ArgumentException("Deve ser informado o remetente do email (Parâmetro: 'SmtpUser').");
-
-                var pass = _configuration.GetValue<string>("SmtpPass");
+                    throw new ArgumentException("Deve ser informado o remetente do email (Parâmetro: 'SmtpUser' ou configuração do sistema).");
                 if (string.IsNullOrEmpty(pass))
-                    throw new ArgumentException("Deve ser informada a senha do remetente do email (Parâmetro: 'SmtpPass').");
-
-                var porta = _configuration.GetValue<int>("SmtpPort");
+                    throw new ArgumentException("Deve ser informada a senha do remetente do email (Parâmetro: 'SmtpPass' ou configuração do sistema).");
                 if (porta == 0)
-                    throw new ArgumentException("Deve ser informada a porta de saída do email (Parâmetro: 'SmtpPort').");
+                    throw new ArgumentException("Deve ser informada a porta de saída do email (Parâmetro: 'SmtpPort' ou configuração do sistema).");
 
                 // create message
                 var email = new MimeMessage();
                 email.From.Add(MailboxAddress.Parse(remetente));
-                var useSsl = _configuration.GetValue<string>("SmtpUseSsl") == "S";
 
                 foreach (var item in destinatario.Split(";"))
                 {

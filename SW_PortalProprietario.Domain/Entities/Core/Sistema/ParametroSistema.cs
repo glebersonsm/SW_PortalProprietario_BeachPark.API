@@ -73,6 +73,15 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? EndpointEnvioSms2FA { get; set; }
         #endregion
 
+        #region Configurações de envio de e-mail (SMTP)
+        public virtual string? SmtpHost { get; set; }
+        public virtual int? SmtpPort { get; set; }
+        public virtual EnumSimNao? SmtpUseSsl { get; set; } = EnumSimNao.Não;
+        public virtual string? SmtpUser { get; set; }
+        public virtual string? SmtpPass { get; set; }
+        public virtual string? SmtpFromName { get; set; }
+        #endregion
+
         public virtual async Task SaveValidate()
         {
             List<string> mensagens = new();
