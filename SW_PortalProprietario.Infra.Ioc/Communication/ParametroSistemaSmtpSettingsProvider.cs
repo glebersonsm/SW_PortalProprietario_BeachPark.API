@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -10,18 +11,31 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
     /// Obtém configurações SMTP a partir de ParametroSistema (banco).
     /// Usa IRepositoryNH (mesmo repositório que grava os parâmetros na tela Configurações) para garantir
     /// que o envio use os dados salvos pelo usuário; fallback para IRepositoryHosted se NH não estiver disponível no escopo.
+    /// Se a senha estiver vazia em ParametroSistema, usa a senha do .env/appsettings (SmtpPass ou SmptPass).
     /// </summary>
     public class ParametroSistemaSmtpSettingsProvider : ISmtpSettingsProvider
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ParametroSistemaSmtpSettingsProvider> _logger;
+        private readonly IConfiguration _configuration;
 
         public ParametroSistemaSmtpSettingsProvider(
             IServiceProvider serviceProvider,
-            ILogger<ParametroSistemaSmtpSettingsProvider> logger)
+            ILogger<ParametroSistemaSmtpSettingsProvider> logger,
+            IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
+            _configuration = configuration;
+        }
+
+        /// <summary>Lê senha SMTP do .env/appsettings (IConfiguration); aceita "SmtpPass" ou o typo "SmptPass".</summary>
+        private string? GetSmtpPassFromConfig()
+        {
+            var pass = _configuration.GetValue<string>("SmtpPass");
+            if (!string.IsNullOrWhiteSpace(pass)) return pass.Trim();
+            pass = _configuration.GetValue<string>("SmptPass");
+            return string.IsNullOrWhiteSpace(pass) ? null : pass.Trim();
         }
 
         public async Task<SmtpSettingsResult?> GetSmtpSettingsFromParametroSistemaAsync(CancellationToken cancellationToken = default)
@@ -32,7 +46,10 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 var param = await GetParametroSistemaFromRepositoryAsync(scope.ServiceProvider).ConfigureAwait(false);
                 if (param == null)
                     return null;
-                if (string.IsNullOrWhiteSpace(param.SmtpHost) || string.IsNullOrWhiteSpace(param.SmtpUser) || string.IsNullOrWhiteSpace(param.SmtpPass))
+                if (string.IsNullOrWhiteSpace(param.SmtpHost) || string.IsNullOrWhiteSpace(param.SmtpUser))
+                    return null;
+                var pass = !string.IsNullOrWhiteSpace(param.SmtpPass) ? param.SmtpPass.Trim() : GetSmtpPassFromConfig();
+                if (string.IsNullOrWhiteSpace(pass))
                     return null;
                 var port = param.SmtpPort ?? 0;
                 if (port <= 0)
@@ -43,7 +60,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     Host = param.SmtpHost.Trim(),
                     Port = port,
                     User = param.SmtpUser.Trim(),
-                    Pass = param.SmtpPass.Trim(),
+                    Pass = pass,
                     UseSsl = param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
                     FromName = string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
                 };
@@ -66,7 +83,10 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
 
                 if (param == null)
                     return ctx;
-                if (string.IsNullOrWhiteSpace(param.SmtpHost) || string.IsNullOrWhiteSpace(param.SmtpUser) || string.IsNullOrWhiteSpace(param.SmtpPass))
+                if (string.IsNullOrWhiteSpace(param.SmtpHost) || string.IsNullOrWhiteSpace(param.SmtpUser))
+                    return ctx;
+                var pass = !string.IsNullOrWhiteSpace(param.SmtpPass) ? param.SmtpPass.Trim() : GetSmtpPassFromConfig();
+                if (string.IsNullOrWhiteSpace(pass))
                     return ctx;
                 var port = param.SmtpPort ?? 0;
                 if (port <= 0)
@@ -77,7 +97,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     Host = param.SmtpHost.Trim(),
                     Port = port,
                     User = param.SmtpUser.Trim(),
-                    Pass = param.SmtpPass.Trim(),
+                    Pass = pass,
                     UseSsl = param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
                     FromName = string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
                 };

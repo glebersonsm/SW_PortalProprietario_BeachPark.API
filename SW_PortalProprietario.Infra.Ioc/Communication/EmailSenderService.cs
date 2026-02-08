@@ -95,7 +95,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 {
                     host = _configuration.GetValue<string>("SmtpHost") ?? "";
                     remetente = _configuration.GetValue<string>("SmtpUser") ?? "";
-                    pass = _configuration.GetValue<string>("SmtpPass") ?? "";
+                    pass = _configuration.GetValue<string>("SmtpPass") ?? _configuration.GetValue<string>("SmptPass") ?? "";
                     porta = _configuration.GetValue<int>("SmtpPort", 0);
                     useSsl = _configuration.GetValue<string>("SmtpUseSsl") == "S";
                     fromName = _configuration.GetValue<string>("SmtpFromName");
