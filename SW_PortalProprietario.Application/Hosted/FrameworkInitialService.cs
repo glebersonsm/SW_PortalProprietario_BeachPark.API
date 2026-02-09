@@ -104,7 +104,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
                     if (_configuration.GetValue<bool>("CriarUsuariosClientesLegado", false))
                     {
-                        await CriarUsuariosClientesLegado(_repository, _communicationProvider, _mapper, tipoTelefone, session);
+                        await CriarUsuariosClientesLegado(_repository, _communicationProvider, _mapper, tipoTelefone!, session);
                     }
 
                 }
@@ -602,8 +602,23 @@ namespace SW_PortalProprietario.Application.Hosted
                     (await _repository.FindBySql<UserRegisterInputModel>(sb.ToString(), session)).AsList();
 
 
+                List<int> pessoasJaImportadas = new List<int>();
+                pessoasJaImportadas = (await _repository.FindBySql<int>(@"Select 
+                                                                                Cast(u.PessoaProvider as int) 
+                                                                             From 
+                                                                                PessoaSistemaXProvider u 
+                                                                             where 
+                                                                                PessoaProvider is not null", session)).AsList();
+
+
                 foreach (var item in usuariosLegado)
                 {
+                    if (item.PessoaId != null && pessoasJaImportadas.Contains(Convert.ToInt32(item.PessoaId)))
+                    {
+                        _logger.LogInformation($"Usuário com PessoaId {item.PessoaId} já foi importado anteriormente. Pulando importação para este usuário.");
+                        continue;
+                    }
+
                     try
                     {
                         _repository.BeginTransaction(session);
@@ -627,9 +642,18 @@ namespace SW_PortalProprietario.Application.Hosted
 
                         if (!string.IsNullOrEmpty(item.CpfCnpj))
                         {
-                            if (Helper.IsCpf(item.CpfCnpj))
+                            var apenasNumeros = Helper.ApenasNumeros(item.CpfCnpj);
+                            if (string.IsNullOrEmpty(apenasNumeros))
+                            {
+                                _logger.LogWarning($"Não foi possível determinar o tipo do documento do usuário com login: {item.Login} - Pois o número informado não é um CPF ou CNPJ válido: '{item.CpfCnpj}'");
+                                item.CpfCnpj = null;
+                                _repository.Rollback(session);
+                                continue;
+                            }
+
+                            if (Helper.IsCpf(apenasNumeros))
                                 item.TipoDocumentoClienteNome = "CPF";
-                            else if (Helper.IsCnpj(item.CpfCnpj))
+                            else if (Helper.IsCnpj(apenasNumeros))
                                 item.TipoDocumentoClienteNome = "CNPJ";
                             else
                             {
@@ -656,6 +680,8 @@ namespace SW_PortalProprietario.Application.Hosted
                         var resultCommit = await _repository.CommitAsync(session);
                         if (resultCommit.exception != null)
                             throw resultCommit.exception;
+
+                        pessoasJaImportadas.Add(Convert.ToInt32(item.PessoaId));
                     }
                     catch (Exception err)
                     {
