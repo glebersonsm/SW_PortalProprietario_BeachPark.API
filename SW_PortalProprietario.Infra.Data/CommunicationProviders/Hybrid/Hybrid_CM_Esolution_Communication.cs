@@ -471,7 +471,8 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                 pes.Email,
                 0 AS Administrador,
                 '' as Password,
-                '' as PasswordConfirmation
+                '' as PasswordConfirmation,
+                Nvl(tlp.DDI,'')||nvl(tlp.DDD,'')||tlp.Numero as Telefone
                 FROM
                 ContratoTs c
                 INNER JOIN Pessoa p ON c.IdPessoa = p.IdPessoa
@@ -482,6 +483,8 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                 INNER JOIN CLIENTEPESS cp ON cp.IdPessoa = a.IDCLIENTE
                 INNER JOIN Pessoa pes ON cp.IdPessoa = pes.IdPessoa
                 LEFT JOIN TipoDocPessoa tdp ON pes.IDDOCUMENTO = tdp.IDDOCUMENTO
+                LEFT JOIN EndPess ep on pes.IdPessoa = ep.IdPessoa
+                LEFT JOIN TelendPess tlp on ep.IdEndereco = tlp.IdEndereco and tlp.Tipo like '%L%' and tlp.Numero is not null
                 WHERE
                 vts.FLGCANCELADO = 'N' AND
                 vts.FlgRevertido = 'N' AND 
@@ -1592,11 +1595,14 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                     p.Email,
                     COALESCE(c.CondominioSenha,'UVVANR+GEBVZ1IHpp3rQcg==') AS Password,
                     COALESCE(c.CondominioSenha,'UVVANR+GEBVZ1IHpp3rQcg==') AS PasswordConfirmation,
-                    c.Codigo
+                    c.Codigo,
+                    pt.Numero as Telefone
                     from 
                     Cliente c
                     Inner Join Empresa e on c.Empresa = e.Id
                     Inner Join Pessoa p on c.Pessoa = p.Id
+                    Left Join PessoaTelefone pt on pt.Pessoa = p.Id
+                    Left Join TipoTelefone tt on pt.TipoTelefone = tt.Id and tt.Tipo = 'M'
                     WHERE 
                     e.Id in ({parametroSistema.ExibirFinanceirosDasEmpresaIds})
                     and ( Exists(Select co.Proprietario From Cota co Where co.Proprietario = c.Id and co.Status = 'V') or 

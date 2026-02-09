@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
+using System.Linq;
 using System.Net.Http;
 
 namespace SW_PortalProprietario.Application.Services.Core
@@ -44,6 +45,36 @@ namespace SW_PortalProprietario.Application.Services.Core
                 return;
             }
 
+            // Redirecionar SMS para número permitido em ambiente de homologação
+            var enviarSmsApenasParaNumeroPermitido = _configuration.GetValue<bool>("EnviarSmsApenasParaNumeroPermitido", false);
+            if (enviarSmsApenasParaNumeroPermitido)
+            {
+                var numeroPermitido = _configuration.GetValue<string>("NumeroSmsPermitido");
+                if (!string.IsNullOrWhiteSpace(numeroPermitido))
+                {
+                    var numeroOriginal = phoneNumber;
+                    // Normalizar número permitido: remover caracteres não numéricos
+                    var apenasNumerosPermitido = new string(numeroPermitido.Trim().Where(char.IsDigit).ToArray());
+                    // Garantir formato correto (com código do país se necessário)
+                    if (apenasNumerosPermitido.Length == 10 || apenasNumerosPermitido.Length == 11)
+                    {
+                        phoneNumber = "55" + apenasNumerosPermitido;
+                    }
+                    else if (apenasNumerosPermitido.Length == 12 || apenasNumerosPermitido.Length == 13)
+                    {
+                        // Já tem código do país, usar como está
+                        phoneNumber = apenasNumerosPermitido;
+                    }
+                    else
+                    {
+                        // Usar como está se não corresponder aos formatos esperados
+                        phoneNumber = apenasNumerosPermitido;
+                    }
+                    _logger.LogInformation("SMS redirecionado em homologação: de {NumeroOriginal} para {NumeroPermitido}", MaskPhone(numeroOriginal), MaskPhone(phoneNumber));
+                }
+            }
+
+            // Remover código do país se o número tiver 13 dígitos (55 + 11 dígitos)
             if (phoneNumber.Length == 13)
                 phoneNumber = phoneNumber.Substring(2);
 

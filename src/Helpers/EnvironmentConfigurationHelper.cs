@@ -77,6 +77,8 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             OverrideIfNotEmpty(configuration, "UsarSenhaPadraoAmbienteHomologacao", "USAR_SENHA_PADRAO_AMBIENTE_HOMOLOGACAO");
             OverrideIfNotEmpty(configuration, "EnviarEmailApenasParaDestinatariosPermitidos", "ENVIAR_EMAIL_APENAS_PARA_DESTINATARIOS_PERMITIDOS");
             OverrideIfNotEmpty(configuration, "DestinatarioEmailPermitido", "DESTINATARIO_EMAIL_PERMITIDO");
+            OverrideIfNotEmpty(configuration, "EnviarSmsApenasParaNumeroPermitido", "ENVIAR_SMS_APENAS_PARA_NUMERO_PERMITIDO");
+            OverrideIfNotEmpty(configuration, "NumeroSmsPermitido", "NUMERO_SMS_PERMITIDO");
             OverrideIfNotEmpty(configuration, "ConnectionStrings:ForceRollback", "FORCE_ROLLBACK");
 
             // CORS

@@ -39,8 +39,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.TokenResult).CustomType("StringClob").CustomSqlType("Text");
             Map(b => b.Removido).CustomType<EnumType<EnumSimNao>>();
             Map(b => b.DataHoraRemocao);
-            Map(b => b.LoginPms).Unique();
-            Map(b => b.LoginSistemaVenda).Unique();
+            Map(b => b.LoginPms);
+            Map(b => b.LoginSistemaVenda);
             Map(b => b.AvatarBase64).CustomType("StringClob").CustomSqlType("Text").Nullable();
 
             Table("Usuario");

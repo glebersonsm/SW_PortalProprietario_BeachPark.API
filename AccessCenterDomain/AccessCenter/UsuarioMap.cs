@@ -7,7 +7,7 @@ namespace AccessCenterDomain.AccessCenter
     {
         public UsuarioMap()
         {
-            Id(x => x.Id).GeneratedBy.Sequence("USUARIO_SEQUENCE");
+            Id(x => x.Id).GeneratedBy.Native("USUARIO_SEQUENCE");
             Map(b => b.Tag);
             Map(b => b.UsuarioCriacao);
             Map(b => b.DataHoraCriacao);

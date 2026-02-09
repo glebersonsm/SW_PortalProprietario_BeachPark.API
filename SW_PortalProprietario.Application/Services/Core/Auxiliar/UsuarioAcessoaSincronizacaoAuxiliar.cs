@@ -17,7 +17,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
         }
 
 
-        public async Task SincronizarEmpresas(List<int> empresasIdsList, Usuario? usuario, bool removerOutras = false)
+        public async Task SincronizarEmpresas(List<int> empresasIdsList, Domain.Entities.Core.Sistema.Usuario? usuario, bool removerOutras = false)
         {
             if (usuario == null)
                 throw new ArgumentNullException("Deve ser informado o usuário para sincronização de empresas que ele acessa");
@@ -29,7 +29,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                 foreach (var item in empresasIdsList)
                 {
                     if (!empresasVinculadas.Any(c => c.Empresa?.Id == item))
-                        listaSalvar.Add(new EmpresaUsuario() { Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = item }, Usuario = new Usuario() { Id = usuario.Id } });
+                        listaSalvar.Add(new EmpresaUsuario() { Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = item }, Usuario = new Domain.Entities.Core.Sistema.Usuario() { Id = usuario.Id } });
 
                 }
             }
@@ -51,7 +51,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
             }
         }
 
-        public async Task SincronizarGruposUsuarios(List<int> grupoUsuariosIdsList, Usuario? usuario, bool removerOutros = false)
+        public async Task SincronizarGruposUsuarios(List<int> grupoUsuariosIdsList, Domain.Entities.Core.Sistema.Usuario? usuario, bool removerOutros = false)
         {
             if (usuario == null)
                 throw new ArgumentNullException("Deve ser informado o usuário para sincronização dos grupos de usuários dele");
@@ -63,7 +63,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                 foreach (var item in grupoUsuariosIdsList)
                 {
                     if (!grupoUsuarioVinculados.Any(c => c.GrupoUsuario?.Id == item))
-                        listaSalvar.Add(new UsuarioGrupoUsuario() { GrupoUsuario = new GrupoUsuario() { Id = item }, Usuario = new Usuario() { Id = usuario.Id } });
+                        listaSalvar.Add(new UsuarioGrupoUsuario() { GrupoUsuario = new GrupoUsuario() { Id = item }, Usuario = new Domain.Entities.Core.Sistema.Usuario() { Id = usuario.Id } });
 
                 }
             }

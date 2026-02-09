@@ -1,6 +1,8 @@
+using AccessCenterDomain.AccessCenter;
 using CMDomain.Models.AuthModels;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NHibernate;
 using SW_PortalProprietario.Application.Functions;
@@ -22,7 +24,7 @@ using System.Text;
 using System.Text.Json;
 using System.Xml;
 using ZXing;
-using Microsoft.Extensions.DependencyInjection;
+using Pessoa = SW_PortalProprietario.Domain.Entities.Core.DadosPessoa.Pessoa;
 
 namespace SW_PortalProprietario.Application.Hosted
 {
@@ -48,6 +50,8 @@ namespace SW_PortalProprietario.Application.Hosted
                 var _repository = scope.ServiceProvider.GetRequiredService<IRepositoryHosted>();
                 var _communicationProvider = scope.ServiceProvider.GetRequiredService<ICommunicationProvider>();
                 var _mapper = scope.ServiceProvider.GetRequiredService<IProjectObjectMapper>();
+                var tipoTelefone = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoTelefone>($"Select tt.* From TipoTelefone tt Where Lower(tt.Nome) in ('celular')")).FirstOrDefault();
+
                 using (var session = _repository.CreateSession())
                 {
 
@@ -95,12 +99,12 @@ namespace SW_PortalProprietario.Application.Hosted
 
                     if (_configuration.GetValue<bool>("CriarUsuariosLegado", false))
                     {
-                        await CriarUsuariosLegado(_repository, _communicationProvider, _mapper, session);
+                        await CriarUsuariosLegado(_repository, _communicationProvider, _mapper,tipoTelefone!, session);
                     }
 
                     if (_configuration.GetValue<bool>("CriarUsuariosClientesLegado", false))
                     {
-                        await CriarUsuariosClientesLegado(_repository, _communicationProvider, _mapper, session);
+                        await CriarUsuariosClientesLegado(_repository, _communicationProvider, _mapper, tipoTelefone, session);
                     }
 
                 }
@@ -249,6 +253,10 @@ namespace SW_PortalProprietario.Application.Hosted
                 var usuariosSistema =
                     (await _repository.FindBySql<UserRegisterInputModel>(sb.ToString(), session)).AsList();
 
+                var tipoTelefone = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoTelefone>($"Select tt.* From TipoTelefone tt Where Lower(tt.Nome) in ('celular')", session)).FirstOrDefault();
+                if (tipoTelefone == null) throw new Exception("Tipo de telefone 'Celular' não encontrado no banco de dados.");
+
+
                 if (!usuariosSistema.Any(b => !string.IsNullOrEmpty(b.Login) && b.Login.Contains("glebersonsm", StringComparison.InvariantCultureIgnoreCase)))
                 {
                     try
@@ -260,9 +268,11 @@ namespace SW_PortalProprietario.Application.Hosted
                         item.Login = "Glebersonsm";
                         item.FullName = "Gleberson Simão de Moura";
                         item.CpfCnpj = "76473430172";
+                        item.Telefone = "64992149095";
+                        item.Email = "glebersonsm@gmail.com";
                         item.PasswordConfirmation = item.Password;
                         item.Administrator = EnumSimNao.Sim;
-                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, session);
+                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, tipoTelefone, session);
                         usuariosSistema.Add(item);
 
                         var resultCommit = await _repository.CommitAsync(session);
@@ -283,7 +293,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task CriarUsuariosLegado(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, IStatelessSession? session)
+        private async Task CriarUsuariosLegado(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, Domain.Entities.Core.DadosPessoa.TipoTelefone tipoTelefone, IStatelessSession? session)
         {
 
             try
@@ -384,15 +394,12 @@ namespace SW_PortalProprietario.Application.Hosted
                         if (string.IsNullOrEmpty(pass))
                             pass = "Abc@123";
 
-                        //if (!string.IsNullOrEmpty(item.Login) && item.Login.Contains("t.becker", StringComparison.InvariantCultureIgnoreCase))
-                        //{
-                        //}
 
                         item.Password = pass;
                         item.PasswordConfirmation = pass;
                         item.Administrator = EnumSimNao.Sim;
                         item.Login = item.Login?.Trim(' ').RemoveAccents();
-                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, session);
+                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, tipoTelefone, session);
                         usuariosSistema.Add(item);
 
                         if (_repository != null)
@@ -490,7 +497,7 @@ namespace SW_PortalProprietario.Application.Hosted
         }
         
 
-        private async Task CriarUsuariosClientesLegado(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, IStatelessSession? session)
+        private async Task CriarUsuariosClientesLegado(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, Domain.Entities.Core.DadosPessoa.TipoTelefone tipoTelefone, IStatelessSession? session)
         {
             StringBuilder sbParametros = new(@$"Select 
                                     p.Id, 
@@ -640,13 +647,10 @@ namespace SW_PortalProprietario.Application.Hosted
                             continue;
                         }
 
-                        var pass = !string.IsNullOrEmpty(item.Password) ? SW_Utils.Functions.Helper.DescriptografarPadraoEsol("", item.Password!) : "";
+                        var pass = item.Password = "Abc@123";
 
-                        if (string.IsNullOrEmpty(item.Password))
-                            item.Password = "Abc@123";
-
-                        item.Administrator = EnumSimNao.Sim;
-                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, session);
+                        item.Administrator = EnumSimNao.Não;
+                        await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item,tipoTelefone, session);
                         usuariosSistema.Add(item);
 
                         var resultCommit = await _repository.CommitAsync(session);
@@ -667,7 +671,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task<Usuario?> RegistrarUsuarioExecute(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, UserRegisterInputModel userInputModel, NHibernate.IStatelessSession? session)
+        private async Task<Domain.Entities.Core.Sistema.Usuario?> RegistrarUsuarioExecute(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IProjectObjectMapper _mapper, UserRegisterInputModel userInputModel, Domain.Entities.Core.DadosPessoa.TipoTelefone tipoTelefone, NHibernate.IStatelessSession? session)
         {
             if (userInputModel == null) return null;
 
@@ -736,7 +740,7 @@ namespace SW_PortalProprietario.Application.Hosted
                     pessoa = new Pessoa()
                     {
                         Nome = userInputModel?.FullName,
-                        UsuarioCriacao = null,
+                        UsuarioCriacao = 1,
                         DataHoraCriacao = DateTime.Now,
                         EmailPreferencial = userInputModel?.Email,
                         TipoPessoa = tipoPessoa,
@@ -747,9 +751,16 @@ namespace SW_PortalProprietario.Application.Hosted
                 }
                 else
                 {
-                    var usuarioJaExistente = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where p.Id = {pessoa.Id} and u.DataHoraRemocao is null and Coalesce(u.Removido,0) = 0 ", session)).FirstOrDefault();
+                    var usuarioJaExistente = (await _repository.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where p.Id = {pessoa.Id} and u.DataHoraRemocao is null and Coalesce(u.Removido,0) = 0 ", session)).FirstOrDefault();
                     if (usuarioJaExistente != null)
+                    {
+                        var pessoaTelefone = (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaTelefone>($"From PessoaTelefone pt Where pt.Pessoa.Id = {pessoa.Id}", session)).FirstOrDefault();
+                        if (pessoaTelefone == null && !string.IsNullOrEmpty(userInputModel?.Telefone))
+                        {
+                            await SincronizarTelefone(_repository, userInputModel, session, pessoa,tipoTelefone);
+                        }
                         return usuarioJaExistente;
+                    } 
                 }
 
                 var login = userInputModel?.CpfCnpj ?? userInputModel?.Email;
@@ -765,7 +776,7 @@ namespace SW_PortalProprietario.Application.Hosted
                     }
                 }
 
-                Usuario usu = new()
+                Domain.Entities.Core.Sistema.Usuario usu = new()
                 {
                     Pessoa = pessoa,
                     Login = login!.Replace(" ","").RemoveAccents(),
@@ -776,8 +787,8 @@ namespace SW_PortalProprietario.Application.Hosted
                 };
 
 
-                var exists = !string.IsNullOrEmpty(userInputModel?.Email) ? (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Login = '{usu.Login}'  and u.DataHoraRemocao is null and Coalesce(u.Removido,0) = 0", session)).FirstOrDefault() :
-                    (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Login = '{usu.Login}'  and u.DataHoraRemocao is null and Coalesce(u.Removido,0) = 0", session)).FirstOrDefault();
+                var exists = !string.IsNullOrEmpty(userInputModel?.Email) ? (await _repository.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Login = '{usu.Login}'  and u.DataHoraRemocao is null and Coalesce(u.Removido,0) = 0", session)).FirstOrDefault() :
+                    (await _repository.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Login = '{usu.Login}'  and u.DataHoraRemocao is null and Coalesce(u.Removido,0) = 0", session)).FirstOrDefault();
 
                 if (exists != null)
                     throw new Exception($"Já existe um usuário com o login: '{usu.Login}'");
@@ -788,8 +799,8 @@ namespace SW_PortalProprietario.Application.Hosted
 
                     await _repository.ForcedSave(usu, session);
                     var tipoDocumentosPessoa = (await _repository.FindBySql<TipoDocumentoPessoa>($"Select tdp.* From TipoDocumentoPessoa tdp Where Lower(tdp.Nome) in ('cpf','cnpj','passaport') and tdp.TipoPessoa = {(int?)pessoa.TipoPessoa}", session)).FirstOrDefault();
-                    if (tipoDocumentosPessoa != null && (!string.IsNullOrEmpty(userInputModel?.CpfCnpj) && (Helper.IsCnpj(userInputModel.CpfCnpj) || Helper.IsCpf(userInputModel.CpfCnpj) || (!string.IsNullOrEmpty(userInputModel.TipoDocumentoClienteNome) && 
-                        userInputModel.TipoDocumentoClienteNome.ToLower().Contains("passaport",StringComparison.CurrentCultureIgnoreCase)))))
+                    if (tipoDocumentosPessoa != null && (!string.IsNullOrEmpty(userInputModel?.CpfCnpj) && (Helper.IsCnpj(userInputModel.CpfCnpj) || Helper.IsCpf(userInputModel.CpfCnpj) || (!string.IsNullOrEmpty(userInputModel.TipoDocumentoClienteNome) &&
+                        userInputModel.TipoDocumentoClienteNome.ToLower().Contains("passaport", StringComparison.CurrentCultureIgnoreCase)))))
                     {
                         var retorno = await SincronizarDocumentos(_repository, _mapper, pessoa, session, true, new PessoaDocumentoInputModel() { TipoDocumentoId = tipoDocumentosPessoa.Id, Numero = $"{apenasNumeros}", PessoaId = pessoa.Id });
                     }
@@ -805,6 +816,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         await _repository.ForcedSave(pessoa, session);
                     }
 
+                    await SincronizarTelefone(_repository, userInputModel, session, pessoa, tipoTelefone);
 
                     await _repository.ForcedSave(usu, session);
 
@@ -812,8 +824,8 @@ namespace SW_PortalProprietario.Application.Hosted
                     usu.ProviderChaveUsuario = $"PessoaId:{userInputModel?.PessoaId}|UsuarioId:{usu.Id}";
                     await _repository.ForcedSave(usu, session);
 
-                    var providerName = !string.IsNullOrEmpty(userInputModel?.ProviderName) 
-                        ? userInputModel.ProviderName 
+                    var providerName = !string.IsNullOrEmpty(userInputModel?.ProviderName)
+                        ? userInputModel.ProviderName
                         : _communicationProvider.CommunicationProviderName;
 
                     var psxpp = new PessoaSistemaXProvider()
@@ -836,7 +848,80 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task CriarOuVincularTagGeral(IRepositoryHosted _repository, Usuario user, NHibernate.IStatelessSession? session)
+        private static async Task SincronizarTelefone(IRepositoryHosted _repository, UserRegisterInputModel userInputModel, IStatelessSession? session, Pessoa pessoa, Domain.Entities.Core.DadosPessoa.TipoTelefone tipoTelefone)
+        {
+            if (!string.IsNullOrEmpty(userInputModel?.Telefone))
+            {
+                var celularValido = false;
+
+                var apenasNumerosTelefone = SW_Utils.Functions.Helper.ApenasNumeros(userInputModel.Telefone);
+                if (!string.IsNullOrEmpty(apenasNumerosTelefone))
+                {
+                    var numeroTelefoneValidar = Convert.ToInt64(apenasNumerosTelefone).ToString();
+
+                    if (numeroTelefoneValidar.Length == 12 || numeroTelefoneValidar.Length == 13)
+                    {
+                        if (numeroTelefoneValidar.Substring(4).StartsWith('9') || numeroTelefoneValidar.Substring(4).StartsWith('8') || numeroTelefoneValidar.Substring(4).StartsWith('7'))
+                            celularValido = true;
+                    }
+                    else if (numeroTelefoneValidar.Length == 11 || numeroTelefoneValidar.Length == 10)
+                    {
+                        if (numeroTelefoneValidar.Substring(2).StartsWith('9') || numeroTelefoneValidar.Substring(2).StartsWith('8') || numeroTelefoneValidar.Substring(2).StartsWith('7'))
+                            celularValido = true;
+                    }
+                    else if (numeroTelefoneValidar.Length > 16)
+                    {
+                        if (numeroTelefoneValidar.Substring(0, 2).StartsWith("55"))
+                        {
+                            numeroTelefoneValidar = numeroTelefoneValidar.Substring(2, 10);
+                            celularValido = true;
+                        }
+                        else
+                        {
+                            numeroTelefoneValidar = numeroTelefoneValidar.Substring(0, 10);
+                            celularValido = true;
+                        }
+                    }
+
+                    if (numeroTelefoneValidar.Substring(0, 2).Equals("55"))
+                    {
+                        numeroTelefoneValidar = numeroTelefoneValidar.Substring(2);
+                    }
+
+                    if (numeroTelefoneValidar.Length == 10)
+                    {
+                        numeroTelefoneValidar = $"{numeroTelefoneValidar.Substring(0, 2)}9{numeroTelefoneValidar.Substring(2)}";
+                    }
+
+                    if (numeroTelefoneValidar.Length != 11 || (!numeroTelefoneValidar.Substring(3, 1).Equals("9") &&
+                        !numeroTelefoneValidar.Substring(3, 1).Equals("8") &&
+                        !numeroTelefoneValidar.Substring(3, 1).Equals("7")))
+                    {
+                        celularValido = false;
+                    }
+
+                    if (celularValido)
+                    {
+                        var telefoneExistente = (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaTelefone>($"From PessoaTelefone pt Where pt.Pessoa.Id = {pessoa.Id} and pt.Numero = '{numeroTelefoneValidar}'", session)).FirstOrDefault();
+                        if (telefoneExistente == null)
+                        {
+                            var telefone = new Domain.Entities.Core.DadosPessoa.PessoaTelefone()
+                            {
+                                Pessoa = pessoa,
+                                Numero = numeroTelefoneValidar,
+                                TipoTelefone = tipoTelefone,
+                                UsuarioCriacao = 1,
+                                DataHoraCriacao = DateTime.Now,
+                                NumeroFormatado = SW_Utils.Functions.Helper.Formatar(numeroTelefoneValidar, "(##) #####-####")
+                            };
+                            await _repository.ForcedSave(telefone, session);
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task CriarOuVincularTagGeral(IRepositoryHosted _repository, Domain.Entities.Core.Sistema.Usuario user, NHibernate.IStatelessSession? session)
         {
             var tagId = _configuration.GetValue<int>("TagGeralId");
 
@@ -863,14 +948,14 @@ namespace SW_PortalProprietario.Application.Hosted
             {
                 var userTag = new UsuarioTags()
                 {
-                    Usuario = new Usuario() { Id = user.Id },
+                    Usuario = new Domain.Entities.Core.Sistema.Usuario() { Id = user.Id },
                     Tags = tag
                 };
                 await _repository.ForcedSave(userTag, session);
             }
         }
 
-        private async Task VincularEmpresasAoUsuario(IRepositoryHosted _repository, Usuario? user, NHibernate.IStatelessSession? session)
+        private async Task VincularEmpresasAoUsuario(IRepositoryHosted _repository, Domain.Entities.Core.Sistema.Usuario? user, NHibernate.IStatelessSession? session)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
 
@@ -885,7 +970,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         var empUsuario = new EmpresaUsuario
                         {
                             Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.Id.GetValueOrDefault() },
-                            Usuario = new Usuario() { Id = user.Id }
+                            Usuario = new Domain.Entities.Core.Sistema.Usuario() { Id = user.Id }
                         };
 
                         await _repository.ForcedSave(empUsuario, session);
@@ -981,18 +1066,18 @@ namespace SW_PortalProprietario.Application.Hosted
                     if (!telefone.Preferencial.HasValue)
                         telefone.Preferencial = EnumSimNao.Não;
 
-                    var tipoTelefone = (await _repository.FindBySql<TipoTelefone>($"Select te.* From TipoTelefone te Where te.Id =  {telefone.TipoTelefoneId.GetValueOrDefault()}", session)).FirstOrDefault();
+                    var tipoTelefone = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoTelefone>($"Select te.* From TipoTelefone te Where te.Id =  {telefone.TipoTelefoneId.GetValueOrDefault()}", session)).FirstOrDefault();
                     if (tipoTelefone == null)
                         throw new ArgumentException($"Não foi encontrado o tipo de telefone informado: {telefone.TipoTelefoneId.GetValueOrDefault()}");
 
 
                     var telefoneExistente = telefone.Id.GetValueOrDefault(0) > 0 ?
-                        (await _repository.FindByHql<PessoaTelefone>($"From PessoaTelefone pe Inner Join Fetch pe.TipoTelefone te Inner Join Fetch pe.Pessoa p Where pe.Id = {telefone.Id.GetValueOrDefault()}", session)).FirstOrDefault() :
-                        (await _repository.FindByHql<PessoaTelefone>($"From PessoaTelefone pe Inner Join Fetch pe.TipoTelefone te Inner Join Fetch pe.Pessoa p Where p.Id = {pessoa?.Id} and pe.Numero = '{telefone.Numero?.TrimEnd()}'", session)).FirstOrDefault();
+                        (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaTelefone>($"From PessoaTelefone pe Inner Join Fetch pe.TipoTelefone te Inner Join Fetch pe.Pessoa p Where pe.Id = {telefone.Id.GetValueOrDefault()}", session)).FirstOrDefault() :
+                        (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaTelefone>($"From PessoaTelefone pe Inner Join Fetch pe.TipoTelefone te Inner Join Fetch pe.Pessoa p Where p.Id = {pessoa?.Id} and pe.Numero = '{telefone.Numero?.TrimEnd()}'", session)).FirstOrDefault();
 
                     if (telefoneExistente == null)
                     {
-                        telefoneExistente = _mapper.Map<PessoaTelefone>(telefone);
+                        telefoneExistente = _mapper.Map<Domain.Entities.Core.DadosPessoa.PessoaTelefone>(telefone);
                         telefoneExistente.Pessoa = pessoa;
                         telefoneExistente.Numero = Helper.ApenasNumeros(telefone.Numero);
                     }
@@ -1010,7 +1095,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
                     if (telefoneExistente.Preferencial == EnumSimNao.Sim && pessoa != null && pessoa.Id > 0)
                     {
-                        var outrosTelefones = (await _repository.FindByHql<PessoaTelefone>($"From PessoaTelefone pt Inner Join Fetch pt.TipoTelefone tt Inner Join Fetch pt.Pessoa p Where p.Id = {pessoa.Id} and pt.Id <> {telefoneExistente.Id} and pt.Preferencial = 1", session)).AsList();
+                        var outrosTelefones = (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaTelefone>($"From PessoaTelefone pt Inner Join Fetch pt.TipoTelefone tt Inner Join Fetch pt.Pessoa p Where p.Id = {pessoa.Id} and pt.Id <> {telefoneExistente.Id} and pt.Preferencial = 1", session)).AsList();
                         foreach (var item in outrosTelefones)
                         {
                             item.Preferencial = EnumSimNao.Não;
@@ -1038,17 +1123,17 @@ namespace SW_PortalProprietario.Application.Hosted
                     if (!endereco.Preferencial.HasValue)
                         endereco.Preferencial = EnumSimNao.Não;
 
-                    var tipoEndereco = (await _repository.FindBySql<TipoEndereco>($"Select te.* From TipoEndereco te Where te.Id =  {endereco.TipoEnderecoId.GetValueOrDefault()}", session)).FirstOrDefault();
+                    var tipoEndereco = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoEndereco>($"Select te.* From TipoEndereco te Where te.Id =  {endereco.TipoEnderecoId.GetValueOrDefault()}", session)).FirstOrDefault();
                     if (tipoEndereco == null)
                         throw new ArgumentException($"Não foi encontrado o tipo de endereço informado: {endereco.TipoEnderecoId.GetValueOrDefault()}");
 
-                    var cidade = (await _repository.FindByHql<Cidade>($"From Cidade c Inner Join Fetch c.Estado e Inner Join Fetch e.Pais p Where c.Id =  {endereco.CidadeId.GetValueOrDefault()}", session)).FirstOrDefault();
+                    var cidade = (await _repository.FindByHql<Domain.Entities.Core.Geral.Cidade>($"From Cidade c Inner Join Fetch c.Estado e Inner Join Fetch e.Pais p Where c.Id =  {endereco.CidadeId.GetValueOrDefault()}", session)).FirstOrDefault();
                     if (cidade == null)
                         throw new ArgumentException($"Não foi encontrada a Cidade informada: {endereco.CidadeId.GetValueOrDefault()}");
 
                     var enderecoExistente = endereco.Id.GetValueOrDefault(0) > 0 ?
-                        (await _repository.FindByHql<PessoaEndereco>($"From PessoaEndereco pe Inner Join Fetch pe.TipoEndereco te Inner Join Fetch pe.Pessoa p Inner Join Fetch pe.Cidade cid Inner Join Fetch cid.Estado est Inner Join Fetch est.Pais pa Where pe.Id = {endereco.Id.GetValueOrDefault()}", session)).FirstOrDefault() :
-                        (await _repository.FindByHql<PessoaEndereco>($"From PessoaEndereco pe Inner Join Fetch pe.TipoEndereco te Inner Join Fetch pe.Pessoa p Inner Join Fetch pe.Cidade cid Inner Join Fetch cid.Estado est Inner Join Fetch est.Pais pa Where p.Id = {pessoa?.Id} and Lower(pe.Logradouro) = '{endereco?.Logradouro?.TrimEnd().ToLower()}'", session)).FirstOrDefault();
+                        (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaEndereco>($"From PessoaEndereco pe Inner Join Fetch pe.TipoEndereco te Inner Join Fetch pe.Pessoa p Inner Join Fetch pe.Cidade cid Inner Join Fetch cid.Estado est Inner Join Fetch est.Pais pa Where pe.Id = {endereco.Id.GetValueOrDefault()}", session)).FirstOrDefault() :
+                        (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaEndereco>($"From PessoaEndereco pe Inner Join Fetch pe.TipoEndereco te Inner Join Fetch pe.Pessoa p Inner Join Fetch pe.Cidade cid Inner Join Fetch cid.Estado est Inner Join Fetch est.Pais pa Where p.Id = {pessoa?.Id} and Lower(pe.Logradouro) = '{endereco?.Logradouro?.TrimEnd().ToLower()}'", session)).FirstOrDefault();
 
 
 
@@ -1079,7 +1164,7 @@ namespace SW_PortalProprietario.Application.Hosted
             try
             {
                 _repository.BeginTransaction(session);
-                var empresas = (await _repository.FindByHql<Empresa>("From Empresa e", session)).AsList();
+                var empresas = (await _repository.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e", session)).AsList();
                 if (empresas != null && empresas.Count() == 1)
                 {
                     var parametroSistema = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empresas.First().Id}", session)).FirstOrDefault();
@@ -1120,7 +1205,7 @@ namespace SW_PortalProprietario.Application.Hosted
             try
             {
                 _repository.BeginTransaction(session);
-                var empresas = (await _repository.FindByHql<Empresa>("From Empresa e", session)).AsList();
+                var empresas = (await _repository.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e", session)).AsList();
                 if (empresas != null && empresas.Count() == 1)
                 {
                     var empresaFirst = empresas.First();
@@ -1137,7 +1222,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         var empUsuario = new EmpresaUsuario()
                         {
                             Empresa = empresaFirst,
-                            Usuario = new Usuario() { Id = usuario.Id.GetValueOrDefault(usuario.UsuarioId.GetValueOrDefault()) }
+                            Usuario = new Domain.Entities.Core.Sistema.Usuario() { Id = usuario.Id.GetValueOrDefault(usuario.UsuarioId.GetValueOrDefault()) }
                         };
                         await _repository.ForcedSave(empUsuario, session);
                     }
@@ -1333,7 +1418,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
         private async Task ConfigurarEmpresa(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, NHibernate.IStatelessSession? session)
         {
-            var empresaExistente = (await _repository.FindByHql<Empresa>("From Empresa e", session)).FirstOrDefault();
+            var empresaExistente = (await _repository.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e", session)).FirstOrDefault();
             if (empresaExistente == null)
             {
                 try
@@ -1434,10 +1519,10 @@ namespace SW_PortalProprietario.Application.Hosted
                     {
                         _repository.BeginTransaction(session);
 
-                        var brasil = (await _repository.FindByHql<Pais>("From Pais p Where Lower(p.Nome) = 'brasil'", session)).FirstOrDefault();
+                        var brasil = (await _repository.FindByHql<Domain.Entities.Core.Geral.Pais>("From Pais p Where Lower(p.Nome) = 'brasil'", session)).FirstOrDefault();
                         if (brasil == null)
                         {
-                            brasil = new Pais()
+                            brasil = new Domain.Entities.Core.Geral.Pais()
                             {
                                 CodigoIbge = "02",
                                 Nome = "Brasil",
@@ -1460,7 +1545,7 @@ namespace SW_PortalProprietario.Application.Hosted
                             .GroupBy(a => a?.microrregiao?.mesorregiao?.uf?.id))
                         {
 
-                            Estado? estadoAtual = null;
+                            Domain.Entities.Core.Geral.Estado? estadoAtual = null;
                             var fst = groupEstado.First();
                             if (fst != null)
                             {
@@ -1469,7 +1554,7 @@ namespace SW_PortalProprietario.Application.Hosted
                                 if (!string.IsNullOrEmpty(nomeEstado) && !string.IsNullOrEmpty(nomeNormalizado))
                                 {
 
-                                    estadoAtual = (await _repository.FindByHql<Estado>($@"From 
+                                    estadoAtual = (await _repository.FindByHql<Domain.Entities.Core.Geral.Estado>($@"From 
                                                                                 Estado e 
                                                                             Where 
                                                                                 (
@@ -1484,7 +1569,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
                                     if (estadoAtual == null)
                                     {
-                                        estadoAtual = new Estado()
+                                        estadoAtual = new Domain.Entities.Core.Geral.Estado()
                                         {
                                             Pais = brasil,
                                             Sigla = fst.microrregiao?.mesorregiao?.uf?.sigla!.Replace("'", ""),
@@ -1503,7 +1588,7 @@ namespace SW_PortalProprietario.Application.Hosted
                                 foreach (var cidadeImportacao in groupEstado)
                                 {
 
-                                    Cidade? cidade = null;
+                                    Domain.Entities.Core.Geral.Cidade? cidade = null;
                                     var nomeCidade = cidadeImportacao?.nome!.Replace("'", "");
                                     var nomeCidadeNormalizado = SW_PortalProprietario.Domain.Functions.Helper.RemoveAccentsFromDomain(nomeCidade!).Replace("'", "");
 
@@ -1517,7 +1602,7 @@ namespace SW_PortalProprietario.Application.Hosted
                                     if (!string.IsNullOrEmpty(nomeCidade) && !string.IsNullOrEmpty(nomeCidadeNormalizado))
                                     {
 
-                                        cidade = (await _repository.FindByHql<Cidade>($@"From 
+                                        cidade = (await _repository.FindByHql<Domain.Entities.Core.Geral.Cidade>($@"From 
                                                                                 Cidade c
                                                                                 Inner Join Fetch c.Estado e
                                                                                 Inner Join Fetch e.Pais p
@@ -1533,7 +1618,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
                                         if (cidade == null)
                                         {
-                                            cidade = new Cidade()
+                                            cidade = new Domain.Entities.Core.Geral.Cidade()
                                             {
                                                 Estado = estadoAtual,
                                                 Nome = $"{cidadeImportacao?.nome!.Replace("'", "")}",
