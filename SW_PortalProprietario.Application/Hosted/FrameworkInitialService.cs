@@ -602,8 +602,12 @@ namespace SW_PortalProprietario.Application.Hosted
                         _repository.BeginTransaction(session);
 
                         var usuJaExistente =
-                                        usuariosSistema.FirstOrDefault(a => (!string.IsNullOrEmpty(a.CpfCnpj) && !string.IsNullOrEmpty(item.CpfCnpj) && Convert.ToInt64(Helper.ApenasNumeros(a.CpfCnpj)) ==
-                                    Convert.ToInt64(Helper.ApenasNumeros(item.CpfCnpj))) || (!string.IsNullOrEmpty(a.Login) && a.Login.Trim(' ').Equals(item.Login?.Trim(' '), StringComparison.CurrentCultureIgnoreCase)));
+                                        usuariosSistema.FirstOrDefault(a => (!string.IsNullOrEmpty(a.CpfCnpj) && 
+                                        !string.IsNullOrEmpty(item.CpfCnpj) && 
+                                        Convert.ToInt64(Helper.ApenasNumeros(a.CpfCnpj)) ==
+                                    Convert.ToInt64(Helper.ApenasNumeros(item.CpfCnpj))) || 
+                                    (!string.IsNullOrEmpty(a.Login) && a.Login.Trim(' ').Equals(item.Login?.Trim(' '), StringComparison.CurrentCultureIgnoreCase)));
+
                         if (usuJaExistente != null)
                         {
                             if (!usuariosSistema.Any(b => !string.IsNullOrEmpty(b.Login) && b.Login.Trim(' ').Equals(usuJaExistente.Login?.Trim(' '), StringComparison.CurrentCultureIgnoreCase)))
@@ -614,24 +618,26 @@ namespace SW_PortalProprietario.Application.Hosted
                             continue;
                         }
 
-                        if (!string.IsNullOrEmpty(item.TipoDocumentoClienteNome))
+                        if (!string.IsNullOrEmpty(item.CpfCnpj))
                         {
-                            if (((item.TipoDocumentoClienteNome.Contains("cpf", StringComparison.CurrentCultureIgnoreCase) ||
-                              item.TipoDocumentoClienteNome.Contains("cnpj", StringComparison.CurrentCultureIgnoreCase)) &&
-                              !string.IsNullOrEmpty(item.CpfCnpj) && !Helper.IsCnpj(item.CpfCnpj!) && !Helper.IsCpf(item.CpfCnpj!)))
+                            if (Helper.IsCpf(item.CpfCnpj))
+                                item.TipoDocumentoClienteNome = "CPF";
+                            else if (Helper.IsCnpj(item.CpfCnpj))
+                                item.TipoDocumentoClienteNome = "CNPJ";
+                            else
                             {
-                                _logger.LogWarning($"Não foi possível importar o CPF/CNPJ do usuário com login: {item.Login} - Pois o CPF/CNPJ não é válido: '{item.CpfCnpj}'");
+                                _logger.LogWarning($"Não foi possível determinar o tipo do documento do usuário com login: {item.Login} - Pois o número informado não é um CPF ou CNPJ válido: '{item.CpfCnpj}'");
                                 item.CpfCnpj = null;
+                                _repository.Rollback(session);
+                                continue;
                             }
                         }
+                        
+                         var pass = !string.IsNullOrEmpty(item.Password) ? SW_Utils.Functions.Helper.DescriptografarPadraoEsol("", item.Password!) : "";
 
-                        var pass = !string.IsNullOrEmpty(item.Password) ? SW_Utils.Functions.Helper.DescriptografarPadraoEsol("", item.Password!) : "";
-                        if (string.IsNullOrEmpty(pass))
-                        {
-                            pass = "Abc@123";
-                        }
-                        item.Password = pass;
-                        item.PasswordConfirmation = pass;
+                        if (string.IsNullOrEmpty(item.Password))
+                            item.Password = "Abc@123";
+
                         item.Administrator = EnumSimNao.Sim;
                         await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item, session);
                         usuariosSistema.Add(item);

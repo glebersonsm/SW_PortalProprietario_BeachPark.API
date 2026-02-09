@@ -1549,13 +1549,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
             {
                 if (parametroSistema != null && string.IsNullOrEmpty(parametroSistema.ExibirFinanceirosDasEmpresaIds))
                 {
-                    var empresasLigadasEmpreendimentos = (await _repositoryAccessCenter.FindBySql<EmpresaModel>(@$"Select 
-                                        e.Id 
-                                    From 
-                                        Filial f
-                                        Inner Join Empresa e on f.Empresa = e.Id 
-                                        Inner Join Empreendimento em on f.Empreendimento = em.Id 
-                                    Where 1 = 1")).AsList();
+                    var empresasLigadasEmpreendimentos = (await _repositoryAccessCenter.FindBySql<EmpresaModel>(@$"npm ")).AsList();
 
                     if (empresasLigadasEmpreendimentos.Any())
                     {
