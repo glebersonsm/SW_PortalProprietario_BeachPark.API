@@ -16,15 +16,27 @@ using SW_PortalCliente_BeachPark.API.Helpers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Carrega as variáveis de ambiente do arquivo .env
-// Usa o diretório base da aplicação para garantir que funcione como serviço do Windows
+// Tenta primeiro no diretório base da aplicação (bin/Debug ou bin/Release)
 var envPath = Path.Combine(AppContext.BaseDirectory, ".env");
+
+// Se não encontrar, tenta na raiz do projeto (útil durante desenvolvimento)
+if (!File.Exists(envPath))
+{
+    var projectRoot = Directory.GetCurrentDirectory();
+    envPath = Path.Combine(projectRoot, ".env");
+}
+
 if (File.Exists(envPath))
 {
+    Console.WriteLine($"Arquivo .env carregado de: {envPath}");
     Env.Load(envPath);
 }
 else
 {
-    Console.WriteLine($"AVISO: Arquivo .env não encontrado em: {envPath}");
+    Console.WriteLine($"AVISO: Arquivo .env não encontrado.");
+    Console.WriteLine($"  - Tentado em: {Path.Combine(AppContext.BaseDirectory, ".env")}");
+    Console.WriteLine($"  - Tentado em: {Path.Combine(Directory.GetCurrentDirectory(), ".env")}");
+    Console.WriteLine($"  - Certifique-se de que o arquivo .env existe e está configurado para ser copiado no build.");
 }
 
 // Carrega as configurações dos arquivos JSON
