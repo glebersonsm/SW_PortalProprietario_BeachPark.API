@@ -70,6 +70,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
 
 
         public string CommunicationProviderName => "Hybrid_CM_Esolution";
+
         // Implementação da propriedade da interface base, qual retornar? Talvez irrelevante se não usado, ou concatenado.
         public string PrefixoTransacaoFinanceira => PREFIXO_TRANSACOES_FINANCEIRAS_CM;
 
@@ -98,28 +99,111 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         // OBS: Estes métodos lançam exceção pois a intenção é usar os métodos sufixados específicos (_Cm ou _Esol).
         // =================================================================================================
 
-        public Task<IAccessValidateResultModel> ValidateAccess(string login, string senha, string pessoaProviderId = "") => throw new NotImplementedException("Use ValidateAccess_Cm or ValidateAccess_Esol");
-        public Task<UsuarioValidateResultModel> GerUserFromLegado(UserRegisterInputModel model) => throw new NotImplementedException("Use GerUserFromLegado_Cm or GerUserFromLegado_Esol");
-        public Task<bool> GravarUsuarioNoLegado(string pessoaProviderId, string login, string senha) => throw new NotImplementedException("Use GravarUsuarioNoLegado_Cm or GravarUsuarioNoLegado_Esol");
-        public Task<bool> AlterarSenhaNoLegado(string pessoaProviderId, string login, string senha) => throw new NotImplementedException("Use AlterarSenhaNoLegado_Cm or AlterarSenhaNoLegado_Esol");
+        public Task<IAccessValidateResultModel> ValidateAccess(string login, string senha, string pessoaProviderId = "")
+        {
+            throw new NotImplementedException("Use ValidateAccess_Cm or ValidateAccess_Esol");
+        }
+
+        public Task<UsuarioValidateResultModel> GerUserFromLegado(UserRegisterInputModel model)
+        {
+            throw new NotImplementedException("Use GerUserFromLegado_Cm or GerUserFromLegado_Esol");
+        }
+
+        public Task<bool> GravarUsuarioNoLegado(string pessoaProviderId, string login, string senha)
+        {
+            throw new NotImplementedException("Use GravarUsuarioNoLegado_Cm or GravarUsuarioNoLegado_Esol");
+        }
+
+        public Task<bool> AlterarSenhaNoLegado(string pessoaProviderId, string login, string senha)
+        {
+            throw new NotImplementedException("Use AlterarSenhaNoLegado_Cm or AlterarSenhaNoLegado_Esol");
+        }
+
         public Task<bool> IsDefault() => Task.FromResult(false);
-        public Task GravarVinculoUsuario(IAccessValidateResultModel result, Domain.Entities.Core.Sistema.Usuario usuario) => throw new NotImplementedException("Use GravarVinculoUsuario_Cm or GravarVinculoUsuario_Esol");
-        public Task<VinculoAccessXPortalBase?> GetOutrosDadosPessoaProvider(string pessoaProviderId) => throw new NotImplementedException("Use GetOutrosDadosPessoaProvider_Cm or GetOutrosDadosPessoaProvider_Esol");
-        public Task<EmpresaSimplificadaModel?> GetEmpresaVinculadaLegado(int id) => throw new NotImplementedException("Use GetEmpresaVinculadaLegado_Cm or GetEmpresaVinculadaLegado_Esol");
-        public Task<List<PaisModel>> GetPaisesLegado() => throw new NotImplementedException("Use GetPaisesLegado_Cm or GetPaisesLegado_Esol");
-        public Task<List<EstadoModel>> GetEstadosLegado() => throw new NotImplementedException("Use GetEstadosLegado_Cm or GetEstadosLegado_Esol");
-        public Task<List<CidadeModel>> GetCidade() => throw new NotImplementedException("Use GetCidade_Cm or GetCidade_Esol");
-        public Task<List<UserRegisterInputModel>> GetUsuariosAtivosSistemaLegado() => throw new NotImplementedException("Use GetUsuariosAtivosSistemaLegado_Cm or GetUsuariosAtivosSistemaLegado_Esol");
-        public Task<List<UserRegisterInputModel>> GetClientesUsuariosLegado(ParametroSistemaViewModel parametroSistema) => throw new NotImplementedException("Use GetClientesUsuariosLegado_Cm or GetClientesUsuariosLegado_Esol");
-        public Task<(int pageNumber, int lastPageNumber, IEnumerable<CidadeModel> cidades)?> SearchCidade(CidadeSearchModel searchModel) => throw new NotImplementedException("Use SearchCidade_Cm or SearchCidade_Esol");
-        public Task<bool> DesativarUsuariosSemCotaOuContrato() => throw new NotImplementedException("Use DesativarUsuariosSemCotaOuContrato_Cm or DesativarUsuariosSemCotaOuContrato_Esol");
-        public Task GetOutrosDadosUsuario(TokenResultModel userReturn) => throw new NotImplementedException("Use GetOutrosDadosUsuario_Cm or GetOutrosDadosUsuario_Esol");
-        public Task<List<DadosContratoModel>?> GetContratos(List<int> pessoasPesquisar) => throw new NotImplementedException("Use GetContratos_Cm or GetContratos_Esol");
-        public Task<List<EmpresaVinculadaModel>?> GetEmpresasVinculadas(List<string> empresasIds) => throw new NotImplementedException("Use GetEmpresasVinculadas_Cm or GetEmpresasVinculadas_Esol");
-        public Task<List<UserRegisterInputModel>> GetUsuariosClientesSemCotasAtivoasNoSistemaLegado() => throw new NotImplementedException("Use GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Cm or GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Esol");
-        public Task<List<ClientesInadimplentes>> Inadimplentes(List<int>? pessoasPesquisar = null) => throw new NotImplementedException("Use Inadimplentes_Cm or Inadimplentes_Esol");
-        public Task<List<ReservaInfo>> GetReservasWithCheckInDateMultiPropriedadeAsync(DateTime checkInDate, bool simulacao = false) => throw new NotImplementedException("Use GetReservasWithCheckInDateMultiPropriedadeAsync_Cm or GetReservasWithCheckInDateMultiPropriedadeAsync_Esol");
-        public Task<List<ReservaInfo>> GetReservasWithCheckInDateTimeSharingAsync(DateTime checkInDate, bool simulacao = false) => throw new NotImplementedException("Use GetReservasWithCheckInDateTimeSharingAsync_Cm or GetReservasWithCheckInDateTimeSharingAsync_Esol");
+
+        public Task GravarVinculoUsuario(IAccessValidateResultModel result, Domain.Entities.Core.Sistema.Usuario usuario)
+        {
+            throw new NotImplementedException("Use GravarVinculoUsuario_Cm or GravarVinculoUsuario_Esol");
+        }
+
+        public Task<VinculoAccessXPortalBase?> GetOutrosDadosPessoaProvider(string pessoaProviderId)
+        {
+            throw new NotImplementedException("Use GetOutrosDadosPessoaProvider_Cm or GetOutrosDadosPessoaProvider_Esol");
+        }
+
+        public Task<EmpresaSimplificadaModel?> GetEmpresaVinculadaLegado(int id)
+        {
+            throw new NotImplementedException("Use GetEmpresaVinculadaLegado_Cm or GetEmpresaVinculadaLegado_Esol");
+        }
+
+        public Task<List<PaisModel>> GetPaisesLegado()
+        {
+            throw new NotImplementedException("Use GetPaisesLegado_Cm or GetPaisesLegado_Esol");
+        }
+
+        public Task<List<EstadoModel>> GetEstadosLegado()
+        {
+            throw new NotImplementedException("Use GetEstadosLegado_Cm or GetEstadosLegado_Esol");
+        }
+
+        public Task<List<CidadeModel>> GetCidade()
+        {
+            throw new NotImplementedException("Use GetCidade_Cm or GetCidade_Esol");
+        }
+        public Task<List<UserRegisterInputModel>> GetUsuariosAtivosSistemaLegado()
+        {
+            throw new NotImplementedException("Use GetUsuariosAtivosSistemaLegado_Cm or GetUsuariosAtivosSistemaLegado_Esol");
+        }
+        public Task<List<UserRegisterInputModel>> GetClientesUsuariosLegado(ParametroSistemaViewModel parametroSistema)
+        {
+            throw new NotImplementedException("Use GetClientesUsuariosLegado_Cm or GetClientesUsuariosLegado_Esol");
+        }
+
+        public Task<(int pageNumber, int lastPageNumber, IEnumerable<CidadeModel> cidades)?> SearchCidade(CidadeSearchModel searchModel)
+        {
+             throw new NotImplementedException("Use SearchCidade_Cm or SearchCidade_Esol");
+        }
+
+        public Task<bool> DesativarUsuariosSemCotaOuContrato()
+        {
+            throw new NotImplementedException("Use DesativarUsuariosSemCotaOuContrato_Cm or DesativarUsuariosSemCotaOuContrato_Esol");
+        }
+
+        public Task GetOutrosDadosUsuario(TokenResultModel userReturn)
+        {
+            throw new NotImplementedException("Use GetOutrosDadosUsuario_Cm or GetOutrosDadosUsuario_Esol");
+        }
+
+        public Task<List<DadosContratoModel>?> GetContratos(List<int> pessoasPesquisar)
+        {
+            throw new NotImplementedException("Use GetContratos_Cm or GetContratos_Esol");
+        }
+
+        public Task<List<EmpresaVinculadaModel>?> GetEmpresasVinculadas(List<string> empresasIds)
+        {
+            throw new NotImplementedException("Use GetEmpresasVinculadas_Cm or GetEmpresasVinculadas_Esol");
+        }
+
+        public Task<List<UserRegisterInputModel>> GetUsuariosClientesSemCotasAtivoasNoSistemaLegado()
+        {
+            throw new NotImplementedException("Use GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Cm or GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Esol");
+        }
+
+        public Task<List<ClientesInadimplentes>> Inadimplentes(List<int>? pessoasPesquisar = null)
+        {
+            throw new NotImplementedException("Use Inadimplentes_Cm or Inadimplentes_Esol");
+        }
+
+        public Task<List<ReservaInfo>> GetReservasWithCheckInDateMultiPropriedadeAsync(DateTime checkInDate, bool simulacao = false)
+        {
+            throw new NotImplementedException("Use GetReservasWithCheckInDateMultiPropriedadeAsync_Cm or GetReservasWithCheckInDateMultiPropriedadeAsync_Esol");
+        }
+
+        public Task<List<ReservaInfo>> GetReservasWithCheckInDateTimeSharingAsync(DateTime checkInDate, bool simulacao = false)
+        {
+            throw new NotImplementedException("Use GetReservasWithCheckInDateTimeSharingAsync_Cm or GetReservasWithCheckInDateTimeSharingAsync_Esol");
+        }
+
         public bool? ShouldSendEmailForReserva_Cm(ReservaInfo reserva, AutomaticCommunicationConfigModel config, List<DadosContratoModel>? contratos, List<ClientesInadimplentes>? inadimplentes)
         {
             //To-do implementar validão inadimplência e status CRC
@@ -1462,7 +1546,27 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         public async Task<List<UserRegisterInputModel>> GetClientesUsuariosLegado_Esol(ParametroSistemaViewModel parametroSistema)
         {
             if (parametroSistema == null || string.IsNullOrEmpty(parametroSistema.ExibirFinanceirosDasEmpresaIds))
-                return await Task.FromResult(new List<UserRegisterInputModel>());
+            {
+                if (parametroSistema != null && string.IsNullOrEmpty(parametroSistema.ExibirFinanceirosDasEmpresaIds))
+                {
+                    var empresasLigadasEmpreendimentos = (await _repositoryAccessCenter.FindBySql<EmpresaModel>(@$"Select 
+                                        e.Id 
+                                    From 
+                                        Filial f
+                                        Inner Join Empresa e on f.Empresa = e.Id 
+                                        Inner Join Empreendimento em on f.Empreendimento = em.Id 
+                                    Where 1 = 1")).AsList();
+
+                    if (empresasLigadasEmpreendimentos.Any())
+                    {
+                        parametroSistema.ExibirFinanceirosDasEmpresaIds = string.Join(",", empresasLigadasEmpreendimentos.Select(s => s.Id));
+                        await _repositorySystem.ExecuteSqlCommand($"Update ParametroSistema Set ExibirFinanceirosDasEmpresaIds = '{parametroSistema.ExibirFinanceirosDasEmpresaIds}'");
+                    }
+                    else
+                        parametroSistema.ExibirFinanceirosDasEmpresaIds = "1";
+                }
+                else return await Task.FromResult(new List<UserRegisterInputModel>());
+            }
 
 
             var documentosPessoas = (await _repositoryAccessCenter.FindBySql<DocumentoRegistro>(@$"

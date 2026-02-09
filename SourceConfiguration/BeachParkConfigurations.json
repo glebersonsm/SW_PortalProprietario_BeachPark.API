@@ -47,7 +47,7 @@
   "VincularUsuarioEmpresa": true,
   "ImportarCidades": false,
   "CriarUsuariosLegado": false,
-  "CriarUsuariosClientesLegado": false,
+  "CriarUsuariosClientesLegado": true,
   "ConsultarStatusPix": false,
   "RabbitMqConnectionHost": "",
   "RabbitMqConnectionPort": 0,

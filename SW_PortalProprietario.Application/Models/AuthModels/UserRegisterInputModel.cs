@@ -28,6 +28,7 @@ namespace SW_PortalProprietario.Application.Models.AuthModels
         public int? PessoaFinanceiroId { get; set; }
         public string? PessoaFinanceiroNome { get; set; }
         public string? Sexo { get; set; }
+        public string? ProviderName { get; set; }
 
     }
 }
