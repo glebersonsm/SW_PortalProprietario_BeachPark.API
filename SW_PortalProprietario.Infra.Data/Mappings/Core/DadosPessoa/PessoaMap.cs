@@ -15,10 +15,10 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             Map(b => b.DataHoraCriacao);
             Map(b => b.DataHoraAlteracao).Nullable();
             Map(p => p.UsuarioAlteracao).Nullable();
-            Map(b => b.Nome).Length(100);
-            Map(b => b.NomeFantasia).Length(100);
-            Map(b => b.EmailPreferencial).Length(100);
-            Map(b => b.EmailAlternativo).Length(100);
+            Map(b => b.Nome).Length(200);
+            Map(b => b.NomeFantasia).Length(200);
+            Map(b => b.EmailPreferencial).Length(200);
+            Map(b => b.EmailAlternativo).Length(200);
             Map(b => b.DataNascimento);
             Map(b => b.DataAbertura);
             Map(b => b.DataEncerramento);

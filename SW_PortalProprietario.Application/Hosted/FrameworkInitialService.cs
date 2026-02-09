@@ -67,10 +67,10 @@ namespace SW_PortalProprietario.Application.Hosted
                     //}
 
 
-                    await UpdatePermissions(_repository, session);
-                    await UpdateAreasSistema(_repository, session);
-                    await UpdateGrupoModulos(_repository, session);
-                    await UpdateModules(_repository, session);
+                    //await UpdatePermissions(_repository, session);
+                    //await UpdateAreasSistema(_repository, session);
+                    //await UpdateGrupoModulos(_repository, session);
+                    //await UpdateModules(_repository, session);
 
                     if (_configuration.GetValue<bool>("InativarUsuariosSemCota"))
                     {
@@ -857,64 +857,78 @@ namespace SW_PortalProprietario.Application.Hosted
                 var apenasNumerosTelefone = SW_Utils.Functions.Helper.ApenasNumeros(userInputModel.Telefone);
                 if (!string.IsNullOrEmpty(apenasNumerosTelefone))
                 {
-                    var numeroTelefoneValidar = Convert.ToInt64(apenasNumerosTelefone).ToString();
+                    Int64 telInt64;
 
-                    if (numeroTelefoneValidar.Length == 12 || numeroTelefoneValidar.Length == 13)
+                    var numeroTelefoneValidarInt64 = Int64.TryParse(apenasNumerosTelefone, out telInt64) ?  Convert.ToInt64(apenasNumerosTelefone) : 0;
+                    var numeroTelefoneValidar = numeroTelefoneValidarInt64.ToString();
+
+                    if (!string.IsNullOrEmpty(numeroTelefoneValidar))
                     {
-                        if (numeroTelefoneValidar.Substring(4).StartsWith('9') || numeroTelefoneValidar.Substring(4).StartsWith('8') || numeroTelefoneValidar.Substring(4).StartsWith('7'))
-                            celularValido = true;
-                    }
-                    else if (numeroTelefoneValidar.Length == 11 || numeroTelefoneValidar.Length == 10)
-                    {
-                        if (numeroTelefoneValidar.Substring(2).StartsWith('9') || numeroTelefoneValidar.Substring(2).StartsWith('8') || numeroTelefoneValidar.Substring(2).StartsWith('7'))
-                            celularValido = true;
-                    }
-                    else if (numeroTelefoneValidar.Length > 16)
-                    {
-                        if (numeroTelefoneValidar.Substring(0, 2).StartsWith("55"))
+                        if (numeroTelefoneValidar.Length == 12 || numeroTelefoneValidar.Length == 13)
                         {
-                            numeroTelefoneValidar = numeroTelefoneValidar.Substring(2, 10);
-                            celularValido = true;
+                            if (numeroTelefoneValidar.Substring(4).StartsWith('9') || numeroTelefoneValidar.Substring(4).StartsWith('8') || numeroTelefoneValidar.Substring(4).StartsWith('7'))
+                                celularValido = true;
                         }
-                        else
+                        else if (numeroTelefoneValidar.Length == 11 || numeroTelefoneValidar.Length == 10)
                         {
-                            numeroTelefoneValidar = numeroTelefoneValidar.Substring(0, 10);
-                            celularValido = true;
+                            if (numeroTelefoneValidar.Substring(2).StartsWith('9') || numeroTelefoneValidar.Substring(2).StartsWith('8') || numeroTelefoneValidar.Substring(2).StartsWith('7'))
+                                celularValido = true;
                         }
-                    }
-
-                    if (numeroTelefoneValidar.Substring(0, 2).Equals("55"))
-                    {
-                        numeroTelefoneValidar = numeroTelefoneValidar.Substring(2);
-                    }
-
-                    if (numeroTelefoneValidar.Length == 10)
-                    {
-                        numeroTelefoneValidar = $"{numeroTelefoneValidar.Substring(0, 2)}9{numeroTelefoneValidar.Substring(2)}";
-                    }
-
-                    if (numeroTelefoneValidar.Length != 11 || (!numeroTelefoneValidar.Substring(3, 1).Equals("9") &&
-                        !numeroTelefoneValidar.Substring(3, 1).Equals("8") &&
-                        !numeroTelefoneValidar.Substring(3, 1).Equals("7")))
-                    {
-                        celularValido = false;
-                    }
-
-                    if (celularValido)
-                    {
-                        var telefoneExistente = (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaTelefone>($"From PessoaTelefone pt Where pt.Pessoa.Id = {pessoa.Id} and pt.Numero = '{numeroTelefoneValidar}'", session)).FirstOrDefault();
-                        if (telefoneExistente == null)
+                        else if (numeroTelefoneValidar.Length > 16)
                         {
-                            var telefone = new Domain.Entities.Core.DadosPessoa.PessoaTelefone()
+                            if (numeroTelefoneValidar.Substring(0, 2).StartsWith("55"))
                             {
-                                Pessoa = pessoa,
-                                Numero = numeroTelefoneValidar,
-                                TipoTelefone = tipoTelefone,
-                                UsuarioCriacao = 1,
-                                DataHoraCriacao = DateTime.Now,
-                                NumeroFormatado = SW_Utils.Functions.Helper.Formatar(numeroTelefoneValidar, "(##) #####-####")
-                            };
-                            await _repository.ForcedSave(telefone, session);
+                                numeroTelefoneValidar = numeroTelefoneValidar.Substring(2, 10);
+                                celularValido = true;
+                            }
+                            else
+                            {
+                                numeroTelefoneValidar = numeroTelefoneValidar.Substring(0, 10);
+                                celularValido = true;
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(numeroTelefoneValidar) || numeroTelefoneValidar.Length < 10)
+                            celularValido = false;
+
+                        if (celularValido && numeroTelefoneValidar.Substring(0, 2).Equals("55"))
+                        {
+                            numeroTelefoneValidar = numeroTelefoneValidar.Substring(2);
+                        }
+
+                        if (!string.IsNullOrEmpty(numeroTelefoneValidar) && numeroTelefoneValidar.Length == 10)
+                        {
+                            numeroTelefoneValidar = $"{numeroTelefoneValidar.Substring(0, 2)}9{numeroTelefoneValidar.Substring(2)}";
+                        }
+
+                        if (!string.IsNullOrEmpty(numeroTelefoneValidar) && (numeroTelefoneValidar.Length != 11 || (!numeroTelefoneValidar.Substring(3, 1).Equals("9") &&
+                            !numeroTelefoneValidar.Substring(3, 1).Equals("8") &&
+                            !numeroTelefoneValidar.Substring(3, 1).Equals("7"))))
+                        {
+                            celularValido = false;
+                        }
+
+                        if (string.IsNullOrEmpty(numeroTelefoneValidar) || numeroTelefoneValidar.Length < 11)
+                        {
+                            celularValido = false;
+                        }
+
+                        if (celularValido)
+                        {
+                            var telefoneExistente = (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaTelefone>($"From PessoaTelefone pt Where pt.Pessoa.Id = {pessoa.Id} and pt.Numero = '{numeroTelefoneValidar}'", session)).FirstOrDefault();
+                            if (telefoneExistente == null)
+                            {
+                                var telefone = new Domain.Entities.Core.DadosPessoa.PessoaTelefone()
+                                {
+                                    Pessoa = pessoa,
+                                    Numero = numeroTelefoneValidar,
+                                    TipoTelefone = tipoTelefone,
+                                    UsuarioCriacao = 1,
+                                    DataHoraCriacao = DateTime.Now,
+                                    NumeroFormatado = SW_Utils.Functions.Helper.Formatar(numeroTelefoneValidar, "(##) #####-####")
+                                };
+                                await _repository.ForcedSave(telefone, session);
+                            }
                         }
                     }
                 }
