@@ -92,16 +92,16 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                       CC.DATACANCELAMENTO,
                                       RC.DATAREVERSAO,
                                       VC.NUMEROCONTRATO,
-                                      NVL(VC.FLGCANCELADO,'N') AS CANCELADO,
-                                      NVL(VC.FLGREVERTIDO,'N') AS REVERTIDO,
+                                      COALESCE(VC.FLGCANCELADO,'N') AS CANCELADO,
+                                      COALESCE(VC.FLGREVERTIDO,'N') AS REVERTIDO,
                                       V.CODVENDA,
                                       AG.NOME AS SALAVENDAS,
-                                      NVL(RC.DATAREVERSAO, V.DATAVENDA) AS DATAVENDA,
-                                      C.NUMEROPONTOS - NVL(U.UTILIZACAO,0) + NVL(COMPRADOS.PONTOSCOMPRADOS,0) AS SALDOPONTOS,                  
-                                      NVL(CC.FLGMIGRADO,NVL(RC.FLGMIGRADO,NVL(A.FLGMIGRADO,'N'))) AS FLGMIGRADO,
-                                      CAST( DECODE(NVL(CC.FLGMIGRADO,NVL(RC.FLGMIGRADO,NVL(A.FLGMIGRADO,'N'))), 'S','Contratos migrados','Vendas normais') AS VARCHAR(18) ) AS TEXTOMIGRADO,
-                                      TO_NUMBER(DECODE(NVL(VC.FLGCANCELADO,'N'),'N',
-                                      DECODE(NVL(VC.FLGREVERTIDO,'N'),'N',1,0),0)) AS ATIVO,
+                                      COALESCE(RC.DATAREVERSAO, V.DATAVENDA) AS DATAVENDA,
+                                      C.NUMEROPONTOS - COALESCE(U.UTILIZACAO,0) + COALESCE(COMPRADOS.PONTOSCOMPRADOS,0) AS SALDOPONTOS,                  
+                                      COALESCE(CC.FLGMIGRADO,COALESCE(RC.FLGMIGRADO,COALESCE(A.FLGMIGRADO,'N'))) AS FLGMIGRADO,
+                                      CAST( DECODE(COALESCE(CC.FLGMIGRADO,COALESCE(RC.FLGMIGRADO,COALESCE(A.FLGMIGRADO,'N'))), 'S','Contratos migrados','Vendas normais') AS VARCHAR(18) ) AS TEXTOMIGRADO,
+                                      TO_NUMBER(DECODE(COALESCE(VC.FLGCANCELADO,'N'),'N',
+                                      DECODE(COALESCE(VC.FLGREVERTIDO,'N'),'N',1,0),0)) AS ATIVO,
                                       PAGTO.QUANT_PARC_ENTRADA AS QtdeParcelasEntrada,
                                       PAGTO.VALOR_ENTRADA AS ValorEntrada,
                                       PAGTO.QUANT_PARC_FINANC AS QtdeParcelasFinanciamento,
@@ -110,19 +110,19 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                       0.00 AS PERCENTTS, C.IDCONTRATOTS, LA.DESCRICAO AS LOCALPROSPECCAO, 
                                       DECODE(A.PERIODOATEND, 'M', 'Matutino', 'V', 'Vespertino', 'N', 'Noturno') AS PERIODOATEND,
                                       ROUND((CASE WHEN VC.FLGREVERTIDO = 'N' AND VC.FLGCANCELADO = 'N' THEN
-                                         (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
+                                         (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
                                         ELSE
-                                          (PAGTO.QUITADO + NVL(COMPRADOS.PAGTO,0))
-                                        END * 100) / CASE WHEN (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0)) > 0 THEN (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0)) ELSE 1 END,5) PERCENTUALINTEGRALIZACAO,
+                                          (PAGTO.QUITADO + COALESCE(COMPRADOS.PAGTO,0))
+                                        END * 100) / CASE WHEN (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0)) > 0 THEN (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0)) ELSE 1 END,5) PERCENTUALINTEGRALIZACAO,
                                        CASE WHEN VC.FLGCANCELADO = 'S' THEN 'CANCELADO'  
                                             WHEN VC.FLGREVERTIDO = 'S' THEN 'REVERTIDO'  
-                                            WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
-                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                                                           ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
+                                            WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
+                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                                                           ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
                                        AND (VC.IDSEMANAFIXAUH IS NULL)) THEN 'EXPIRADO' ELSE 'ATIVO' END AS STATUS,
-                                       (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
-                                             WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                             ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE,
+                                       (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
+                                             WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                             ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE,
                                        PAGTO.QTDE_PAGTO AS QtdeParcelasPagas
                                     FROM   
                                       VENDAXCONTRATOTS VC, 
@@ -139,7 +139,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                       PARAMTS PAR,
                                       VWENDERECO EP,
                                       PESSOA PRO,
-                                      (SELECT VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
+                                      (SELECT VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
                                          FROM LANCAMENTOTS L, VENDATS V, VENDAXCONTRATOTS VC, CONTRATOTS C, AJUSTEFINANCTS AJ, REVCONTRATOTS R
                                         WHERE L.IDVENDATS         = V.IDVENDATS
                                           AND V.IDVENDATS         = VC.IDVENDATS
@@ -153,15 +153,15 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                            OR  (VC.FLGCANCELADO = 'S' AND L.IDMOTIVOESTORNO IS NULL     AND L.IDCANCCONTRATOTS IS NULL ))
                                           AND L.IDVENDATS IS NOT NULL
                                           AND L.FLGREMOVIDO IS NULL
-                                        GROUP BY VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
-                                      (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+                                        GROUP BY VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
+                                      (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
                                          FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
                                         WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                                           AND LP.IDRESERVASFRONT  = RF.IDRESERVASFRONT (+)
                                           AND LP.IDRESERVAMIGRADA = RM.IDRESERVAMIGRADA (+)
                                           AND LP.IDTIPOLANCPONTOTS <> 8      
                                         GROUP BY IDVENDAXCONTRATO) U,
-                                      (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS,
+                                      (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS,
                                               SUM(DECODE(L.IDTIPOLANCAMENTO, 18,L.VLRLANCAMENTO,0)) AS PAGTO 
                                          FROM LANCPONTOSTS LP, LANCAMENTOTS L
                                         WHERE LP.IDLANCPONTOSTS = L.IDLANCPONTOSTS (+)
@@ -174,26 +174,26 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 0, PAG.VLRLANCAMENTO, 0),0))) AS ABERTO_VENCIDO,
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 1, PAG.VLRLANCAMENTO, 0),0))) AS ABERTO_A_VENCER,
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 0, 1, 0),0))) AS QUANT_PARC_VENCIDA,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) AS QUANT_PARC_ENTRADA,
-                                               ABS(SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'E', PAG.VLRLANCAMENTO, 0))) AS VALOR_ENTRADA,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QUANT_PARC_FINANC,
-                                               ABS(SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', PAG.VLRLANCAMENTO, 0))) AS VALOR_FINANC,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) + SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QTDE_PAGTO
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) AS QUANT_PARC_ENTRADA,
+                                               ABS(SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'E', PAG.VLRLANCAMENTO, 0))) AS VALOR_ENTRADA,
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QUANT_PARC_FINANC,
+                                               ABS(SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', PAG.VLRLANCAMENTO, 0))) AS VALOR_FINANC,
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) + SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QTDE_PAGTO
                                                FROM
                                                     (SELECT L.VLRLANCAMENTO, L.IDVENDATS, CAR.DATAPROGRAMADA, SUBSTR(L.COMPLDOCUMENTO,1,1) AS COMPLDOCUMENTO,
                                                             CASE WHEN P.DATASISTEMA > CAR.DATAPROGRAMADA THEN 0 ELSE 1 END VENCIMENTO,
                                                             DECODE(L.CODDOCUMENTO, NULL, DECODE(P.DATASISTEMA, L.DATALANCAMENTO, DECODE(T.CODTIPDOC, NULL, 'QUITADO',
-                                                                                     DECODE(L.IDMOTIVOESTORNO, NULL, DECODE(NVL(L.FLGMIGRADO, 'N'), 'N', 'EM ABERTO', 'QUITADO'), 'QUITADO')),'QUITADO'),
-                                                                                     DECODE(NVL(CAR.ESTORNADO,'N'),'N', DECODE(NVL(CAR.SALDOCAR, 0), 0,DECODE(NVL(TOTALCANCELAMENTOS,0),0,'QUITADO','QUITADO'),
-                                                                                     DECODE(NVL(CAR.NUMFATURA,0),0, 'EM ABERTO','QUITADO')), 'QUITADO')) AS STATUSCAR
+                                                                                     DECODE(L.IDMOTIVOESTORNO, NULL, DECODE(COALESCE(L.FLGMIGRADO, 'N'), 'N', 'EM ABERTO', 'QUITADO'), 'QUITADO')),'QUITADO'),
+                                                                                     DECODE(COALESCE(CAR.ESTORNADO,'N'),'N', DECODE(COALESCE(CAR.SALDOCAR, 0), 0,DECODE(COALESCE(TOTALCANCELAMENTOS,0),0,'QUITADO','QUITADO'),
+                                                                                     DECODE(COALESCE(CAR.NUMFATURA,0),0, 'EM ABERTO','QUITADO')), 'QUITADO')) AS STATUSCAR
                                                         FROM LANCAMENTOTS L, VENDATS V, TIPODEBCREDHOTEL T, PARAMTS P,
                                                              (SELECT CASE WHEN ( SUM(CASE WHEN TOT.OPERACAO = 2 THEN CASE WHEN TOT.ESTORNO IS NULL THEN 0 ELSE 1 END ELSE 0 END ) ) = 0 THEN 'N' ELSE 'S' END AS ESTORNADO,
                                                                      TOT.CODDOCUMENTO, TOT.IDFORCLI, TOT.DATAPROGRAMADA, TOT.NUMFATURA,
-                                                                     NVL(SUM(TO_NUMBER(DECODE(TOT.OPERACAO, 4, TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1)) * TOT.CANCELAMENTO, 0))), 0) AS TOTALCANCELAMENTOS,
-                                                                     NVL(SUM(1), 0) AS NUMNAOESTORNADOS,
-                                                                     NVL(SUM(TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1))), 0) AS SALDOCAR
+                                                                     COALESCE(SUM(TO_NUMBER(DECODE(TOT.OPERACAO, 4, TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1)) * TOT.CANCELAMENTO, 0))), 0) AS TOTALCANCELAMENTOS,
+                                                                     COALESCE(SUM(1), 0) AS NUMNAOESTORNADOS,
+                                                                     COALESCE(SUM(TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1))), 0) AS SALDOCAR
                                                                 FROM (SELECT L.OPERACAO, ESTORNO, D.CODDOCUMENTO, D.IDFORCLI, D.DATAPROGRAMADA, L.DEBCRE, L.VALOR, L.CODALTERADOR, L.NUMLANCTO, D.NUMFATURA,
-                                                                             (SELECT TO_NUMBER(DECODE(NVL(SUM(1),0),0,0,1)) FROM TIPOALTERCANCEL TC WHERE TC.CODALTERADOR = L.CODALTERADOR AND TC.IDAGENCIATS = A.IDAGENCIATS) AS CANCELAMENTO
+                                                                             (SELECT TO_NUMBER(DECODE(COALESCE(SUM(1),0),0,0,1)) FROM TIPOALTERCANCEL TC WHERE TC.CODALTERADOR = L.CODALTERADOR AND TC.IDAGENCIATS = A.IDAGENCIATS) AS CANCELAMENTO
                                                                                 FROM DOCUMENTO D, LANCTODOCUM L, LANCAMENTOTS LTS, VENDATS V, ATENDCLIENTETS A
                                                                                WHERE A.IDATENDCLIENTETS = V.IDATENDCLIENTETS
                                                                                  AND LTS.IDVENDATS      = V.IDVENDATS
@@ -297,22 +297,22 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
                     sb.AppendLine($@" and Lower(CASE WHEN VC.FLGCANCELADO = 'S' THEN 'CANCELADO'  
                     WHEN VC.FLGREVERTIDO = 'S' THEN 'REVERTIDO'  
-                    WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
-                                                   WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                                   ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
+                    WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
+                                                   WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                                   ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
                AND (VC.IDSEMANAFIXAUH IS NULL)) THEN 'EXPIRADO' ELSE 'ATIVO' END) like '%{searchModel.Status.TrimEnd().ToLower()}%'");
             }
 
             if (searchModel.DataVendaInicial.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
             {
                 parameters.Add(new Parameter("dataVendaInicial", searchModel.DataVendaInicial.GetValueOrDefault().Date));
-                sb.AppendLine(" and NVL(RC.DATAREVERSAO, V.DATAVENDA) >= :dataVendaInicial ");
+                sb.AppendLine(" and COALESCE(RC.DATAREVERSAO, V.DATAVENDA) >= :dataVendaInicial ");
             }
 
             if (searchModel.DataVendaFinal.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
             {
                 parameters.Add(new Parameter("dataVendaFinal", searchModel.DataVendaFinal.GetValueOrDefault().Date.AddDays(1).AddMicroseconds(-1)));
-                sb.AppendLine(" and NVL(RC.DATAREVERSAO, V.DATAVENDA) <= :dataVendaFinal ");
+                sb.AppendLine(" and COALESCE(RC.DATAREVERSAO, V.DATAVENDA) <= :dataVendaFinal ");
             }
 
             if (searchModel.DataCancelamentoInicial.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
@@ -417,22 +417,22 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                             vxc.IdVendaXContrato,
                             pj.NUMEROPROJETO ||'-'|| TO_CHAR(TO_NUMBER(VXC.NUMEROCONTRATO)) AS NumeroContrato,
                             cast(TO_CHAR( COALESCE(PJ.NUMEROPROJETO,'-1' ) ) || '-' || TO_CHAR( TO_NUMBER(VXC.NUMEROCONTRATO) ) as varchar (50)) AS PROJETOXCONTRATO,
-                            NVL(VXC.FLGCANCELADO,'N') AS CANCELADO,
-                            NVL(VXC.FLGREVERTIDO,'N') AS REVERTIDO,
-                            TO_NUMBER(DECODE(NVL(VXC.FLGCANCELADO,'N'),'N',
-                                      DECODE(NVL(VXC.FLGREVERTIDO,'N'),'N',1,0),0)) AS ATIVO,
+                            COALESCE(VXC.FLGCANCELADO,'N') AS CANCELADO,
+                            COALESCE(VXC.FLGREVERTIDO,'N') AS REVERTIDO,
+                            TO_NUMBER(DECODE(COALESCE(VXC.FLGCANCELADO,'N'),'N',
+                                      DECODE(COALESCE(VXC.FLGREVERTIDO,'N'),'N',1,0),0)) AS ATIVO,
                             CASE WHEN VXC.FLGCANCELADO = 'S' THEN 'CANCELADO'  
                                             WHEN VXC.FLGREVERTIDO = 'S' THEN 'REVERTIDO'  
-                                            WHEN ((SYSDATE-1 > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
-                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                                                           ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
+                                            WHEN ((SYSDATE-1 > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
+                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                                                           ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
                                        AND (VXC.IDSEMANAFIXAUH IS NULL)) THEN 'EXPIRADO' ELSE 'ATIVO' END AS STATUS,
                             c.NumeroPontos as TotalPontos,
                             rc.IdRCI,
-                            NVL(RC.DATAREVERSAO, V.DATAVENDA) AS DATAVENDA,
-                            (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
-                                             WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                             ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE
+                            COALESCE(RC.DATAREVERSAO, V.DATAVENDA) AS DATAVENDA,
+                            (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
+                                             WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                             ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE
                             FROM 
                             cm.VendaXContratoTs vxc
                             INNER Join cm.AtendClienteTs ate ON vxc.IdAtendClienteTs = ate.IdAtendClienteTs
@@ -451,8 +451,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                              ap.VALORCHAR IS NOT null AND 
                              LENGTH(ap.VALORCHAR) > 1) rc on rc.IdPessoa = p.IdPessoa
                             WHERE
-                            NVL(vxc.FLGREVERTIDO,'N')  = 'N' AND
-                            NVL(vxc.FLGCANCELADO, 'N') = 'N' AND
+                            COALESCE(vxc.FLGREVERTIDO,'N')  = 'N' AND
+                            COALESCE(vxc.FLGCANCELADO, 'N') = 'N' AND
                             p.IdPessoa = {pessoaVinculadaSistema.PessoaProvider}")).AsList();
 
                 return (1, 1, contratosRetornar.AsList());
@@ -476,16 +476,16 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                       CC.DATACANCELAMENTO, 
                                       RC.DATAREVERSAO,
                                       cast( TO_CHAR( COALESCE( PJ.NUMEROPROJETO,'-1' ) ) || '-' || TO_CHAR( TO_NUMBER(VC.NUMEROCONTRATO) ) as varchar (50)) AS NumeroContrato,
-                                      NVL(VC.FLGCANCELADO,'N') AS CANCELADO,
-                                      NVL(VC.FLGREVERTIDO,'N') AS REVERTIDO,
+                                      COALESCE(VC.FLGCANCELADO,'N') AS CANCELADO,
+                                      COALESCE(VC.FLGREVERTIDO,'N') AS REVERTIDO,
                                       V.CODVENDA,
                                       AG.NOME AS SALAVENDAS,
-                                      NVL(RC.DATAREVERSAO, V.DATAVENDA) AS DATAVENDA,
-                                      C.NUMEROPONTOS - NVL(U.UTILIZACAO,0) + NVL(COMPRADOS.PONTOSCOMPRADOS,0) AS SALDOPONTOS, 
-                                      NVL(CC.FLGMIGRADO,NVL(RC.FLGMIGRADO,NVL(A.FLGMIGRADO,'N'))) AS FLGMIGRADO,
-                                      CAST( DECODE(NVL(CC.FLGMIGRADO,NVL(RC.FLGMIGRADO,NVL(A.FLGMIGRADO,'N'))), 'S','Contratos migrados','Vendas normais') AS VARCHAR(18) ) AS TEXTOMIGRADO,
-                                      TO_NUMBER(DECODE(NVL(VC.FLGCANCELADO,'N'),'N',
-                                      DECODE(NVL(VC.FLGREVERTIDO,'N'),'N',1,0),0)) AS ATIVO,
+                                      COALESCE(RC.DATAREVERSAO, V.DATAVENDA) AS DATAVENDA,
+                                      C.NUMEROPONTOS - COALESCE(U.UTILIZACAO,0) + COALESCE(COMPRADOS.PONTOSCOMPRADOS,0) AS SALDOPONTOS, 
+                                      COALESCE(CC.FLGMIGRADO,COALESCE(RC.FLGMIGRADO,COALESCE(A.FLGMIGRADO,'N'))) AS FLGMIGRADO,
+                                      CAST( DECODE(COALESCE(CC.FLGMIGRADO,COALESCE(RC.FLGMIGRADO,COALESCE(A.FLGMIGRADO,'N'))), 'S','Contratos migrados','Vendas normais') AS VARCHAR(18) ) AS TEXTOMIGRADO,
+                                      TO_NUMBER(DECODE(COALESCE(VC.FLGCANCELADO,'N'),'N',
+                                      DECODE(COALESCE(VC.FLGREVERTIDO,'N'),'N',1,0),0)) AS ATIVO,
                                       PAGTO.QUANT_PARC_ENTRADA AS QtdeParcelasEntrada,
                                       PAGTO.VALOR_ENTRADA AS ValorEntrada,
                                       PAGTO.QUANT_PARC_FINANC AS QtdeParcelasFinanciamento,
@@ -494,19 +494,19 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                       0.00 AS PERCENTTS, C.IDCONTRATOTS, LA.DESCRICAO AS LOCALPROSPECCAO, 
                                       DECODE(A.PERIODOATEND, 'M', 'Matutino', 'V', 'Vespertino', 'N', 'Noturno') AS PERIODOATEND,
                                       ROUND((CASE WHEN VC.FLGREVERTIDO = 'N' AND VC.FLGCANCELADO = 'N' THEN
-                                         (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
+                                         (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
                                         ELSE
-                                          (PAGTO.QUITADO + NVL(COMPRADOS.PAGTO,0))
-                                        END * 100) / CASE WHEN (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0)) > 0 THEN (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0)) ELSE 1 END,5) PERCENTUALINTEGRALIZACAO,
+                                          (PAGTO.QUITADO + COALESCE(COMPRADOS.PAGTO,0))
+                                        END * 100) / CASE WHEN (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0)) > 0 THEN (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0)) ELSE 1 END,5) PERCENTUALINTEGRALIZACAO,
                                        CASE WHEN VC.FLGCANCELADO = 'S' THEN 'CANCELADO'  
                                             WHEN VC.FLGREVERTIDO = 'S' THEN 'REVERTIDO'  
-                                            WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
-                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                                                           ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
+                                            WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
+                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                                                           ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
                                        AND (VC.IDSEMANAFIXAUH IS NULL)) THEN 'EXPIRADO' ELSE 'ATIVO' END AS STATUS,
-                                       (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
-                                             WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                             ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE,
+                                       (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
+                                             WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                             ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE,
                                        PAGTO.QTDE_PAGTO AS QtdeParcelasPagas,
                                        C.NUMEROPONTOS AS TOTALPONTOS,
                                        rc1.IdRCI
@@ -534,7 +534,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                         WHERE ap.idatributopessoa = 10 AND 
                                         ap.VALORCHAR IS NOT null AND 
                                         LENGTH(ap.VALORCHAR) > 1) rc1,
-                                      (SELECT VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
+                                      (SELECT VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
                                          FROM LANCAMENTOTS L, VENDATS V, VENDAXCONTRATOTS VC, CONTRATOTS C, AJUSTEFINANCTS AJ, REVCONTRATOTS R
                                         WHERE L.IDVENDATS         = V.IDVENDATS
                                           AND V.IDVENDATS         = VC.IDVENDATS
@@ -548,15 +548,15 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                            OR  (VC.FLGCANCELADO = 'S' AND L.IDMOTIVOESTORNO IS NULL     AND L.IDCANCCONTRATOTS IS NULL ))
                                           AND L.IDVENDATS IS NOT NULL
                                           AND L.FLGREMOVIDO IS NULL
-                                        GROUP BY VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
-                                      (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+                                        GROUP BY VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
+                                      (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
                                          FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
                                         WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                                           AND LP.IDRESERVASFRONT  = RF.IDRESERVASFRONT (+)
                                           AND LP.IDRESERVAMIGRADA = RM.IDRESERVAMIGRADA (+)
                                           AND LP.IDTIPOLANCPONTOTS <> 8      
                                         GROUP BY IDVENDAXCONTRATO) U,
-                                      (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS,
+                                      (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS,
                                               SUM(DECODE(L.IDTIPOLANCAMENTO, 18,L.VLRLANCAMENTO,0)) AS PAGTO 
                                          FROM LANCPONTOSTS LP, LANCAMENTOTS L
                                         WHERE LP.IDLANCPONTOSTS = L.IDLANCPONTOSTS (+)
@@ -569,26 +569,26 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 0, PAG.VLRLANCAMENTO, 0),0))) AS ABERTO_VENCIDO,
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 1, PAG.VLRLANCAMENTO, 0),0))) AS ABERTO_A_VENCER,
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 0, 1, 0),0))) AS QUANT_PARC_VENCIDA,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) AS QUANT_PARC_ENTRADA,
-                                               ABS(SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'E', PAG.VLRLANCAMENTO, 0))) AS VALOR_ENTRADA,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QUANT_PARC_FINANC,
-                                               ABS(SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', PAG.VLRLANCAMENTO, 0))) AS VALOR_FINANC,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) + SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QTDE_PAGTO
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) AS QUANT_PARC_ENTRADA,
+                                               ABS(SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'E', PAG.VLRLANCAMENTO, 0))) AS VALOR_ENTRADA,
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QUANT_PARC_FINANC,
+                                               ABS(SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', PAG.VLRLANCAMENTO, 0))) AS VALOR_FINANC,
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) + SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QTDE_PAGTO
                                                FROM
                                                     (SELECT L.VLRLANCAMENTO, L.IDVENDATS, CAR.DATAPROGRAMADA, SUBSTR(L.COMPLDOCUMENTO,1,1) AS COMPLDOCUMENTO,
                                                             CASE WHEN P.DATASISTEMA > CAR.DATAPROGRAMADA THEN 0 ELSE 1 END VENCIMENTO,
                                                             DECODE(L.CODDOCUMENTO, NULL, DECODE(P.DATASISTEMA, L.DATALANCAMENTO, DECODE(T.CODTIPDOC, NULL, 'QUITADO',
-                                                                                     DECODE(L.IDMOTIVOESTORNO, NULL, DECODE(NVL(L.FLGMIGRADO, 'N'), 'N', 'EM ABERTO', 'QUITADO'), 'QUITADO')),'QUITADO'),
-                                                                                     DECODE(NVL(CAR.ESTORNADO,'N'),'N', DECODE(NVL(CAR.SALDOCAR, 0), 0,DECODE(NVL(TOTALCANCELAMENTOS,0),0,'QUITADO','QUITADO'),
-                                                                                     DECODE(NVL(CAR.NUMFATURA,0),0, 'EM ABERTO','QUITADO')), 'QUITADO')) AS STATUSCAR
+                                                                                     DECODE(L.IDMOTIVOESTORNO, NULL, DECODE(COALESCE(L.FLGMIGRADO, 'N'), 'N', 'EM ABERTO', 'QUITADO'), 'QUITADO')),'QUITADO'),
+                                                                                     DECODE(COALESCE(CAR.ESTORNADO,'N'),'N', DECODE(COALESCE(CAR.SALDOCAR, 0), 0,DECODE(COALESCE(TOTALCANCELAMENTOS,0),0,'QUITADO','QUITADO'),
+                                                                                     DECODE(COALESCE(CAR.NUMFATURA,0),0, 'EM ABERTO','QUITADO')), 'QUITADO')) AS STATUSCAR
                                                         FROM LANCAMENTOTS L, VENDATS V, TIPODEBCREDHOTEL T, PARAMTS P,
                                                              (SELECT CASE WHEN ( SUM(CASE WHEN TOT.OPERACAO = 2 THEN CASE WHEN TOT.ESTORNO IS NULL THEN 0 ELSE 1 END ELSE 0 END ) ) = 0 THEN 'N' ELSE 'S' END AS ESTORNADO,
                                                                      TOT.CODDOCUMENTO, TOT.IDFORCLI, TOT.DATAPROGRAMADA, TOT.NUMFATURA,
-                                                                     NVL(SUM(TO_NUMBER(DECODE(TOT.OPERACAO, 4, TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1)) * TOT.CANCELAMENTO, 0))), 0) AS TOTALCANCELAMENTOS,
-                                                                     NVL(SUM(1), 0) AS NUMNAOESTORNADOS,
-                                                                     NVL(SUM(TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1))), 0) AS SALDOCAR
+                                                                     COALESCE(SUM(TO_NUMBER(DECODE(TOT.OPERACAO, 4, TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1)) * TOT.CANCELAMENTO, 0))), 0) AS TOTALCANCELAMENTOS,
+                                                                     COALESCE(SUM(1), 0) AS NUMNAOESTORNADOS,
+                                                                     COALESCE(SUM(TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1))), 0) AS SALDOCAR
                                                                 FROM (SELECT L.OPERACAO, ESTORNO, D.CODDOCUMENTO, D.IDFORCLI, D.DATAPROGRAMADA, L.DEBCRE, L.VALOR, L.CODALTERADOR, L.NUMLANCTO, D.NUMFATURA,
-                                                                             (SELECT TO_NUMBER(DECODE(NVL(SUM(1),0),0,0,1)) FROM TIPOALTERCANCEL TC WHERE TC.CODALTERADOR = L.CODALTERADOR AND TC.IDAGENCIATS = A.IDAGENCIATS) AS CANCELAMENTO
+                                                                             (SELECT TO_NUMBER(DECODE(COALESCE(SUM(1),0),0,0,1)) FROM TIPOALTERCANCEL TC WHERE TC.CODALTERADOR = L.CODALTERADOR AND TC.IDAGENCIATS = A.IDAGENCIATS) AS CANCELAMENTO
                                                                                 FROM DOCUMENTO D, LANCTODOCUM L, LANCAMENTOTS LTS, VENDATS V, ATENDCLIENTETS A
                                                                                WHERE A.IDATENDCLIENTETS = V.IDATENDCLIENTETS
                                                                                  AND LTS.IDVENDATS      = V.IDVENDATS
@@ -635,7 +635,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                             ) )
                                       AND H.IDPESSOA = {empresaCmId}
                                       AND p.IDPESSOA = {(searchModel.IdCliente.HasValue ? searchModel.IdCliente.Value.ToString() : pessoaVinculadaSistema.PessoaProvider)}
-                                      AND NVL(VC.FLGREVERTIDO,'N') = 'N' AND NVL(VC.FLGCANCELADO,'N') = 'N'
+                                      AND COALESCE(VC.FLGREVERTIDO,'N') = 'N' AND COALESCE(VC.FLGCANCELADO,'N') = 'N'
                                       ");
 
 
@@ -658,22 +658,22 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             {
                 sb.AppendLine($@" and Lower(CASE WHEN VC.FLGCANCELADO = 'S' THEN 'CANCELADO'  
                     WHEN VC.FLGREVERTIDO = 'S' THEN 'REVERTIDO'  
-                    WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
-                                                   WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                                   ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
+                    WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
+                                                   WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                                   ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
                AND (VC.IDSEMANAFIXAUH IS NULL)) THEN 'EXPIRADO' ELSE 'ATIVO' END) like '%{searchModel.Status.ToLower().TrimEnd()}%'");
             }
 
             if (searchModel.DataVendaInicial.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
             {
                 parameters.Add(new Parameter("dataVendaInicial", searchModel.DataVendaInicial.GetValueOrDefault().Date));
-                sb.AppendLine(" and NVL(RC.DATAREVERSAO, V.DATAVENDA) >= :dataVendaInicial ");
+                sb.AppendLine(" and COALESCE(RC.DATAREVERSAO, V.DATAVENDA) >= :dataVendaInicial ");
             }
 
             if (searchModel.DataVendaFinal.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
             {
                 parameters.Add(new Parameter("dataVendaFinal", searchModel.DataVendaFinal.GetValueOrDefault().Date.AddDays(1).AddMicroseconds(-1)));
-                sb.AppendLine(" and NVL(RC.DATAREVERSAO, V.DATAVENDA) <= :dataVendaFinal ");
+                sb.AppendLine(" and COALESCE(RC.DATAREVERSAO, V.DATAVENDA) <= :dataVendaFinal ");
             }
 
             if (searchModel.DataCancelamentoInicial.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
@@ -794,14 +794,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
 
             var sb = new StringBuilder($@"WITH ReservasPontos AS (
-                                            SELECT IDRESERVASFRONT, SUM(NVL(NUMEROPONTOS, 0)) AS QtdePontos, IDVENDAXCONTRATO, FLGMIGRADO  
+                                            SELECT IDRESERVASFRONT, SUM(COALESCE(NUMEROPONTOS, 0)) AS QtdePontos, IDVENDAXCONTRATO, FLGMIGRADO  
                                             FROM LANCPONTOSTS
                                             WHERE IDTIPOLANCPONTOTS IN (1, 4)
                                             GROUP BY IDRESERVASFRONT, IDVENDAXCONTRATO, FLGMIGRADO
                                         ),
                                         UsuarioReserva AS (
                                             SELECT LP.IDRESERVASFRONT,
-                                                   NVL(LP.IDUSUARIORESERVA, NVL(LP.IDUSUARIO, LP.IDUSUARIOLOGADO)) AS IDUSUARIO
+                                                   COALESCE(LP.IDUSUARIORESERVA, COALESCE(LP.IDUSUARIO, LP.IDUSUARIOLOGADO)) AS IDUSUARIO
                                             FROM LANCPONTOSTS LP
                                             JOIN (
                                                 SELECT MIN(IDLANCPONTOSTS) AS IDLANCPONTOSTS
@@ -848,8 +848,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                             )
                                             ELSE TO_CHAR(RF.LOCRESERVA)
                                         END AS LOCALIZADOR,
-                                        NVL(RF.DATACHEGPREVISTA, RF.DATACHEGADAREAL) AS CHECKIN,
-                                        NVL(RF.DATAPARTPREVISTA, RF.DATAPARTIDAREAL) AS CHECKOUT,
+                                        COALESCE(RF.DATACHEGPREVISTA, RF.DATACHEGADAREAL) AS CHECKIN,
+                                        COALESCE(RF.DATAPARTPREVISTA, RF.DATAPARTIDAREAL) AS CHECKOUT,
                                         ST.DESCRICAO AS STATUSRESERVA,
                                         RF.DATACANCELAMENTO,
                                         PEH.NOME AS HOTEL,
@@ -858,13 +858,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                         DECODE(RP.FLGMIGRADO,'N','Normal','S','Migrada') AS TIPORESERVA,
                                         TO_CHAR(VXC.NUMEROCONTRATO) AS NUMEROCONTRATO,
                                         US.NOMEUSUARIO AS CRIADAPOR,
-                                        NVL(RP.Qtdepontos, 0) AS PONTORESERVA,
-                                        NVL(RTX.VLRTAXA, 0) AS ValorTaxa,
+                                        COALESCE(RP.Qtdepontos, 0) AS PONTORESERVA,
+                                        COALESCE(RTX.VLRTAXA, 0) AS ValorTaxa,
                                         CASE 
-                                            WHEN (NVL(RTX.VLRTAXA, 0) = 0 AND RTX.VLRTAXAISENTA IS NOT NULL) THEN 'Sim'
+                                            WHEN (COALESCE(RTX.VLRTAXA, 0) = 0 AND RTX.VLRTAXAISENTA IS NOT NULL) THEN 'Sim'
                                             ELSE 'Não'
                                         END AS TAXAISENTA,
-                                        ( SELECT NVL(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RF.IDRESERVASFRONT ) VALORPENSAO,
+                                        ( SELECT COALESCE(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RF.IDRESERVASFRONT ) VALORPENSAO,
                                         PH.NOME AS HOSPEDEPRINCIPAL,
                                         RF.Adultos,
                                         RF.Criancas1,
@@ -953,20 +953,20 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             //                                    TO_CHAR(PJ.NUMEROPROJETO)||'-'||TO_CHAR(VXC.NUMEROCONTRATO) AS PROJETOXCONTRATO,
             //                                    TO_CHAR(VXC.NUMEROCONTRATO) AS NUMEROCONTRATO,
             //                                    US.NOMEUSUARIO AS CRIADAPOR,
-            //                                    NVL(PR.VALOR,0) AS PONTORESERVA,
-            //                                    NVL(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
+            //                                    COALESCE(PR.VALOR,0) AS PONTORESERVA,
+            //                                    COALESCE(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
             //                                    'Não' AS TAXAISENTA,
             //                                    CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'Não' END AS LISTAESPERA,
             //                                    V.IDVENDATS,
             //                                    DTTX.DATALANCAMENTO AS DATAPAGTAXA,
-            //                                    ( SELECT NVL(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RM.IDRESERVAMIGRADA ) VALORPENSAO,
-            //                                    ROUND(TO_NUMBER( DECODE( NVL(C.VALORPONTO,0),0, DECODE(NVL(C.VALORPERCPONTO,0),0,
-            //                                                        DECODE( NVL(C.NUMEROPONTOS,0),0,0, NVL(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
-            //                                                        (NVL(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
-            //                                                        NVL(C.VALORPONTO,0))),6) AS VALORPONTO,
-            //                                    ROUND(PR.VALOR * TO_NUMBER((DECODE(NVL(C.VALORPONTO,0),0, DECODE(NVL(C.VALORPERCPONTO,0),0, 
-            //                                    DECODE(NVL(C.NUMEROPONTOS,0),0,0, NVL(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
-            //                                    (NVL(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100), NVL(C.VALORPONTO,0)))),6) AS VALORPONTOS,
+            //                                    ( SELECT COALESCE(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RM.IDRESERVAMIGRADA ) VALORPENSAO,
+            //                                    ROUND(TO_NUMBER( DECODE( COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0,
+            //                                                        DECODE( COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
+            //                                                        (COALESCE(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
+            //                                                        COALESCE(C.VALORPONTO,0))),6) AS VALORPONTO,
+            //                                    ROUND(PR.VALOR * TO_NUMBER((DECODE(COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0, 
+            //                                    DECODE(COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
+            //                                    (COALESCE(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100), COALESCE(C.VALORPONTO,0)))),6) AS VALORPONTOS,
             //                                    ' ' AS MOTIVO_FORCAR_RESERVA,
             //                                    ' ' AS JUST_FORCAR_RESERVA,
             //                                    0 AS VLRCONTABPONTOS,
@@ -975,12 +975,12 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             //                                    FROM VENDAXCONTRATOTS VXC, RESERVAMIGRADATS RM, USUARIOSISTEMA US, ATENDCLIENTETS A, RESERVASBULKTS RB, PARAMHOTEL PH, PROJETOTS PJ, TIPOUH TUH, VENDATS V, PESSOA CL, PESSOA H,
             //                                        HOTEL HO, CONTRATOTS C, REVCONTRATOTS RV, LISTAESPERATS LS,
             //                                    (SELECT IDRESERVAMIGRADA, MIN(IDVENDAXCONTRATO) AS IDVENDAXCONTRATO,
-            //                                            SUM(NVL(TO_NUMBER(DECODE(IDTIPOLANCPONTOTS,1,NUMEROPONTOS)),0)) AS NUMPONTOS,
+            //                                            SUM(COALESCE(TO_NUMBER(DECODE(IDTIPOLANCPONTOTS,1,NUMEROPONTOS)),0)) AS NUMPONTOS,
             //                                            MAX(FLGMIGRADO) AS FLGMIGRADO, MIN(IDHOTEL) AS IDHOTEL, MAX(DATALANCAMENTO) AS DATALANCAMENTO
             //                                        FROM LANCPONTOSTS
             //                                    GROUP BY IDRESERVAMIGRADA) LP,
             //                                    (SELECT DISTINCT IDRESERVAMIGRADA,IDRESERVASRCI FROM RESERVASRCI) RCI,
-            //                                    (SELECT IDRESERVAMIGRADA, SUM(NVL(NUMEROPONTOS,0)) AS VALOR
+            //                                    (SELECT IDRESERVAMIGRADA, SUM(COALESCE(NUMEROPONTOS,0)) AS VALOR
             //                                        FROM LANCPONTOSTS 
             //                                    WHERE IDTIPOLANCPONTOTS IN (1,4) 
             //                                    GROUP BY IDRESERVAMIGRADA) PR,
@@ -998,17 +998,17 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             //                                        AND LP.IDTIPOLANCPONTOTS IN (1,4)
             //                                        AND LP.IDRESERVAMIGRADA IS NOT NULL
             //                                    GROUP BY LP.IDRESERVAMIGRADA) DTTX,
-            //                                    (SELECT LANCPONTOSTS.IDRESERVAMIGRADA, NVL(LANCPONTOSTS.IDUSUARIORESERVA, NVL(LANCPONTOSTS.IDUSUARIO, LANCPONTOSTS.IDUSUARIOLOGADO)) AS IDUSUARIO
+            //                                    (SELECT LANCPONTOSTS.IDRESERVAMIGRADA, COALESCE(LANCPONTOSTS.IDUSUARIORESERVA, COALESCE(LANCPONTOSTS.IDUSUARIO, LANCPONTOSTS.IDUSUARIOLOGADO)) AS IDUSUARIO
             //                                        FROM LANCPONTOSTS, (SELECT MIN(LP.IDLANCPONTOSTS) AS IDLANCPONTOSTS FROM LANCPONTOSTS LP GROUP BY LP.IDRESERVAMIGRADA) IDS
             //                                    WHERE LANCPONTOSTS.IDLANCPONTOSTS = IDS.IDLANCPONTOSTS) USUARIORES,   
-            //                                    (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+            //                                    (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
             //                                        FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
             //                                    WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
             //                                        AND LP.IDRESERVASFRONT  = RF.IDRESERVASFRONT (+)
             //                                        AND LP.IDRESERVAMIGRADA = RM.IDRESERVAMIGRADA (+)
             //                                        AND LP.IDTIPOLANCPONTOTS <> 8
             //                                    GROUP BY IDVENDAXCONTRATO) U,
-            //                                    (SELECT VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
+            //                                    (SELECT VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
             //                                        FROM LANCAMENTOTS L, VENDATS V, VENDAXCONTRATOTS VC, CONTRATOTS C, AJUSTEFINANCTS AJ, REVCONTRATOTS R
             //                                    WHERE L.IDVENDATS      = V.IDVENDATS
             //                                        AND V.IDVENDATS      = VC.IDVENDATS
@@ -1021,7 +1021,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             //                                        OR  (VC.FLGREVERTIDO = 'S' AND L.IDMOTIVOESTORNO IS NOT NULL AND L.IDCANCCONTRATOTS IS NULL   AND L.IDAJUSTEFINANCTS IS NOT NULL )
             //                                        OR  (VC.FLGCANCELADO = 'S' AND L.IDMOTIVOESTORNO IS NULL     AND L.IDCANCCONTRATOTS IS NULL ))
             //                                        AND L.IDVENDATS IS NOT NULL
-            //                                    GROUP BY VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL
+            //                                    GROUP BY VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL
             //                                WHERE RM.IDRESERVAMIGRADA     = RCI.IDRESERVAMIGRADA(+)  
             //                                    AND RM.IDRESERVAMIGRADA     = RB.IDRESERVASFRONT (+)
             //                                    AND RB.IDRESERVASFRONT      = LS.IDRESERVASFRONT(+)
@@ -1127,12 +1127,12 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 var contratosBd = (await _repository.FindBySql<ContratoTimeSharinCacheModel>(@$"SELECT 
                    c.idcontratots,
                    CASE 
-   	                WHEN nvl(vc.FlgRevertido,'N')= 'S' THEN 'Revertido'
-   	                WHEN nvl(vc.FlgCancelado,'N')= 'S' THEN 'Cancelado'
+   	                WHEN COALESCE(vc.FlgRevertido,'N')= 'S' THEN 'Revertido'
+   	                WHEN COALESCE(vc.FlgCancelado,'N')= 'S' THEN 'Cancelado'
    	                ELSE 'Ativo' END AS StatusContrato,
-   	                (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(rev.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
-                      WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(Rev.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                      ELSE NVL(rev.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE,
+   	                (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(rev.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
+                      WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(Rev.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                      ELSE COALESCE(rev.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE,
                    rev.DataReversao, 
                    can.DataCancelamento,
                    aten.idcliente,
@@ -1305,7 +1305,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 		                                    WHEN RG.OBSERVACOES IS NULL THEN R.OBSERVACOES
 		                                    ELSE CASE
 			                                    WHEN R.OBSERVACOES IS NULL THEN RG.OBSERVACOES
-			                                    ELSE 'Reserva Grupo: ' || (NVL(RG.OBSERVACOES, ' '))|| ' - Reserva Individual: ' ||(NVL(R.OBSERVACOES, ' '))
+			                                    ELSE 'Reserva Grupo: ' || (COALESCE(RG.OBSERVACOES, ' '))|| ' - Reserva Individual: ' ||(COALESCE(R.OBSERVACOES, ' '))
 		                                    END
 	                                    END AS OBSERVACOES,
                                         PRO.NUMEROCONTRATO,
@@ -1316,8 +1316,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 	                                    PRO.FLGCANCELADO AS ContratoCancelado,
                                         R.CLIENTERESERVANTE,   
 	                                    U.BLOCO,
-	                                    DECODE(NVL(AGENDA.QTDAGENDA, 0), 0, 'N', 'S') AS FLGAGENDA,
-	                                    DECODE(NVL(MENSAGEM.QTDMENSAGEM, 0), 0, 'N', 'S') AS FLGMENSAGEM,
+	                                    DECODE(COALESCE(AGENDA.QTDAGENDA, 0), 0, 'N', 'S') AS FLGAGENDA,
+	                                    DECODE(COALESCE(MENSAGEM.QTDMENSAGEM, 0), 0, 'N', 'S') AS FLGMENSAGEM,
 	                                    H.IDHOSPEDE,
 	                                    TO_NUMBER(R.NUMRESERVAGDS) AS NUMRESERVAGDS,
 	                                    TO_NUMBER(R.NUMRESERVA) AS NUMRESERVA,
@@ -1328,18 +1328,18 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 	                                    R.OBSSENSIVEIS,
 	                                    M.DATAPARTREAL AS DTSAIDAHOSPEDE,
 	                                    STAT.DESCRICAO AS StatusReserva,
-	                                    NVL(R.OBSERVACOES, ' ') AS OBSRESERVA,
+	                                    COALESCE(R.OBSERVACOES, ' ') AS OBSRESERVA,
 	                                    TO_DATE(TO_CHAR(DECODE(R.STATUSRESERVA, 0 ,                                                                                          
-        	                                             (NVL(R.HORACHEGADAREAL, R.HORACHEGPREVISTA)), 1,                                                                            
-        			                                     (NVL(R.HORACHEGADAREAL, R.HORACHEGPREVISTA)),                                                                                  
-        			                                     (NVL(M.HORACHEGREAL, M.HORACHEGPREVISTA)) ), 'DD/MM/YYYY HH24:MI:SS'), 'DD/MM/YYYY HH24:MI:SS') AS HORACHEGADA ,
+        	                                             (COALESCE(R.HORACHEGADAREAL, R.HORACHEGPREVISTA)), 1,                                                                            
+        			                                     (COALESCE(R.HORACHEGADAREAL, R.HORACHEGPREVISTA)),                                                                                  
+        			                                     (COALESCE(M.HORACHEGREAL, M.HORACHEGPREVISTA)) ), 'DD/MM/YYYY HH24:MI:SS'), 'DD/MM/YYYY HH24:MI:SS') AS HORACHEGADA ,
 	                                    TO_DATE(TO_CHAR(DECODE(R.STATUSRESERVA, 0 ,                                                                                           
-        	                                             (NVL(R.HORAPARTIDAREAL, R.HORAPARTPREVISTA)) , 1,                                                                           
-        			                                     (NVL(R.HORAPARTIDAREAL, R.HORAPARTPREVISTA)) ,                                                                                 
-        			                                     (NVL(M.HORAPARTREAL, M.HORAPARTPREVISTA)) ), 'DD/MM/YYYY HH24:MI:SS'), 'DD/MM/YYYY HH24:MI:SS')AS HORAPARTIDA,
-	                                    NVL(M.DATAPARTREAL, M.DATAPARTPREVISTA) AS CHECKOUT,
+        	                                             (COALESCE(R.HORAPARTIDAREAL, R.HORAPARTPREVISTA)) , 1,                                                                           
+        			                                     (COALESCE(R.HORAPARTIDAREAL, R.HORAPARTPREVISTA)) ,                                                                                 
+        			                                     (COALESCE(M.HORAPARTREAL, M.HORAPARTPREVISTA)) ), 'DD/MM/YYYY HH24:MI:SS'), 'DD/MM/YYYY HH24:MI:SS')AS HORAPARTIDA,
+	                                    COALESCE(M.DATAPARTREAL, M.DATAPARTPREVISTA) AS CHECKOUT,
 	                                    R.GARANTENOSHOW,
-	                                    NVL(M.DATACHEGREAL, M.DATACHEGPREVISTA) AS CHECKIN,
+	                                    COALESCE(M.DATACHEGREAL, M.DATACHEGPREVISTA) AS CHECKIN,
 	                                    R.CODUH,
 	                                    R.LOCRESERVA,
 	                                    R.CODREFERENCIA,
@@ -1347,7 +1347,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 	                                    RG.OBSERVACOES AS OBSGRP,
 	                                    R.IDHOTEL,
 	                                    HT.NOME AS HOTEL,
-	                                    NVL(H.CODTRATAMENTO, '')|| ' ' || H.NOME || ' '  || H.SOBRENOME || DECODE(M.INCOGNITO, 'N', '', ' (INC.)') AS NOMEHOSPEDE,
+	                                    COALESCE(H.CODTRATAMENTO, '')|| ' ' || H.NOME || ' '  || H.SOBRENOME || DECODE(M.INCOGNITO, 'N', '', ' (INC.)') AS NOMEHOSPEDE,
 	                                    H.NOME || ' ' || H.SOBRENOME AS NOMEHOSPEDEORD,
 	                                    RG.NOMEGRUPO,
 	                                    M.DATACHEGPREVISTA,
@@ -1986,8 +1986,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                               ELSE
                                                 TO_CHAR(RF.LOCRESERVA)
                                               END LOCALIZADOR,
-                                              NVL(RF.DATACHEGPREVISTA, RF.DATACHEGADAREAL) AS CHECKIN,
-                                              NVL(RF.DATAPARTPREVISTA, RF.DATAPARTIDAREAL) AS CHECKOUT,
+                                              COALESCE(RF.DATACHEGPREVISTA, RF.DATACHEGADAREAL) AS CHECKIN,
+                                              COALESCE(RF.DATAPARTPREVISTA, RF.DATAPARTIDAREAL) AS CHECKOUT,
                                               ST.DESCRICAO AS STATUS,
                                               RF.DATACANCELAMENTO,
                                               H.NOME AS HOTEL,
@@ -1999,20 +1999,20 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                               TO_CHAR(PJ.NUMEROPROJETO)||'-'||TO_CHAR(VXC.NUMEROCONTRATO) AS PROJETOXCONTRATO,
                                               TO_CHAR(VXC.NUMEROCONTRATO) AS NUMEROCONTRATO,
                                               US.NOMEUSUARIO AS CRIADAPOR,
-                                              NVL(PR.VALOR,0) AS PONTORESERVA,
-                                              NVL(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
-                                              CASE WHEN ((NVL(LTX.VLRTAXA,0) = 0) AND (LTX.VLRTAXAISENTA IS NOT NULL)) THEN 'Sim' ELSE 'Não' END TAXAISENTA,
+                                              COALESCE(PR.VALOR,0) AS PONTORESERVA,
+                                              COALESCE(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
+                                              CASE WHEN ((COALESCE(LTX.VLRTAXA,0) = 0) AND (LTX.VLRTAXAISENTA IS NOT NULL)) THEN 'Sim' ELSE 'Não' END TAXAISENTA,
                                               CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'Não' END AS LISTAESPERA,
                                               V.IDVENDATS,
                                               DTTX.DATALANCAMENTO AS DATAPAGTAXA,
-                                              ( SELECT NVL(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RF.IDRESERVASFRONT ) VALORPENSAO,
-                                              ROUND(TO_NUMBER( DECODE( NVL(C.VALORPONTO,0),0, DECODE(NVL(C.VALORPERCPONTO,0),0,
-                                                                   DECODE( NVL(C.NUMEROPONTOS,0),0,0, NVL(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
-                                                                   (NVL(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
-                                                                   NVL(C.VALORPONTO,0))),6) AS VALORPONTO,
-                                              ROUND(PR.VALOR * TO_NUMBER((DECODE(NVL(C.VALORPONTO,0),0, DECODE(NVL(C.VALORPERCPONTO,0),0,
-                                              DECODE(NVL(C.NUMEROPONTOS,0),0,0, NVL(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
-                                              (NVL(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100), NVL(C.VALORPONTO,0)))),6) AS VALORPONTOS,
+                                              ( SELECT COALESCE(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RF.IDRESERVASFRONT ) VALORPENSAO,
+                                              ROUND(TO_NUMBER( DECODE( COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0,
+                                                                   DECODE( COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
+                                                                   (COALESCE(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
+                                                                   COALESCE(C.VALORPONTO,0))),6) AS VALORPONTO,
+                                              ROUND(PR.VALOR * TO_NUMBER((DECODE(COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0,
+                                              DECODE(COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
+                                              (COALESCE(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100), COALESCE(C.VALORPONTO,0)))),6) AS VALORPONTOS,
                                               MFR.DESCRICAO AS MOTIVO_FORCAR_RESERVA,
                                               MFR.JUSTIFORACONT AS JUST_FORCAR_RESERVA,
                                                (SELECT SUM(LF.VLRLANCAMENTO) AS TOTAL
@@ -2052,7 +2052,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                    AND R.STATUSRESERVA     IN (2,3,4)
                                                  GROUP BY CF.IDRESERVASFRONT) AS VLRCONTABTAXA, RF.ADULTOS, RF.CRIANCAS1, RF.CRIANCAS2, (SELECT COUNT(*) FROM RESERVASFRONT WHERE NUMRESERVAPRINC = RF.NUMRESERVA) AS QTDRESERVAS,
                                                  CASE WHEN FR1.IDFRACIONAMENTOTS > 0 THEN 'Abertura' WHEN FR2.IDFRACIONAMENTOTS > 0 THEN 'Fechamento' ELSE ' ' END FRACIONAMENTO,
-                                                 Nvl(RF.TipoDeUso,'UP') AS TipoDeUso
+                                                 COALESCE(RF.TipoDeUso,'UP') AS TipoDeUso
                                              FROM   
                                                 VENDAXCONTRATOTS VXC, 
                                                 MOVIMENTOHOSPEDES M,    
@@ -2075,11 +2075,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                 FRACIONAMENTOTS FR2,
                                                 (SELECT DISTINCT IDRESERVASFRONT, IDRESERVASRCI  FROM RESERVASRCI) RCI,
                                                 (SELECT IDRESERVASFRONT, MIN(IDVENDAXCONTRATO) AS IDVENDAXCONTRATO,
-                                                      SUM(NVL(TO_NUMBER(DECODE(IDTIPOLANCPONTOTS,1,NUMEROPONTOS)),0)) AS NUMPONTOS,
+                                                      SUM(COALESCE(TO_NUMBER(DECODE(IDTIPOLANCPONTOTS,1,NUMEROPONTOS)),0)) AS NUMPONTOS,
                                                       MAX(FLGMIGRADO) AS FLGMIGRADO, MIN(IDHOTEL) AS IDHOTEL, MAX(DATALANCAMENTO) AS DATALANCAMENTO
                                                  FROM LANCPONTOSTS
                                                 GROUP BY IDRESERVASFRONT) LP,
-                                              (SELECT IDRESERVASFRONT, SUM(NVL(NUMEROPONTOS,0)) AS VALOR FROM LANCPONTOSTS WHERE IDTIPOLANCPONTOTS IN (1,4) GROUP BY IDRESERVASFRONT) PR,
+                                              (SELECT IDRESERVASFRONT, SUM(COALESCE(NUMEROPONTOS,0)) AS VALOR FROM LANCPONTOSTS WHERE IDTIPOLANCPONTOTS IN (1,4) GROUP BY IDRESERVASFRONT) PR,
                                               (SELECT LP.IDRESERVASFRONT, SUM(L.VLRLANCAMENTO) AS VLRTAXA, LP.VLRTAXAISENTA 
                                                  FROM LANCAMENTOTS L, LANCPONTOSTS LP 
                                                 WHERE L.IDLANCPONTOSTS = LP.IDLANCPONTOSTS
@@ -2094,17 +2094,17 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                   AND LP.IDTIPOLANCPONTOTS IN (1,4)
                                                   AND LP.IDRESERVASFRONT IS NOT NULL
                                                 GROUP BY LP.IDRESERVASFRONT) DTTX,
-                                              (SELECT LANCPONTOSTS.IDRESERVASFRONT, NVL(LANCPONTOSTS.IDUSUARIORESERVA, NVL(LANCPONTOSTS.IDUSUARIO, LANCPONTOSTS.IDUSUARIOLOGADO)) AS IDUSUARIO
+                                              (SELECT LANCPONTOSTS.IDRESERVASFRONT, COALESCE(LANCPONTOSTS.IDUSUARIORESERVA, COALESCE(LANCPONTOSTS.IDUSUARIO, LANCPONTOSTS.IDUSUARIOLOGADO)) AS IDUSUARIO
                                                  FROM LANCPONTOSTS, (SELECT MIN(LP.IDLANCPONTOSTS) AS IDLANCPONTOSTS FROM LANCPONTOSTS LP GROUP BY LP.IDRESERVASFRONT) IDS
                                                 WHERE LANCPONTOSTS.IDLANCPONTOSTS = IDS.IDLANCPONTOSTS) USUARIORES,
-                                              (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+                                              (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
                                                  FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
                                                 WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                                                   AND LP.IDRESERVASFRONT  = RF.IDRESERVASFRONT (+)
                                                   AND LP.IDRESERVAMIGRADA = RM.IDRESERVAMIGRADA (+)
                                                   AND LP.IDTIPOLANCPONTOTS <> 8
                                                 GROUP BY IDVENDAXCONTRATO) U,
-                                              (SELECT VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
+                                              (SELECT VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
                                                  FROM LANCAMENTOTS L, VENDATS V, VENDAXCONTRATOTS VC, CONTRATOTS C, AJUSTEFINANCTS AJ, REVCONTRATOTS R
                                                 WHERE L.IDVENDATS      = V.IDVENDATS
                                                   AND V.IDVENDATS      = VC.IDVENDATS
@@ -2117,7 +2117,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                    OR  (VC.FLGREVERTIDO = 'S' AND L.IDMOTIVOESTORNO IS NOT NULL AND L.IDCANCCONTRATOTS IS NULL   AND L.IDAJUSTEFINANCTS IS NOT NULL )
                                                    OR  (VC.FLGCANCELADO = 'S' AND L.IDMOTIVOESTORNO IS NULL     AND L.IDCANCCONTRATOTS IS NULL ))
                                                   AND L.IDVENDATS IS NOT NULL
-                                                GROUP BY VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
+                                                GROUP BY VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
                                               (SELECT L.IDRESERVASFRONT, M.DESCRICAO, L.JUSTIFORACONT
                                                  FROM LANCPONTOSTS L, MOTIVOTS M
                                                 WHERE L.IDMOTIVOFORACONT = M.IDMOTIVOTS
@@ -2195,20 +2195,20 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                 TO_CHAR(PJ.NUMEROPROJETO)||'-'||TO_CHAR(VXC.NUMEROCONTRATO) AS PROJETOXCONTRATO,
                                                 TO_CHAR(VXC.NUMEROCONTRATO) AS NUMEROCONTRATO,
                                                 US.NOMEUSUARIO AS CRIADAPOR,
-                                                NVL(PR.VALOR,0) AS PONTORESERVA,
-                                                NVL(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
+                                                COALESCE(PR.VALOR,0) AS PONTORESERVA,
+                                                COALESCE(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
                                                 'Não' AS TAXAISENTA,
                                                 CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'Não' END AS LISTAESPERA,
                                                 V.IDVENDATS,
                                                 DTTX.DATALANCAMENTO AS DATAPAGTAXA,
-                                                ( SELECT NVL(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RM.IDRESERVAMIGRADA ) VALORPENSAO,
-                                                ROUND(TO_NUMBER( DECODE( NVL(C.VALORPONTO,0),0, DECODE(NVL(C.VALORPERCPONTO,0),0,
-                                                                    DECODE( NVL(C.NUMEROPONTOS,0),0,0, NVL(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
-                                                                    (NVL(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
-                                                                    NVL(C.VALORPONTO,0))),6) AS VALORPONTO,
-                                                ROUND(PR.VALOR * TO_NUMBER((DECODE(NVL(C.VALORPONTO,0),0, DECODE(NVL(C.VALORPERCPONTO,0),0, 
-                                                DECODE(NVL(C.NUMEROPONTOS,0),0,0, NVL(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
-                                                (NVL(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100), NVL(C.VALORPONTO,0)))),6) AS VALORPONTOS,
+                                                ( SELECT COALESCE(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RM.IDRESERVAMIGRADA ) VALORPENSAO,
+                                                ROUND(TO_NUMBER( DECODE( COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0,
+                                                                    DECODE( COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
+                                                                    (COALESCE(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
+                                                                    COALESCE(C.VALORPONTO,0))),6) AS VALORPONTO,
+                                                ROUND(PR.VALOR * TO_NUMBER((DECODE(COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0, 
+                                                DECODE(COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VXC.VALORFINAL) / C.NUMEROPONTOS),
+                                                (COALESCE(VAL.TOTAL, VXC.VALORFINAL) * C.VALORPERCPONTO)/ 100), COALESCE(C.VALORPONTO,0)))),6) AS VALORPONTOS,
                                                 ' ' AS MOTIVO_FORCAR_RESERVA,
                                                 ' ' AS JUST_FORCAR_RESERVA,
                                                 0 AS VLRCONTABPONTOS,
@@ -2217,12 +2217,12 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                 FROM VENDAXCONTRATOTS VXC, RESERVAMIGRADATS RM, USUARIOSISTEMA US, ATENDCLIENTETS A, RESERVASBULKTS RB, PARAMHOTEL PH, PROJETOTS PJ, TIPOUH TUH, VENDATS V, PESSOA CL, PESSOA H,
                                                     HOTEL HO, CONTRATOTS C, REVCONTRATOTS RV, LISTAESPERATS LS,
                                                 (SELECT IDRESERVAMIGRADA, MIN(IDVENDAXCONTRATO) AS IDVENDAXCONTRATO,
-                                                        SUM(NVL(TO_NUMBER(DECODE(IDTIPOLANCPONTOTS,1,NUMEROPONTOS)),0)) AS NUMPONTOS,
+                                                        SUM(COALESCE(TO_NUMBER(DECODE(IDTIPOLANCPONTOTS,1,NUMEROPONTOS)),0)) AS NUMPONTOS,
                                                         MAX(FLGMIGRADO) AS FLGMIGRADO, MIN(IDHOTEL) AS IDHOTEL, MAX(DATALANCAMENTO) AS DATALANCAMENTO
                                                     FROM LANCPONTOSTS
                                                 GROUP BY IDRESERVAMIGRADA) LP,
                                                 (SELECT DISTINCT IDRESERVAMIGRADA,IDRESERVASRCI FROM RESERVASRCI) RCI,
-                                                (SELECT IDRESERVAMIGRADA, SUM(NVL(NUMEROPONTOS,0)) AS VALOR
+                                                (SELECT IDRESERVAMIGRADA, SUM(COALESCE(NUMEROPONTOS,0)) AS VALOR
                                                     FROM LANCPONTOSTS 
                                                 WHERE IDTIPOLANCPONTOTS IN (1,4) 
                                                 GROUP BY IDRESERVAMIGRADA) PR,
@@ -2240,17 +2240,17 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                     AND LP.IDTIPOLANCPONTOTS IN (1,4)
                                                     AND LP.IDRESERVAMIGRADA IS NOT NULL
                                                 GROUP BY LP.IDRESERVAMIGRADA) DTTX,
-                                                (SELECT LANCPONTOSTS.IDRESERVAMIGRADA, NVL(LANCPONTOSTS.IDUSUARIORESERVA, NVL(LANCPONTOSTS.IDUSUARIO, LANCPONTOSTS.IDUSUARIOLOGADO)) AS IDUSUARIO
+                                                (SELECT LANCPONTOSTS.IDRESERVAMIGRADA, COALESCE(LANCPONTOSTS.IDUSUARIORESERVA, COALESCE(LANCPONTOSTS.IDUSUARIO, LANCPONTOSTS.IDUSUARIOLOGADO)) AS IDUSUARIO
                                                     FROM LANCPONTOSTS, (SELECT MIN(LP.IDLANCPONTOSTS) AS IDLANCPONTOSTS FROM LANCPONTOSTS LP GROUP BY LP.IDRESERVAMIGRADA) IDS
                                                 WHERE LANCPONTOSTS.IDLANCPONTOSTS = IDS.IDLANCPONTOSTS) USUARIORES,   
-                                                (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+                                                (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
                                                     FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
                                                 WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                                                     AND LP.IDRESERVASFRONT  = RF.IDRESERVASFRONT (+)
                                                     AND LP.IDRESERVAMIGRADA = RM.IDRESERVAMIGRADA (+)
                                                     AND LP.IDTIPOLANCPONTOTS <> 8
                                                 GROUP BY IDVENDAXCONTRATO) U,
-                                                (SELECT VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
+                                                (SELECT VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
                                                     FROM LANCAMENTOTS L, VENDATS V, VENDAXCONTRATOTS VC, CONTRATOTS C, AJUSTEFINANCTS AJ, REVCONTRATOTS R
                                                 WHERE L.IDVENDATS      = V.IDVENDATS
                                                     AND V.IDVENDATS      = VC.IDVENDATS
@@ -2263,7 +2263,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                     OR  (VC.FLGREVERTIDO = 'S' AND L.IDMOTIVOESTORNO IS NOT NULL AND L.IDCANCCONTRATOTS IS NULL   AND L.IDAJUSTEFINANCTS IS NOT NULL )
                                                     OR  (VC.FLGCANCELADO = 'S' AND L.IDMOTIVOESTORNO IS NULL     AND L.IDCANCCONTRATOTS IS NULL ))
                                                     AND L.IDVENDATS IS NOT NULL
-                                                GROUP BY VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL
+                                                GROUP BY VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL
                                             WHERE RM.IDRESERVAMIGRADA     = RCI.IDRESERVAMIGRADA(+)  
                                                 AND RM.IDRESERVAMIGRADA     = RB.IDRESERVASFRONT (+)
                                                 AND RB.IDRESERVASFRONT      = LS.IDRESERVASFRONT(+)
@@ -2497,7 +2497,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 		                                    WHEN RG.OBSERVACOES IS NULL THEN R.OBSERVACOES
 		                                    ELSE CASE
 			                                    WHEN R.OBSERVACOES IS NULL THEN RG.OBSERVACOES
-			                                    ELSE 'Reserva Grupo: ' || (NVL(RG.OBSERVACOES, ' '))|| ' - Reserva Individual: ' ||(NVL(R.OBSERVACOES, ' '))
+			                                    ELSE 'Reserva Grupo: ' || (COALESCE(RG.OBSERVACOES, ' '))|| ' - Reserva Individual: ' ||(COALESCE(R.OBSERVACOES, ' '))
 		                                    END
 	                                    END AS OBSERVACOES,
                                         PRO.PROJETOXCONTRATO AS NUMEROCONTRATO,
@@ -2510,8 +2510,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                         PRO.PROJETOXCONTRATO AS PROJECTXCONTRACT,
                                         PRO.IdRCI,
 	                                    U.BLOCO,
-	                                    DECODE(NVL(AGENDA.QTDAGENDA, 0), 0, 'N', 'S') AS FLGAGENDA,
-	                                    DECODE(NVL(MENSAGEM.QTDMENSAGEM, 0), 0, 'N', 'S') AS FLGMENSAGEM,
+	                                    DECODE(COALESCE(AGENDA.QTDAGENDA, 0), 0, 'N', 'S') AS FLGAGENDA,
+	                                    DECODE(COALESCE(MENSAGEM.QTDMENSAGEM, 0), 0, 'N', 'S') AS FLGMENSAGEM,
 	                                    H.IDHOSPEDE,
 	                                    TO_NUMBER(R.NUMRESERVAGDS) AS NUMRESERVAGDS,
 	                                    TO_NUMBER(R.NUMRESERVA) AS NUMRESERVA,
@@ -2521,18 +2521,18 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 	                                    R.OBSSENSIVEIS,
 	                                    M.DATAPARTREAL AS DTSAIDAHOSPEDE,
 	                                    STAT.DESCRICAO AS StatusReserva,
-	                                    NVL(R.OBSERVACOES, ' ') AS OBSRESERVA,
+	                                    COALESCE(R.OBSERVACOES, ' ') AS OBSRESERVA,
 	                                    TO_DATE(TO_CHAR(DECODE(R.STATUSRESERVA, 0 ,                                                                                          
-        	                                             (NVL(R.HORACHEGADAREAL, R.HORACHEGPREVISTA)), 1,                                                                            
-        			                                     (NVL(R.HORACHEGADAREAL, R.HORACHEGPREVISTA)),                                                                                  
-        			                                     (NVL(M.HORACHEGREAL, M.HORACHEGPREVISTA)) ), 'DD/MM/YYYY HH24:MI:SS'), 'DD/MM/YYYY HH24:MI:SS') AS HORACHEGADA ,
+        	                                             (COALESCE(R.HORACHEGADAREAL, R.HORACHEGPREVISTA)), 1,                                                                            
+        			                                     (COALESCE(R.HORACHEGADAREAL, R.HORACHEGPREVISTA)),                                                                                  
+        			                                     (COALESCE(M.HORACHEGREAL, M.HORACHEGPREVISTA)) ), 'DD/MM/YYYY HH24:MI:SS'), 'DD/MM/YYYY HH24:MI:SS') AS HORACHEGADA ,
 	                                    TO_DATE(TO_CHAR(DECODE(R.STATUSRESERVA, 0 ,                                                                                           
-        	                                             (NVL(R.HORAPARTIDAREAL, R.HORAPARTPREVISTA)) , 1,                                                                           
-        			                                     (NVL(R.HORAPARTIDAREAL, R.HORAPARTPREVISTA)) ,                                                                                 
-        			                                     (NVL(M.HORAPARTREAL, M.HORAPARTPREVISTA)) ), 'DD/MM/YYYY HH24:MI:SS'), 'DD/MM/YYYY HH24:MI:SS')AS HORAPARTIDA,
-	                                    NVL(M.DATAPARTREAL, M.DATAPARTPREVISTA) AS CHECKOUT,
+        	                                             (COALESCE(R.HORAPARTIDAREAL, R.HORAPARTPREVISTA)) , 1,                                                                           
+        			                                     (COALESCE(R.HORAPARTIDAREAL, R.HORAPARTPREVISTA)) ,                                                                                 
+        			                                     (COALESCE(M.HORAPARTREAL, M.HORAPARTPREVISTA)) ), 'DD/MM/YYYY HH24:MI:SS'), 'DD/MM/YYYY HH24:MI:SS')AS HORAPARTIDA,
+	                                    COALESCE(M.DATAPARTREAL, M.DATAPARTPREVISTA) AS CHECKOUT,
 	                                    R.GARANTENOSHOW,
-	                                    NVL(M.DATACHEGREAL, M.DATACHEGPREVISTA) AS CHECKIN,
+	                                    COALESCE(M.DATACHEGREAL, M.DATACHEGPREVISTA) AS CHECKIN,
 	                                    R.CODUH,
 	                                    R.LOCRESERVA,
 	                                    R.CODREFERENCIA,
@@ -2540,7 +2540,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 	                                    RG.OBSERVACOES AS OBSGRP,
 	                                    R.IDHOTEL,
 	                                    HT.NOME AS HOTEL,
-	                                    NVL(H.CODTRATAMENTO, '')|| ' ' || H.NOME || ' ' || H.SOBRENOME || DECODE(M.INCOGNITO, 'N', '', ' (INC.)') AS NOMEHOSPEDE,
+	                                    COALESCE(H.CODTRATAMENTO, '')|| ' ' || H.NOME || ' ' || H.SOBRENOME || DECODE(M.INCOGNITO, 'N', '', ' (INC.)') AS NOMEHOSPEDE,
 	                                    H.NOME || ' ' || H.SOBRENOME AS NOMEHOSPEDEORD,
 	                                    RG.NOMEGRUPO,
 	                                    M.DATACHEGPREVISTA,
@@ -3013,7 +3013,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                             lpts.IdReservasFront, 
                                             rf.clientereservante,
                                             rf.clientehospede,
-                                            Sum(Nvl(lpts.NumeroPontos,0)+Nvl(lpts.VLRPENSAO,0)) AS QtdePontos
+                                            Sum(COALESCE(lpts.NumeroPontos,0)+COALESCE(lpts.VLRPENSAO,0)) AS QtdePontos
                                             FROM 
                                             LancpontosTs lpts
                                             INNER JOIN ReservasFront rf ON lpts.IDRESERVASFRONT = rf.IDRESERVASFRONT
@@ -3229,28 +3229,28 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 return resultCache;
             }
 
-            var result = (await _repository.FindBySql<DadosFinanceirosContrato>(@$"Select b.* From (SELECT Nvl(RC.DATAREVERSAO,V.DataVenda) AS DataVenda,
+            var result = (await _repository.FindBySql<DadosFinanceirosContrato>(@$"Select b.* From (SELECT COALESCE(RC.DATAREVERSAO,V.DataVenda) AS DataVenda,
                                       VC.NUMEROCONTRATO,
                                       VC.IDVENDAXCONTRATO,
                                       VC.IDVENDATS,
                                       Coalesce(PAGTO.ABERTO_VENCIDO,0) as SaldoInadimplente,
                                       ROUND((CASE WHEN VC.FLGREVERTIDO = 'N' AND VC.FLGCANCELADO = 'N' THEN
-                                         (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
+                                         (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
                                         ELSE
-                                          (PAGTO.QUITADO + NVL(COMPRADOS.PAGTO,0))
-                                        END * 100) / CASE WHEN (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0)) > 0 THEN (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0)) ELSE 1 END,5) PERCENTUALINTEGRALIZACAO,
+                                          (PAGTO.QUITADO + COALESCE(COMPRADOS.PAGTO,0))
+                                        END * 100) / CASE WHEN (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0)) > 0 THEN (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0)) ELSE 1 END,5) PERCENTUALINTEGRALIZACAO,
                                        CASE WHEN VC.FLGCANCELADO = 'S' THEN 'CANCELADO'  
                                             WHEN VC.FLGREVERTIDO = 'S' THEN 'REVERTIDO'  
-                                            WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
-                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                                                           ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
+                                            WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
+                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                                                           ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
                                        AND (VC.IDSEMANAFIXAUH IS NULL)) THEN 'EXPIRADO' ELSE 'ATIVO' END AS STATUS,
                                        ROUND((CASE WHEN VC.FLGREVERTIDO = 'N' AND VC.FLGCANCELADO = 'N' THEN
-                                         (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
+                                         (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
                                         ELSE
-                                          (PAGTO.QUITADO + NVL(COMPRADOS.PAGTO,0))
+                                          (PAGTO.QUITADO + COALESCE(COMPRADOS.PAGTO,0))
                                         END)) as ValorTotalPago,
-                                        NVL(VAL.TOTAL, VC.VALORFINAL) as ValorTotalContrato,
+                                        COALESCE(VAL.TOTAL, VC.VALORFINAL) as ValorTotalContrato,
                                         C.NUMEROPONTOS,
                                         A.IDCLIENTE
                                     FROM   
@@ -3268,7 +3268,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                       PARAMTS PAR,
                                       VWENDERECO EP,
                                       PESSOA PRO,
-                                      (SELECT VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
+                                      (SELECT VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
                                          FROM LANCAMENTOTS L, VENDATS V, VENDAXCONTRATOTS VC, CONTRATOTS C, AJUSTEFINANCTS AJ, REVCONTRATOTS R
                                         WHERE L.IDVENDATS         = V.IDVENDATS
                                           AND V.IDVENDATS         = VC.IDVENDATS
@@ -3282,15 +3282,15 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                            OR  (VC.FLGCANCELADO = 'S' AND L.IDMOTIVOESTORNO IS NULL     AND L.IDCANCCONTRATOTS IS NULL ))
                                           AND L.IDVENDATS IS NOT NULL
                                           AND L.FLGREMOVIDO IS NULL
-                                        GROUP BY VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
-                                      (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+                                        GROUP BY VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
+                                      (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
                                          FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
                                         WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                                           AND LP.IDRESERVASFRONT  = RF.IDRESERVASFRONT (+)
                                           AND LP.IDRESERVAMIGRADA = RM.IDRESERVAMIGRADA (+)
                                           AND LP.IDTIPOLANCPONTOTS <> 8      
                                         GROUP BY IDVENDAXCONTRATO) U,
-                                      (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS,
+                                      (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS,
                                               SUM(DECODE(L.IDTIPOLANCAMENTO, 18,L.VLRLANCAMENTO,0)) AS PAGTO 
                                          FROM LANCPONTOSTS LP, LANCAMENTOTS L
                                         WHERE LP.IDLANCPONTOSTS = L.IDLANCPONTOSTS (+)
@@ -3303,26 +3303,26 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 0, PAG.VLRLANCAMENTO, 0),0))) AS ABERTO_VENCIDO,
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 1, PAG.VLRLANCAMENTO, 0),0))) AS ABERTO_A_VENCER,
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 0, 1, 0),0))) AS QUANT_PARC_VENCIDA,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) AS QUANT_PARC_ENTRADA,
-                                               ABS(SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'E', PAG.VLRLANCAMENTO, 0))) AS VALOR_ENTRADA,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QUANT_PARC_FINANC,
-                                               ABS(SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', PAG.VLRLANCAMENTO, 0))) AS VALOR_FINANC,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) + SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QTDE_PAGTO
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) AS QUANT_PARC_ENTRADA,
+                                               ABS(SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'E', PAG.VLRLANCAMENTO, 0))) AS VALOR_ENTRADA,
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QUANT_PARC_FINANC,
+                                               ABS(SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', PAG.VLRLANCAMENTO, 0))) AS VALOR_FINANC,
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) + SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QTDE_PAGTO
                                                FROM
                                                     (SELECT L.VLRLANCAMENTO, L.IDVENDATS, CAR.DATAPROGRAMADA, SUBSTR(L.COMPLDOCUMENTO,1,1) AS COMPLDOCUMENTO,
                                                             CASE WHEN P.DATASISTEMA > CAR.DATAPROGRAMADA THEN 0 ELSE 1 END VENCIMENTO,
                                                             DECODE(L.CODDOCUMENTO, NULL, DECODE(P.DATASISTEMA, L.DATALANCAMENTO, DECODE(T.CODTIPDOC, NULL, 'QUITADO',
-                                                                                     DECODE(L.IDMOTIVOESTORNO, NULL, DECODE(NVL(L.FLGMIGRADO, 'N'), 'N', 'EM ABERTO', 'QUITADO'), 'QUITADO')),'QUITADO'),
-                                                                                     DECODE(NVL(CAR.ESTORNADO,'N'),'N', DECODE(NVL(CAR.SALDOCAR, 0), 0,DECODE(NVL(TOTALCANCELAMENTOS,0),0,'QUITADO','QUITADO'),
-                                                                                     DECODE(NVL(CAR.NUMFATURA,0),0, 'EM ABERTO','QUITADO')), 'QUITADO')) AS STATUSCAR
+                                                                                     DECODE(L.IDMOTIVOESTORNO, NULL, DECODE(COALESCE(L.FLGMIGRADO, 'N'), 'N', 'EM ABERTO', 'QUITADO'), 'QUITADO')),'QUITADO'),
+                                                                                     DECODE(COALESCE(CAR.ESTORNADO,'N'),'N', DECODE(COALESCE(CAR.SALDOCAR, 0), 0,DECODE(COALESCE(TOTALCANCELAMENTOS,0),0,'QUITADO','QUITADO'),
+                                                                                     DECODE(COALESCE(CAR.NUMFATURA,0),0, 'EM ABERTO','QUITADO')), 'QUITADO')) AS STATUSCAR
                                                         FROM LANCAMENTOTS L, VENDATS V, TIPODEBCREDHOTEL T, PARAMTS P,
                                                              (SELECT CASE WHEN ( SUM(CASE WHEN TOT.OPERACAO = 2 THEN CASE WHEN TOT.ESTORNO IS NULL THEN 0 ELSE 1 END ELSE 0 END ) ) = 0 THEN 'N' ELSE 'S' END AS ESTORNADO,
                                                                      TOT.CODDOCUMENTO, TOT.IDFORCLI, TOT.DATAPROGRAMADA, TOT.NUMFATURA,
-                                                                     NVL(SUM(TO_NUMBER(DECODE(TOT.OPERACAO, 4, TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1)) * TOT.CANCELAMENTO, 0))), 0) AS TOTALCANCELAMENTOS,
-                                                                     NVL(SUM(1), 0) AS NUMNAOESTORNADOS,
-                                                                     NVL(SUM(TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1))), 0) AS SALDOCAR
+                                                                     COALESCE(SUM(TO_NUMBER(DECODE(TOT.OPERACAO, 4, TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1)) * TOT.CANCELAMENTO, 0))), 0) AS TOTALCANCELAMENTOS,
+                                                                     COALESCE(SUM(1), 0) AS NUMNAOESTORNADOS,
+                                                                     COALESCE(SUM(TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1))), 0) AS SALDOCAR
                                                                 FROM (SELECT L.OPERACAO, ESTORNO, D.CODDOCUMENTO, D.IDFORCLI, D.DATAPROGRAMADA, L.DEBCRE, L.VALOR, L.CODALTERADOR, L.NUMLANCTO, D.NUMFATURA,
-                                                                             (SELECT TO_NUMBER(DECODE(NVL(SUM(1),0),0,0,1)) FROM TIPOALTERCANCEL TC WHERE TC.CODALTERADOR = L.CODALTERADOR AND TC.IDAGENCIATS = A.IDAGENCIATS) AS CANCELAMENTO
+                                                                             (SELECT TO_NUMBER(DECODE(COALESCE(SUM(1),0),0,0,1)) FROM TIPOALTERCANCEL TC WHERE TC.CODALTERADOR = L.CODALTERADOR AND TC.IDAGENCIATS = A.IDAGENCIATS) AS CANCELAMENTO
                                                                                 FROM DOCUMENTO D, LANCTODOCUM L, LANCAMENTOTS LTS, VENDATS V, ATENDCLIENTETS A
                                                                                WHERE A.IDATENDCLIENTETS = V.IDATENDCLIENTETS
                                                                                  AND LTS.IDVENDATS      = V.IDVENDATS
@@ -3431,24 +3431,24 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             DateTime dataInicioApuracaoPeriodoDebito = dataDebitoPontosAtual.Value.AddYears(-1);
 
 
-            var result = (await _repository.FindBySql<DebitoPorNaoUtlizacaoModel>(@$"SELECT NVL(R.DATAREVERSAO,V.DATAVENDA) AS DATAVENDA,
+            var result = (await _repository.FindBySql<DebitoPorNaoUtlizacaoModel>(@$"SELECT COALESCE(R.DATAREVERSAO,V.DATAVENDA) AS DATAVENDA,
         
                                        :dataDebitoPrevisto as VALIDADECREDITO,      
 
                                        RFV.PONTOSRF, RMV.PONTOSRM, PONTOSV.PONTOSOUTROS,
-                                       (NVL(RFV.PONTOSRF,0) + NVL(RMV.PONTOSRM,0) + NVL(PONTOSV.PONTOSOUTROS,0)) AS PONTOSUTILIZADOS,
+                                       (COALESCE(RFV.PONTOSRF,0) + COALESCE(RMV.PONTOSRM,0) + COALESCE(PONTOSV.PONTOSOUTROS,0)) AS PONTOSUTILIZADOS,
                
                                        CASE WHEN (RF.IDVENDAXCONTRATO IS NULL) AND (RM.IDVENDAXCONTRATO IS NULL) AND (PONTOS.IDVENDAXCONTRATO IS NULL) THEN
-                                         CASE WHEN (C.NUMEROPONTOS - NVL(U.UTILIZACAO,0)) > (C.DESCONTOANUAL - (NVL(RFV.PONTOSRF,0) + NVL(RMV.PONTOSRM,0) + NVL(PONTOSV.PONTOSOUTROS,0))) THEN
-                                           C.DESCONTOANUAL - (NVL(RFV.PONTOSRF,0) + NVL(RMV.PONTOSRM,0) + NVL(PONTOSV.PONTOSOUTROS,0))
+                                         CASE WHEN (C.NUMEROPONTOS - COALESCE(U.UTILIZACAO,0)) > (C.DESCONTOANUAL - (COALESCE(RFV.PONTOSRF,0) + COALESCE(RMV.PONTOSRM,0) + COALESCE(PONTOSV.PONTOSOUTROS,0))) THEN
+                                           C.DESCONTOANUAL - (COALESCE(RFV.PONTOSRF,0) + COALESCE(RMV.PONTOSRM,0) + COALESCE(PONTOSV.PONTOSOUTROS,0))
                                          ELSE
-                                           (C.NUMEROPONTOS - NVL(U.UTILIZACAO,0))
+                                           (C.NUMEROPONTOS - COALESCE(U.UTILIZACAO,0))
                                          END
                                        ELSE
-                                         CASE WHEN (C.UTILIZACAOMINIMAPONTOS > 0) AND ((C.NUMEROPONTOS - NVL(U.UTILIZACAO,0)) > (C.UTILIZACAOMINIMAPONTOS - (NVL(RF.PONTOSRF,0) + NVL(RM.PONTOSRM,0) + NVL(PONTOS.PONTOSOUTROS,0) + NVL(RFV.PONTOSRF,0) + NVL(RMV.PONTOSRM,0) + NVL(PONTOSV.PONTOSOUTROS,0)))) THEN
-                                           C.UTILIZACAOMINIMAPONTOS - (NVL(RF.PONTOSRF,0) + NVL(RM.PONTOSRM,0) + NVL(PONTOS.PONTOSOUTROS,0) + NVL(RFV.PONTOSRF,0) + NVL(RMV.PONTOSRM,0) + NVL(PONTOSV.PONTOSOUTROS,0) )
+                                         CASE WHEN (C.UTILIZACAOMINIMAPONTOS > 0) AND ((C.NUMEROPONTOS - COALESCE(U.UTILIZACAO,0)) > (C.UTILIZACAOMINIMAPONTOS - (COALESCE(RF.PONTOSRF,0) + COALESCE(RM.PONTOSRM,0) + COALESCE(PONTOS.PONTOSOUTROS,0) + COALESCE(RFV.PONTOSRF,0) + COALESCE(RMV.PONTOSRM,0) + COALESCE(PONTOSV.PONTOSOUTROS,0)))) THEN
+                                           C.UTILIZACAOMINIMAPONTOS - (COALESCE(RF.PONTOSRF,0) + COALESCE(RM.PONTOSRM,0) + COALESCE(PONTOS.PONTOSOUTROS,0) + COALESCE(RFV.PONTOSRF,0) + COALESCE(RMV.PONTOSRM,0) + COALESCE(PONTOSV.PONTOSOUTROS,0) )
                                          ELSE
-                                           (C.NUMEROPONTOS - NVL(U.UTILIZACAO,0))
+                                           (C.NUMEROPONTOS - COALESCE(U.UTILIZACAO,0))
                                          END
                                        END AS CREDITOPONTOS,
               
@@ -3599,7 +3599,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                            AND  :dataBaseInicialAnoAnterior = LP.VALIDADECREDITO
                                          GROUP BY LP.IDVENDAXCONTRATO) PONTOSVEXTRA,          
       
-                                       (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+                                       (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
                                          FROM LANCPONTOSTS LP
                                          WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6)
                                          GROUP BY IDVENDAXCONTRATO) U
@@ -3620,15 +3620,15 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                 AND    C.IDCONTRATOTS           = VC.IDCONTRATOTS
                                 AND    A.IDATENDCLIENTETS       = V.IDATENDCLIENTETS
                                 AND    P.IDPESSOA               = A.IDCLIENTE
-                                AND    (NVL(C.DESCONTOANUAL, 0) > 0 OR NVL(C.TAXAANUAL, 0) > 0)
+                                AND    (COALESCE(C.DESCONTOANUAL, 0) > 0 OR COALESCE(C.TAXAANUAL, 0) > 0)
 
                                 AND   ( (  (RF.IDVENDAXCONTRATO IS NULL) AND (RM.IDVENDAXCONTRATO IS NULL) AND (PONTOS.IDVENDAXCONTRATO IS NULL) )
-                                   OR ( ( NVL(RF.PONTOSRF,0) + NVL(RM.PONTOSRM,0) + NVL(PONTOS.PONTOSOUTROS,0) + NVL(RFV.PONTOSRF,0) + NVL(RMV.PONTOSRM,0) + NVL(PONTOSV.PONTOSOUTROS,0)  ) <= C.UTILIZACAOMINIMAPONTOS ) )
+                                   OR ( ( COALESCE(RF.PONTOSRF,0) + COALESCE(RM.PONTOSRM,0) + COALESCE(PONTOS.PONTOSOUTROS,0) + COALESCE(RFV.PONTOSRF,0) + COALESCE(RMV.PONTOSRM,0) + COALESCE(PONTOSV.PONTOSOUTROS,0)  ) <= C.UTILIZACAOMINIMAPONTOS ) )
 
-                                AND    NVL(U.UTILIZACAO,0) < C.NUMEROPONTOS
-                                AND    NVL(PONTOSVEXTRA.PONTOS,0) < C.DESCONTOANUAL
-                                AND    (NVL(RFV.PONTOSRF,0) + NVL(RMV.PONTOSRM,0) + NVL(PONTOSV.PONTOSOUTROS,0)) < C.DESCONTOANUAL
-                                AND    ADD_MONTHS(NVL(R.DATAREVERSAO,V.DATAVENDA), 12) <= PAR.DATASISTEMA
+                                AND    COALESCE(U.UTILIZACAO,0) < C.NUMEROPONTOS
+                                AND    COALESCE(PONTOSVEXTRA.PONTOS,0) < C.DESCONTOANUAL
+                                AND    (COALESCE(RFV.PONTOSRF,0) + COALESCE(RMV.PONTOSRM,0) + COALESCE(PONTOSV.PONTOSOUTROS,0)) < C.DESCONTOANUAL
+                                AND    ADD_MONTHS(COALESCE(R.DATAREVERSAO,V.DATAVENDA), 12) <= PAR.DATASISTEMA
                                  AND C.FLGGERACREDNUTIL = 'S'
                                 AND    :dataDebitoPrevisto <= :dataAtualMais6Meses
                                 AND    :dataAtualMais6Meses >= :dataInicioApuracaoDebito",
@@ -4680,7 +4680,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                AND H.ATIVO         = 'S'
                AND CH.IDCONTRATOTS = :idContratoTs
                AND C.IDHOTEL       = 3
-             GROUP BY P.NOME, H.IDHOTEL, NVL(PH.DATASISTEMA, PTS.DATASISTEMA), HTS.FLGTIPO, HTS.DIAINICIALSEMANA, H.OBSERVACAO
+             GROUP BY P.NOME, H.IDHOTEL, COALESCE(PH.DATASISTEMA, PTS.DATASISTEMA), HTS.FLGTIPO, HTS.DIAINICIALSEMANA, H.OBSERVACAO
              ORDER BY P.NOME     ", new Parameter("idContratoTs", idContratoTs))).AsList();
 
             if (!string.IsNullOrEmpty(hotelId) && int.Parse(hotelId) > 0)
@@ -4693,13 +4693,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
         public async Task<DadosFinanceirosContratoModel> DadosUtilizacaoContrato(int idVendaXContrato)
         {
             var sb = new StringBuilder(@$"SELECT
-                 TO_DATE( TO_CHAR( NVL(R.DATAREVERSAO,V.DATAVENDA),'DD/MM/YYYY' ),'DD/MM/YYYY') DATAVENDA,
+                 TO_DATE( TO_CHAR( COALESCE(R.DATAREVERSAO,V.DATAVENDA),'DD/MM/YYYY' ),'DD/MM/YYYY') DATAVENDA,
                  VC.IDVENDATS, VC.IDVENDAXCONTRATO, VC.FLGREVERTIDO, VC.FLGCANCELADO,
-                 CASE WHEN NVL(VC.FLGREVERTIDO,'N') = 'N' THEN 'Não' ELSE 'Sim' END AS REVERTIDO,
-                 CASE WHEN NVL(VC.FLGCANCELADO,'N') = 'N' THEN 'Não' ELSE 'Sim' END AS CANCELADO,
+                 CASE WHEN COALESCE(VC.FLGREVERTIDO,'N') = 'N' THEN 'Não' ELSE 'Sim' END AS REVERTIDO,
+                 CASE WHEN COALESCE(VC.FLGCANCELADO,'N') = 'N' THEN 'Não' ELSE 'Sim' END AS CANCELADO,
                  TO_DATE( TO_CHAR(R.DATAREVERSAO,'DD/MM/YYYY'),'DD/MM/YYYY') DATAREVERSAO,
                  TO_DATE( TO_CHAR(DECODE(VC.FLGREVERTIDO,'N',CC.DATACANCELAMENTO,R2.DATAREVERSAO),'DD/MM/YYYY'),'DD/MM/YYYY') DATACANCELAMENTO,
-                 TO_CHAR( NVL(PJ.NUMEROPROJETO,'-1') ) || '-' || TO_CHAR(VC.NUMEROCONTRATO) AS NUMPROJETOCONTRATO,
+                 TO_CHAR( COALESCE(PJ.NUMEROPROJETO,'-1') ) || '-' || TO_CHAR(VC.NUMEROCONTRATO) AS NUMPROJETOCONTRATO,
                  TO_CHAR(VC.NUMEROCONTRATO) as NumeroContrato,
                  C.NOME AS NOMEPRODUTO,
                  P.IDPESSOA,
@@ -4708,7 +4708,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                  U1.TIPOLANC DEBCRED,
                  TO_DATE(TO_CHAR(U1.DATALANCAMENTO,'DD/MM/YYYY'),'DD/MM/YYYY') DATAOPERACAOLANCAMENTO,
                  U1.IDTIPOLANCPONTOTS,
-                 DECODE(NVL(U1.STATUSRESERVA,'Não aplicável'),'Não aplicável', U1.TIPOLANCAMENTO, DECODE(U1.IDTIPOLANCPONTOTS,4,'Reserva',U1.TIPOLANCAMENTO)) DESCRICAOTIPOLANC,
+                 DECODE(COALESCE(U1.STATUSRESERVA,'Não aplicável'),'Não aplicável', U1.TIPOLANCAMENTO, DECODE(U1.IDTIPOLANCPONTOTS,4,'Reserva',U1.TIPOLANCAMENTO)) DESCRICAOTIPOLANC,
                  U1.DESCRICAO MOTIVOLANCAMENTO,
                  U1.IDRESERVASFRONT, 
                  U1.HOTEL,
@@ -4717,29 +4717,29 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                  U1.LOCALIZADOR,
                  TO_DATE( U1.CHECKIN,'DD/MM/YYYY') CHECKIN,
                  TO_DATE( U1.CHECKOUT,'DD/MM/YYYY') CHECKOUT,
-                 NVL(PJ.NUMEROPROJETO,'-1') AS NUMEROPROJETO,
-                 NVL(VAL.TOTAL, VC.VALORFINAL) AS VALORCOMPRA,
-                 Round(TO_NUMBER( DECODE( NVL(C.VALORPONTO,0),0, DECODE(NVL(C.VALORPERCPONTO,0),0,
-                    DECODE( NVL(C.NUMEROPONTOS,0),0,0, NVL(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS),
-                    (NVL(VAL.TOTAL, VC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
-                    NVL(C.VALORPONTO,0))),6) AS VALORPONTO,
+                 COALESCE(PJ.NUMEROPROJETO,'-1') AS NUMEROPROJETO,
+                 COALESCE(VAL.TOTAL, VC.VALORFINAL) AS VALORCOMPRA,
+                 Round(TO_NUMBER( DECODE( COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0,
+                    DECODE( COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS),
+                    (COALESCE(VAL.TOTAL, VC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
+                    COALESCE(C.VALORPONTO,0))),6) AS VALORPONTO,
                  Round(CASE WHEN U1.TIPOLANC = 'Débito' THEN U1.NUMEROPONTOS*-1 ELSE U1.NUMEROPONTOS END *
-                  TO_NUMBER((DECODE(NVL(C.VALORPONTO,0),0, DECODE(NVL(C.VALORPERCPONTO,0),0,
-                  DECODE(NVL(C.NUMEROPONTOS,0),0,0, NVL(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS),
-                  (NVL(VAL.TOTAL, VC.VALORFINAL) * C.VALORPERCPONTO)/ 100), NVL(C.VALORPONTO,0)))),6) AS VALORUTILIZACAO,
-                 Round(NVL(NVL(PONTOSANO.UTILIZACAO, U.UTILIZACAO),0),6) AS PONTOSBAIXADOSATUAL,
-                 Round(CASE WHEN NVL(VC.FLGCANCELADO,'N') = 'N' THEN
-                  C.NUMEROPONTOS - NVL(NVL(PONTOSANO.UTILIZACAO, U.UTILIZACAO),0) + NVL(COMPRADOS.PONTOSCOMPRADOS,0)
+                  TO_NUMBER((DECODE(COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0,
+                  DECODE(COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS),
+                  (COALESCE(VAL.TOTAL, VC.VALORFINAL) * C.VALORPERCPONTO)/ 100), COALESCE(C.VALORPONTO,0)))),6) AS VALORUTILIZACAO,
+                 Round(COALESCE(COALESCE(PONTOSANO.UTILIZACAO, U.UTILIZACAO),0),6) AS PONTOSBAIXADOSATUAL,
+                 Round(CASE WHEN COALESCE(VC.FLGCANCELADO,'N') = 'N' THEN
+                  C.NUMEROPONTOS - COALESCE(COALESCE(PONTOSANO.UTILIZACAO, U.UTILIZACAO),0) + COALESCE(COMPRADOS.PONTOSCOMPRADOS,0)
                   ELSE 0
                  END,6) AS SALDOPONTOSATUAL,
                  Round(CASE WHEN VC.FLGCANCELADO = 'N' THEN
-                  ((C.NUMEROPONTOS - NVL(NVL(PONTOSANO.UTILIZACAO, U.UTILIZACAO),0)) * TO_NUMBER(DECODE(NVL(C.NUMEROPONTOS,0),0,0,NVL(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS)))
+                  ((C.NUMEROPONTOS - COALESCE(COALESCE(PONTOSANO.UTILIZACAO, U.UTILIZACAO),0)) * TO_NUMBER(DECODE(COALESCE(C.NUMEROPONTOS,0),0,0,COALESCE(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS)))
  	                 ELSE 0
                  END,6) AS VALORSALDOATUAL,
-                 NVL(U1.STATUSRESERVA, 'Não aplicável') STATUSRESERVA,
-                 NVL(U1.RCI, 'X') RCI,
-                 NVL(U1.FRACIONAMENTO, 'Não aplicável') FRACIONAMENTO,
-                 NVL(U1.STATUS_BOOK, 'Não aplicável') STATUS_BOOK,
+                 COALESCE(U1.STATUSRESERVA, 'Não aplicável') STATUSRESERVA,
+                 COALESCE(U1.RCI, 'X') RCI,
+                 COALESCE(U1.FRACIONAMENTO, 'Não aplicável') FRACIONAMENTO,
+                 COALESCE(U1.STATUS_BOOK, 'Não aplicável') STATUS_BOOK,
                  TO_DATE( TO_CHAR(DECODE(U1.IDTIPOLANCPONTOTS,4,DECODE(C.FLGGERACREDNUTIL,'S',U1.VALIDADECREDITO,U1.DATALANCAMENTO),''),'DD/MM/YYYY'),'DD/MM/YYYY') AS VALIDADECREDITO,
                  C.DESCONTOANUAL,
                  C.VALIDADE,
@@ -4748,7 +4748,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                  TX.TAXAMANUTENCAO + TX.TAXAADMINISTRATIVA AS TOTALTAXA,
                  TX.PAGTOTAXAMANUTENCAO + TX.TRANSFTAXAMANUTENCAO + TX.PAGTOTAXAADMINISTRATIVA AS TOTALPAGTOTAXA,
                  U1.IDLANCPONTOSTS, TO_DATE(TO_CHAR(U1.TRGDTINCLUSAO, 'DD/MM/YYYY'), 'DD/MM/YYYY') AS DATALANCAMENTOREAL,
-                 NVL(COMPRADOS.PONTOSCOMPRADOS, 0) AS PONTOSCOMPRADOS, CASE WHEN TO_DATE(
+                 COALESCE(COMPRADOS.PONTOSCOMPRADOS, 0) AS PONTOSCOMPRADOS, CASE WHEN TO_DATE(
                               TO_CHAR(
                                   DECODE(U1.IDTIPOLANCPONTOTS, 4,
                                       DECODE(C.FLGGERACREDNUTIL,'S', U1.VALIDADECREDITO, U1.DATALANCAMENTO),
@@ -4794,14 +4794,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                  CANCCONTRATOTS CC,
                  REVCONTRATOTS R2,
                  HOTEL H,
-                 (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+                 (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
                   FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
                   WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                   AND LP.IDRESERVASFRONT = RF.IDRESERVASFRONT (+)
                   AND LP.IDRESERVAMIGRADA = RM.IDRESERVAMIGRADA (+)
                   AND LP.IDTIPOLANCPONTOTS <> 8
                   GROUP BY IDVENDAXCONTRATO) U,
-                 (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D', LPD.NUMEROPONTOS, -LPD.NUMEROPONTOS)),0) AS UTILIZACAO
+                 (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D', LPD.NUMEROPONTOS, -LPD.NUMEROPONTOS)),0) AS UTILIZACAO
                   FROM LANCPONTOSTS LP
                   JOIN PARAMTS PAR ON LP.IDHOTEL = PAR.IDHOTEL
                   JOIN LANCPONTOSDIATS LPD ON LP.IDLANCPONTOSTS = LPD.IDLANCPONTOSTS
@@ -4811,7 +4811,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   AND NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                   GROUP BY IDVENDAXCONTRATO
                   ) PONTOSANO,
-                 (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS
+                 (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS
                   FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
                   WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                   AND LP.IDRESERVASFRONT = RF.IDRESERVASFRONT (+)
@@ -4819,7 +4819,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   AND (SELECT SUM(VLRLANCAMENTO) AS SALDO FROM LANCAMENTOTS WHERE IDLANCPONTOSTS = LP.IDLANCPONTOSTS GROUP BY IDLANCPONTOSTS) = 0
                   AND LP.IDTIPOLANCPONTOTS = 8
                   GROUP BY IDVENDAXCONTRATO) COMPRADOS,
-                 (SELECT LP.IDLANCPONTOSTS, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO,
+                 (SELECT LP.IDLANCPONTOSTS, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO,
                   SUM(DECODE(L.IDTIPOLANCAMENTO,5,L.VLRLANCAMENTO,0)) AS TAXAMANUTENCAO,
                   SUM(DECODE(L.IDTIPOLANCAMENTO,6,L.VLRLANCAMENTO,0)) AS PAGTOTAXAMANUTENCAO,
                   SUM(DECODE(L.IDTIPOLANCAMENTO,13,L.VLRLANCAMENTO,0)) AS TRANSFTAXAMANUTENCAO,
@@ -4957,7 +4957,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                  WHERE L.IDTIPOLANCPONTOTS IN (2, 8)
                   AND L.IDTIPOLANCPONTOTS != 1)
                   ) U1,
-                 (SELECT VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
+                 (SELECT VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
                   FROM LANCAMENTOTS L, VENDATS V, VENDAXCONTRATOTS VC, CONTRATOTS C, AJUSTEFINANCTS AJ, REVCONTRATOTS R
                   WHERE L.IDVENDATS = V.IDVENDATS
                    AND V.IDVENDATS = VC.IDVENDATS
@@ -4970,7 +4970,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                    OR (VC.FLGREVERTIDO = 'S' AND L.IDMOTIVOESTORNO IS NOT NULL AND L.IDCANCCONTRATOTS IS NULL AND L.IDAJUSTEFINANCTS IS NOT NULL )
                    OR (VC.FLGCANCELADO = 'S' AND L.IDMOTIVOESTORNO IS NULL AND L.IDCANCCONTRATOTS IS NULL ))
                    AND L.IDVENDATS IS NOT NULL
-                  GROUP BY VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL
+                  GROUP BY VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL
                  WHERE VC.IDVENDATS = V.IDVENDATS
                  AND A.IDATENDCLIENTETS = V.IDATENDCLIENTETS
                  AND P.IDPESSOA  = A.IDCLIENTE
@@ -5098,9 +5098,9 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                              P.NUMEROPROJETO ||'-'|| TO_CHAR(TO_NUMBER(VC.NUMEROCONTRATO)) AS NUMEROCONTRATO,
                              C.IDCONTRATOTS,
                              C.NOME,
-                             C.NUMEROPONTOS - NVL(Sum( TO_NUMBER(DECODE(L.DEBITOCREDITO, 'C',-L.NUMEROPONTOS,L.NUMEROPONTOS)) *
+                             C.NUMEROPONTOS - COALESCE(Sum( TO_NUMBER(DECODE(L.DEBITOCREDITO, 'C',-L.NUMEROPONTOS,L.NUMEROPONTOS)) *
                                                        TO_NUMBER(DECODE(L.IDTIPOLANCPONTOTS, 1, DECODE(R.STATUSRESERVA, 6, 0, 1), 1))), 0) AS SaldoPontos,
-                             NVL(CRED.CREDITO, 0) AS CREDITO
+                             COALESCE(CRED.CREDITO, 0) AS CREDITO
                      FROM     CM.ATENDCLIENTETS  A, CM.VENDATS V, CM.VENDAXCONTRATOTS VC,
                              CM.CONTRATOTS C, CM.LANCPONTOSTS L, CM.PROJETOTS P, CM.RESERVASFRONT R, CM.AGENCIATS,
                              (SELECT VC.IDVENDAXCONTRATO, Sum(LP.NUMEROPONTOS) AS CREDITO
@@ -6010,7 +6010,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     (await _repository.FindBySql<ReservaTsModel>(@$"Select
                                                 rf.DataChegPrevista as Checkin,
                                                 rf.DataPartPrevista as Checkout,
-                                                Nvl(rf.TipoDeUso,'UP') AS TipoDeUso,
+                                                COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso,
                                                 rf.*
                                             From 
                                                 ReservasFront rf 
@@ -6448,7 +6448,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             if (model.IdReservasFront.GetValueOrDefault(0) > 0)
             {
-                reservaCriada = (await _repository.FindBySql<ReservaTsModel>($"Select Nvl(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.IdReservasFront.GetValueOrDefault()}")).FirstOrDefault();
+                reservaCriada = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.IdReservasFront.GetValueOrDefault()}")).FirstOrDefault();
                 if (reservaCriada == null)
                     throw new ArgumentException("Reserva não encontrada");
 
@@ -6818,7 +6818,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 throw new ArgumentException("Deve ser informado o Id da reserva para ser alterada.");
 
             // Verificar se a quantidade de pessoas mudou e recalcular pontos se necessário
-            var reservaOriginal = (await _repository.FindBySql<ReservaTsModel>($"Select Nvl(rf.TipoDeUso,'UP') AS TipoDeUso, rf.LocReserva, rf.LocReserva as AgendamentoId, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.IdReservasFront.GetValueOrDefault()} and rf.StatusReserva in (0,1,5,6)")).FirstOrDefault();
+            var reservaOriginal = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.LocReserva, rf.LocReserva as AgendamentoId, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.IdReservasFront.GetValueOrDefault()} and rf.StatusReserva in (0,1,5,6)")).FirstOrDefault();
             if (reservaOriginal != null)
             {
                 var lancPontosTs = (await _repository.FindByHql<LancPontosTs>($"From LancPontosTs Where IdReservasFront = {reservaOriginal.IdReservasFront}")).FirstOrDefault();
@@ -7385,10 +7385,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                     A.IDCLIENTE, 
                                     vc.IdVendaXContrato, 
                                     vc.IdContratoTs, 
-                                    NVL(RC.DATAREVERSAO, V.DATAVENDA) AS DATA, 
+                                    COALESCE(RC.DATAREVERSAO, V.DATAVENDA) AS DATA, 
                                     PJ.NUMEROPROJETO, VC.NUMEROCONTRATO,
                                     VC.FLGREVERTIDO, VC.FLGCANCELADO,
-                                    TO_DATE(TO_CHAR(DECODE(C.FLGDTANIVERSARIO, 0, NVL(RC.DATAREVERSAO, V.DATAVENDA), NVL(VC.DATAINTEGRALIZA, P.DATASISTEMA)),'DD/MM/YYYY'),'DD/MM/YYYY') AS DATAANIVERSARIO,
+                                    TO_DATE(TO_CHAR(DECODE(C.FLGDTANIVERSARIO, 0, COALESCE(RC.DATAREVERSAO, V.DATAVENDA), COALESCE(VC.DATAINTEGRALIZA, P.DATASISTEMA)),'DD/MM/YYYY'),'DD/MM/YYYY') AS DATAANIVERSARIO,
                                     C.PERCTXMANUTPRIUTI, C.PERCPONTOSPRIUTI, C.PERCTXMANUTSEGUTI, C.PERCPONTOSSEGUTI, C.FLGUTILVLRPROP, C.FLGUTILPONTOSPROP, C.FLGSALDOINSUFICIENTE, C.FLGUTILALTATEMPANOCOMPRA,
                                     C.Validade, C.TipoValidade, C.IdTipoDcTaxa
                                     FROM ATENDCLIENTETS A, VENDATS V, VENDAXCONTRATOTS VC, PROJETOTS PJ, REVCONTRATOTS RC, CONTRATOTS C, PARAMTS P
@@ -7634,10 +7634,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                          VC.IDVENDAXCONTRATO, 
                          F.IdFracionamentoTs, 
                          R.IdReservasFront AS IdReservasFront1,
-                         NVL(R.DataChegadaReal,R.DataChegPrevista) AS CheckinReservasFront1,
-                         NVL(R.DataPartidaReal,R.DataPartPrevista) AS CheckoutReservasFront1,
+                         COALESCE(R.DataChegadaReal,R.DataChegPrevista) AS CheckinReservasFront1,
+                         COALESCE(R.DataPartidaReal,R.DataPartPrevista) AS CheckoutReservasFront1,
                          R.StatusReserva as StatusReservasFront1,
-                         Nvl(R.Adultos,0)+Nvl(R.CRIANCAS1,0)+Nvl(R.CRIANCAS2,0) AS QtdePessoas,
+                         COALESCE(R.Adultos,0)+COALESCE(R.CRIANCAS1,0)+COALESCE(R.CRIANCAS2,0) AS QtdePessoas,
                          R.IdHotel,
                          R.NumReserva as NumReserva1,
                          A.IdCliente,
@@ -7653,20 +7653,20 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         AND    VC.IDATENDCLIENTETS = A.IDATENDCLIENTETS
                         AND    F.IDRESERVASFRONT2 IS NULL
                         AND    R.STATUSRESERVA    <> 6
-                        AND    NVL(C.PERCPONTOSSEGUTI,0) = 0
+                        AND    COALESCE(C.PERCPONTOSSEGUTI,0) = 0
                         AND    F.IDVENDAXCONTRATO = VC.IDVENDAXCONTRATO
                         AND    VC.IDCONTRATOTS    = C.IDCONTRATOTS
-                        AND    (R.DATACHEGPREVISTA + NVL(C.NUMMAXDIASFECFRAC,0)) >= :dataSistema
+                        AND    (R.DATACHEGPREVISTA + COALESCE(C.NUMMAXDIASFECFRAC,0)) >= :dataSistema
                         AND    A.IDCLIENTE        = {idCliente} )
                         UNION
                         (SELECT 
                          VC.IDVENDAXCONTRATO, 
                          F.IdFracionamentoTs, 
                          R.IdReservasFront AS IdReservasFront1,
-                         NVL(R.DataChegadaReal,R.DataChegPrevista) AS CheckinReservasFront1,
-                         NVL(R.DataPartidaReal,R.DataPartPrevista) AS CheckoutReservasFront1,
+                         COALESCE(R.DataChegadaReal,R.DataChegPrevista) AS CheckinReservasFront1,
+                         COALESCE(R.DataPartidaReal,R.DataPartPrevista) AS CheckoutReservasFront1,
                          R.StatusReserva as StatusReservasFront1,
-                         Nvl(R.Adultos,0)+Nvl(R.CRIANCAS1,0)+Nvl(R.CRIANCAS2,0) AS QtdePessoas,
+                         COALESCE(R.Adultos,0)+COALESCE(R.CRIANCAS1,0)+COALESCE(R.CRIANCAS2,0) AS QtdePessoas,
                          R.IdHotel,
                          R.NumReserva as NumReserva1,
                          A.IdCliente,
@@ -7678,8 +7678,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         AND    VC.IDATENDCLIENTETS = A.IDATENDCLIENTETS
                         AND    VC.IDCONTRATOTS    = C.IDCONTRATOTS
                         AND    R.STATUSRESERVA    = 6
-                        AND    NVL(C.PERCPONTOSSEGUTI,0) = 0
-                        AND    (R.DATACHEGPREVISTA + NVL(C.NUMMAXDIASFECFRAC,0)) >= :dataSistema
+                        AND    COALESCE(C.PERCPONTOSSEGUTI,0) = 0
+                        AND    (R.DATACHEGPREVISTA + COALESCE(C.NUMMAXDIASFECFRAC,0)) >= :dataSistema
                         AND    (R.DATACHEGPREVISTA - R.DATACANCELAMENTO) >= C.NUMMINDIASCANCRES
                         AND    A.IDCLIENTE        = {idCliente})", new Parameter("dataSistema", paramTs!.DataSistema.GetValueOrDefault().Date))).AsList();
         }
@@ -7733,7 +7733,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
         {
             if (model.ReservaId.GetValueOrDefault(0) > 0)
             {
-                var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select Nvl(rf.TipoDeUso,'UP') AS TipoDeUso, Nvl(rf.DataChegPrevista,rf.DataChegadaReal) as DataCheckin, rf.* From ReservasFront rf Where rf.NumReserva = {model.ReservaId}")).FirstOrDefault();
+                var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, COALESCE(rf.DataChegPrevista,rf.DataChegadaReal) as DataCheckin, rf.* From ReservasFront rf Where rf.NumReserva = {model.ReservaId}")).FirstOrDefault();
                 if (reserva == null)
                     throw new ArgumentException("Reserva não encontrada");
                 if (reserva.DataCheckin.GetValueOrDefault().Date.Subtract(DateTime.Today.Date).Days < 30)
@@ -7761,7 +7761,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 if (reservaTimeSharing.IdReservasFront.GetValueOrDefault(0) > 0 || !string.IsNullOrEmpty(reservaTimeSharing.NumReserva))
                 {
                     var reserva = reservaTimeSharing.IdReservasFront.GetValueOrDefault(0) == 0 ? (await _repository.FindBySql<ReservaTsModel>(@$"Select 
-                                    Nvl(rf.TipoDeUso,'UP') AS TipoDeUso,    
+                                    COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso,    
                                     rf.* 
                                     From 
                                         ReservasFront rf 
@@ -7892,7 +7892,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     rf.VLRDIARIAMANUAL,
                     rf.TrgDtInclusao,
                     rf.TrgUserInclusao,
-                    Nvl(rf.TipoDeUso,'UP') AS TipoDeUso
+                    COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso
                     From 
                     ReservasFront rf
                     Inner Join Hotel h on rf.IdHotel = h.IdHotel
@@ -7956,8 +7956,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     p.NumDocumento as Documento,
                     p.EMAIL,
                     pf.SEXO,
-                    Nvl(mh.DATACHEGPREVISTA,mh.DATACHEGREAL) AS CHECKIN,
-                    Nvl(mh.DATAPARTPREVISTA,mh.DATAPARTREAL) AS DataCheckout
+                    COALESCE(mh.DATACHEGPREVISTA,mh.DATACHEGREAL) AS CHECKIN,
+                    COALESCE(mh.DATAPARTPREVISTA,mh.DATAPARTREAL) AS DataCheckout
                     FROM 
                     MovimentoHospedes mh
                     INNER JOIN Hospede h ON mh.IdHospede = h.IdHospede
@@ -8358,7 +8358,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     throw new ArgumentException("Reserva Time Sharing não encontrada para vinculação.");
 
                 var reservasFront = (await _repository.FindBySql<ReservaTsModel>(@$"Select 
-                            Nvl(rf.TipoDeUso,'UP') AS TipoDeUso,
+                            COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso,
                             rf.*,
                             To_char(Coalesce(rf.DataChegadaReal, rf.DataChegPrevista),'dd/MM/yyyy') as Checkin,
                             To_char(Coalesce(rf.DataPartidaReal, rf.DataPartPrevista),'dd/MM/yyyy') as Checkout,
@@ -8479,7 +8479,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 throw new ArgumentException("ReservaId é obrigatório");
 
             // Busca a reserva atual para obter informações do contrato
-            var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select Nvl(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {searchModel.ReservaId.GetValueOrDefault()}")).FirstOrDefault();
+            var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {searchModel.ReservaId.GetValueOrDefault()}")).FirstOrDefault();
             if (reserva == null)
                 throw new ArgumentException("Reserva não encontrada");
 
@@ -8606,7 +8606,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 _repositorySystem.BeginTransaction();
 
                 // 1. Buscar reserva atual
-                var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select Nvl(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Chekout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.ReservaId}")).FirstOrDefault();
+                var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Chekout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.ReservaId}")).FirstOrDefault();
                 if (reserva == null)
                     throw new ArgumentException("Reserva não encontrada");
 
@@ -8746,7 +8746,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 _repositorySystem.BeginTransaction();
 
                 // 1. Buscar reserva atual
-                var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select Nvl(rf.TipoDeUso,'UP') AS TipoDeUso, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.ReservaId}")).FirstOrDefault();
+                var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.ReservaId}")).FirstOrDefault();
                 if (reserva == null)
                     throw new ArgumentException("Reserva não encontrada");
 
@@ -8814,7 +8814,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             {
                 if (request.NumReserva.GetValueOrDefault(0) > 0)
                 {
-                    var reservasFront = (await _repository.FindBySql<ReservaTsModel>("Select Nvl(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkoutm, rf.* From ReservasFront rf Where rf.NumReserva = :numReserva ", new Parameter("numReserva", request.NumReserva.GetValueOrDefault()))).FirstOrDefault();
+                    var reservasFront = (await _repository.FindBySql<ReservaTsModel>("Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkoutm, rf.* From ReservasFront rf Where rf.NumReserva = :numReserva ", new Parameter("numReserva", request.NumReserva.GetValueOrDefault()))).FirstOrDefault();
                     if (reservasFront == null)
                         throw new ArgumentException($"Reserva {request.NumReserva} não encontrada");
 

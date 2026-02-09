@@ -632,8 +632,15 @@ namespace SW_PortalProprietario.Application.Hosted
                                 continue;
                             }
                         }
-                        
-                         var pass = !string.IsNullOrEmpty(item.Password) ? SW_Utils.Functions.Helper.DescriptografarPadraoEsol("", item.Password!) : "";
+                        else
+                        {
+                            _logger.LogWarning($"Não foi possível determinar o tipo do documento do usuário com login: {item.Login} - Pois o número informado não é um CPF ou CNPJ válido: '{item.CpfCnpj}'");
+                            item.CpfCnpj = null;
+                            _repository.Rollback(session);
+                            continue;
+                        }
+
+                        var pass = !string.IsNullOrEmpty(item.Password) ? SW_Utils.Functions.Helper.DescriptografarPadraoEsol("", item.Password!) : "";
 
                         if (string.IsNullOrEmpty(item.Password))
                             item.Password = "Abc@123";

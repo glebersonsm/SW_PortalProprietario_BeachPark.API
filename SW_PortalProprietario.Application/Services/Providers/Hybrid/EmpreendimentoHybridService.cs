@@ -118,9 +118,9 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                             ia.Nome AS ImovelAndarNome,
                                             ti.Codigo AS TipoImovelCodigo,
                                             ti.Nome AS TipoImovelNome,
-                                            NVL(est.Vendida, 0) AS QtdeVendida,
-                                            NVL(est.Disponivel, 0) AS QtdeDisponivel,
-                                            NVL(est.Bloqueada, 0) AS QtdeBloqueada
+                                            COALESCE(est.Vendida, 0) AS QtdeVendida,
+                                            COALESCE(est.Disponivel, 0) AS QtdeDisponivel,
+                                            COALESCE(est.Bloqueada, 0) AS QtdeBloqueada
                                         FROM
                                             Imovel i
                                             INNER JOIN ImovelBloco ib ON i.ImovelBloco = ib.Id
@@ -3275,7 +3275,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                                                                             tc.Codigo as TipoCotaCodigo,
                                                                                             tc.Nome as TipoCotaNome,
                                                                                             clip.Id as PessoaProviderId,
-                                                                                            Nvl(emp.Empresa,cli.Empresa) as EmpresaAcId,
+                                                                                            COALESCE(emp.Empresa,cli.Empresa) as EmpresaAcId,
                                                                                             av.IdIntercambiadora,
                                                                                             av.Codigo as NumeroContrato,
                                                                                             Case when ti.Id in ({tipoImovelPadraoBlack}) then 'Black' else 'Default' end as PadraoDeCor

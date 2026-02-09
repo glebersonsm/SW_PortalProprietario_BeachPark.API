@@ -266,9 +266,9 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                         tcr.TaxaMultaMensalProcessamento,
                                         e.Id as EmpresaId,
                                         pemp.Nome as EmpresaNome,
-                                        Nvl((Select Max(crpa.Data) From ContaReceberParcelaAlteracao crpa Where crpa.TipoContaReceber = tcr.Id and crpa.ContaReceberParcela = crp.Id),crp.DataHoraBaixa) as DataProcessamento,
-                                        Nvl((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
-                                        Case when Nvl((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta,
+                                        COALESCE((Select Max(crpa.Data) From ContaReceberParcelaAlteracao crpa Where crpa.TipoContaReceber = tcr.Id and crpa.ContaReceberParcela = crp.Id),crp.DataHoraBaixa) as DataProcessamento,
+                                        COALESCE((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
+                                        Case when COALESCE((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta,
                                         crp.DataHoraBaixa
                                         From 
                                             ContaReceberParcela crp
@@ -429,7 +429,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                         Case when crbp.Status <> 'C' then crbp.Id else null end as BoletoId,
                                         p.Id as PessoaProviderId,
                                         Case 
-                                            when crp.Status = 'P' and crbp.Status <> 'C' then Round(NVL(crbp.ValorBoleto,crp.Valor),2) 
+                                            when crp.Status = 'P' and crbp.Status <> 'C' then Round(COALESCE(crbp.ValorBoleto,crp.Valor),2) 
                                             when crp.Status = 'B' then crp.Valor else Round(crp.Valor,2) end as Valor,
                                         Case when crp.ValorBaixado > crp.Valor and crp.Status = 'B' then crp.ValorBaixado else crp.Valor end as ValorAtualizado,
                                         Case 
@@ -462,10 +462,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                         tcr.TaxaMultaMensalProcessamento,
                                         cremp.Id as EmpresaId,
                                         empes.Nome as EmpresaNome,
-                                        Nvl((Select Max(crpa.Data) From ContaReceberParcelaAlteracao crpa Where crpa.TipoContaReceber = tcr.Id and crpa.ContaReceberParcela = crp.Id and (Nvl(crp.CartaoCreditoRecorrenteStatus,'P') = 'A' or crp.DocumentoFinanceira is not null)),crp.Vencimento) as DataProcessamento,
-                                        nvl((Select Max(av.Codigo) From FrAtendimentoVendaContaRec avcr Inner Join FrAtendimentoVenda av on avcr.FrAtendimentoVenda = av.Id Where avcr.ContaReceber = cr.Id),cr.Documento) as Contrato,
-                                        Nvl((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
-                                        Case when Nvl((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta,
+                                        COALESCE((Select Max(crpa.Data) From ContaReceberParcelaAlteracao crpa Where crpa.TipoContaReceber = tcr.Id and crpa.ContaReceberParcela = crp.Id and (COALESCE(crp.CartaoCreditoRecorrenteStatus,'P') = 'A' or crp.DocumentoFinanceira is not null)),crp.Vencimento) as DataProcessamento,
+                                        COALESCE((Select Max(av.Codigo) From FrAtendimentoVendaContaRec avcr Inner Join FrAtendimentoVenda av on avcr.FrAtendimentoVenda = av.Id Where avcr.ContaReceber = cr.Id),cr.Documento) as Contrato,
+                                        COALESCE((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
+                                        Case when COALESCE((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta,
                                         crp.DataHoraBaixa
                                         From 
                                             ContaReceberParcela crp
@@ -890,7 +890,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                         Case when crbp.Status <> 'C' then crbp.Id else null end as BoletoId,
                                         p.Id as PessoaProviderId,
                                         Case 
-                                            when crp.Status = 'P' and crbp.Status <> 'C' then Round(NVL(crbp.ValorBoleto,crp.Valor),2) 
+                                            when crp.Status = 'P' and crbp.Status <> 'C' then Round(COALESCE(crbp.ValorBoleto,crp.Valor),2) 
                                             when crp.Status = 'B' then crp.Valor else Round(crp.Valor,2) end as Valor,
                                         Case when crp.ValorBaixado > crp.Valor and crp.Status = 'B' then crp.ValorBaixado else crp.Valor end as ValorAtualizado,
                                         Case 
@@ -923,11 +923,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                         tcr.TaxaMultaMensalProcessamento,
                                         cremp.Id as EmpresaId,
                                         empes.Nome as EmpresaNome,
-                                        Nvl((Select Max(av.Codigo) From FrAtendimentoVendaContaRec avcr Inner Join FrAtendimentoVenda av on avcr.FrAtendimentoVenda = av.Id Where avcr.ContaReceber = cr.Id),cr.Documento) as Contrato,
-                                        Nvl((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
-                                        Case when Nvl((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta,
+                                        COALESCE((Select Max(av.Codigo) From FrAtendimentoVendaContaRec avcr Inner Join FrAtendimentoVenda av on avcr.FrAtendimentoVenda = av.Id Where avcr.ContaReceber = cr.Id),cr.Documento) as Contrato,
+                                        COALESCE((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
+                                        Case when COALESCE((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta,
                                         crp.DataHoraBaixa,
-                                        Nvl((Select Max(crpa.Data) From ContaReceberParcelaAlteracao crpa Where crpa.TipoContaReceber = tcr.Id and crpa.ContaReceberParcela = crp.Id and (Nvl(crp.CartaoCreditoRecorrenteStatus,'P') = 'A' or crp.DocumentoFinanceira is not null)),crp.Vencimento) as DataProcessamento
+                                        COALESCE((Select Max(crpa.Data) From ContaReceberParcelaAlteracao crpa Where crpa.TipoContaReceber = tcr.Id and crpa.ContaReceberParcela = crp.Id and (COALESCE(crp.CartaoCreditoRecorrenteStatus,'P') = 'A' or crp.DocumentoFinanceira is not null)),crp.Vencimento) as DataProcessamento
                                         From 
                                             ContaReceberParcela crp
                                             Inner Join TipoContaReceber tcr on crp.TipoContaReceber = tcr.Id 
@@ -1308,8 +1308,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                         tcr.TaxaJuroMensalProcessamento,
                                         tcr.TaxaMultaMensalProcessamento,
                                         (Select Max(av.Codigo) From FrAtendimentoVendaContaRec avcr Inner Join FrAtendimentoVenda av on avcr.FrAtendimentoVenda = av.Id Where avcr.ContaReceber = cr.Id) as Contrato,
-                                        Nvl((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
-                                        Case when Nvl((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta
+                                        COALESCE((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
+                                        Case when COALESCE((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta
                                         From 
                                             ContaReceberParcela crp
                                             Inner Join TipoContaReceber tcr on crp.TipoContaReceber = tcr.Id
@@ -2457,8 +2457,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                         (Select Max(av.Codigo) From FrAtendimentoVendaContaRec avcr Inner Join FrAtendimentoVenda av on avcr.ContaReceber = av.Id Where avcr.ContaReceber = cr.Id) as Contrato,
                                         cremp.Id as EmpresaId,
                                         empes.Nome as EmpresaNome,
-                                        Nvl((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
-                                        Case when Nvl((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta,
+                                        COALESCE((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
+                                        Case when COALESCE((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta,
                                         crp.DataHoraBaixa
                                         From 
                                             ContaReceberParcela crp

@@ -441,8 +441,8 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                 INNER JOIN Pessoa pes ON c.IdUsuario = pes.IdPessoa
                 LEFT JOIN TipoDocPessoa tdp ON pes.IDDOCUMENTO = tdp.IDDOCUMENTO
                 WHERE
-                Nvl(c.Bloqueado,'N') = 'N' AND
-                nvl(c.Desativado,'N') = 'N' AND 
+                COALESCE(c.Bloqueado,'N') = 'N' AND
+                COALESCE(c.Desativado,'N') = 'N' AND 
                 pes.Nome is not null and length(pes.Nome) > 2 and 
                 (pes.IdPessoa in (SELECT us.IdUsuario 
                     FROM 
@@ -544,15 +544,15 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                    vc.IdVendaXContrato as IdVendaXContrato,
                    vc.NumeroContrato,
                    CASE 
-   	                WHEN nvl(vc.FlgRevertido,'N')= 'S' THEN 'Revertido'
-   	                WHEN nvl(vc.FlgCancelado,'N')= 'S' THEN 'Cancelado'
+   	                WHEN COALESCE(vc.FlgRevertido,'N')= 'S' THEN 'Revertido'
+   	                WHEN COALESCE(vc.FlgCancelado,'N')= 'S' THEN 'Cancelado'
    	                ELSE 'Ativo' END AS Status,
                     V.DataVenda,
                     can.DataCancelamento,
                     rev.DataReversao,
-   	                (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(rev.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
-                      WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(Rev.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                      ELSE NVL(rev.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE,
+   	                (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(rev.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12) 
+                      WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(Rev.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                      ELSE COALESCE(rev.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END) AS DATAVALIDADE,
                    rev.DataReversao, 
                    can.DataCancelamento,
                    aten.idcliente as PessoaTitular1Id,
@@ -578,8 +578,8 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                    vc.FlgCancelado = 'N' and 
                    vc.FlgRevertido = 'N' and 
                     CASE 
-   	                WHEN nvl(vc.FlgRevertido,'N')= 'S' THEN 'Revertido'
-   	                WHEN nvl(vc.FlgCancelado,'N')= 'S' THEN 'Cancelado'
+   	                WHEN COALESCE(vc.FlgRevertido,'N')= 'S' THEN 'Revertido'
+   	                WHEN COALESCE(vc.FlgCancelado,'N')= 'S' THEN 'Cancelado'
    	                ELSE 'Ativo' END = 'Ativo' ");
 
 
@@ -655,28 +655,28 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
             if (itemCache != null && itemCache.Any())
                 return itemCache;
 
-            var sbSql = new StringBuilder(@$"Select b.* From (SELECT Nvl(RC.DATAREVERSAO,V.DataVenda) AS DataVenda,
+            var sbSql = new StringBuilder(@$"Select b.* From (SELECT COALESCE(RC.DATAREVERSAO,V.DataVenda) AS DataVenda,
                                       VC.NUMEROCONTRATO,
                                       VC.IDVENDAXCONTRATO,
                                       VC.IDVENDATS,
                                       Coalesce(PAGTO.ABERTO_VENCIDO,0) as SaldoInadimplente,
                                       ROUND((CASE WHEN VC.FLGREVERTIDO = 'N' AND VC.FLGCANCELADO = 'N' THEN
-                                         (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
+                                         (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
                                         ELSE
-                                          (PAGTO.QUITADO + NVL(COMPRADOS.PAGTO,0))
-                                        END * 100) / CASE WHEN (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0)) > 0 THEN (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0)) ELSE 1 END,5) PERCENTUALINTEGRALIZACAO,
+                                          (PAGTO.QUITADO + COALESCE(COMPRADOS.PAGTO,0))
+                                        END * 100) / CASE WHEN (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0)) > 0 THEN (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0)) ELSE 1 END,5) PERCENTUALINTEGRALIZACAO,
                                        CASE WHEN VC.FLGCANCELADO = 'S' THEN 'CANCELADO'  
                                             WHEN VC.FLGREVERTIDO = 'S' THEN 'REVERTIDO'  
-                                            WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
-                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(NVL(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
-                                                                           ELSE NVL(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
+                                            WHEN ((PAR.DATASISTEMA > (CASE WHEN C.TIPOVALIDADE = 'A' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE * 12)  
+                                                                           WHEN C.TIPOVALIDADE = 'M' THEN ADD_MONTHS(COALESCE(RC.DATAREVERSAO, V.DATAVENDA), C.VALIDADE) 
+                                                                           ELSE COALESCE(RC.DATAREVERSAO, V.DATAVENDA) + C.VALIDADE END))                                          
                                        AND (VC.IDSEMANAFIXAUH IS NULL)) THEN 'EXPIRADO' ELSE 'ATIVO' END AS STATUS,
                                        ROUND((CASE WHEN VC.FLGREVERTIDO = 'N' AND VC.FLGCANCELADO = 'N' THEN
-                                         (NVL(VAL.TOTAL, VC.VALORFINAL) + NVL(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
+                                         (COALESCE(VAL.TOTAL, VC.VALORFINAL) + COALESCE(COMPRADOS.PAGTO,0) - PAGTO.ABERTO_A_VENCER - PAGTO.ABERTO_VENCIDO)
                                         ELSE
-                                          (PAGTO.QUITADO + NVL(COMPRADOS.PAGTO,0))
+                                          (PAGTO.QUITADO + COALESCE(COMPRADOS.PAGTO,0))
                                         END)) as ValorTotalPago,
-                                        NVL(VAL.TOTAL, VC.VALORFINAL) as ValorTotalContrato,
+                                        COALESCE(VAL.TOTAL, VC.VALORFINAL) as ValorTotalContrato,
                                         C.NUMEROPONTOS,
                                         A.IDCLIENTE,
                                         P.NOME,
@@ -697,7 +697,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                                       PARAMTS PAR,
                                       VWENDERECO EP,
                                       PESSOA PRO,
-                                      (SELECT VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
+                                      (SELECT VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS) AS IDREVCONTRATOTS, ABS(SUM(L.VLRLANCAMENTO)) AS TOTAL
                                          FROM LANCAMENTOTS L, VENDATS V, VENDAXCONTRATOTS VC, CONTRATOTS C, AJUSTEFINANCTS AJ, REVCONTRATOTS R
                                         WHERE L.IDVENDATS         = V.IDVENDATS
                                           AND V.IDVENDATS         = VC.IDVENDATS
@@ -711,15 +711,15 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                                            OR  (VC.FLGCANCELADO = 'S' AND L.IDMOTIVOESTORNO IS NULL     AND L.IDCANCCONTRATOTS IS NULL ))
                                           AND L.IDVENDATS IS NOT NULL
                                           AND L.FLGREMOVIDO IS NULL
-                                        GROUP BY VC.IDVENDAXCONTRATO, NVL(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
-                                      (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
+                                        GROUP BY VC.IDVENDAXCONTRATO, COALESCE(L.IDREVCONTRATOTS, R.IDREVCONTRATOTS)) VAL,
+                                      (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'D',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS UTILIZACAO
                                          FROM LANCPONTOSTS LP, RESERVASFRONT RF, RESERVAMIGRADATS RM
                                         WHERE NOT EXISTS(SELECT R.IDRESERVASFRONT FROM RESERVASFRONT R WHERE R.IDRESERVASFRONT = LP.IDRESERVASFRONT AND R.STATUSRESERVA = 6 AND LP.IDTIPOLANCPONTOTS = 1)
                                           AND LP.IDRESERVASFRONT  = RF.IDRESERVASFRONT (+)
                                           AND LP.IDRESERVAMIGRADA = RM.IDRESERVAMIGRADA (+)
                                           AND LP.IDTIPOLANCPONTOTS <> 8      
                                         GROUP BY IDVENDAXCONTRATO) U,
-                                      (SELECT LP.IDVENDAXCONTRATO, NVL(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS,
+                                      (SELECT LP.IDVENDAXCONTRATO, COALESCE(SUM(DECODE(LP.DEBITOCREDITO,'C',LP.NUMEROPONTOS,-LP.NUMEROPONTOS)),0) AS PONTOSCOMPRADOS,
                                               SUM(DECODE(L.IDTIPOLANCAMENTO, 18,L.VLRLANCAMENTO,0)) AS PAGTO 
                                          FROM LANCPONTOSTS LP, LANCAMENTOTS L
                                         WHERE LP.IDLANCPONTOSTS = L.IDLANCPONTOSTS (+)
@@ -732,26 +732,26 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 0, PAG.VLRLANCAMENTO, 0),0))) AS ABERTO_VENCIDO,
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 1, PAG.VLRLANCAMENTO, 0),0))) AS ABERTO_A_VENCER,
                                                ABS(SUM(DECODE(PAG.STATUSCAR, 'EM ABERTO', DECODE(PAG.VENCIMENTO, 0, 1, 0),0))) AS QUANT_PARC_VENCIDA,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) AS QUANT_PARC_ENTRADA,
-                                               ABS(SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'E', PAG.VLRLANCAMENTO, 0))) AS VALOR_ENTRADA,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QUANT_PARC_FINANC,
-                                               ABS(SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', PAG.VLRLANCAMENTO, 0))) AS VALOR_FINANC,
-                                               SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) + SUM(DECODE(SUBSTR(NVL(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QTDE_PAGTO
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) AS QUANT_PARC_ENTRADA,
+                                               ABS(SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'E', PAG.VLRLANCAMENTO, 0))) AS VALOR_ENTRADA,
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QUANT_PARC_FINANC,
+                                               ABS(SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', PAG.VLRLANCAMENTO, 0))) AS VALOR_FINANC,
+                                               SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 0, 1)) + SUM(DECODE(SUBSTR(COALESCE(PAG.COMPLDOCUMENTO,'E'),1,1), 'P', 1, 0)) AS QTDE_PAGTO
                                                FROM
                                                     (SELECT L.VLRLANCAMENTO, L.IDVENDATS, CAR.DATAPROGRAMADA, SUBSTR(L.COMPLDOCUMENTO,1,1) AS COMPLDOCUMENTO,
                                                             CASE WHEN P.DATASISTEMA > CAR.DATAPROGRAMADA THEN 0 ELSE 1 END VENCIMENTO,
                                                             DECODE(L.CODDOCUMENTO, NULL, DECODE(P.DATASISTEMA, L.DATALANCAMENTO, DECODE(T.CODTIPDOC, NULL, 'QUITADO',
-                                                                                     DECODE(L.IDMOTIVOESTORNO, NULL, DECODE(NVL(L.FLGMIGRADO, 'N'), 'N', 'EM ABERTO', 'QUITADO'), 'QUITADO')),'QUITADO'),
-                                                                                     DECODE(NVL(CAR.ESTORNADO,'N'),'N', DECODE(NVL(CAR.SALDOCAR, 0), 0,DECODE(NVL(TOTALCANCELAMENTOS,0),0,'QUITADO','QUITADO'),
-                                                                                     DECODE(NVL(CAR.NUMFATURA,0),0, 'EM ABERTO','QUITADO')), 'QUITADO')) AS STATUSCAR
+                                                                                     DECODE(L.IDMOTIVOESTORNO, NULL, DECODE(COALESCE(L.FLGMIGRADO, 'N'), 'N', 'EM ABERTO', 'QUITADO'), 'QUITADO')),'QUITADO'),
+                                                                                     DECODE(COALESCE(CAR.ESTORNADO,'N'),'N', DECODE(COALESCE(CAR.SALDOCAR, 0), 0,DECODE(COALESCE(TOTALCANCELAMENTOS,0),0,'QUITADO','QUITADO'),
+                                                                                     DECODE(COALESCE(CAR.NUMFATURA,0),0, 'EM ABERTO','QUITADO')), 'QUITADO')) AS STATUSCAR
                                                         FROM LANCAMENTOTS L, VENDATS V, TIPODEBCREDHOTEL T, PARAMTS P,
                                                              (SELECT CASE WHEN ( SUM(CASE WHEN TOT.OPERACAO = 2 THEN CASE WHEN TOT.ESTORNO IS NULL THEN 0 ELSE 1 END ELSE 0 END ) ) = 0 THEN 'N' ELSE 'S' END AS ESTORNADO,
                                                                      TOT.CODDOCUMENTO, TOT.IDFORCLI, TOT.DATAPROGRAMADA, TOT.NUMFATURA,
-                                                                     NVL(SUM(TO_NUMBER(DECODE(TOT.OPERACAO, 4, TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1)) * TOT.CANCELAMENTO, 0))), 0) AS TOTALCANCELAMENTOS,
-                                                                     NVL(SUM(1), 0) AS NUMNAOESTORNADOS,
-                                                                     NVL(SUM(TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1))), 0) AS SALDOCAR
+                                                                     COALESCE(SUM(TO_NUMBER(DECODE(TOT.OPERACAO, 4, TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1)) * TOT.CANCELAMENTO, 0))), 0) AS TOTALCANCELAMENTOS,
+                                                                     COALESCE(SUM(1), 0) AS NUMNAOESTORNADOS,
+                                                                     COALESCE(SUM(TO_NUMBER(DECODE(TOT.DEBCRE,'D',TOT.VALOR,TOT.VALOR*-1))), 0) AS SALDOCAR
                                                                 FROM (SELECT L.OPERACAO, ESTORNO, D.CODDOCUMENTO, D.IDFORCLI, D.DATAPROGRAMADA, L.DEBCRE, L.VALOR, L.CODALTERADOR, L.NUMLANCTO, D.NUMFATURA,
-                                                                             (SELECT TO_NUMBER(DECODE(NVL(SUM(1),0),0,0,1)) FROM TIPOALTERCANCEL TC WHERE TC.CODALTERADOR = L.CODALTERADOR AND TC.IDAGENCIATS = A.IDAGENCIATS) AS CANCELAMENTO
+                                                                             (SELECT TO_NUMBER(DECODE(COALESCE(SUM(1),0),0,0,1)) FROM TIPOALTERCANCEL TC WHERE TC.CODALTERADOR = L.CODALTERADOR AND TC.IDAGENCIATS = A.IDAGENCIATS) AS CANCELAMENTO
                                                                                 FROM DOCUMENTO D, LANCTODOCUM L, LANCAMENTOTS LTS, VENDATS V, ATENDCLIENTETS A
                                                                                WHERE A.IDATENDCLIENTETS = V.IDATENDCLIENTETS
                                                                                  AND LTS.IDVENDATS      = V.IDVENDATS
@@ -1549,7 +1549,13 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
             {
                 if (parametroSistema != null && string.IsNullOrEmpty(parametroSistema.ExibirFinanceirosDasEmpresaIds))
                 {
-                    var empresasLigadasEmpreendimentos = (await _repositoryAccessCenter.FindBySql<EmpresaModel>(@$"npm ")).AsList();
+                    var empresasLigadasEmpreendimentos = (await _repositoryAccessCenter.FindBySql<EmpresaModel>(@$"Select 
+                                        e.Id 
+                                    From 
+                                        Filial f
+                                        Inner Join Empreendimento em on em.Filial = f.Id
+                                        Inner Join Empresa e on f.Empresa = e.Id 
+                                    Where 1 = 1 ")).AsList();
 
                     if (empresasLigadasEmpreendimentos.Any())
                     {
@@ -1584,8 +1590,8 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                     p.Id AS PessoaId,
                     CASE WHEN p.Tipo = 'F' THEN p.CPF ELSE p.CNPJ END AS CpfCnpj,
                     p.Email,
-                    Nvl(c.CondominioSenha,'UVVANR+GEBVZ1IHpp3rQcg==') AS Password,
-                    Nvl(c.CondominioSenha,'UVVANR+GEBVZ1IHpp3rQcg==') AS PasswordConfirmation,
+                    COALESCE(c.CondominioSenha,'UVVANR+GEBVZ1IHpp3rQcg==') AS Password,
+                    COALESCE(c.CondominioSenha,'UVVANR+GEBVZ1IHpp3rQcg==') AS PasswordConfirmation,
                     c.Codigo
                     from 
                     Cliente c

@@ -28,7 +28,7 @@ namespace SW_Utils.Functions
         {
             if (dataBaseType == EnumDataBaseType.Oracle)
             {
-                sql = sql.Replace("Coalesce(", "NVL(", StringComparison.CurrentCultureIgnoreCase);
+                sql = sql.Replace("Coalesce(", "COALESCE(", StringComparison.CurrentCultureIgnoreCase);
             }
 
             return sql;
