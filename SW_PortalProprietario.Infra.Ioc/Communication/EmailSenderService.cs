@@ -20,16 +20,19 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
         private readonly ILogger<EmailSenderService> _logger;
         private readonly ISmtpSettingsProvider _smtpSettingsProvider;
         private readonly IParametroSistemaService _parametroSistemaService;
+        private readonly IEmailSenderHostedService _emailSenderHostedService;
 
         public EmailSenderService(IConfiguration configuration,
             ILogger<EmailSenderService> loger,
             ISmtpSettingsProvider smtpSettingsProvider,
-            IParametroSistemaService parametroSistemaService)
+            IParametroSistemaService parametroSistemaService,
+            IEmailSenderHostedService emailSenderHostedService)
         {
             _configuration = configuration;
             _logger = loger;
             _smtpSettingsProvider = smtpSettingsProvider;
             _parametroSistemaService = parametroSistemaService;
+            _emailSenderHostedService = emailSenderHostedService;
         }
 
         public async Task Send(EmailModel model)
@@ -118,7 +121,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 try
                 {
                     if (preferSystemNetMail)
-                        await EmailSenderHostedService.SendViaSystemNetMailStaticAsync(destinatario, assunto, html, null, host, porta, useSsl, remetente, pass, fromName);
+                        await _emailSenderHostedService.SendViaSystemNetMailStaticAsync(destinatario, assunto, html, null, host, porta, useSsl, remetente, pass, fromName);
                     else
                         await SendViaMailKitAsync(destinatario, assunto, html, host, porta, useSsl, remetente, pass, fromName);
                     return;
@@ -135,7 +138,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     if (preferSystemNetMail)
                         await SendViaMailKitAsync(destinatario, assunto, html, host, porta, useSsl, remetente, pass, fromName);
                     else
-                        await EmailSenderHostedService.SendViaSystemNetMailStaticAsync(destinatario, assunto, html, null, host, porta, useSsl, remetente, pass, fromName);
+                        await _emailSenderHostedService.SendViaSystemNetMailStaticAsync(destinatario, assunto, html, null, host, porta, useSsl, remetente, pass, fromName);
                     _logger.LogInformation("Email enviado com sucesso pelo método alternativo (assunto: {Assunto}).", assunto);
                     if (ctx.Settings != null)
                     {
@@ -165,7 +168,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             }
         }
 
-        private static async Task SendViaMailKitAsync(
+        private async Task SendViaMailKitAsync(
             string destinatario,
             string assunto,
             string html,

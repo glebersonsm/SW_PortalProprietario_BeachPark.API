@@ -69,6 +69,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
 
         private async Task Send(string destinatario, string assunto, string html, List<EmailAnexoModel>? anexos = null)
         {
+
             try
             {
                 if (string.IsNullOrEmpty(destinatario))
@@ -177,7 +178,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
         /// <summary>
         /// Envio via MailKit (Cliente de email direto). Usado como método principal ou como fallback.
         /// </summary>
-        private async Task SendViaMailKitAsync(
+        public async Task SendViaMailKitAsync(
             string destinatario,
             string assunto,
             string html,
@@ -245,7 +246,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
         /// <summary>
         /// Envio via System.Net.Mail (Cliente de email APP), estilo Sw_ClimberIntegration. Compartilhado com EmailSenderService.
         /// </summary>
-        public static async Task SendViaSystemNetMailStaticAsync(
+        public async Task SendViaSystemNetMailStaticAsync(
             string destinatario,
             string assunto,
             string html,
@@ -257,35 +258,53 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             string pass,
             string? fromName)
         {
-            var fromAddress = string.IsNullOrWhiteSpace(fromName) ? remetente : $"{fromName.Trim()} <{remetente}>";
-            using var mensagem = new MailMessage();
-            mensagem.From = new System.Net.Mail.MailAddress(remetente, fromName ?? "");
-            foreach (var to in destinatario.Split(";", StringSplitOptions.RemoveEmptyEntries))
-            {
-                var trimmed = to.Trim();
-                if (!string.IsNullOrEmpty(trimmed))
-                    mensagem.To.Add(trimmed);
-            }
-            mensagem.Subject = assunto;
-            mensagem.Body = html;
-            mensagem.IsBodyHtml = true;
 
-            if (anexos != null)
+            MailMessage mensagem = new MailMessage(remetente, "glebersonsm@swsolucoes.inf.br", assunto, html);
+            System.Net.Mail.SmtpClient smtpClient = new System.Net.Mail.SmtpClient(host);
+
+            try
             {
-                foreach (var anexo in anexos)
+
+                foreach (var to in destinatario.Split(";", StringSplitOptions.RemoveEmptyEntries))
                 {
-                    if (anexo?.Arquivo != null && anexo.Arquivo.Length > 0)
-                        mensagem.Attachments.Add(new Attachment(new MemoryStream(anexo.Arquivo), anexo.NomeArquivo, anexo.TipoMime));
+                    var trimmed = to.Trim();
+                    if (!string.IsNullOrEmpty(trimmed))
+                        mensagem.To.Add(trimmed);
                 }
+                mensagem.IsBodyHtml = true;
+
+                if (anexos != null)
+                {
+                    foreach (var anexo in anexos)
+                    {
+                        if (anexo?.Arquivo != null && anexo.Arquivo.Length > 0)
+                            mensagem.Attachments.Add(new Attachment(new MemoryStream(anexo.Arquivo), anexo.NomeArquivo, anexo.TipoMime));
+                    }
+                }
+
+                smtpClient.Port = porta;
+                smtpClient.EnableSsl = true;
+                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Credentials = new NetworkCredential(remetente, pass);
+
+                // Envia o email
+                await smtpClient.SendMailAsync(mensagem);
+
+                Console.WriteLine("Email enviado com sucesso!");
+
             }
-
-            using var clienteSmtp = new SmtpClient(host, porta);
-            clienteSmtp.EnableSsl = useSsl;
-            clienteSmtp.DeliveryMethod = SmtpDeliveryMethod.Network;
-            clienteSmtp.UseDefaultCredentials = false;
-            clienteSmtp.Credentials = new NetworkCredential(remetente, pass);
-
-            await clienteSmtp.SendMailAsync(mensagem);
+            catch (Exception err)
+            {
+                _logger.LogError(err,err.Message);
+                throw err;
+            }
+            finally
+            {
+                smtpClient?.Dispose();
+                mensagem?.Attachments.Dispose();
+                mensagem?.Dispose();
+            }
         }
 
         private BodyBuilder ProcessarHtmlComImagens(string html)
