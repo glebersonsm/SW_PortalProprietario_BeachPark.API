@@ -38,6 +38,10 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             return string.IsNullOrWhiteSpace(pass) ? null : pass.Trim();
         }
 
+        /// <summary>Host e porta padrão para AWS SES SMTP (região us-east-1).</summary>
+        private const string AwsSesSmtpHostDefault = "email-smtp.us-east-1.amazonaws.com";
+        private const int AwsSesSmtpPortDefault = 587;
+
         public async Task<SmtpSettingsResult?> GetSmtpSettingsFromParametroSistemaAsync(CancellationToken cancellationToken = default)
         {
             try
@@ -46,22 +50,26 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 var param = await GetParametroSistemaFromRepositoryAsync(scope.ServiceProvider).ConfigureAwait(false);
                 if (param == null)
                     return null;
-                if (string.IsNullOrWhiteSpace(param.SmtpHost) || string.IsNullOrWhiteSpace(param.SmtpUser))
+                var isAws = param.TipoEnvioEmail == EnumTipoEnvioEmail.AwsSes;
+                var host = !string.IsNullOrWhiteSpace(param.SmtpHost) ? param.SmtpHost.Trim() : (isAws ? AwsSesSmtpHostDefault : null);
+                if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(param.SmtpUser))
                     return null;
                 var pass = !string.IsNullOrWhiteSpace(param.SmtpPass) ? param.SmtpPass.Trim() : GetSmtpPassFromConfig();
                 if (string.IsNullOrWhiteSpace(pass))
                     return null;
                 var port = param.SmtpPort ?? 0;
                 if (port <= 0)
+                    port = isAws ? AwsSesSmtpPortDefault : 0;
+                if (port <= 0)
                     return null;
 
                 return new SmtpSettingsResult
                 {
-                    Host = param.SmtpHost.Trim(),
+                    Host = host,
                     Port = port,
                     User = param.SmtpUser.Trim(),
                     Pass = pass,
-                    UseSsl = param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
+                    UseSsl = isAws || param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
                     FromName = string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
                 };
             }
@@ -84,22 +92,26 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
 
                 if (param == null)
                     return ctx;
-                if (string.IsNullOrWhiteSpace(param.SmtpHost) || string.IsNullOrWhiteSpace(param.SmtpUser))
+                var isAws = param.TipoEnvioEmail == EnumTipoEnvioEmail.AwsSes;
+                var host = !string.IsNullOrWhiteSpace(param.SmtpHost) ? param.SmtpHost.Trim() : (isAws ? AwsSesSmtpHostDefault : null);
+                if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(param.SmtpUser))
                     return ctx;
                 var pass = !string.IsNullOrWhiteSpace(param.SmtpPass) ? param.SmtpPass.Trim() : GetSmtpPassFromConfig();
                 if (string.IsNullOrWhiteSpace(pass))
                     return ctx;
                 var port = param.SmtpPort ?? 0;
                 if (port <= 0)
+                    port = isAws ? AwsSesSmtpPortDefault : 0;
+                if (port <= 0)
                     return ctx;
 
                 ctx.Settings = new SmtpSettingsResult
                 {
-                    Host = param.SmtpHost.Trim(),
+                    Host = host,
                     Port = port,
                     User = param.SmtpUser.Trim(),
                     Pass = pass,
-                    UseSsl = param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
+                    UseSsl = isAws || param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
                     FromName = string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
                 };
                 return ctx;
