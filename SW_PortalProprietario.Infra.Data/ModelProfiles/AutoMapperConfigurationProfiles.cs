@@ -297,6 +297,12 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
 
             #endregion
 
+            #region RabbitMQ Queue
+
+            CreateMap<RabbitMQQueue, RabbitMQQueueViewModel>();
+
+            #endregion
+
             #region DocumentTemplate
 
             CreateMap<DocumentTemplate, DocumentTemplateModel>();
@@ -929,6 +935,20 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
                 .ForMember(dest => dest.Habilitar2FAPorSms, opt => opt.MapFrom(a => a.Habilitar2FAPorSms))
                 .ForMember(dest => dest.Habilitar2FAParaCliente, opt => opt.MapFrom(a => a.Habilitar2FAParaCliente))
                 .ForMember(dest => dest.Habilitar2FAParaAdministrador, opt => opt.MapFrom(a => a.Habilitar2FAParaAdministrador))
+                .ForAllMembers(opt =>
+            opt.Condition((src, dest, srcMember) => srcMember != null));
+
+            #endregion
+
+            #region RabbitMQ Queue
+
+            CreateMap<RabbitMQQueueInputModel, RabbitMQQueue>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.ObjectGuid, opt => opt.Ignore())
+                .ForMember(dest => dest.DataHoraCriacao, opt => opt.Ignore())
+                .ForMember(dest => dest.DataHoraAlteracao, opt => opt.Ignore())
+                .ForMember(dest => dest.UsuarioCriacao, opt => opt.Ignore())
+                .ForMember(dest => dest.UsuarioAlteracao, opt => opt.Ignore())
                 .ForAllMembers(opt =>
             opt.Condition((src, dest, srcMember) => srcMember != null));
 
