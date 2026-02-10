@@ -78,5 +78,10 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? EmailTrackingBaseUrl { get; set; }
         #endregion
 
+        #region Configurações de Importação de Usuários/Clientes do Legado
+        public EnumSimNao? CriarUsuariosLegado { get; set; }
+        public EnumSimNao? CriarUsuariosClientesLegado { get; set; }
+        #endregion
+
     }
 }

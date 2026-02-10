@@ -181,6 +181,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (string.IsNullOrEmpty(model.EmailTrackingBaseUrl) || model.EmailTrackingBaseUrl.Equals("string", StringComparison.InvariantCultureIgnoreCase))
                     model.EmailTrackingBaseUrl = psBd != null ? psBd.EmailTrackingBaseUrl : null;
 
+                if (!model.CriarUsuariosLegado.HasValue)
+                    model.CriarUsuariosLegado = psBd != null ? psBd.CriarUsuariosLegado : Domain.Enumns.EnumSimNao.Não;
+                if (!model.CriarUsuariosClientesLegado.HasValue)
+                    model.CriarUsuariosClientesLegado = psBd != null ? psBd.CriarUsuariosClientesLegado : Domain.Enumns.EnumSimNao.Não;
+
                 var outroParametroMesmaEmpresa = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}")).FirstOrDefault();
                 if (psBd?.Id == 0 && (outroParametroMesmaEmpresa != null && outroParametroMesmaEmpresa.Id > 0))
                     psBd.Id = outroParametroMesmaEmpresa.Id;

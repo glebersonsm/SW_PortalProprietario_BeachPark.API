@@ -85,6 +85,13 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? EmailTrackingBaseUrl { get; set; }
         #endregion
 
+        #region Configurações de Importação de Usuários/Clientes do Legado
+        /// <summary> Habilita a criação automática de usuários do sistema legado. </summary>
+        public virtual EnumSimNao? CriarUsuariosLegado { get; set; } = EnumSimNao.Não;
+        /// <summary> Habilita a criação automática de usuários clientes do sistema legado. </summary>
+        public virtual EnumSimNao? CriarUsuariosClientesLegado { get; set; } = EnumSimNao.Não;
+        #endregion
+
         public virtual async Task SaveValidate()
         {
             List<string> mensagens = new();

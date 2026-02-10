@@ -74,6 +74,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             services.TryAddScoped<IScriptService, ScriptService>();
             services.TryAddScoped<ITokenBodyService, JwtTokenService>();
             services.TryAddScoped<IParametroSistemaService, ParametroSistemaService>();
+            services.TryAddScoped<IRabbitMQQueueService, RabbitMQQueueService>();
             services.TryAddScoped<IReservaAgendamentoService, ReservaAgendamentoService>();
             services.TryAddScoped<IDocumentTemplateService, DocumentTemplateService>();
             services.TryAddScoped<IVoucherReservaService, VoucherReservaService>();

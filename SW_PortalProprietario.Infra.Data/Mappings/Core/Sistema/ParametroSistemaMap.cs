@@ -83,6 +83,9 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.TipoEnvioEmail).CustomType<EnumTipoEnvioEmail>();
             Map(b => b.EmailTrackingBaseUrl).Length(500);
 
+            Map(b => b.CriarUsuariosLegado).CustomType<EnumSimNao>();
+            Map(b => b.CriarUsuariosClientesLegado).CustomType<EnumSimNao>();
+
             Table("ParametroSistema");
         }
     }
