@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using NHibernate;
 using SW_PortalProprietario.Application.Functions;
 using SW_PortalProprietario.Application.Interfaces;
+using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.AuthModels;
 using SW_PortalProprietario.Application.Models.FrameworkModels;
 using SW_PortalProprietario.Application.Models.GeralModels;
@@ -602,18 +603,19 @@ namespace SW_PortalProprietario.Application.Hosted
                     (await _repository.FindBySql<UserRegisterInputModel>(sb.ToString(), session)).AsList();
 
 
-                List<int> pessoasJaImportadas = new List<int>();
-                pessoasJaImportadas = (await _repository.FindBySql<int>(@"Select 
-                                                                                Cast(u.PessoaProvider as int) 
+                List<UserProviderTemp> pessoasJaImportadas = new List<UserProviderTemp>();
+                pessoasJaImportadas = (await _repository.FindBySql<UserProviderTemp>(@"Select 
+                                                                                 u.PessoaProvider,
+                                                                                u.NomeProvider
                                                                              From 
                                                                                 PessoaSistemaXProvider u 
                                                                              where 
-                                                                                PessoaProvider is not null", session)).AsList();
+                                                                                PessoaProvider is not null and NomeProvider is not null", session)).AsList();
 
 
                 foreach (var item in usuariosLegado)
                 {
-                    if (item.PessoaId != null && pessoasJaImportadas.Contains(Convert.ToInt32(item.PessoaId)))
+                    if (item.PessoaId != null && pessoasJaImportadas.Any(p => p.PessoaProvider == item.PessoaId && !string.IsNullOrEmpty(p.PessoaProvider) && p.NomeProvider!.Equals(item.ProviderName,StringComparison.InvariantCultureIgnoreCase)))
                     {
                         _logger.LogInformation($"Usuário com PessoaId {item.PessoaId} já foi importado anteriormente. Pulando importação para este usuário.");
                         continue;
@@ -681,7 +683,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         if (resultCommit.exception != null)
                             throw resultCommit.exception;
 
-                        pessoasJaImportadas.Add(Convert.ToInt32(item.PessoaId));
+                        pessoasJaImportadas.Add(new UserProviderTemp() { NomeProvider = item.ProviderName, PessoaProvider = item.PessoaId });
                     }
                     catch (Exception err)
                     {
