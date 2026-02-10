@@ -7,6 +7,8 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         Task<RabbitMQQueueViewModel?> SaveQueue(RabbitMQQueueInputModel model);
         Task<List<RabbitMQQueueViewModel>> GetAllQueues();
         Task<RabbitMQQueueViewModel?> GetQueueById(int id);
+        Task<RabbitMQQueueViewModel?> GetQueueByNome(string nome);
+        Task<bool> IsQueueActiveByNome(string nome);
         Task<bool> DeleteQueue(int id);
         Task<RabbitMQQueueViewModel?> ToggleQueueStatus(int id);
     }

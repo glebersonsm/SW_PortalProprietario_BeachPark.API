@@ -7,6 +7,7 @@ using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 using SW_PortalProprietario.Domain.Enumns;
+using SW_Utils.Auxiliar;
 
 namespace SW_PortalProprietario.Application.Services.Core
 {
@@ -468,6 +469,39 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _logger.LogError(err, $"Não foi possível buscar a fila RabbitMQ com id {id}");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Busca uma fila pelo nome (apenas leitura no banco, sem sincronizar com RabbitMQ).
+        /// Usado pelos consumers para verificar se a fila está ativa antes de iniciar.
+        /// </summary>
+        public async Task<RabbitMQQueueViewModel?> GetQueueByNome(string nome)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(nome))
+                    return null;
+                var list = await _repository.FindByHql<RabbitMQQueue>(
+                    "From RabbitMQQueue q Where Lower(q.Nome) = Lower(:nome)",
+                    null,
+                    new Parameter("nome", nome));
+                var queue = list.FirstOrDefault();
+                return queue != null ? _mapper.Map<RabbitMQQueueViewModel>(queue) : null;
+            }
+            catch (Exception err)
+            {
+                _logger.LogDebug(err, "GetQueueByNome: {Nome}", nome);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Indica se a fila está ativa no banco (Ativo = Sim). Usado pelos HostedServices para iniciar/parar consumers.
+        /// </summary>
+        public async Task<bool> IsQueueActiveByNome(string nome)
+        {
+            var vm = await GetQueueByNome(nome);
+            return vm != null && vm.Ativo == EnumSimNao.Sim;
         }
 
         public async Task<bool> DeleteQueue(int id)
