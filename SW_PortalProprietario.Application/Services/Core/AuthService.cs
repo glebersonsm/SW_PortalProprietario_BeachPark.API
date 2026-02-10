@@ -1528,7 +1528,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw new ArgumentException("Não foi possível enviar o SMS: número de celular inválido (cadastre DDD + número com 10 ou 11 dígitos).");
             }
             var numeroParaEnvio = apenasNumeros.Length == 10 || apenasNumeros.Length == 11
-                ? "55" + apenasNumeros
+                ? apenasNumeros
                 : apenasNumeros;
             var textoMensagem = $"Seu código de acesso é: {code}. Válido por {TwoFactorCodeExpirationMinutes} min.";
             await _smsProvider.SendSmsAsync(numeroParaEnvio, textoMensagem, endpointSms, CancellationToken);
