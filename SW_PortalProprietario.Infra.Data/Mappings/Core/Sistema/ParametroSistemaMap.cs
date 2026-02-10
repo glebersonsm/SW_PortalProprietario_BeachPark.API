@@ -77,6 +77,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.SmtpHost).Length(500);
             Map(b => b.SmtpPort);
             Map(b => b.SmtpUseSsl).CustomType<EnumSimNao>();
+            Map(b => b.SmtpIamUser).Length(500);
             Map(b => b.SmtpUser).Length(500);
             Map(b => b.SmtpPass).Length(500);
             Map(b => b.SmtpFromName).Length(500);

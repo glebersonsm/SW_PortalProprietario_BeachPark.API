@@ -9,6 +9,9 @@ namespace SW_PortalProprietario.Domain.Enumns
         ClienteEmailDireto = 0,
 
         /// <summary> Cliente de email APP: System.Net.Mail (MailMessage + SmtpClient.Send), estilo Climber. </summary>
-        ClienteEmailApp = 1
+        ClienteEmailApp = 1,
+
+        /// <summary> AWS SES SMTP: envio via Amazon Simple Email Service (credenciais IAM/SMTP). </summary>
+        AwsSes = 2
     }
 }

@@ -170,6 +170,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     model.SmtpPort = psBd != null ? psBd.SmtpPort : null;
                 if (!model.SmtpUseSsl.HasValue)
                     model.SmtpUseSsl = psBd != null ? psBd.SmtpUseSsl : Domain.Enumns.EnumSimNao.Não;
+                if (string.IsNullOrEmpty(model.SmtpIamUser) || model.SmtpIamUser.Equals("string", StringComparison.InvariantCultureIgnoreCase))
+                    model.SmtpIamUser = psBd != null ? psBd.SmtpIamUser : null;
                 if (string.IsNullOrEmpty(model.SmtpUser) || model.SmtpUser.Equals("string", StringComparison.InvariantCultureIgnoreCase))
                     model.SmtpUser = psBd != null ? psBd.SmtpUser : null;
                 if (string.IsNullOrEmpty(model.SmtpPass) || model.SmtpPass.Equals("string", StringComparison.InvariantCultureIgnoreCase))

@@ -140,7 +140,8 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     else
                         await _emailSenderHostedService.SendViaSystemNetMailStaticAsync(destinatario, assunto, html, null, host, porta, useSsl, remetente, pass, fromName);
                     _logger.LogInformation("Email enviado com sucesso pelo método alternativo (assunto: {Assunto}).", assunto);
-                    if (ctx.Settings != null)
+                    // Só atualizar parâmetro se o tipo atual for MailKit ou System.Net.Mail (nunca sobrescrever AwsSes)
+                    if (ctx.Settings != null && ctx.TipoEnvioEmail != EnumTipoEnvioEmail.AwsSes)
                     {
                         var tipoQueFuncionou = preferSystemNetMail ? EnumTipoEnvioEmail.ClienteEmailDireto : EnumTipoEnvioEmail.ClienteEmailApp;
                         try

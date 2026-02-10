@@ -71,6 +71,8 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? SmtpHost { get; set; }
         public int? SmtpPort { get; set; }
         public EnumSimNao? SmtpUseSsl { get; set; }
+        /// <summary> Nome do usuário IAM (identificador/label), usado quando TipoEnvioEmail = AwsSes. </summary>
+        public string? SmtpIamUser { get; set; }
         public string? SmtpUser { get; set; }
         public string? SmtpPass { get; set; }
         public string? SmtpFromName { get; set; }

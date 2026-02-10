@@ -627,6 +627,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                     p.SmtpHost,
                                     p.SmtpPort,
                                     p.SmtpUseSsl,
+                                    p.SmtpIamUser,
                                     p.SmtpUser,
                                     p.SmtpPass,
                                     p.SmtpFromName,

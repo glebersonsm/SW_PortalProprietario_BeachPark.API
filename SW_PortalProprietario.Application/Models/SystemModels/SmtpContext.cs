@@ -10,7 +10,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         /// <summary> Configurações SMTP quando disponíveis no sistema; null para usar fallback (.env). </summary>
         public SmtpSettingsResult? Settings { get; set; }
 
-        /// <summary> Tipo de envio: ClienteEmailDireto = MailKit, ClienteEmailApp = System.Net.Mail. </summary>
+        /// <summary> Tipo de envio: ClienteEmailDireto = MailKit, ClienteEmailApp = System.Net.Mail, AwsSes = MailKit com credenciais AWS SES SMTP. </summary>
         public EnumTipoEnvioEmail TipoEnvioEmail { get; set; } = EnumTipoEnvioEmail.ClienteEmailDireto;
 
         /// <summary> URL base para confirmação de leitura (pixel). Se null/vazio, usa IConfiguration["EmailTrackingBaseUrl"]. </summary>

@@ -77,6 +77,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? SmtpHost { get; set; }
         public virtual int? SmtpPort { get; set; }
         public virtual EnumSimNao? SmtpUseSsl { get; set; } = EnumSimNao.Não;
+        public virtual string? SmtpIamUser { get; set; }
         public virtual string? SmtpUser { get; set; }
         public virtual string? SmtpPass { get; set; }
         public virtual string? SmtpFromName { get; set; }
