@@ -1675,7 +1675,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     Destinatario = destinatario,
                     TextoEnviado = textoEnviado,
                     DataHoraEnvio = DateTime.UtcNow,
-                    TwoFactorId = twoFactorId,
+                    TwoFactorId = twoFactorId.ToString(),
                     EmailId = emailId,
                     DataHoraCriacao = DateTime.UtcNow,
                     UsuarioCriacao = usuario.UsuarioCriacao ?? _configuration.GetValue<int>("UsuarioSistemaId", 1)

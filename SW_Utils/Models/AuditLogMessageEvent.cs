@@ -4,10 +4,10 @@ namespace SW_Utils.Models
     {
         public AuditLogMessageEvent()
         {
-            Guid = Guid.NewGuid();
+            Guid = System.Guid.NewGuid().ToString();
         }
         
-        public Guid Guid { get; }
+        public string Guid { get; }
         public string EntityType { get; set; } = string.Empty;
         public int EntityId { get; set; }
         public int Action { get; set; } // EnumAuditAction

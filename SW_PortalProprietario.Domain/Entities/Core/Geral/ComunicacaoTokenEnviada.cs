@@ -21,7 +21,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         /// <summary> Data/hora em que a mensagem foi enviada. </summary>
         public virtual DateTime DataHoraEnvio { get; set; }
         /// <summary> Id da sessão 2FA no cache (para rastreio). </summary>
-        public virtual Guid? TwoFactorId { get; set; }
+        public virtual string? TwoFactorId { get; set; }
         /// <summary> Id do registro na tabela Email, quando canal = email. </summary>
         public virtual int? EmailId { get; set; }
     }
