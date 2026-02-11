@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -141,6 +141,33 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                     new List<string>() { $"Não foi possível alterar a senha", err.Message, err.InnerException.Message } :
                     new List<string>() { $"Não foi possível alterar a senha", err.Message },
                     Status = StatusCodes.Status500InternalServerError
+                });
+            }
+        }
+
+        [HttpGet("resetPasswordChannels")]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status500InternalServerError)]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetResetPasswordChannels([FromQuery] string? login)
+        {
+            try
+            {
+                var result = await _userService.GetResetPasswordChannelsAsync(login ?? "");
+                return Ok(new ResultModel<Login2FAOptionsResultModel>(result)
+                {
+                    Errors = new List<string>(),
+                    Status = StatusCodes.Status200OK,
+                    Success = true
+                });
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<Login2FAOptionsResultModel>(new Login2FAOptionsResultModel())
+                {
+                    Errors = new List<string>() { err.Message },
+                    Status = StatusCodes.Status500InternalServerError,
+                    Success = false
                 });
             }
         }

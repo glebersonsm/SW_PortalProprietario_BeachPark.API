@@ -10,6 +10,7 @@ using SW_PortalProprietario.Application.Models.PessoaModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_PortalProprietario.Application.Services.Core.Auxiliar;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
+using SW_PortalProprietario.Application.Services.Core.Interfaces.Communication;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 using SW_PortalProprietario.Domain.Enumns;
@@ -30,6 +31,8 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly ICommunicationProvider _communicationProvider;
+        private readonly ISmsProvider _smsProvider;
+        private readonly IEmailSenderHostedService _emailSenderHostedService;
 
         public UserService(IRepositoryNH repository,
             ILogger<UserService> logger,
@@ -37,7 +40,9 @@ namespace SW_PortalProprietario.Application.Services.Core
             IProjectObjectMapper mapper,
             IEmailService emailService,
             IConfiguration configuration,
-            ICommunicationProvider communicationProvider)
+            ICommunicationProvider communicationProvider,
+            ISmsProvider smsProvider,
+            IEmailSenderHostedService emailSenderHostedService)
         {
             _repository = repository;
             _logger = logger;
@@ -46,6 +51,8 @@ namespace SW_PortalProprietario.Application.Services.Core
             _emailService = emailService;
             _configuration = configuration;
             _communicationProvider = communicationProvider;
+            _smsProvider = smsProvider;
+            _emailSenderHostedService = emailSenderHostedService;
         }
 
         public async Task<ChangePasswordResultModel> ChangePassword(ChangePasswordInputModel changePasswordInputModel)
@@ -1071,6 +1078,24 @@ namespace SW_PortalProprietario.Application.Services.Core
                     if (string.IsNullOrEmpty(userManter.Pessoa?.EmailAlternativo) && string.IsNullOrEmpty(userManter.Pessoa?.EmailPreferencial))
                         throw new ArgumentException("Não é possível resetar a senha do usuário, pois ele não possui um email cadastrado");
 
+                    // Verificar se o perfil do usuário tem 2FA habilitado
+                    var parametroSistema = await _repository.GetParametroSistemaViewModel();
+                    var isUsuarioAdministrador = userManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var tem2FAHabilitado = isUsuarioAdministrador
+                        ? parametroSistema?.Habilitar2FAParaAdministrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim
+                        : parametroSistema?.Habilitar2FAParaCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+
+                    // Se tem 2FA habilitado, não enviar senha
+                    if (tem2FAHabilitado)
+                    {
+                        var (executed1, exception1) = await _repository.CommitAsync();
+                        if (executed1)
+                        {
+                            return "A senha foi resetada com sucesso. Como seu perfil possui autenticação em duas etapas (2FA) habilitada, entre em contato com o administrador do sistema para obter sua nova senha.";
+                        }
+                        else throw exception1 ?? new Exception("Erro na operação");
+                    }
+
 
                     Random rd = new();
                     var codToSend = rd.Next(10000, 80000);
@@ -1080,38 +1105,100 @@ namespace SW_PortalProprietario.Application.Services.Core
                     userManter.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
                     await _repository.Save(userManter);
 
-                    var emailsPermitidos = _configuration.GetValue<string>("DestinatarioEmailPermitido");
-                    var enviarEmailApenasParaDestinatariosPermitidos = _configuration.GetValue<bool>("EnviarEmailApenasParaDestinatariosPermitidos", true);
+                    
 
-                    var pessoa = (await _repository.FindBySql<PessoaModel>($"Select Coalesce(p.EmailPreferencial,EmailAlternativo) as Email, p.Id as IdPessoa From Pessoa p Where p.Id = {userManter.Pessoa.Id}")).FirstOrDefault();
+                    // Validar canal escolhido
+                    var channel = model.Channel?.Trim().ToLowerInvariant();
+                    if (string.IsNullOrEmpty(channel) || (channel != "email" && channel != "sms"))
+                        throw new ArgumentException("Para sua segurança, informe o canal (e-mail ou SMS) para receber a nova senha.");
 
-                    var emailUtilizar = pessoa?.Email;
+                    // Verificar se o canal está disponível para o usuário
+                    var channels = await GetResetPasswordChannelsAsync(model.Login ?? "");
+                    var channelAllowed = channels.Channels?.Any(c => string.Equals(c.Type, channel, StringComparison.OrdinalIgnoreCase)) ?? false;
+                    if (!channelAllowed)
+                        throw new ArgumentException("Canal não disponível para este usuário.");
 
-                    if (enviarEmailApenasParaDestinatariosPermitidos)
+                    string? destinatario = null;
+                    string mensagemRetorno = "";
+
+                    if (channel == "email")
                     {
-                        if (string.IsNullOrEmpty(emailsPermitidos) || string.IsNullOrEmpty(emailUtilizar) ||
-                                            !emailsPermitidos.Contains(emailUtilizar, StringComparison.CurrentCultureIgnoreCase))
+                        // Preparar email para envio
+                        var emailsPermitidos = _configuration.GetValue<string>("DestinatarioEmailPermitido");
+                        var enviarEmailApenasParaDestinatariosPermitidos = _configuration.GetValue<bool>("EnviarEmailApenasParaDestinatariosPermitidos", true);
+
+                        var pessoa = (await _repository.FindBySql<PessoaModel>($"Select Coalesce(p.EmailPreferencial,EmailAlternativo) as Email, p.Id as IdPessoa From Pessoa p Where p.Id = {userManter.Pessoa.Id}")).FirstOrDefault();
+                        destinatario = pessoa?.Email;
+
+                        if (enviarEmailApenasParaDestinatariosPermitidos)
                         {
-                            emailUtilizar = "glebersonsm@gmail.com";
+                            if (string.IsNullOrEmpty(emailsPermitidos) || string.IsNullOrEmpty(destinatario) ||
+                                                !emailsPermitidos.Contains(destinatario, StringComparison.CurrentCultureIgnoreCase))
+                            {
+                                destinatario = "glebersonsm@gmail.com";
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(destinatario) && destinatario.Contains("@"))
+                        {
+                            var usuarioSistemaId = _configuration.GetValue<int>("UsuarioSistemaId", 1);
+                            var empresaId = _configuration.GetValue<int>("EmpresaSwPortalId", 0);
+                            var assunto = "Nova senha gerada automaticamente pelo Portal do Cliente";
+                            var conteudoEmail = $"Olá, {userManter.Pessoa?.Nome}!{Environment.NewLine}Sua senha de acesso ao sistema foi modificada para: <b>{password}</b> favor altere ela novamente por uma de sua escolha, após o primeiro login!";
+                            var emailModel = await _emailService.SaveInternal(new EmailInputInternalModel()
+                            {
+                                UsuarioCriacao = userManter.UsuarioCriacao.GetValueOrDefault(usuarioSistemaId),
+                                EmpresaId = empresaId > 0 ? empresaId : null,
+                                Assunto = assunto,
+                                Destinatario = destinatario,
+                                ConteudoEmail = conteudoEmail
+                            });
+                            try
+                            {
+                                if (emailModel?.Id.GetValueOrDefault(0) > 0)
+                                {
+                                    await _emailSenderHostedService.Send(emailModel);
+                                    await _emailService.MarcarComoEnviado(emailModel.Id.GetValueOrDefault());
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Falha ao enviar email de reset de senha imediatamente; o email permanece na fila para envio posterior.");
+                            }
+                            mensagemRetorno = $"A nova senha foi enviada para o email: {MaskEmail(destinatario)}";
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Não foi possível enviar a senha por email: nenhum email válido cadastrado para este usuário.");
                         }
                     }
-
-                    if (!string.IsNullOrEmpty(emailUtilizar) && emailUtilizar.Contains("@"))
+                    else if (channel == "sms")
                     {
-                        await _emailService.SaveInternal(new EmailInputInternalModel()
+                        // Enviar por SMS
+                        var celular = await GetFirstCelularForPessoa(userManter.Pessoa?.Id ?? 0);
+                        if (string.IsNullOrEmpty(celular))
                         {
-                            UsuarioCriacao = userManter.UsuarioCriacao.GetValueOrDefault(_configuration.GetValue<int>("UsuarioSistemaId", 1)),
-                            Assunto = "Nova senha gerada automaticamente pelo Portal do Proprietário",
-                            Destinatario = emailUtilizar,
-                            ConteudoEmail = $"Olá, {userManter.Pessoa?.Nome}!{Environment.NewLine}Sua senha de acesso ao sistema foi modificada para: <b>{password}</b> favor altere ela novamente por uma de sua escolha, após o primeiro login!"
-                        });
-
+                            throw new ArgumentException("Não foi possível enviar a senha por SMS: nenhum número de celular cadastrado para este usuário.");
+                        }
+                        var apenasNumeros = new string(celular.Where(char.IsDigit).ToArray());
+                        if (apenasNumeros.Length < 10)
+                        {
+                            throw new ArgumentException("Não foi possível enviar a senha por SMS: número de celular inválido (cadastre DDD + número com 10 ou 11 dígitos).");
+                        }
+                        var numeroParaEnvio = apenasNumeros.Length == 10 || apenasNumeros.Length == 11
+                            ? apenasNumeros
+                            : apenasNumeros;
+                        var textoMensagem = $"Olá, {userManter.Pessoa?.Nome}! Sua nova senha de acesso ao Portal do Cliente é: {password}. Favor altere ela por uma de sua escolha após o primeiro login.";
+                        var endpointSms = parametroSistema?.EndpointEnvioSms2FA;
+                        await _smsProvider.SendSmsAsync(numeroParaEnvio, textoMensagem, endpointSms, default);
+                        destinatario = MaskPhone(celular);
+                        mensagemRetorno = $"A nova senha foi enviada para o SMS: {destinatario}";
                     }
 
                     var (executed, exception) = await _repository.CommitAsync();
                     if (executed)
                     {
-                        return $"A nova senha foi enviada para o email: {emailUtilizar}";
+                        return mensagemRetorno;
                     }
                     else throw exception ?? new Exception("Erro na operação");
                 }
@@ -1170,6 +1257,73 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             return resultNew;
 
+        }
+
+        public async Task<Login2FAOptionsResultModel> GetResetPasswordChannelsAsync(string login)
+        {
+            var result = new Login2FAOptionsResultModel { RequiresTwoFactor = false, UserType = null, Channels = new List<Login2FAChannelModel>() };
+            if (string.IsNullOrWhiteSpace(login)) return result;
+            login = login.Trim().RemoveAccents().Replace(" ", "");
+            var usuarios = await GetUsuario(new LoginInputModel { Login = login });
+            Usuario? usuario = usuarios?.OrderByDescending(a => a.Id).FirstOrDefault();
+            if (usuario == null || usuario.Status != EnumStatus.Ativo)
+                return result;
+            bool isAdmin = usuario.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            result.UserType = isAdmin ? "Administrador" : "Cliente";
+            ParametroSistemaViewModel? param = null;
+            try { param = await _repository.GetParametroSistemaViewModel(); } catch { /* sem empresa/sessão */ }
+            if (param == null) return result;
+            
+            // Verificar se o perfil tem 2FA habilitado - se tiver, não retornar canais (não deve enviar senha)
+            bool twoFAForProfile = isAdmin
+                ? (param.Habilitar2FAParaAdministrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                : (param.Habilitar2FAParaCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim);
+            if (twoFAForProfile) return result; // Se tem 2FA, não deve enviar senha por canal
+            
+            // Retornar canais disponíveis para envio da nova senha
+            if (!string.IsNullOrEmpty(usuario.Pessoa?.EmailPreferencial) && usuario.Pessoa.EmailPreferencial.Contains("@"))
+                result.Channels.Add(new Login2FAChannelModel { Type = "email", Display = MaskEmail(usuario.Pessoa.EmailPreferencial) });
+            
+            var celular = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
+            if (!string.IsNullOrEmpty(celular))
+                result.Channels.Add(new Login2FAChannelModel { Type = "sms", Display = MaskPhone(celular) });
+            
+            return result;
+        }
+
+        private static string MaskEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email) || !email.Contains("@")) return "***@***.***";
+            var at = email.IndexOf('@');
+            var local = email.Substring(0, at);
+            var domain = email.Substring(at + 1);
+            var dot = domain.LastIndexOf('.');
+            var domainName = dot > 0 ? domain.Substring(0, dot) : domain;
+            var domainExt = dot > 0 ? domain.Substring(dot) : "";
+            var maskedLocal = local.Length <= 2 ? "***" : local.Substring(0, 1) + "***";
+            var maskedDomain = domainName.Length <= 2 ? "***" : domainName.Substring(0, 1) + "***";
+            return maskedLocal + "@" + maskedDomain + domainExt;
+        }
+
+        private static string MaskPhone(string phone)
+        {
+            var digits = new string(phone?.Where(char.IsDigit).ToArray() ?? Array.Empty<char>());
+            if (digits.Length < 4) return "(**) *********";
+            var ddd = digits.Length >= 2 ? digits.Substring(0, 2) : "**";
+            var last4 = digits.Length >= 4 ? digits.Substring(digits.Length - 4) : digits;
+            return $"({ddd}) *****{last4}";
+        }
+
+        private async Task<string?> GetFirstCelularForPessoa(int pessoaId)
+        {
+            if (pessoaId <= 0) return null;
+            var list = (await _repository.FindBySql<string>($@"
+                Select Top 1 pt.NumeroFormatado as Numero From PessoaTelefone pt
+                Inner Join TipoTelefone tt on pt.TipoTelefone = tt.Id
+                Where pt.Pessoa = {pessoaId} and pt.NumeroFormatado is not null and Ltrim(Rtrim(pt.NumeroFormatado)) <> ''
+                  and (Lower(tt.Nome) like '%celular%' or pt.Preferencial = 1)
+                Order by Case When Lower(tt.Nome) like '%celular%' then 0 else 1 end, Case When pt.Preferencial = 1 then 0 else 1 end")).ToList();
+            return list.FirstOrDefault();
         }
     }
 }
