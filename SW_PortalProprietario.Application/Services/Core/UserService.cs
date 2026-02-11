@@ -135,12 +135,14 @@ namespace SW_PortalProprietario.Application.Services.Core
                 Coalesce(u.Administrador,0) as Administrador,
                 Coalesce(u.GestorFinanceiro,0) as GestorFinanceiro,
                 Coalesce(u.GestorReservasAgendamentos,0) as GestorReservasAgendamentos,
+                Coalesce(u.UsuarioAdministrativo,0) as UsuarioAdministrativo,
                 p.Id as PessoaId,
                 pprov.pessoaprovider as PessoaProviderId,
                 pprov.nomeprovider,
                 u.LoginPms,
                 u.LoginSistemaVenda,
-                u.AvatarBase64
+                u.AvatarBase64,
+                u.MenuPermissions as MenuPermissionsJson
                 From 
                 Usuario u
                 Inner Join Pessoa p on u.Pessoa = p.Id
@@ -294,11 +296,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                                     u.Status,
                                     Coalesce(u.Administrador,0) as Administrador,
                                     Coalesce(u.GestorFinanceiro,0) as GestorFinanceiro,
-                                    Coalesce(u.GestorReservasAgendamentos,0) as GestorReservasAgendamentos,                                    
+                                    Coalesce(u.GestorReservasAgendamentos,0) as GestorReservasAgendamentos,
+                                    Coalesce(u.UsuarioAdministrativo,0) as UsuarioAdministrativo,                                    
                                     p.Id as PessoaId,
                                     u.LoginPms,
                                     u.LoginSistemaVenda,
-                                    u.AvatarBase64
+                                    u.AvatarBase64,
+                                    u.MenuPermissions as MenuPermissionsJson
                                     From 
                                     Usuario u
                                     Inner Join Pessoa p on u.Pessoa = p.Id
@@ -364,6 +368,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
             var users = await _repository.FindBySql<UsuarioModel>(sb.ToString(), session: null, parameters.ToArray());
+            
             if (searchModel.CarregarPermissoes.GetValueOrDefault(false))
             {
                 await PopulatePemissionsOfUsers(users);
@@ -721,6 +726,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                         else user.GestorReservasAgendamentos = EnumSimNao.Não;
                     }
 
+                    if (userInputModel.UsuarioAdministrativo.HasValue)
+                    {
+                        if (userInputModel.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                            user.UsuarioAdministrativo = EnumSimNao.Sim;
+                        else user.UsuarioAdministrativo = EnumSimNao.Não;
+                    }
+
                     var (executed, exception) = await _repository.CommitAsync();
                     if (executed)
                     {
@@ -910,9 +922,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                     Administrador = userInputModel != null ? userInputModel.Administrador.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não,
                     GestorFinanceiro = userInputModel != null ? userInputModel.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não,
                     GestorReservasAgendamentos = userInputModel != null ? userInputModel.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não,
+                    UsuarioAdministrativo = userInputModel != null ? userInputModel.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não,
                     LoginPms = userInputModel?.LoginPms,
                     LoginSistemaVenda = userInputModel?.LoginSistemaVenda,
-                    AvatarBase64 = userInputModel?.AvatarBase64
+                    AvatarBase64 = userInputModel?.AvatarBase64,
+                    MenuPermissions = userInputModel?.MenuPermissions != null && userInputModel.MenuPermissions.Any()
+                        ? System.Text.Json.JsonSerializer.Serialize(userInputModel.MenuPermissions)
+                        : null
                 };
 
 
@@ -928,6 +944,10 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
                     user.Administrador = userInputModel != null ? userInputModel.Administrador.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não;
                 }
+                if (userInputModel != null && userInputModel.UsuarioAdministrativo.HasValue)
+                {
+                    user.UsuarioAdministrativo = userInputModel != null ? userInputModel.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não;
+                }
                 if (!string.IsNullOrEmpty(userInputModel?.Login))
                 {
                     var outroUsuarioMesmoLogin = (await _repository.FindBySql<Usuario>($"Select u.* From Usuario u Where Lower(u.Login) = '{userInputModel.Login.ToLower()}' and u.Id <> {user.Id}")).FirstOrDefault();
@@ -942,6 +962,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                     user.LoginPms = userInputModel.LoginPms;
                     user.LoginSistemaVenda = userInputModel.LoginSistemaVenda;
                     user.AvatarBase64 = userInputModel.AvatarBase64;
+                    
+                    // Salvar MenuPermissions como JSON
+                    if (userInputModel.MenuPermissions != null && userInputModel.MenuPermissions.Any())
+                    {
+                        user.MenuPermissions = System.Text.Json.JsonSerializer.Serialize(userInputModel.MenuPermissions);
+                    }
+                    else
+                    {
+                        user.MenuPermissions = null;
+                    }
                 }
 
             }

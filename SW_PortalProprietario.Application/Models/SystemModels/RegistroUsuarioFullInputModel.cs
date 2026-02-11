@@ -15,11 +15,13 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public EnumSimNao? Administrador { get; set; }
         public EnumSimNao? GestorFinanceiro { get; set; }
         public EnumSimNao? GestorReservasAgendamentos { get; set; }
+        public EnumSimNao? UsuarioAdministrativo { get; set; }
         public bool RemoverTagsNaoEnviadas { get; set; } = false;
         public List<int>? TagsRequeridas { get; set; }
         public string? LoginPms { get; set; }
         public string? LoginSistemaVenda { get; set; }
         public string? AvatarBase64 { get; set; }
+        public List<string>? MenuPermissions { get; set; }
 
 
     }

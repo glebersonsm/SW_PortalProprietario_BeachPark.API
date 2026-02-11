@@ -2,6 +2,7 @@ using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Models.PessoaModels;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 using SW_PortalProprietario.Domain.Enumns;
+using System.Text.Json;
 
 namespace SW_PortalProprietario.Application.Models.SystemModels
 {
@@ -15,6 +16,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public EnumSimNao? Administrador { get; set; }
         public EnumSimNao? GestorFinanceiro { get; set; }
         public EnumSimNao? GestorReservasAgendamentos { get; set; }
+        public EnumSimNao? UsuarioAdministrativo { get; set; }
         public PessoaCompletaModel? Pessoa { get; set; }
         public List<UsuarioModuloPermissaoModel>? UsuarioModuloPermissoes { get; set; }
         public List<EmpresaUsuarioModel>? UsuarioEmpresas { get; set; }
@@ -28,6 +30,36 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? LoginPms { get; set; }
         public string? LoginSistemaVenda { get; set; }
         public string? AvatarBase64 { get; set; }
+        
+        // Propriedade para receber do SQL (Dapper mapeia como string)
+        private string? _menuPermissionsJson;
+        public string? MenuPermissionsJson 
+        { 
+            get => _menuPermissionsJson; 
+            set 
+            { 
+                _menuPermissionsJson = value;
+                // Deserializar automaticamente quando receber do SQL
+                if (!string.IsNullOrEmpty(value))
+                {
+                    try
+                    {
+                        MenuPermissions = JsonSerializer.Deserialize<List<string>>(value);
+                    }
+                    catch
+                    {
+                        MenuPermissions = null;
+                    }
+                }
+                else
+                {
+                    MenuPermissions = null;
+                }
+            } 
+        }
+        
+        // Propriedade para uso no código (List<string>)
+        public List<string>? MenuPermissions { get; set; }
 
         public static explicit operator UsuarioModel(Usuario model)
         {
@@ -40,9 +72,13 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
                 NomePessoa = model.Pessoa?.Nome,
                 Status = model.Status,
                 Administrador = model.Administrador,
+                UsuarioAdministrativo = model.UsuarioAdministrativo,
                 LoginPms = model.LoginPms,
                 LoginSistemaVenda = model.LoginSistemaVenda,
-                AvatarBase64 = model.AvatarBase64
+                AvatarBase64 = model.AvatarBase64,
+                MenuPermissions = !string.IsNullOrEmpty(model.MenuPermissions) 
+                    ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(model.MenuPermissions) 
+                    : null
             };
         }
 

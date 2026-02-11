@@ -10,6 +10,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual EnumSimNao? Administrador { get; set; }
         public virtual EnumSimNao? GestorFinanceiro { get; set; }
         public virtual EnumSimNao? GestorReservasAgendamentos { get; set; }
+        public virtual EnumSimNao? UsuarioAdministrativo { get; set; }
         public virtual string? PasswordHash { get; set; }
         public virtual EnumStatus? Status { get; set; } = EnumStatus.Ativo;
         public virtual string? ProviderChaveUsuario { get; set; }
@@ -19,6 +20,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? LoginPms { get; set; }
         public virtual string? LoginSistemaVenda { get; set; }
         public virtual string? AvatarBase64 { get; set; }
+        public virtual string? MenuPermissions { get; set; }
 
         public virtual async Task SaveValidate()
         {
