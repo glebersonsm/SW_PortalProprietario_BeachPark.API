@@ -1469,6 +1469,115 @@ namespace SW_PortalProprietario.Application.Services.Core
             return $"({ddd}) *****{last4}";
         }
 
+        /// <summary>
+        /// Determina o email correto para envio baseado no ambiente e perfil do usuário.
+        /// Para 2FA, sempre usa o usuário logado como referência de perfil.
+        /// </summary>
+        private async Task<string> GetEmailDestinatarioAsync(Usuario usuarioDestino, string? emailOriginal)
+        {
+            var tipoAmbiente = _configuration.GetValue<string>("TipoAmbiente", "PRD")?.ToUpper();
+            
+            // Se for PRD, sempre enviar para o próprio usuário destino
+            if (tipoAmbiente == "PRD")
+            {
+                return emailOriginal ?? usuarioDestino.Pessoa?.EmailPreferencial ?? "";
+            }
+            
+            // Se for HML, aplicar regras específicas
+            if (tipoAmbiente == "HML")
+            {
+                // Para 2FA, sempre usar o usuário logado como referência
+                var loggedUser = await _repository.GetLoggedUser();
+                Usuario? usuarioParaVerificarPerfil = null;
+                
+                if (loggedUser.HasValue)
+                {
+                    usuarioParaVerificarPerfil = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
+                }
+                
+                // Se não há usuário logado, usar o próprio usuário destino (fallback)
+                usuarioParaVerificarPerfil = usuarioParaVerificarPerfil ?? usuarioDestino;
+                
+                if (usuarioParaVerificarPerfil != null)
+                {
+                    var isAdmin = usuarioParaVerificarPerfil.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isAdministrativeUser = usuarioParaVerificarPerfil.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isCliente = !isAdmin && !isAdministrativeUser;
+                    
+                    // Se o usuário (logado ou destino) for Admin ou Admin User, enviar para o próprio email dele
+                    if (isAdmin || isAdministrativeUser)
+                    {
+                        return usuarioParaVerificarPerfil.Pessoa?.EmailPreferencial ?? "";
+                    }
+                    
+                    // Se for Cliente, enviar apenas para DESTINATARIO_EMAIL_PERMITIDO
+                    if (isCliente)
+                    {
+                        var emailPermitido = _configuration.GetValue<string>("DestinatarioEmailPermitido");
+                        return emailPermitido ?? "";
+                    }
+                }
+            }
+            
+            // Fallback: retornar email original
+            return emailOriginal ?? usuarioDestino.Pessoa?.EmailPreferencial ?? "";
+        }
+
+        /// <summary>
+        /// Determina o telefone correto para envio baseado no ambiente e perfil do usuário.
+        /// Para 2FA, sempre usa o usuário logado como referência de perfil.
+        /// </summary>
+        private async Task<string> GetTelefoneDestinatarioAsync(Usuario usuarioDestino, string? telefoneOriginal)
+        {
+            var tipoAmbiente = _configuration.GetValue<string>("TipoAmbiente", "PRD")?.ToUpper();
+            
+            // Se for PRD, sempre enviar para o próprio usuário destino
+            if (tipoAmbiente == "PRD")
+            {
+                return telefoneOriginal ?? "";
+            }
+            
+            // Se for HML, aplicar regras específicas
+            if (tipoAmbiente == "HML")
+            {
+                // Para 2FA, sempre usar o usuário logado como referência
+                var loggedUser = await _repository.GetLoggedUser();
+                Usuario? usuarioParaVerificarPerfil = null;
+                
+                if (loggedUser.HasValue)
+                {
+                    usuarioParaVerificarPerfil = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
+                }
+                
+                // Se não há usuário logado, usar o próprio usuário destino (fallback)
+                usuarioParaVerificarPerfil = usuarioParaVerificarPerfil ?? usuarioDestino;
+                
+                if (usuarioParaVerificarPerfil != null)
+                {
+                    var isAdmin = usuarioParaVerificarPerfil.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isAdministrativeUser = usuarioParaVerificarPerfil.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isCliente = !isAdmin && !isAdministrativeUser;
+                    
+                    // Se o usuário (logado ou destino) for Admin ou Admin User, enviar para o próprio telefone dele
+                    if (isAdmin || isAdministrativeUser)
+                    {
+                        var celularUsuario = await GetFirstCelularForPessoa(usuarioParaVerificarPerfil.Pessoa?.Id ?? 0);
+                        return celularUsuario ?? "";
+                    }
+                    
+                    // Se for Cliente, enviar apenas para NUMERO_SMS_PERMITIDO
+                    if (isCliente)
+                    {
+                        var numeroPermitido = _configuration.GetValue<string>("NumeroSmsPermitido");
+                        return numeroPermitido ?? "";
+                    }
+                }
+            }
+            
+            // Fallback: retornar telefone original
+            return telefoneOriginal ?? "";
+        }
+
         private async Task<string?> GetFirstCelularForPessoa(int pessoaId)
         {
             if (pessoaId <= 0) return null;
@@ -1483,8 +1592,13 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         private async Task Send2FACodeByEmailAsync(Usuario usuario, string code, Guid twoFactorId)
         {
-            var email = usuario.Pessoa?.EmailPreferencial;
-            if (string.IsNullOrEmpty(email) || !email.Contains("@")) return;
+            var emailOriginal = usuario.Pessoa?.EmailPreferencial;
+            if (string.IsNullOrEmpty(emailOriginal) || !emailOriginal.Contains("@")) return;
+            
+            // Determinar email correto baseado em ambiente e perfil
+            var emailDestinatario = await GetEmailDestinatarioAsync(usuario, emailOriginal);
+            if (string.IsNullOrEmpty(emailDestinatario) || !emailDestinatario.Contains("@")) return;
+            
             var usuarioSistemaId = _configuration.GetValue<int>("UsuarioSistemaId", 1);
             var empresaId = _configuration.GetValue<int>("EmpresaSwPortalId", 0);
             var assunto = "Código de verificação - Login em duas etapas";
@@ -1494,7 +1608,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 UsuarioCriacao = usuario.UsuarioCriacao ?? usuarioSistemaId,
                 EmpresaId = empresaId > 0 ? empresaId : null,
                 Assunto = assunto,
-                Destinatario = email,
+                Destinatario = emailDestinatario,
                 ConteudoEmail = conteudoEmail
             });
             try
@@ -1504,7 +1618,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     await _emailSenderHostedService.Send(emailModel);
                     await _emailService.MarcarComoEnviado(emailModel.Id.GetValueOrDefault());
                     var textoEnviado = $"[Assunto] {assunto}{Environment.NewLine}{Environment.NewLine}{conteudoEmail}";
-                    await RegistrarComunicacaoTokenEnviadaAsync(usuario, "email", email, textoEnviado, twoFactorId, emailModel.Id);
+                    // Registrar com email original para auditoria, mas enviar para emailDestinatario
+                    await RegistrarComunicacaoTokenEnviadaAsync(usuario, "email", emailOriginal, textoEnviado, twoFactorId, emailModel.Id);
                 }
             }
             catch (Exception ex)
@@ -1515,13 +1630,22 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         private async Task Send2FACodeBySmsAsync(Usuario usuario, string code, Guid twoFactorId, string? endpointSms = null)
         {
-            var celular = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
-            if (string.IsNullOrEmpty(celular))
+            var celularOriginal = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
+            if (string.IsNullOrEmpty(celularOriginal))
             {
                 _logger.LogWarning("2FA SMS: usuário {UserId} sem número de celular cadastrado.", usuario.Id);
                 throw new ArgumentException("Não foi possível enviar o SMS: nenhum número de celular cadastrado para este usuário. Cadastre um celular ou use o canal e-mail.");
             }
-            var apenasNumeros = new string(celular.Where(char.IsDigit).ToArray());
+            
+            // Determinar telefone correto baseado em ambiente e perfil
+            var telefoneDestinatario = await GetTelefoneDestinatarioAsync(usuario, celularOriginal);
+            if (string.IsNullOrEmpty(telefoneDestinatario))
+            {
+                _logger.LogWarning("2FA SMS: não foi possível determinar telefone destinatário para usuário {UserId}.", usuario.Id);
+                throw new ArgumentException("Não foi possível enviar o SMS: número de telefone não disponível.");
+            }
+            
+            var apenasNumeros = new string(telefoneDestinatario.Where(char.IsDigit).ToArray());
             if (apenasNumeros.Length < 10)
             {
                 _logger.LogWarning("2FA SMS: número inválido para usuário {UserId} (menos de 10 dígitos).", usuario.Id);
@@ -1532,7 +1656,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 : apenasNumeros;
             var textoMensagem = $"Seu código de acesso é: {code}. Válido por {TwoFactorCodeExpirationMinutes} min.";
             await _smsProvider.SendSmsAsync(numeroParaEnvio, textoMensagem, endpointSms, CancellationToken);
-            await RegistrarComunicacaoTokenEnviadaAsync(usuario, "sms", numeroParaEnvio, textoMensagem, twoFactorId, null);
+            // Registrar com telefone original para auditoria, mas enviar para telefoneDestinatario
+            await RegistrarComunicacaoTokenEnviadaAsync(usuario, "sms", celularOriginal, textoMensagem, twoFactorId, null);
         }
 
         /// <summary>

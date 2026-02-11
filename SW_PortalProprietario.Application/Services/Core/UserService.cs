@@ -912,6 +912,15 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (outroUsuarioMesmoLogin != null)
                     throw new Exception($"O Login: '{userInputModel.Login}' já está sendo utilizado por outro usuário");
 
+
+                string? permissoes = null;
+                var isAdministrativeUser = userInputModel?.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                var isAdmin = userInputModel?.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                if (!isAdmin && isAdministrativeUser && userInputModel?.MenuPermissions != null && userInputModel.MenuPermissions.Any())
+                {
+                    permissoes = System.Text.Json.JsonSerializer.Serialize(userInputModel.MenuPermissions);
+                }
+
                 user = new()
                 {
                     Pessoa = pessoa,
@@ -926,24 +935,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     LoginPms = userInputModel?.LoginPms,
                     LoginSistemaVenda = userInputModel?.LoginSistemaVenda,
                     AvatarBase64 = userInputModel?.AvatarBase64,
-                    MenuPermissions = (() => {
-                        // Limpar MenuPermissions para Administrador ou Cliente
-                        var isAdministrativeUser = userInputModel?.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                        var isAdmin = userInputModel?.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                        
-                        if (isAdmin || !isAdministrativeUser)
-                        {
-                            return null;
-                        }
-                        
-                        // Salvar MenuPermissions apenas para Usuário administrativo
-                        if (userInputModel?.MenuPermissions != null && userInputModel.MenuPermissions.Any())
-                        {
-                            return System.Text.Json.JsonSerializer.Serialize(userInputModel.MenuPermissions);
-                        }
-                        
-                        return null;
-                    })()
+                    MenuPermissions = permissoes
                 };
 
 
@@ -1178,20 +1170,19 @@ namespace SW_PortalProprietario.Application.Services.Core
                     if (channel == "email")
                     {
                         // Preparar email para envio
-                        var emailsPermitidos = _configuration.GetValue<string>("DestinatarioEmailPermitido");
-                        var enviarEmailApenasParaDestinatariosPermitidos = _configuration.GetValue<bool>("EnviarEmailApenasParaDestinatariosPermitidos", true);
-
                         var pessoa = (await _repository.FindBySql<PessoaModel>($"Select Coalesce(p.EmailPreferencial,EmailAlternativo) as Email, p.Id as IdPessoa From Pessoa p Where p.Id = {userManter.Pessoa.Id}")).FirstOrDefault();
-                        destinatario = pessoa?.Email;
-
-                        if (enviarEmailApenasParaDestinatariosPermitidos)
+                        var emailOriginal = pessoa?.Email;
+                        
+                        // Determinar email correto baseado em ambiente e perfil
+                        // Se há usuário logado Admin/Admin User, enviar para ele mesmo. Caso contrário, usar perfil do userManter.
+                        var loggedUser = await _repository.GetLoggedUser();
+                        Usuario? usuarioLogado = null;
+                        if (loggedUser.HasValue)
                         {
-                            if (string.IsNullOrEmpty(emailsPermitidos) || string.IsNullOrEmpty(destinatario) ||
-                                                !emailsPermitidos.Contains(destinatario, StringComparison.CurrentCultureIgnoreCase))
-                            {
-                                destinatario = "glebersonsm@gmail.com";
-                            }
+                            usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                         }
+                        var emailDestinatario = await GetEmailDestinatarioAsync(userManter, emailOriginal, usuarioLogado);
+                        destinatario = emailDestinatario;
 
                         if (!string.IsNullOrEmpty(destinatario) && destinatario.Contains("@"))
                         {
@@ -1219,7 +1210,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                             {
                                 _logger.LogWarning(ex, "Falha ao enviar email de reset de senha imediatamente; o email permanece na fila para envio posterior.");
                             }
-                            mensagemRetorno = $"A nova senha foi enviada para o email: {MaskEmail(destinatario)}";
+                            // Mostrar email original mascarado na mensagem, mas enviar para emailDestinatario
+                            mensagemRetorno = $"A nova senha foi enviada para o email: {MaskEmail(emailOriginal ?? destinatario)}";
                         }
                         else
                         {
@@ -1229,12 +1221,27 @@ namespace SW_PortalProprietario.Application.Services.Core
                     else if (channel == "sms")
                     {
                         // Enviar por SMS
-                        var celular = await GetFirstCelularForPessoa(userManter.Pessoa?.Id ?? 0);
-                        if (string.IsNullOrEmpty(celular))
+                        var celularOriginal = await GetFirstCelularForPessoa(userManter.Pessoa?.Id ?? 0);
+                        if (string.IsNullOrEmpty(celularOriginal))
                         {
                             throw new ArgumentException("Não foi possível enviar a senha por SMS: nenhum número de celular cadastrado para este usuário.");
                         }
-                        var apenasNumeros = new string(celular.Where(char.IsDigit).ToArray());
+                        
+                        // Determinar telefone correto baseado em ambiente e perfil
+                        // Se há usuário logado Admin/Admin User, enviar para ele mesmo. Caso contrário, usar perfil do userManter.
+                        var loggedUser = await _repository.GetLoggedUser();
+                        Usuario? usuarioLogado = null;
+                        if (loggedUser.HasValue)
+                        {
+                            usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
+                        }
+                        var telefoneDestinatario = await GetTelefoneDestinatarioAsync(userManter, celularOriginal, usuarioLogado);
+                        if (string.IsNullOrEmpty(telefoneDestinatario))
+                        {
+                            throw new ArgumentException("Não foi possível enviar a senha por SMS: número de telefone não disponível.");
+                        }
+                        
+                        var apenasNumeros = new string(telefoneDestinatario.Where(char.IsDigit).ToArray());
                         if (apenasNumeros.Length < 10)
                         {
                             throw new ArgumentException("Não foi possível enviar a senha por SMS: número de celular inválido (cadastre DDD + número com 10 ou 11 dígitos).");
@@ -1245,7 +1252,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                         var textoMensagem = $"Olá, {userManter.Pessoa?.Nome}! Sua nova senha de acesso ao Portal do Cliente é: {password}. Favor altere ela por uma de sua escolha após o primeiro login.";
                         var endpointSms = parametroSistema?.EndpointEnvioSms2FA;
                         await _smsProvider.SendSmsAsync(numeroParaEnvio, textoMensagem, endpointSms, default);
-                        destinatario = MaskPhone(celular);
+                        // Mostrar telefone original mascarado na mensagem, mas enviar para telefoneDestinatario
+                        destinatario = MaskPhone(celularOriginal);
                         mensagemRetorno = $"A nova senha foi enviada para o SMS: {destinatario}";
                     }
 
@@ -1264,6 +1272,117 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _logger.LogError(err, err.Message);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Determina o email correto para envio baseado no ambiente e perfil do usuário.
+        /// Para reset de senha, considera o usuário que está resetando. Para 2FA, considera o usuário logado.
+        /// </summary>
+        private async Task<string> GetEmailDestinatarioAsync(Usuario usuarioDestino, string? emailOriginal, Usuario? usuarioLogado = null)
+        {
+            var tipoAmbiente = _configuration.GetValue<string>("TipoAmbiente", "PRD")?.ToUpper();
+            
+            // Se for PRD, sempre enviar para o próprio usuário destino
+            if (tipoAmbiente == "PRD")
+            {
+                return emailOriginal ?? usuarioDestino.Pessoa?.EmailPreferencial ?? "";
+            }
+            
+            // Se for HML, aplicar regras específicas
+            if (tipoAmbiente == "HML")
+            {
+                // Tentar obter usuário logado se não foi fornecido
+                if (usuarioLogado == null)
+                {
+                    var loggedUser = await _repository.GetLoggedUser();
+                    if (loggedUser.HasValue)
+                    {
+                        usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
+                    }
+                }
+                
+                // Se não há usuário logado (ex: reset de senha), usar o próprio usuário destino para determinar perfil
+                var usuarioParaVerificarPerfil = usuarioLogado ?? usuarioDestino;
+                
+                if (usuarioParaVerificarPerfil != null)
+                {
+                    var isAdmin = usuarioParaVerificarPerfil.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isAdministrativeUser = usuarioParaVerificarPerfil.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isCliente = !isAdmin && !isAdministrativeUser;
+                    
+                    // Se o usuário (logado ou destino) for Admin ou Admin User, enviar para o próprio email dele
+                    if (isAdmin || isAdministrativeUser)
+                    {
+                        return usuarioParaVerificarPerfil.Pessoa?.EmailPreferencial ?? "";
+                    }
+                    
+                    // Se for Cliente, enviar apenas para DESTINATARIO_EMAIL_PERMITIDO
+                    if (isCliente)
+                    {
+                        var emailPermitido = _configuration.GetValue<string>("DestinatarioEmailPermitido");
+                        return emailPermitido ?? "";
+                    }
+                }
+            }
+            
+            // Fallback: retornar email original
+            return emailOriginal ?? usuarioDestino.Pessoa?.EmailPreferencial ?? "";
+        }
+
+        /// <summary>
+        /// Determina o telefone correto para envio baseado no ambiente e perfil do usuário.
+        /// Para reset de senha, considera o usuário que está resetando. Para 2FA, considera o usuário logado.
+        /// </summary>
+        private async Task<string> GetTelefoneDestinatarioAsync(Usuario usuarioDestino, string? telefoneOriginal, Usuario? usuarioLogado = null)
+        {
+            var tipoAmbiente = _configuration.GetValue<string>("TipoAmbiente", "PRD")?.ToUpper();
+            
+            // Se for PRD, sempre enviar para o próprio usuário destino
+            if (tipoAmbiente == "PRD")
+            {
+                return telefoneOriginal ?? "";
+            }
+            
+            // Se for HML, aplicar regras específicas
+            if (tipoAmbiente == "HML")
+            {
+                // Tentar obter usuário logado se não foi fornecido
+                if (usuarioLogado == null)
+                {
+                    var loggedUser = await _repository.GetLoggedUser();
+                    if (loggedUser.HasValue)
+                    {
+                        usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
+                    }
+                }
+                
+                // Se não há usuário logado (ex: reset de senha), usar o próprio usuário destino para determinar perfil
+                var usuarioParaVerificarPerfil = usuarioLogado ?? usuarioDestino;
+                
+                if (usuarioParaVerificarPerfil != null)
+                {
+                    var isAdmin = usuarioParaVerificarPerfil.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isAdministrativeUser = usuarioParaVerificarPerfil.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isCliente = !isAdmin && !isAdministrativeUser;
+                    
+                    // Se o usuário (logado ou destino) for Admin ou Admin User, enviar para o próprio telefone dele
+                    if (isAdmin || isAdministrativeUser)
+                    {
+                        var celularUsuario = await GetFirstCelularForPessoa(usuarioParaVerificarPerfil.Pessoa?.Id ?? 0);
+                        return celularUsuario ?? "";
+                    }
+                    
+                    // Se for Cliente, enviar apenas para NUMERO_SMS_PERMITIDO
+                    if (isCliente)
+                    {
+                        var numeroPermitido = _configuration.GetValue<string>("NumeroSmsPermitido");
+                        return numeroPermitido ?? "";
+                    }
+                }
+            }
+            
+            // Fallback: retornar telefone original
+            return telefoneOriginal ?? "";
         }
 
         private async Task<List<Usuario>?> GetUsuario(LoginInputModel userLoginInputModel)
@@ -1371,13 +1490,13 @@ namespace SW_PortalProprietario.Application.Services.Core
         private async Task<string?> GetFirstCelularForPessoa(int pessoaId)
         {
             if (pessoaId <= 0) return null;
-            var list = (await _repository.FindBySql<string>($@"
-                Select Top 1 pt.NumeroFormatado as Numero From PessoaTelefone pt
+            var itemRetorno = (await _repository.FindBySql<string>($@"
+                Select pt.NumeroFormatado as Numero From PessoaTelefone pt
                 Inner Join TipoTelefone tt on pt.TipoTelefone = tt.Id
                 Where pt.Pessoa = {pessoaId} and pt.NumeroFormatado is not null and Ltrim(Rtrim(pt.NumeroFormatado)) <> ''
                   and (Lower(tt.Nome) like '%celular%' or pt.Preferencial = 1)
-                Order by Case When Lower(tt.Nome) like '%celular%' then 0 else 1 end, Case When pt.Preferencial = 1 then 0 else 1 end")).ToList();
-            return list.FirstOrDefault();
+                Order by Case When Lower(tt.Nome) like '%celular%' then 0 else 1 end, Case When pt.Preferencial = 1 then 0 else 1 end")).FirstOrDefault();
+            return itemRetorno;
         }
     }
 }
