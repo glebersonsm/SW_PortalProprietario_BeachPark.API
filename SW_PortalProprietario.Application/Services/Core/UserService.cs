@@ -926,9 +926,24 @@ namespace SW_PortalProprietario.Application.Services.Core
                     LoginPms = userInputModel?.LoginPms,
                     LoginSistemaVenda = userInputModel?.LoginSistemaVenda,
                     AvatarBase64 = userInputModel?.AvatarBase64,
-                    MenuPermissions = userInputModel?.MenuPermissions != null && userInputModel.MenuPermissions.Any()
-                        ? System.Text.Json.JsonSerializer.Serialize(userInputModel.MenuPermissions)
-                        : null
+                    MenuPermissions = (() => {
+                        // Limpar MenuPermissions para Administrador ou Cliente
+                        var isAdministrativeUser = userInputModel?.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                        var isAdmin = userInputModel?.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                        
+                        if (isAdmin || !isAdministrativeUser)
+                        {
+                            return null;
+                        }
+                        
+                        // Salvar MenuPermissions apenas para Usuário administrativo
+                        if (userInputModel?.MenuPermissions != null && userInputModel.MenuPermissions.Any())
+                        {
+                            return System.Text.Json.JsonSerializer.Serialize(userInputModel.MenuPermissions);
+                        }
+                        
+                        return null;
+                    })()
                 };
 
 
@@ -963,9 +978,18 @@ namespace SW_PortalProprietario.Application.Services.Core
                     user.LoginSistemaVenda = userInputModel.LoginSistemaVenda;
                     user.AvatarBase64 = userInputModel.AvatarBase64;
                     
-                    // Salvar MenuPermissions como JSON
-                    if (userInputModel.MenuPermissions != null && userInputModel.MenuPermissions.Any())
+                    // Salvar MenuPermissions como JSON apenas se for Usuário administrativo (não Administrador e não Cliente)
+                    var isAdministrativeUser = userInputModel.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isAdmin = userInputModel.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    
+                    if (isAdmin || !isAdministrativeUser)
                     {
+                        // Limpar MenuPermissions para Administrador ou Cliente
+                        user.MenuPermissions = null;
+                    }
+                    else if (userInputModel.MenuPermissions != null && userInputModel.MenuPermissions.Any())
+                    {
+                        // Salvar MenuPermissions apenas para Usuário administrativo
                         user.MenuPermissions = System.Text.Json.JsonSerializer.Serialize(userInputModel.MenuPermissions);
                     }
                     else
