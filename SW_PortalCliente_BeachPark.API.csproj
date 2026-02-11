@@ -143,7 +143,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="PADRONIZACAO_GENERATION_SERVICES.md" />
+    <None Remove="SAGA_PATTERN_README.md" />
+    <None Remove="SCHEMA_AUTO_PREFIX_README.md" />
     <None Remove="src\swPortal.db" />
+    <None Remove="TROUBLESHOOTING_DATABASE_SCHEMA.md" />
   </ItemGroup>
 
   <ItemGroup>

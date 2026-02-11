@@ -1730,7 +1730,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
                         var commitResult = await _repository.CommitAsync(session);
                         if (!commitResult.executed)
-                            throw commitResult.exception ?? new Exception("Não foi poss?vel importar as cidades");
+                            throw commitResult.exception ?? new Exception("Não foi possível importar as cidades");
                     }
                     catch (Exception err)
                     {

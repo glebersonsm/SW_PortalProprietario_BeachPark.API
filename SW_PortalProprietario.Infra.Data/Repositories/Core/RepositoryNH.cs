@@ -403,6 +403,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 var dbCommand = Session.Connection.CreateCommand();
                 sql = RepositoryUtils.NormalizeFunctions(DataBaseType, sql);
                 sql = NormalizaParameterName(sql, parameters);
+                sql = AddSchemaToTables(sql);
+
                 dbCommand.CommandText = sql;
                 _unitOfWork.PrepareCommandSql(dbCommand);
 
@@ -433,6 +435,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 sql = RepositoryUtils.NormalizeFunctions(DataBaseType, sql);
 
                 sql = PaginationHelper.GetPaginatedQuery(sql, DataBaseType, pageNumber, pageSize);
+                sql = AddSchemaToTables(sql);
 
                 Flush();
 
@@ -981,6 +984,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             
             sql = RepositoryUtils.NormalizeFunctions(DataBaseType, sql);
             sql = NormalizaParameterName(sql, parameters);
+            sql = AddSchemaToTables(sql);
 
             var dbCommand = sessionToUse.Connection.CreateCommand();
             dbCommand.CommandText = sql;
@@ -1110,6 +1114,74 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 ProviderKeyUser = usuario.providerChaveUsuario,
                 CompanyId = usuario.companyId
             };
+        }
+
+        /// <summary>
+        /// Adiciona o schema name antes de cada tabela no SQL para PostgreSQL
+        /// </summary>
+        private string AddSchemaToTables(string sql)
+        {
+            // Só aplica para PostgreSQL
+            if (DataBaseType != EnumDataBaseType.PostgreSql)
+                return sql;
+
+            // Obtém o schema da configuração ou usa o padrão
+            var schemaName = GetSchemaName();
+            if (string.IsNullOrEmpty(schemaName))
+                return sql;
+
+            // Lista de palavras-chave SQL que precedem nomes de tabelas
+            var tableKeywords = new[] { "FROM", "JOIN", "INTO", "UPDATE", "TABLE" };
+
+            // Padrão para identificar tabelas sem schema
+            // Captura: palavra-chave SQL + espaço + nome_da_tabela (sem schema)
+            // Não captura se já tiver schema (formato: schema.tabela)
+            var pattern = @"\b(" + string.Join("|", tableKeywords) + @")\s+(?!(?:[a-zA-Z_][a-zA-Z0-9_]*\.))([a-zA-Z_][a-zA-Z0-9_]*)";
+
+            var result = System.Text.RegularExpressions.Regex.Replace(
+                sql,
+                pattern,
+                match =>
+                {
+                    var keyword = match.Groups[1].Value;
+                    var tableName = match.Groups[2].Value;
+
+                    // Ignora subqueries com parênteses ou aliases comuns
+                    if (tableName.Equals("SELECT", StringComparison.OrdinalIgnoreCase) ||
+                        tableName.Equals("VALUES", StringComparison.OrdinalIgnoreCase) ||
+                        tableName.Equals("DUAL", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return match.Value;
+                    }
+
+                    // Adiciona o schema antes da tabela
+                    return $"{keyword} {schemaName}.{tableName}";
+                },
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Obtém o schema name da configuração
+        /// </summary>
+        private string GetSchemaName()
+        {
+            try
+            {
+                // Tenta obter do arquivo de configuração
+                var schemaName = System.Environment.GetEnvironmentVariable("DEFAULT_SCHEMA");
+
+                if (!string.IsNullOrEmpty(schemaName))
+                    return schemaName;
+
+                // Valor padrão para o projeto
+                return "portalohana";
+            }
+            catch (Exception ex)
+            {
+                return "portalohana";
+            }
         }
     }
 
