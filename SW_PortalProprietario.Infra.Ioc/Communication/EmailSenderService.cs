@@ -114,6 +114,14 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 if (porta == 0)
                     throw new ArgumentException("Deve ser informada a porta de saída do email (Parâmetro: 'SmtpPort' ou configuração do sistema).");
 
+                // AWS SES: envio direto via MailKit sem fallback (credenciais específicas da AWS)
+                if (ctx.TipoEnvioEmail == EnumTipoEnvioEmail.AwsSes)
+                {
+                    _logger.LogInformation("Enviando email via AWS SES SMTP. Host: {Host}, Porta: {Porta}, User: {User}, Assunto: {Assunto}", host, porta, remetente, assunto);
+                    await SendViaMailKitAsync(destinatario, assunto, html, host, porta, useSsl, remetente, pass, fromName);
+                    return;
+                }
+
                 var preferSystemNetMail = ctx.TipoEnvioEmail == EnumTipoEnvioEmail.ClienteEmailApp;
                 Exception? firstException = null;
 
@@ -191,11 +199,28 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
 
             // Porta 465 = SSL implícito. Porta 587 (ex.: Gmail) = STARTTLS.
             var secureOption = (porta == 465) ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
+            
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
-            smtp.Connect(host, porta, secureOption);
-            smtp.Authenticate(remetente, password: pass);
-            await smtp.SendAsync(email);
-            smtp.Disconnect(true);
+            
+            try
+            {
+                _logger.LogInformation("Conectando ao servidor SMTP {Host}:{Porta} com segurança {SecureOption}", host, porta, secureOption);
+                await smtp.ConnectAsync(host, porta, secureOption);
+                
+                _logger.LogInformation("Autenticando com usuário: {User}", remetente);
+                await smtp.AuthenticateAsync(remetente, pass);
+                
+                _logger.LogInformation("Enviando email para: {Destinatario}", destinatario);
+                await smtp.SendAsync(email);
+                
+                await smtp.DisconnectAsync(true);
+                _logger.LogInformation("Email enviado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao enviar email via MailKit. Host: {Host}, Porta: {Porta}, User: {User}", host, porta, remetente);
+                throw;
+            }
         }
     }
 }

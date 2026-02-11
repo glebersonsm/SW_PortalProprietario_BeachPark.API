@@ -38,8 +38,8 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             return string.IsNullOrWhiteSpace(pass) ? null : pass.Trim();
         }
 
-        /// <summary>Host e porta padrão para AWS SES SMTP (região us-east-1).</summary>
-        private const string AwsSesSmtpHostDefault = "email-smtp.us-east-1.amazonaws.com";
+        /// <summary>Host e porta padrão para AWS SES SMTP (região sa-east-1).</summary>
+        private const string AwsSesSmtpHostDefault = "email-smtp.sa-east-1.amazonaws.com";
         private const int AwsSesSmtpPortDefault = 587;
 
         public async Task<SmtpSettingsResult?> GetSmtpSettingsFromParametroSistemaAsync(CancellationToken cancellationToken = default)
@@ -67,10 +67,10 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 {
                     Host = host,
                     Port = port,
-                    User = param.SmtpUser.Trim(),
+                    User = isAws ? param.SmtpIamUser! : param.SmtpUser.Trim(),
                     Pass = pass,
                     UseSsl = isAws || param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
-                    FromName = string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
+                    FromName = isAws ? param.SmtpIamUser : string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
                 };
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 var pass = !string.IsNullOrWhiteSpace(param.SmtpPass) ? param.SmtpPass.Trim() : GetSmtpPassFromConfig();
                 if (string.IsNullOrWhiteSpace(pass))
                     return ctx;
-                var port = param.SmtpPort ?? 0;
+                var port = isAws ? AwsSesSmtpPortDefault : param.SmtpPort ?? 0;
                 if (port <= 0)
                     port = isAws ? AwsSesSmtpPortDefault : 0;
                 if (port <= 0)
@@ -112,7 +112,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     User = param.SmtpUser.Trim(),
                     Pass = pass,
                     UseSsl = isAws || param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
-                    FromName = string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
+                    FromName = isAws ? param.SmtpIamUser : string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
                 };
                 return ctx;
             }

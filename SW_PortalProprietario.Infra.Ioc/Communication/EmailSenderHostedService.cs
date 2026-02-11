@@ -1,3 +1,6 @@
+using Amazon;
+using Amazon.SimpleEmail;
+using Amazon.SimpleEmail.Model;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +13,7 @@ using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Application.Services.Core.Interfaces.Communication;
 using SW_PortalProprietario.Domain.Enumns;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -26,6 +30,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
         private readonly ILogger<EmailSenderHostedService> _logger;
         private readonly ISmtpSettingsProvider _smtpSettingsProvider;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private static readonly RegionEndpoint region = RegionEndpoint.USEast1;
 
         public EmailSenderHostedService(IConfiguration configuration,
             ILogger<EmailSenderHostedService> loger,
@@ -72,13 +77,6 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
 
             try
             {
-                if (string.IsNullOrEmpty(destinatario))
-                {
-                    destinatario = _configuration.GetValue<string>("SmtpEmailTo");
-                }
-
-                //if (Debugger.IsAttached)
-                //    destinatario = "glebersonsm@gmail.com";
 
                 if (string.IsNullOrEmpty(destinatario) || !destinatario.Contains("@"))
                     throw new ArgumentException("Deve ser informado o destinatário do email.");
@@ -99,15 +97,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     useSsl = ctx.Settings.UseSsl;
                     fromName = ctx.Settings.FromName;
                 }
-                else
-                {
-                    host = _configuration.GetValue<string>("SmtpHost") ?? "";
-                    remetente = _configuration.GetValue<string>("SmtpUser") ?? "";
-                    pass = _configuration.GetValue<string>("SmtpPass") ?? _configuration.GetValue<string>("SmptPass") ?? "";
-                    porta = _configuration.GetValue<int>("SmtpPort", 0);
-                    useSsl = _configuration.GetValue<string>("SmtpUseSsl") == "S";
-                    fromName = _configuration.GetValue<string>("SmtpFromName");
-                }
+                else throw new ArgumentException("Não foi possível configurar o envio de email");
 
                 if (string.IsNullOrEmpty(host))
                     throw new ArgumentException("Deve ser informado o host para envio do email (Parâmetro: 'SmtpHost' ou configuração do sistema).");
@@ -144,7 +134,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     else
                         await SendViaSystemNetMailStaticAsync(destinatario, assunto, html, anexos, host, porta, useSsl, remetente, pass, fromName);
                     _logger.LogInformation("Email enviado com sucesso pelo método alternativo (assunto: {Assunto}).", assunto);
-                    // Persistir o tipo que funcionou apenas quando não for AwsSes (nunca sobrescrever configuração AWS)
+                    // Persistir o tipo que funzionou apenas quando não for AwsSes (nunca sobrescrever configuração AWS)
                     if (ctx.Settings != null && ctx.TipoEnvioEmail != EnumTipoEnvioEmail.AwsSes)
                     {
                         var tipoQueFuncionou = preferSystemNetMail ? EnumTipoEnvioEmail.ClienteEmailDireto : EnumTipoEnvioEmail.ClienteEmailApp;
@@ -175,6 +165,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             }
         }
 
+
         /// <summary>
         /// Envio via MailKit (Cliente de email direto). Usado como método principal ou como fallback.
         /// </summary>
@@ -191,10 +182,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             string? fromName)
         {
             var email = new MimeMessage();
-            email.From.Add(!string.IsNullOrWhiteSpace(fromName)
-                ? new MailboxAddress(fromName.Trim(), remetente)
-                : MailboxAddress.Parse(remetente));
-
+            email.From.Add(MailboxAddress.Parse(fromName));
             foreach (var item in destinatario.Split(";"))
             {
                 email.To.Add(MailboxAddress.Parse(item.TrimEnd().TrimStart().Replace(";", "")));
@@ -234,13 +222,29 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
 
             email.Body = bodyBuilder.ToMessageBody();
 
-            // Porta 465 = SSL implícito (SslOnConnect). Porta 587 (e outras) = STARTTLS (conexão em texto e depois upgrade).
             var secureOption = (porta == 465) ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
-            using var smtp = new MailKit.Net.Smtp.SmtpClient();
-            smtp.Connect(host, porta, secureOption);
-            smtp.Authenticate(remetente, password: pass);
-            await smtp.SendAsync(email);
-            smtp.Disconnect(true);
+            
+            try
+            {
+                using var smtp = new MailKit.Net.Smtp.SmtpClient();
+
+                _logger.LogInformation("Conectando ao servidor SMTP {Host}:{Porta} com segurança {SecureOption}", host, porta, secureOption);
+                await smtp.ConnectAsync(host, porta, secureOption);
+                
+                _logger.LogInformation("Autenticando com usuário: {User}", remetente);
+                await smtp.AuthenticateAsync(remetente, pass);
+                
+                _logger.LogInformation("Enviando email para: {Destinatario}", destinatario);
+                await smtp.SendAsync(email);
+                
+                await smtp.DisconnectAsync(true);
+                _logger.LogInformation("Email enviado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao enviar email via MailKit. Host: {Host}, Porta: {Porta}, User: {User}", host, porta, remetente);
+                throw;
+            }
         }
 
         /// <summary>
@@ -259,7 +263,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             string? fromName)
         {
 
-            MailMessage mensagem = new MailMessage(remetente, "glebersonsm@swsolucoes.inf.br", assunto, html);
+            MailMessage mensagem = new MailMessage(remetente,destinatario, assunto, html);
             System.Net.Mail.SmtpClient smtpClient = new System.Net.Mail.SmtpClient(host);
 
             try
