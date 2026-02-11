@@ -61,7 +61,8 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             .Raw("hibernate.connection.provider", "NHibernate.Connection.C3P0ConnectionProvider") // Configuração do provedor de conexão
             .Raw("hibernate.c3p0.min_size", "5")  // Tamanho mínimo do pool de conexões
             .Raw("hibernate.c3p0.max_size", "300") // Tamanho máximo do pool de conexões
-            .Raw("hibernate.c3p0.timeout", "300")) // Tempo limite de conexão em segundos
+            .Raw("hibernate.c3p0.timeout", "300") // Tempo limite de conexão em segundos
+            .Raw("default_schema", "portalohana")) // Schema padrão para PostgreSQL
             .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AccessCenterDomain.AutomappingConfigurationAccessCenter>());
 
             var sessionFactory = _sessionFactory.BuildSessionFactory();

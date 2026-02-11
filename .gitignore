@@ -364,5 +364,26 @@ FodyWeavers.xsd
 /Controllers/RegistroUsuarioController.cs
 /Bd/swapi.db
 /src/swPortal.db
-/.easyTdd 
+/.easyTdd
+
+# Deploy and publish directories
+publish/
+backup/
+
+# Environment files with sensitive data
+.env.production
+.env.development
+.env.local
+
+# Permitir arquivo de exemplo
+!.env.production.example
+
+# Log files
+*.log
+logs/
+
+# Scripts executáveis podem ser comitados, mas dados sensíveis não
+# scripts/*.sh já estão incluídos
+# scripts/*.ps1 já estão incluídos
+ 
  
