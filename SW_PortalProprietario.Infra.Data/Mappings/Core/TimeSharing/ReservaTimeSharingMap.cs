@@ -45,6 +45,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.TimeSharing
             Map(p => p.MotivoCancelamentoInfUsu).Length(2000);
             Map(p => p.ClienteNotificadoCancelamento).CustomType<EnumType<EnumSimNao>>();
 
+            Schema("portalohana");
             Table("ReservaTimeSharing");
         }
     }

@@ -21,7 +21,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             Map(b => b.ExigeDataEmissao).CustomType<EnumType<EnumSimNao>>();
             Map(b => b.ExigeDataValidade).CustomType<EnumType<EnumSimNao>>();
             Map(b => b.TipoPessoa).CustomType<EnumType<EnumTiposPessoa>>();
-
+            Schema("portalohana");
             Table("TipoDocumentoPessoa");
         }
     }

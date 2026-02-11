@@ -1,4 +1,4 @@
-﻿using FluentNHibernate.Mapping;
+using FluentNHibernate.Mapping;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 using SW_PortalProprietario.Domain.Enumns;
 
@@ -22,6 +22,10 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Nome).Length(100);
             Map(b => b.Disponivel).CustomType<EnumSimNao>();
             Map(b => b.Ordem).Nullable();
+            Map(b => b.Cor).Length(50).Nullable();
+            Map(b => b.CorTexto).Length(50).Nullable();
+
+            Schema("portalohana");
             Table("GrupoDocumento");
         }
     }

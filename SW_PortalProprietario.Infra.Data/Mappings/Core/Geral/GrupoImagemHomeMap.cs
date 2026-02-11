@@ -16,6 +16,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Nome).Length(100);
             Map(b => b.Ordem).Nullable();
             References(b => b.Empresa, "Empresa");
+
+            Schema("portalohana");
             Table("GrupoImagemHome");
         }
     }

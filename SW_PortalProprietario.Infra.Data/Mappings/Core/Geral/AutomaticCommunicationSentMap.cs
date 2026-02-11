@@ -27,6 +27,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.EmailId).Nullable();
             Map(b => b.EmpreendimentoTipo).CustomType<EnumType<EnumProjetoType>>().Not.Nullable();
 
+            Schema("portalohana");
             Table("AutomaticCommunicationSent");
         }
     }

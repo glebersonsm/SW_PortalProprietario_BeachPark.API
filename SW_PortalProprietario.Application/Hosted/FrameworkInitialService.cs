@@ -49,10 +49,8 @@ namespace SW_PortalProprietario.Application.Hosted
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var _repository = scope.ServiceProvider.GetRequiredService<IRepositoryHosted>();
-                var _communicationProvider = scope.ServiceProvider.GetRequiredService<ICommunicationProvider>();
+                var _communicationProvider = scope.ServiceProvider.GetRequiredService<IHybrid_CM_Esolution_Communication>();
                 var _mapper = scope.ServiceProvider.GetRequiredService<IProjectObjectMapper>();
-                var tipoTelefone = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoTelefone>($"Select tt.* From TipoTelefone tt Where Lower(tt.Nome) in ('celular')")).FirstOrDefault();
-
                 using (var session = _repository.CreateSession())
                 {
 
@@ -77,12 +75,6 @@ namespace SW_PortalProprietario.Application.Hosted
                     {
                         //await InativarUsuariosSemCota();
                         await InativarClienteLegadoSemContratosAtivos(_repository, _communicationProvider, session);
-
-                    }
-
-                    if (_configuration.GetValue<bool>("CriarPrimeiroUsuario"))
-                    {
-                        await CriarUsuarioDefault(_repository, _communicationProvider, _mapper, session);
                     }
 
                     if (_configuration.GetValue<bool>("EfetuarConfiguracoesIniciais"))
@@ -97,6 +89,14 @@ namespace SW_PortalProprietario.Application.Hosted
                             await VincularUsuarioEmpresa(_repository, session);
 
                     }
+
+                    if (_configuration.GetValue<bool>("CriarPrimeiroUsuario"))
+                    {
+                        await CriarUsuarioDefault(_repository, _communicationProvider, _mapper, session);
+                    }
+
+                    var tipoTelefone = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoTelefone>($"Select tt.* From TipoTelefone tt Where Lower(tt.Nome) in ('celular')")).FirstOrDefault();
+
 
                     // Buscar par?metros do sistema para verificar configura??es de importa??o legado
                     var parametroSistema = await GetParametroSistema(_repository, session);
@@ -449,7 +449,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
         }
 
-        private async Task InativarClienteLegadoSemContratosAtivos(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, IStatelessSession? session)
+        private async Task InativarClienteLegadoSemContratosAtivos(IRepositoryHosted _repository, IHybrid_CM_Esolution_Communication _communicationProvider, IStatelessSession? session)
         {
             var usuarioSemContratosAtivosSistemaLegado = new List<UserRegisterInputModel>();
 
@@ -1510,7 +1510,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
         }
 
-        private async Task ConfigurarEmpresa(IRepositoryHosted _repository, ICommunicationProvider _communicationProvider, NHibernate.IStatelessSession? session)
+        private async Task ConfigurarEmpresa(IRepositoryHosted _repository, IHybrid_CM_Esolution_Communication _communicationProvider, NHibernate.IStatelessSession? session)
         {
             var empresaExistente = (await _repository.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e", session)).FirstOrDefault();
             if (empresaExistente == null)
@@ -1518,15 +1518,15 @@ namespace SW_PortalProprietario.Application.Hosted
                 try
                 {
                     _repository.BeginTransaction(session);
-                    var empresaId = _configuration.GetValue<int>("EmpresaCMId");
-                    if (empresaId > 0)
+                    var empresaId = Environment.GetEnvironmentVariable("EMPRESA_LEGADO_AC_ID");
+                    if (empresaId != null && int.TryParse(empresaId, out int empresaIdValue) && empresaIdValue > 0)
                     {
 
                         var cnpj = (await _repository.FindByHql<TipoDocumentoPessoa>($"From TipoDocumentoPessoa tdp Where tdp.TipoPessoa = {(int)EnumTiposPessoa.PessoaJuridica} and Lower(tdp.Nome) like '%cnpj%'", session)).FirstOrDefault();
                         if (cnpj == null)
                             throw new FileNotFoundException("Não foi encontrado o tipo de documento CNPJ para cadastrado no sisetma");
 
-                        var empresa = await _communicationProvider.GetEmpresaVinculadaLegado(empresaId);
+                        var empresa = await _communicationProvider.GetEmpresaVinculadaLegado_Esol(int.Parse(empresaId));
                         if (empresa != null && !string.IsNullOrEmpty(empresa.Cnpj))
                         {
                             Domain.Entities.Core.DadosPessoa.Pessoa pessoaSw = null;

@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Enumns;
+using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Geral
 {
@@ -18,6 +18,8 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual int? UsuarioRemocao { get; set; }
         public virtual DateTime? DataHoraRemocao { get; set; }
         public virtual string? Path { get; set; }
+        public virtual string? Cor { get; set; }
+        public virtual string? CorTexto { get; set; }
 
         public virtual async Task SaveValidate()
         {

@@ -31,7 +31,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Financeiro
             Map(b => b.EmpresaLegadoId);
             Map(b => b.Visivel).CustomType<EnumType<EnumSimNao>>();
             References(b => b.Pessoa, "Pessoa");
-
+            Schema("portalohana");
             Table("CardTokenized");
         }
     }

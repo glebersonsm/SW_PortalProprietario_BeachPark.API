@@ -87,6 +87,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.CriarUsuariosLegado).CustomType<EnumSimNao>();
             Map(b => b.CriarUsuariosClientesLegado).CustomType<EnumSimNao>();
 
+            Schema("portalohana");
             Table("ParametroSistema");
         }
     }

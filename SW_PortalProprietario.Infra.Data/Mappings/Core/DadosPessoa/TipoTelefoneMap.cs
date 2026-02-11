@@ -15,7 +15,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             Map(p => p.UsuarioAlteracao).Nullable();
             Map(b => b.Nome).Length(100);
             Map(b => b.Mascara).Nullable();
-
+            Schema("portalohana");
             Table("TipoTelefone");
         }
     }

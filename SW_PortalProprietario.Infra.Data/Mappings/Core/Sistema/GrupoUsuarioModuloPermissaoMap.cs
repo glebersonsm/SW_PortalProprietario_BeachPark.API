@@ -15,6 +15,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(p => p.UsuarioAlteracao).Nullable();
             References(p => p.ModuloPermissao, "ModuloPermissao");
             References(p => p.GrupoUsuario, "GrupoUsuario");
+            
+            Schema("portalohana");
             Table("GrupoUsuarioModuloPermissao");
         }
     }

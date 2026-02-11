@@ -18,6 +18,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.NovoAgendamentoId);
             Map(b => b.Descricao).Length(4000);
 
+
+            Schema("portalohana");
             Table("HistoricoTrocaDeSemana");
         }
     }

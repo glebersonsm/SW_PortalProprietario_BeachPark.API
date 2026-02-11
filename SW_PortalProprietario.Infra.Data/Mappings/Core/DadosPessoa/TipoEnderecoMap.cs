@@ -14,7 +14,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             Map(b => b.DataHoraAlteracao).Nullable();
             Map(p => p.UsuarioAlteracao).Nullable();
             Map(b => b.Nome).Length(200);
-
+            Schema("portalohana");
             Table("TipoEndereco");
         }
     }

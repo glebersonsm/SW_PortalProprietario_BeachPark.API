@@ -15,6 +15,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(p => p.UsuarioAlteracao).Nullable();
             References(x => x.GrupoFaq, "GrupoFaq");
             References(x => x.Tags, "Tags");
+            
+            Schema("portalohana");
             Table("GrupoFaqTags");
         }
     }

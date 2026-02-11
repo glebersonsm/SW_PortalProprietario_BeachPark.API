@@ -26,6 +26,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework
             References(p => p.Pessoa, "Pessoa").UniqueKey("UK_GrupoEmpresaPessoa");
             Map(b => b.Status).CustomType<EnumType<EnumStatus>>();
 
+            Schema("portalohana");
             Table("GrupoEmpresa");
         }
     }

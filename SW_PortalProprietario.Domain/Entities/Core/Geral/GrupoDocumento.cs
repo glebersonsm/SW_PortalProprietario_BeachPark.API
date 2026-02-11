@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Entities.Core.Framework;
+using SW_PortalProprietario.Domain.Entities.Core.Framework;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Geral
@@ -12,6 +12,8 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual DateTime? DataHoraRemocao { get; set; }
         public virtual int? UsuarioRemocao { get; set; }
         public virtual GrupoDocumento? GrupoDocumentoPai { get; set; }
+        public virtual string? Cor { get; set; }
+        public virtual string? CorTexto { get; set; }
 
         public virtual async Task SaveValidate()
         {

@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Enumns;
+using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.GeralModels
 {
@@ -11,6 +11,8 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public DateTime? DataFimVigencia { get; set; }
         public bool? RemoverTagsNaoEnviadas { get; set; } = false;
         public List<int>? TagsRequeridas { get; set; }
+        public string? Cor { get; set; }
+        public string? CorTexto { get; set; }
 
     }
 }

@@ -19,6 +19,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.TipoMime).Length(100).Not.Nullable();
             Map(b => b.Arquivo).CustomType("BinaryBlob");
 
+            Schema("portalohana");
             Table("EmailAnexo");
         }
     }

@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -207,7 +207,6 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
 
         }
-
         private GrupoDocumentoModel MapWithParent(GrupoDocumento entity)
         {
             var model = _mapper.Map(entity, new GrupoDocumentoModel());
@@ -241,7 +240,15 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             List<SW_Utils.Auxiliar.Parameter> parameters = new();
             List<SW_Utils.Auxiliar.Parameter> parameters1 = new();
-            StringBuilder sb = new("From GrupoDocumento gd Inner Join Fetch gd.Empresa emp Inner Join Fetch emp.Pessoa ep Left Join Fetch gd.GrupoDocumentoPai gdp Left Join Fetch gdp.GrupoDocumentoPai gdpp Where 1 = 1 and gd.UsuarioRemocao is null and gd.DataHoraRemocao is null ");
+            StringBuilder sb = new(@"From 
+                                       GrupoDocumento gd 
+                                       Inner Join Fetch gd.Empresa emp 
+                                       Inner Join Fetch emp.Pessoa ep 
+                                       Left Join Fetch gd.GrupoDocumentoPai gdp 
+                                       Left Join Fetch gdp.GrupoDocumentoPai gdpp 
+                                    Where 1 = 1 
+                                       and gd.UsuarioRemocao is null 
+                                       and gd.DataHoraRemocao is null ");
             if (!string.IsNullOrEmpty(searchModel.Nome))
                 sb.AppendLine($" and Lower(gd.Nome) like '%{searchModel.Nome.ToLower()}%'");
 
@@ -277,7 +284,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
 
             sb.AppendLine(" Order By Coalesce(gd.Ordem, 999999), gd.Id ");
-            var grupoDocumentos = await _repository.FindByHql<GrupoDocumento>(sb.ToString(), session: null, parameters.ToArray());
+            var grupoDocumentos = await _repository.FindByHql<GrupoDocumento>(sb.ToString(), parameters: parameters.ToArray());
 
 
             var itensRetorno = grupoDocumentos.Select(a =>
@@ -305,7 +312,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                         sbDocumentos.AppendLine("  d.Disponivel, ");
                         sbDocumentos.AppendLine("  d.Ordem, ");
                         sbDocumentos.AppendLine("  d.DataInicioVigencia, ");
-                        sbDocumentos.AppendLine("  d.DataFimVigencia ");
+                        sbDocumentos.AppendLine("  d.DataFimVigencia, ");
+                        sbDocumentos.AppendLine("  d.Cor, ");
+                        sbDocumentos.AppendLine("  d.CorTexto ");
                         sbDocumentos.AppendLine("From Documento d ");
                         sbDocumentos.AppendLine("Inner Join GrupoDocumento gd on d.GrupoDocumento = gd.Id ");
                         sbDocumentos.AppendLine("Where ");
@@ -330,7 +339,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         sbDocumentos.AppendLine("Order By Coalesce(d.Ordem, 999999), d.Id ");
 
                         // Projeção direta para DocumentoModelSimplificado (sem Arquivo)
-                        var documentosDosGrupos = await _repository.FindBySql<DocumentoModelSimplificado>(sbDocumentos.ToString(), session: null, parametersDoc.ToArray());
+                        var documentosDosGrupos = await _repository.FindBySql<DocumentoModelSimplificado>(sbDocumentos.ToString(), parameters: parametersDoc.ToArray());
                         var itensRetornoDocumentos = documentosDosGrupos.AsList();
 
                         List<DocumentoTagRow> tagsDosDocumentos = new List<DocumentoTagRow>();

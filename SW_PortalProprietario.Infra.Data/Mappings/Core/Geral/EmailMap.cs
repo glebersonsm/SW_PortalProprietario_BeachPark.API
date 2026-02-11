@@ -30,6 +30,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
                 .Inverse()
                 .LazyLoad();
 
+            Schema("portalohana");
             Table("Email");
         }
 

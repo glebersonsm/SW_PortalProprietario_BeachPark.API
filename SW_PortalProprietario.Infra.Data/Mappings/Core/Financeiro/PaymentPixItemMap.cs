@@ -19,7 +19,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Financeiro
             Map(b => b.Vencimento);
             Map(b => b.DescricaoDoItem);
             References(b => b.PaymentPix, "PaymentPix");
-
+            Schema("portalohana");
             Table("PaymentPixItem");
         }
     }

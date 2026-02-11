@@ -19,6 +19,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Resposta).Length(2000);
             Map(b => b.Disponivel).CustomType<EnumSimNao>();
             Map(b => b.Ordem).Nullable();
+
+            Schema("portalohana");
             Table("Faq");
         }
     }

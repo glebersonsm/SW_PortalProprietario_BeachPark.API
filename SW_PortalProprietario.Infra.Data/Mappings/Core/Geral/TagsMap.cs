@@ -16,6 +16,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Nome).Length(200);
             Map(b => b.Path).Length(200);
             References(x => x.Parent, "Parent");
+
+            Schema("portalohana");
             Table("Tags");
         }
     }

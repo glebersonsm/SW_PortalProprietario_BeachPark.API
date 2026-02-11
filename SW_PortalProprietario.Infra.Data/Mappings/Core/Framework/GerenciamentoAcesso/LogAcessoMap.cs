@@ -21,6 +21,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework.Gerenciamento
             Map(b => b.RequestBody).CustomType("StringClob").CustomSqlType("Text");
             Map(b => b.Response).CustomType("StringClob").CustomSqlType("Text");
             Map(b => b.StatusResult);
+
+            Schema("portalohana");
             Table("LogAcesso");
         }
     }

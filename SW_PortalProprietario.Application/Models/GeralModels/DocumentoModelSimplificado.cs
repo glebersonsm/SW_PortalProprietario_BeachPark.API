@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Domain.Enumns;
+using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.GeralModels
 {
@@ -17,6 +17,8 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public string? DataFimVigenciaStr => DataFimVigencia?.ToString("yyyy-MM-dd");
 
         public List<DocumentoTagsModel>? TagsRequeridas { get; set; }
+        public string? Cor { get; set; }
+        public string? CorTexto { get; set; }
 
     }
 }

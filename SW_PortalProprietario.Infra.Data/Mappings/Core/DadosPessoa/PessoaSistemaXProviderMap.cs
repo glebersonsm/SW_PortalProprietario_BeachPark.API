@@ -17,7 +17,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             Map(b => b.PessoaSistema).Length(100);
             Map(b => b.NomeProvider);
             Map(b => b.TokenResult).CustomType("StringClob").CustomSqlType("Text");
-
+            Schema("portalohana");
             Table("PessoaSistemaXProvider");
         }
     }

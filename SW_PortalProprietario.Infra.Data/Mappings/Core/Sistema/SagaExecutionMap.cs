@@ -11,6 +11,11 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
 
             // SagaId é string (GUID como string), não System.Guid
             Map(b => b.SagaId).Length(100).Not.Nullable().Index("IX_SagaExecution_SagaId");
+            Map(b => b.DataHoraCriacao).Nullable();
+            Map(b => b.DataHoraAlteracao).Nullable();
+            Map(b => b.UsuarioAlteracao).Nullable();
+            Map(b => b.UsuarioCriacao).Nullable();
+            Map(b => b.UsuarioRemocaoId).Nullable();
             Map(b => b.OperationType).Length(200).Not.Nullable();
             Map(b => b.Status).Length(50).Not.Nullable();
             Map(b => b.InputData).CustomType("StringClob").CustomSqlType("Text").Nullable();
@@ -24,12 +29,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.ClientIp).Length(50).Nullable();
             Map(b => b.Metadata).CustomType("StringClob").CustomSqlType("Text").Nullable();
 
-            HasMany(x => x.Steps)
-                .KeyColumn("SagaExecutionId")
-                .Cascade.AllDeleteOrphan()
-                .Inverse()
-                .LazyLoad();
-
+            Schema("portalohana");
             Table("SagaExecution");
         }
     }

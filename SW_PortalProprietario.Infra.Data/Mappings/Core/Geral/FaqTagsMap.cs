@@ -17,6 +17,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
 
             References(x => x.Faq, "Faq");
             References(x => x.Tags, "Tags");
+
+            Schema("portalohana");
             Table("FaqTags");
         }
     }

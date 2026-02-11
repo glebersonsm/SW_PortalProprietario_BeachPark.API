@@ -18,6 +18,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
 
             References(x => x.DocumentTemplate, "DocumentTemplate");
             References(x => x.Tags, "Tags");
+
+            Schema("portalohana");
             Table("DocumentTemplateTags");
         }
     }

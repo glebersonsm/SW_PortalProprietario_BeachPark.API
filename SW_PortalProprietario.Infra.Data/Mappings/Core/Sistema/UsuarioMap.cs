@@ -45,6 +45,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.AvatarBase64).CustomType("StringClob").CustomSqlType("Text").Nullable();
             Map(b => b.MenuPermissions).CustomType("StringClob").CustomSqlType("Text").Nullable();
 
+            Schema("portalohana");
             Table("Usuario");
         }
     }

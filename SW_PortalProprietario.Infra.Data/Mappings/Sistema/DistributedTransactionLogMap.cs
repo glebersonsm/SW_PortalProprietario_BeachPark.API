@@ -10,6 +10,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Sistema
     {
         public DistributedTransactionLogMap()
         {
+            Schema("portalohana");
             Table("DistributedTransactionLog");
             
             Id(x => x.Id)

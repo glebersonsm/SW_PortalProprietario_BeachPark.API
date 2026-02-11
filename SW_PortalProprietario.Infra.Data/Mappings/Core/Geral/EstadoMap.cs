@@ -18,6 +18,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Nome).Length(100);
             Map(b => b.Sigla).Length(20);
             References(p => p.Pais, "Pais");
+
+            Schema("portalohana");
             Table("Estado");
         }
     }

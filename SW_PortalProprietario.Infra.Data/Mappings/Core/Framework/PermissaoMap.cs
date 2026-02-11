@@ -19,6 +19,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework
             Map(b => b.NomeInterno).Length(500);
             Map(b => b.UsarNomeInterno).CustomType<EnumType<EnumSimNao>>();
             Map(b => b.TipoPermissao).Length(200);
+
+            Schema("portalohana");
             Table("Permissao");
         }
     }

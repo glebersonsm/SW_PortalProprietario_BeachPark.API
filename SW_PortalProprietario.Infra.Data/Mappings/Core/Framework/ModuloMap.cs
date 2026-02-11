@@ -22,6 +22,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework
             Map(b => b.NomeInterno).Length(100);
             Map(b => b.Status).CustomType<EnumType<EnumStatus>>();
 
+            Schema("portalohana");
             Table("Modulo");
         }
     }

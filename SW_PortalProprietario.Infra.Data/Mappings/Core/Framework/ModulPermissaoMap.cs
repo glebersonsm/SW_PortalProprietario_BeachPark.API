@@ -15,6 +15,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework
             Map(p => p.UsuarioAlteracao).Nullable();
             References(b => b.Modulo, "Modulo");
             References(b => b.Permissao, "Permissao");
+
+            Schema("portalohana");
             Table("ModuloPermissao");
         }
     }

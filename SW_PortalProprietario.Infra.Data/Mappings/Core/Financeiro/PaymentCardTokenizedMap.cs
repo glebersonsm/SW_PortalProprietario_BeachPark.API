@@ -29,7 +29,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Financeiro
             Map(b => b.ResultadoSincronizacaoParcelas).CustomType("StringClob").CustomSqlType("Text");
             Map(b => b.DadosEnviados).CustomType("StringClob").CustomSqlType("Text");
             Map(b => b.Retorno).CustomType("StringClob").CustomSqlType("Text");
-
+            Schema("portalohana");
             Table("PaymentCardTokenized");
         }
     }

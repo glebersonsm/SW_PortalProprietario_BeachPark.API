@@ -18,6 +18,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework.Gerenciamento
             Map(b => b.ValorAntes).CustomType("StringClob").CustomSqlType("Text");
             Map(b => b.ValorApos).CustomType("StringClob").CustomSqlType("Text");
 
+            Schema("portalohana");
             Table("LogAcessoObjetoCampo");
         }
     }

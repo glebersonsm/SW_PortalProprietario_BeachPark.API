@@ -36,6 +36,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.TipoChavePix);
             Map(b => b.IdCidade);
 
+            Schema("portalohana");
             Table("ConfirmacaoLiberacaoPool");
         }
     }

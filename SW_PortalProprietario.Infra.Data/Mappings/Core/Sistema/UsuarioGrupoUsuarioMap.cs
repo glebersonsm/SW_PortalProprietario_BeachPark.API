@@ -22,6 +22,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             References(p => p.Usuario, "Usuario");
             References(p => p.GrupoUsuario, "GrupoUsuario");
 
+
+            Schema("portalohana");
             Table("UsuarioGrupoUsuario");
         }
     }

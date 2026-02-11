@@ -24,7 +24,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             Map(b => b.DataEncerramento);
             Map(b => b.TipoPessoa).CustomType<EnumType<EnumTipoPessoa>>();
             Map(b => b.RegimeTributario).CustomType<EnumType<EnumTipoTributacao>>();
-
+            Schema("portalohana");
             Table("Pessoa");
         }
     }

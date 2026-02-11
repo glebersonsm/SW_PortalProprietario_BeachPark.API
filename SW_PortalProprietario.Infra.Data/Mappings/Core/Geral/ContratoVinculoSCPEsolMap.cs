@@ -24,6 +24,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             References(p => p.Empresa, "Empresa");
             Map(b => b.Idioma);
 
+            Schema("portalohana");
             Table("ContratoVinculoSCPEsol");
         }
 

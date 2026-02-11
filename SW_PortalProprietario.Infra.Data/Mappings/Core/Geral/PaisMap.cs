@@ -18,6 +18,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Ddi).Length(3);
             Map(b => b.MascaraTelefoneCelular).Length(15);
             Map(b => b.MascaraTelefoneFixo).Length(15);
+
+            Schema("portalohana");
             Table("Pais");
         }
     }

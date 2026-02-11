@@ -17,6 +17,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(p => p.DataHoraRemocao).Nullable();
             References(x => x.GrupoDocumento, "GrupoDocumento");
             References(x => x.Tags, "Tags");
+
+            Schema("portalohana");
             Table("GrupoDocumentoTags");
         }
     }

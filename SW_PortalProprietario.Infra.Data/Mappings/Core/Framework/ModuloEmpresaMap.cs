@@ -22,6 +22,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework
             References(p => p.Empresa, "Empresa");
             References(p => p.Modulo, "Modulo");
 
+            Schema("portalohana");
             Table("ModuloEmpresa");
         }
     }

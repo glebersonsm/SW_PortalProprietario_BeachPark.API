@@ -19,6 +19,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(p => p.Path);
             References(b => b.Documento, "Documento");
             Map(b => b.Acao).Length(100);
+
+            Schema("portalohana");
             Table("HistoricoDocumento");
         }
     }

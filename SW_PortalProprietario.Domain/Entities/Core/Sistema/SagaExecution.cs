@@ -3,10 +3,8 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
     /// <summary>
     /// Representa uma execução completa de uma Saga (transação distribuída)
     /// </summary>
-    public class SagaExecution
+    public class SagaExecution : EntityBaseCore
     {
-        public virtual int? Id { get; set; }
-
         /// <summary>
         /// ID único da Saga (GUID)
         /// </summary>

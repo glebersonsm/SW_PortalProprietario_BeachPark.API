@@ -20,7 +20,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.NumeroContrato).Length(100);
             Map(b => b.Administrador).Length(1);
 
-
+            Schema("portalohana");
             Table("UsuarioMultiPropTemp");
         }
 

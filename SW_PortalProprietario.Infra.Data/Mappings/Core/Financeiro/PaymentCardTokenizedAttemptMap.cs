@@ -19,7 +19,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Financeiro
             Map(b => b.RetornoAmigavel);
             References(b => b.CardTokenized, "CardTokenized");
             Map(b => b.EmpresaLegadoId);
-
+            Schema("portalohana");
             Table("PaymentCardTokenizedAttempt");
         }
     }

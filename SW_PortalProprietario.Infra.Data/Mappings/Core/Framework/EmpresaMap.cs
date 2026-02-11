@@ -33,6 +33,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework
             Map(p => p.CnpjAdministradoraCondominio);
             Map(p => p.EnderecoAdministradoraCondominio);
 
+            Schema("portalohana");
             Table("Empresa");
         }
     }

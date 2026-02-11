@@ -21,7 +21,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             Map(b => b.DataValidade);
             References(b => b.Pessoa, "Pessoa");
             References(b => b.TipoDocumento, "TipoDocumento");
-
+            Schema("portalohana");
             Table("PessoaDocumento");
         }
     }

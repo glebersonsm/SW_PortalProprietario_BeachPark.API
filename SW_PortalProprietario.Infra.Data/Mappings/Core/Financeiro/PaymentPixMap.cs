@@ -29,7 +29,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Financeiro
             Map(b => b.ValidoAte);
             Map(b => b.AgrupamentoBaixaLegadoId);
             Map(b => b.EmpresaLegadoId);
-
+            Schema("portalohana");
             Table("PaymentPix");
         }
     }

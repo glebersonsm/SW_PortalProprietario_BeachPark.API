@@ -23,6 +23,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.TipoOperadorIdade).Length(10).Nullable();
             Map(b => b.TipoDataReferencia).Length(20).Nullable();
 
+            Schema("portalohana");
             Table("RegraPaxFreeConfiguracao");
         }
     }

@@ -29,6 +29,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(p => p.ParametrosConsulta).Length(4000);
             Map(p => p.TipoComunicacao).CustomType<EnumType<EnumHtmlTipoComunicacao>>();
 
+
+            Schema("portalohana");
             Table("HtmlTemplate");
         }
     }

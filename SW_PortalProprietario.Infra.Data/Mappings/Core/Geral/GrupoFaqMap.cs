@@ -19,6 +19,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Disponivel).CustomType<EnumSimNao>();
             Map(b => b.Ordem).Nullable();
             References(b => b.GrupoFaqPai, "IdGrupoFaqPai").Nullable();
+
+            Schema("portalohana");
             Table("GrupoFaq");
         }
     }

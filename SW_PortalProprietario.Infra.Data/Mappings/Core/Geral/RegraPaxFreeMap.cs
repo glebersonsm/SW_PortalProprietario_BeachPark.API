@@ -20,6 +20,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.DataInicioVigencia).Nullable();
             Map(b => b.DataFimVigencia).Nullable();
 
+            Schema("portalohana");
             Table("RegraPaxFree");
         }
     }

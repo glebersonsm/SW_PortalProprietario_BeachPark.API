@@ -9,6 +9,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
     {
         public DocumentTemplateMap()
         {
+            Schema("portalohana");
             Table("DocumentTemplate");
 
             Id(x => x.Id).GeneratedBy.Native("DocumentTemplate_");

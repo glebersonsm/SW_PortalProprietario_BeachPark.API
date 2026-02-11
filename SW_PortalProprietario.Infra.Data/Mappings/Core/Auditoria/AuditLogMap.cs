@@ -26,7 +26,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Auditoria
             Map(b => b.UserAgent).Length(500).Nullable();
             Map(b => b.ChangesJson).Length(10000).Not.Nullable();
             Map(b => b.EntityDataJson).Length(50000).Nullable();
-
+            Schema("portalohana");
             Table("AuditLog");
         }
     }

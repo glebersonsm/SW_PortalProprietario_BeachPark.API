@@ -21,6 +21,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.DataInicioVigencia).Nullable();
             Map(b => b.DataFimVigencia).Nullable();
             Map(b => b.Ordem).Nullable();
+
+            Schema("portalohana");
             Table("ImagemGrupoImagem");
         }
     }

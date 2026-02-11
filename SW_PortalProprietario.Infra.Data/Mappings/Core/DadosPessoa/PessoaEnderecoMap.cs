@@ -24,7 +24,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             References(b => b.Pessoa, "Pessoa");
             References(b => b.TipoEndereco, "TipoEndereco");
             References(b => b.Cidade, "Cidade");
-
+            Schema("portalohana");
             Table("PessoaEndereco");
         }
     }

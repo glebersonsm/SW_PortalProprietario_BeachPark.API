@@ -28,6 +28,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.EmpresaIdsJson).Length(2000).Not.Nullable();
             Map(b => b.TemplateSendMode).CustomType<EnumType<EnumTemplateSendMode>>().Not.Nullable();
 
+            Schema("portalohana");
             Table("AutomaticCommunicationConfig");
         }
     }

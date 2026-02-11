@@ -3,14 +3,13 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
     /// <summary>
     /// Representa um passo individual dentro de uma Saga
     /// </summary>
-    public class SagaStep
+    public class SagaStep : EntityBaseCore
     {
         public virtual int? Id { get; set; }
 
         /// <summary>
         /// Referência para a Saga pai
         /// </summary>
-        public virtual int SagaExecutionId { get; set; }
         public virtual SagaExecution? SagaExecution { get; set; }
 
         /// <summary>

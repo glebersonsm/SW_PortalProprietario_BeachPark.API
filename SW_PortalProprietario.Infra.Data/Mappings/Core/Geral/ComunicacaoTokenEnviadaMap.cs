@@ -23,6 +23,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(x => x.TwoFactorId).Nullable();
             Map(x => x.EmailId).Nullable();
 
+            Schema("portalohana");
             Table("ComunicacaoTokenEnviada");
         }
     }

@@ -18,6 +18,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.NomePesquisa).Length(100);
             References(p => p.Estado, "Estado");
 
+            Schema("portalohana");
             Table("Cidade");
         }
 

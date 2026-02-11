@@ -17,6 +17,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.AgendamentoId);
             Map(b => b.NovoAgendamentoId);
 
+
+            Schema("portalohana");
             Table("HistoricoRetiradaPool");
         }
     }

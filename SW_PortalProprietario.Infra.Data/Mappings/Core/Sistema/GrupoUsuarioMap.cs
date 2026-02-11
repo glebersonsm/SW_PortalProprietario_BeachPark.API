@@ -17,6 +17,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(p => p.UsuarioAlteracao).Nullable();
             Map(b => b.Nome).Length(100);
             Map(b => b.Status).CustomType<EnumType<EnumStatus>>();
+
+            Schema("portalohana");
             Table("GrupoUsuario");
         }
     }

@@ -20,7 +20,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.DadosPessoa
             Map(b => b.Numero);
             Map(b => b.NumeroFormatado);
             Map(b => b.Preferencial).CustomType<EnumType<EnumSimNao>>();
-
+            Schema("portalohana");
             Table("PessoaTelefone");
         }
     }

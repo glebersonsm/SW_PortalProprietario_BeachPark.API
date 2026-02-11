@@ -9,7 +9,6 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
         {
             Id(x => x.Id).GeneratedBy.Native("SagaStep_");
 
-            Map(b => b.SagaExecutionId).Not.Nullable().Index("IX_SagaStep_SagaExecutionId");
             Map(b => b.StepName).Length(200).Not.Nullable();
             Map(b => b.StepOrder).Not.Nullable();
             Map(b => b.Status).Length(50).Not.Nullable();
@@ -28,8 +27,9 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
             Map(b => b.PodeSerCompensado).Not.Nullable();
             Map(b => b.Metadata).CustomType("StringClob").CustomSqlType("Text").Nullable();
 
-            References(x => x.SagaExecution, "SagaExecutionId").Not.Nullable();
+            References(x => x.SagaExecution, "SagaExecution").Not.Nullable();
 
+            Schema("portalohana");
             Table("SagaStep");
         }
     }

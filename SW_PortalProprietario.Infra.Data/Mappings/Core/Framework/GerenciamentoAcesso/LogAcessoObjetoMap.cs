@@ -20,6 +20,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Framework.Gerenciamento
             Map(b => b.UsuarioOperacao);
             Map(b => b.TipoOperacao);
 
+            Schema("portalohana");
             Table("LogAcessoObjeto");
         }
     }

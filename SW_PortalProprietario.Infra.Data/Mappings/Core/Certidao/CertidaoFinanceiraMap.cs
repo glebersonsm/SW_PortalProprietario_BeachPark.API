@@ -32,7 +32,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Certidao
             Map(b => b.TorreBlocoNumero).Length(200);
             Map(b => b.CertidaoEmitidaEm).Length(200);
             Map(b => b.NomeCampoCpfCnpj).Length(200);
-
+            Schema("portalohana");
             Table("CertidaoFinanceira");
         }
     }

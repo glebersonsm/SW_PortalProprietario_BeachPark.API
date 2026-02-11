@@ -19,6 +19,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             References(b => b.RegraPaxFree, "RegraPaxFree");
             Map(b => b.HotelId).Nullable();
 
+            Schema("portalohana");
             Table("RegraPaxFreeHotel");
         }
     }

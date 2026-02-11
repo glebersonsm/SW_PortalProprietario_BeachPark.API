@@ -86,7 +86,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
 
                         var step = new SagaStep
                         {
-                            SagaExecutionId = saga.Id!.Value,
+                            SagaExecution = saga,
                             StepName = stepName,
                             StepOrder = order,
                             Status = "Pending",
@@ -239,7 +239,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
                     return new List<SagaStep>();
 
                 return await session.Query<SagaStep>()
-                    .Where(s => s.SagaExecutionId == saga.Id)
+                    .Where(s => !string.IsNullOrEmpty(s.SagaExecution!.SagaId) ? s.SagaExecution.SagaId == saga.SagaId : false)
                     .OrderBy(s => s.StepOrder)
                     .ToListAsync();
             }
