@@ -124,7 +124,8 @@ namespace SW_PortalProprietario.Application.Services.Core
             bool carregarFull = true;
             var parametroSistema = await _repository.GetParametroSistemaViewModel();
 
-            var loggedUser = await _repository.GetLoggedUser();
+            var loggedUser = await _repository.GetLoggedUser()
+                ?? throw new UnauthorizedAccessException("Usuário não autenticado");
 
             List<Parameter> parameters = new();
             StringBuilder sb = new(@"Select 
@@ -192,9 +193,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 sb.AppendLine($" and u.GestorReservasAgendamentos = {(int)searchModel.GestorReservasAgendamentos} ");
             }
 
-            if (!loggedUser.Value.isAdm)
+            if (!loggedUser.isAdm)
             {
-                sb.AppendLine($" and u.Id = {loggedUser.Value.userId} ");
+                sb.AppendLine($" and u.Id = {loggedUser.userId} ");
             }
 
             var sql = sb.ToString();
@@ -286,7 +287,8 @@ namespace SW_PortalProprietario.Application.Services.Core
         public async Task<List<UsuarioModel>?> SearchNotPaginated(UsuarioSearchModel searchModel)
         {
 
-            var loggedUser = await _repository.GetLoggedUser();
+            var loggedUser = await _repository.GetLoggedUser()
+                ?? throw new UnauthorizedAccessException("Usuário não autenticado");
 
             List<Parameter> parameters = new();
             StringBuilder sb = new(@"Select 
@@ -357,9 +359,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 parameters.Add(new Parameter("status", (int)searchModel.Status));
             }
 
-            if (!loggedUser.Value.isAdm)
+            if (!loggedUser.isAdm)
             {
-                sb.AppendLine($" and u.Id = {loggedUser.Value.userId} ");
+                sb.AppendLine($" and u.Id = {loggedUser.userId} ");
             }
 
             var sql = sb.ToString();

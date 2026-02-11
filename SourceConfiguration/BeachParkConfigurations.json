@@ -39,7 +39,7 @@
   "IntegradoCom": "CM|AC|ESPORTAL",
   "ControleDeUsuarioViaSFE": false,
   "ControleDeUsuarioViaAccessCenter": false,
-  "UpdateDataBase": false,
+  "UpdateDataBase": true,
   "UpdateFramework": true,
   "EfetuarConfiguracoesIniciais": true,
   "CriarPrimeiroUsuario": true,

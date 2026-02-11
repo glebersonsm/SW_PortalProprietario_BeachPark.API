@@ -509,6 +509,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             
             sql = NormalizaParameterName(sql, parameters);
             sql = AddSchemaToTables(sql);
+            sql = AddSchemaToTables(sql);
             
             var sqlPronto = $"Select COUNT(1) FROM ({sql}) a ";
             
@@ -618,6 +619,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 
             var dbCommand = Session.Connection.CreateCommand();
             command = RepositoryUtils.NormalizeFunctions(DataBaseType, command);
+            command = AddSchemaToTables(command);
             dbCommand.CommandText = command;
             _unitOfWork.PrepareCommandSql(dbCommand);
 
