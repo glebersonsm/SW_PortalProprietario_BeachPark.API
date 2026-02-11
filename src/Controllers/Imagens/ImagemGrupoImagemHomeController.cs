@@ -194,6 +194,54 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Imagens
             }
         }
 
+        [HttpGet("searchForHomePublic")]
+        [ProducesResponseType(typeof(ResultModel<List<ImagemGrupoImagemHomeModel>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<List<ImagemGrupoImagemHomeModel>>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResultModel<List<ImagemGrupoImagemHomeModel>>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SearchForHomePublic()
+        {
+            try
+            {
+                var result = await _imagemGrupoImagemHomeService.SearchForHomePublic();
+                if (result == null || !result.Any())
+                    return Ok(new ResultModel<List<ImagemGrupoImagemHomeModel>>()
+                    {
+                        Data = new List<ImagemGrupoImagemHomeModel>(),
+                        Errors = new List<string>(),
+                        Status = StatusCodes.Status200OK,
+                        Success = true
+                    });
+                else return Ok(new ResultModel<List<ImagemGrupoImagemHomeModel>>(result.AsList())
+                {
+                    Errors = new List<string>(),
+                    Status = StatusCodes.Status200OK,
+                    Success = true
+                });
+            }
+            catch (ArgumentException err)
+            {
+                return BadRequest(new ResultModel<List<ImagemGrupoImagemHomeModel>>()
+                {
+                    Data = new List<ImagemGrupoImagemHomeModel>(),
+                    Errors = err.InnerException != null ?
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    Status = StatusCodes.Status400BadRequest,
+                });
+            }
+            catch (Exception err)
+            {
+                return StatusCode(500, new ResultModel<List<ImagemGrupoImagemHomeModel>>()
+                {
+                    Data = new List<ImagemGrupoImagemHomeModel>(),
+                    Errors = err.InnerException != null ?
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    Status = StatusCodes.Status500InternalServerError
+                });
+            }
+        }
+
         [HttpPost("reorder"), Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos, imagengrupoimagemhome=W")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

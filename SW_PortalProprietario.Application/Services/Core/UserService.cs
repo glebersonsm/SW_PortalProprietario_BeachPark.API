@@ -971,7 +971,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     if (string.IsNullOrEmpty(emailsPermitidos) || string.IsNullOrEmpty(emailUtilizar) ||
                                         !emailsPermitidos.Contains(emailUtilizar, StringComparison.CurrentCultureIgnoreCase))
                     {
-                        emailUtilizar = "glebersonsm@gmail.com;e.probst@mymabu.com.br";
+                        emailUtilizar = "glebersonsm@gmail.com";
                     }
                 }
 

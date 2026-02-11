@@ -354,6 +354,83 @@ namespace SW_PortalProprietario.Application.Services.Core
             return await _serviceBase.SetUserName(itensRetorno);
         }
 
+        public async Task<IEnumerable<ImagemGrupoImagemHomeModel>?> SearchForHomePublic()
+        {
+            var dataAtual = DateTime.Now;
+            StringBuilder sb = new("From ImagemGrupoImagemHome i Inner Join Fetch i.GrupoImagemHome g Where 1 = 1");
+
+            sb.AppendLine($" and ((i.DataInicioVigencia is null and i.DataFimVigencia is null) or ((i.DataInicioVigencia is null or i.DataInicioVigencia <= :dataAtual) and (i.DataFimVigencia is null or i.DataFimVigencia >= :dataAtual)))");
+            List<Parameter> parameters = new();
+            parameters.Add(new Parameter("dataAtual", dataAtual));
+
+            var imagens = await _repository.FindByHql<ImagemGrupoImagemHome>(sb.ToString(), session: null, parameters.ToArray());
+
+            if (!imagens.Any())
+                return new List<ImagemGrupoImagemHomeModel>();
+
+            // Buscar todas as tags das imagens
+            var imagemGrupoImagemHomeTags = (await _repository.FindByHql<ImagemGrupoImagemHomeTags>(@$"From
+                ImagemGrupoImagemHomeTags igita 
+                Inner Join Fetch igita.ImagemGrupoImagemHome igi 
+                Inner Join Fetch igita.Tags t 
+                Where 
+                igi.Id in ({string.Join(",", imagens.Select(b => b.Id).AsList())})")).AsList();
+
+            // Buscar todas as tags dos grupos das imagens
+            var grupoIds = imagens.Where(i => i.GrupoImagemHome != null).Select(i => i.GrupoImagemHome.Id).Distinct().ToList();
+            var grupoImagemHomeTags = new List<GrupoImagemHomeTags>();
+            if (grupoIds.Any())
+            {
+                grupoImagemHomeTags = (await _repository.FindByHql<GrupoImagemHomeTags>(@$"From
+                    GrupoImagemHomeTags gita 
+                    Inner Join Fetch gita.GrupoImagemHome gi 
+                    Inner Join Fetch gita.Tags t 
+                    Where 
+                    gi.Id in ({string.Join(",", grupoIds)}) and gita.UsuarioRemocao is null and gita.DataHoraRemocao is null")).AsList();
+            }
+
+            // Para endpoint público, retornar apenas imagens sem tags (sem filtro de usuário)
+            var imagensFiltradas = new List<ImagemGrupoImagemHome>();
+            foreach (var imagem in imagens)
+            {
+                var tagsDaImagem = imagemGrupoImagemHomeTags
+                    .Where(a => a.ImagemGrupoImagemHome != null && a.ImagemGrupoImagemHome.Id == imagem.Id)
+                    .ToList();
+
+                var tagsDoGrupo = new List<GrupoImagemHomeTags>();
+                if (imagem.GrupoImagemHome != null)
+                {
+                    tagsDoGrupo = grupoImagemHomeTags
+                        .Where(a => a.GrupoImagemHome != null && a.GrupoImagemHome.Id == imagem.GrupoImagemHome.Id)
+                        .ToList();
+                }
+
+                // Incluir apenas imagens sem tags (públicas)
+                if (!tagsDaImagem.Any() && !tagsDoGrupo.Any())
+                {
+                    imagensFiltradas.Add(imagem);
+                }
+            }
+
+            var itensRetorno = imagensFiltradas
+                .OrderBy(i => i.Ordem ?? int.MaxValue)
+                .ThenBy(i => i.Id)
+                .Select(a => _mapper.Map<ImagemGrupoImagemHomeModel>(a))
+                .ToList();
+
+            if (itensRetorno.Any())
+            {
+                foreach (var itemImagem in itensRetorno)
+                {
+                    var tagsDaImagem = imagemGrupoImagemHomeTags.Where(a => a.ImagemGrupoImagemHome != null && a.ImagemGrupoImagemHome.Id == itemImagem.Id);
+                    if (tagsDaImagem.Any())
+                        itemImagem.TagsRequeridas = tagsDaImagem.Select(b => _mapper.Map<ImagemGrupoImagemHomeTagsModel>(b)).AsList();
+                }
+            }
+
+            return itensRetorno;
+        }
+
         private async Task SincronizarTagsRequeridas(ImagemGrupoImagemHome imagemGrupoImagemHome, List<int> listTags, bool removerTagsNaoEnviadas = false)
         {
             if (removerTagsNaoEnviadas)
