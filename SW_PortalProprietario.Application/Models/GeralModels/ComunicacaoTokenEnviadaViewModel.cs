@@ -12,7 +12,7 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public string? Destinatario { get; set; }
         public string? TextoEnviado { get; set; }
         public DateTime DataHoraEnvio { get; set; }
-        public Guid? TwoFactorId { get; set; }
+        public string? TwoFactorId { get; set; }
         public int? EmailId { get; set; }
         /// <summary>
         /// Data/hora da primeira abertura do e-mail (quando o destinatário carregou as imagens).
