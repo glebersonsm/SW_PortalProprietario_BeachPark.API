@@ -17,6 +17,52 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             };
         }
 
+        /// <summary>
+        /// Obtém um valor de configuração priorizando variável de ambiente (.env) sobre appsettings.json
+        /// </summary>
+        public static string? GetConfigValue(IConfiguration configuration, string configKey, string? envKey = null, string? defaultValue = null)
+        {
+            // 1. Tentar obter da variável de ambiente (se envKey foi fornecida)
+            if (!string.IsNullOrWhiteSpace(envKey))
+            {
+                var envValue = Environment.GetEnvironmentVariable(envKey);
+                if (!string.IsNullOrWhiteSpace(envValue))
+                {
+                    return envValue;
+                }
+            }
+
+            // 2. Tentar obter do appsettings.json
+            var configValue = configuration[configKey];
+            if (!string.IsNullOrWhiteSpace(configValue))
+            {
+                return configValue;
+            }
+
+            // 3. Retornar valor padrão
+            return defaultValue;
+        }
+
+        /// <summary>
+        /// Obtém um valor de configuração tipado priorizando variável de ambiente (.env) sobre appsettings.json
+        /// </summary>
+        public static T? GetConfigValue<T>(IConfiguration configuration, string configKey, string? envKey = null, T? defaultValue = default)
+        {
+            var stringValue = GetConfigValue(configuration, configKey, envKey, defaultValue?.ToString());
+            
+            if (string.IsNullOrWhiteSpace(stringValue))
+                return defaultValue;
+
+            try
+            {
+                return (T)Convert.ChangeType(stringValue, typeof(T));
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
         public static void OverrideConfigurationWithEnvironmentVariables(IConfiguration configuration)
         {
             // JWT
@@ -50,6 +96,9 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             OverrideIfNotEmpty(configuration, "RabbitMqConnectionPort", "RABBITMQ_PORT");
             OverrideIfNotEmpty(configuration, "RabbitMqConnectionUser", "RABBITMQ_USER");
             OverrideIfNotEmpty(configuration, "RabbitMqConnectionPass", "RABBITMQ_PASS");
+            OverrideIfNotEmpty(configuration, "RabbitMqFilaDeAuditoriaNome", "RABBITMQ_FILA_AUDITORIA");
+            OverrideIfNotEmpty(configuration, "RabbitMqFilaDeLogNome", "RABBITMQ_FILA_LOG");
+            OverrideIfNotEmpty(configuration, "RabbitMqFilaDeEmailNome", "RABBITMQ_FILA_EMAIL");
 
             // CM API
             OverrideIfNotEmpty(configuration, "CMUserId", "CM_USER_ID");

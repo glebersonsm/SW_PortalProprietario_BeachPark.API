@@ -109,6 +109,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _repository.BeginTransaction();
 
                 var programId = _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
+                _logger.LogInformation($"ProgramId configurado: '{programId}'");
                 var programIdLower = programId.ToLower();
 
                 // Lista de filas conhecidas com suas configurações
@@ -139,7 +140,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         HostName = host,
                         Port = port,
                         UserName = user ?? "guest",
-                        Password = pass ?? "guest"
+                        Password = pass ?? "guest25"
                     };
 
                     using var connection = await factory.CreateConnectionAsync();
@@ -150,9 +151,17 @@ namespace SW_PortalProprietario.Application.Services.Core
                     var discoveredQueues = new List<string>();
 
                     // Construir nomes exatos das filas
-                    var queueAuditoriaNomeExact = $"{programId}{_configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp")}".Replace(" ", "");
-                    var queueLogNomeExact = $"{programId}{_configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc")}".Replace(" ", "");
-                    var queueEmailNomeExact = $"{programId}{_configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc")}".Replace(" ", "");
+                    var queueAuditoriaNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp");
+                    var queueLogNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc");
+                    var queueEmailNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc");
+                    
+                    _logger.LogInformation($"Nomes de filas configurados - Auditoria: '{queueAuditoriaNomeRaw}', Log: '{queueLogNomeRaw}', Email: '{queueEmailNomeRaw}'");
+                    
+                    var queueAuditoriaNomeExact = $"{programId}{queueAuditoriaNomeRaw}".Replace(" ", "");
+                    var queueLogNomeExact = $"{programId}{queueLogNomeRaw}".Replace(" ", "");
+                    var queueEmailNomeExact = $"{programId}{queueEmailNomeRaw}".Replace(" ", "");
+                    
+                    _logger.LogInformation($"Nomes completos das filas - Auditoria: '{queueAuditoriaNomeExact}', Log: '{queueLogNomeExact}', Email: '{queueEmailNomeExact}'");
 
                     // Tentar descobrir filas conhecidas usando nomes exatos
                     var queuesToTry = new[] 
@@ -179,15 +188,23 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                     // Buscar todas as filas do banco
                     var existingQueuesInDb = (await _repository.FindByHql<RabbitMQQueue>("From RabbitMQQueue q")).ToList();
-                    var existingQueuesDict = existingQueuesInDb.ToDictionary(q => q.Nome.ToLower(), q => q);
+                    _logger.LogInformation($"Encontradas {existingQueuesInDb.Count} filas existentes no banco de dados");
+                    
+                    var existingQueuesDict = existingQueuesInDb.GroupBy(q => q.Nome.ToLower())
+                        .ToDictionary(g => g.Key, g => g.First());
+
+                    _logger.LogInformation($"Iniciando sincronização de {discoveredQueues.Count} filas descobertas no RabbitMQ");
 
                     // Sincronizar filas descobertas
+                    var syncCount = 0;
                     foreach (var queueName in discoveredQueues)
                     {
                         var queueNameLower = queueName.ToLower();
                         var queueInfo = knownQueues.ContainsKey(queueNameLower) 
                             ? knownQueues[queueNameLower] 
                             : ("Outros", $"Fila de processamento: {queueName}", null, null, null);
+
+                        _logger.LogDebug($"Processando fila: {queueName} (tipo: {queueInfo.tipo})");
 
                         if (existingQueuesDict.TryGetValue(queueNameLower, out var existingQueue))
                         {
@@ -224,6 +241,10 @@ namespace SW_PortalProprietario.Application.Services.Core
                                 await _repository.Save(existingQueue);
                                 _logger.LogInformation($"Fila atualizada: {queueName}");
                             }
+                            else
+                            {
+                                _logger.LogDebug($"Fila {queueName} já está atualizada");
+                            }
                         }
                         else
                         {
@@ -240,9 +261,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                             };
 
                             await _repository.Save(newQueue);
-                            _logger.LogInformation($"Fila sincronizada do RabbitMQ: {queueName}");
+                            _logger.LogInformation($"Fila criada do RabbitMQ: {queueName} (tipo: {queueInfo.tipo})");
                         }
+                        
+                        syncCount++;
                     }
+
+                    _logger.LogInformation($"Total de filas sincronizadas do RabbitMQ: {syncCount}");
                 }
                 catch (Exception ex)
                 {
@@ -287,12 +312,19 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _repository.BeginTransaction();
 
                 var programId = _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
+                _logger.LogInformation($"SyncConfiguredQueues - ProgramId configurado: '{programId}'");
                 
                 // Definir filas configuradas no sistema
+                var queueAuditoriaNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp");
+                var queueLogNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc");
+                var queueEmailNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc");
+                
+                _logger.LogInformation($"SyncConfiguredQueues - Nomes brutos - Auditoria: '{queueAuditoriaNomeRaw}', Log: '{queueLogNomeRaw}', Email: '{queueEmailNomeRaw}'");
+                
                 var configuredQueues = new List<(string nome, string tipo, string descricao, int? consumerConcurrency, int? retryAttempts, int? retryDelaySeconds)>
                 {
                     (
-                        _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp"),
+                        queueAuditoriaNomeRaw,
                         "Auditoria",
                         "Fila de processamento de logs de auditoria",
                         _configuration.GetValue<int?>("AuditLog:ConsumerConcurrency"),
@@ -300,7 +332,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         _configuration.GetValue<int?>("AuditLog:RetryDelaySeconds")
                     ),
                     (
-                        _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc"),
+                        queueLogNomeRaw,
                         "Log",
                         "Fila de processamento de logs de acesso",
                         null,
@@ -308,7 +340,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         null
                     ),
                     (
-                        _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc"),
+                        queueEmailNomeRaw,
                         "Email",
                         "Fila de processamento de envio de e-mails",
                         null,
@@ -317,16 +349,28 @@ namespace SW_PortalProprietario.Application.Services.Core
                     )
                 };
 
-                var existingQueuesInDb = (await _repository.FindByHql<RabbitMQQueue>("From RabbitMQQueue q")).ToList();
-                var existingQueuesDict = existingQueuesInDb.ToDictionary(q => q.Nome.ToLower(), q => q);
+                _logger.LogInformation($"Iniciando sincronização de {configuredQueues.Count} filas configuradas");
 
+                var existingQueuesInDb = (await _repository.FindByHql<RabbitMQQueue>("From RabbitMQQueue q")).ToList();
+                _logger.LogInformation($"Encontradas {existingQueuesInDb.Count} filas existentes no banco de dados");
+
+                var existingQueuesDict = existingQueuesInDb.GroupBy(q => q.Nome.ToLower())
+                    .ToDictionary(g => g.Key, g => g.First());
+
+                var processedCount = 0;
                 foreach (var configQueue in configuredQueues)
                 {
                     if (string.IsNullOrWhiteSpace(configQueue.nome))
+                    {
+                        _logger.LogWarning($"Nome de fila vazio encontrado no tipo '{configQueue.tipo}', ignorando");
                         continue;
+                    }
 
                     var fullQueueName = $"{programId}{configQueue.nome}".Replace(" ", "");
                     var fullQueueNameLower = fullQueueName.ToLower();
+
+                    _logger.LogInformation($"Processando fila: '{fullQueueName}' (tipo: {configQueue.tipo})");
+                    _logger.LogDebug($"  - ProgramId: '{programId}', Nome bruto: '{configQueue.nome}', Nome completo: '{fullQueueName}'");
 
                     if (existingQueuesDict.TryGetValue(fullQueueNameLower, out var existingQueue))
                     {
@@ -363,6 +407,10 @@ namespace SW_PortalProprietario.Application.Services.Core
                             await _repository.Save(existingQueue);
                             _logger.LogInformation($"Fila de processamento assíncrono atualizada: {fullQueueName}");
                         }
+                        else
+                        {
+                            _logger.LogDebug($"Fila {fullQueueName} já está atualizada, nenhuma alteração necessária");
+                        }
                     }
                     else
                     {
@@ -379,20 +427,28 @@ namespace SW_PortalProprietario.Application.Services.Core
                         };
 
                         await _repository.Save(newQueue);
-                        _logger.LogInformation($"Fila de processamento assíncrono sincronizada automaticamente: {fullQueueName}");
+                        _logger.LogInformation($"Fila de processamento assíncrono criada: {fullQueueName} (tipo: {configQueue.tipo})");
                     }
+                    
+                    processedCount++;
                 }
 
+                _logger.LogInformation($"Total de filas processadas: {processedCount}");
+
                 var (executed, exception) = await _repository.CommitAsync();
-                if (!executed && exception != null)
+                if (executed)
                 {
-                    _logger.LogWarning(exception, "Erro ao sincronizar filas configuradas, mas continuando...");
+                    _logger.LogInformation($"Sincronização de filas configuradas concluída com sucesso. {processedCount} filas processadas.");
+                }
+                else if (exception != null)
+                {
+                    _logger.LogWarning(exception, "Erro ao sincronizar filas configuradas");
                     _repository.Rollback();
                 }
             }
             catch (Exception err)
             {
-                _logger.LogWarning(err, "Erro ao sincronizar filas configuradas, mas continuando...");
+                _logger.LogError(err, "Erro ao sincronizar filas configuradas");
                 _repository.Rollback();
             }
         }

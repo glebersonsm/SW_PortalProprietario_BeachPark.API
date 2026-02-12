@@ -980,19 +980,26 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 
         public async Task<IList<T>> FindBySql<T>(string sql, IStatelessSession? session = null, params Parameter[] parameters)
         {
-            var sessionToUse = session ?? Session;
-            ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
-            
-            sql = RepositoryUtils.NormalizeFunctions(DataBaseType, sql);
-            sql = NormalizaParameterName(sql, parameters);
-            sql = AddSchemaToTables(sql);
+            try
+            {
+                var sessionToUse = session ?? Session;
+                ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
 
-            var dbCommand = sessionToUse.Connection.CreateCommand();
-            dbCommand.CommandText = sql;
-            _unitOfWork.PrepareCommandSql(dbCommand);
+                sql = RepositoryUtils.NormalizeFunctions(DataBaseType, sql);
+                sql = NormalizaParameterName(sql, parameters);
+                sql = AddSchemaToTables(sql);
 
-            var dados = await sessionToUse.Connection.QueryAsync<T>(sql, SW_Utils.Functions.RepositoryUtils.GetParametersForSql(parameters), dbCommand.Transaction);
-            return dados.ToList();
+                var dbCommand = sessionToUse.Connection.CreateCommand();
+                dbCommand.CommandText = sql;
+                _unitOfWork.PrepareCommandSql(dbCommand);
+
+                var dados = await sessionToUse.Connection.QueryAsync<T>(sql, SW_Utils.Functions.RepositoryUtils.GetParametersForSql(parameters), dbCommand.Transaction);
+                return dados.ToList();
+            }
+            catch (Exception err)
+            {
+                throw;
+            }
         }
 
         public async Task<long> CountTotalEntry(string sql, IStatelessSession? session = null, params Parameter[] parameters)

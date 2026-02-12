@@ -1179,7 +1179,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         // Se há usuário logado Admin/Admin User, enviar para ele mesmo. Caso contrário, usar perfil do userManter.
                         var loggedUser = await _repository.GetLoggedUser();
                         Usuario? usuarioLogado = null;
-                        if (loggedUser.HasValue)
+                        if (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId))
                         {
                             usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                         }
@@ -1233,7 +1233,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         // Se há usuário logado Admin/Admin User, enviar para ele mesmo. Caso contrário, usar perfil do userManter.
                         var loggedUser = await _repository.GetLoggedUser();
                         Usuario? usuarioLogado = null;
-                        if (loggedUser.HasValue)
+                        if (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId))
                         {
                             usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                         }
@@ -1297,7 +1297,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (usuarioLogado == null)
                 {
                     var loggedUser = await _repository.GetLoggedUser();
-                    if (loggedUser.HasValue)
+                    if (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId))
                     {
                         usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                     }
@@ -1352,7 +1352,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (usuarioLogado == null)
                 {
                     var loggedUser = await _repository.GetLoggedUser();
-                    if (loggedUser.HasValue)
+                    if (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId))
                     {
                         usuarioLogado = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                     }

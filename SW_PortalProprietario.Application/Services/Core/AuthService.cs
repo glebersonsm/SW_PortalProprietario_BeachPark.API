@@ -1490,7 +1490,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var loggedUser = await _repository.GetLoggedUser();
                 Usuario? usuarioParaVerificarPerfil = null;
                 
-                if (loggedUser.HasValue)
+                if (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId))
                 {
                     usuarioParaVerificarPerfil = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                 }
@@ -1544,7 +1544,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var loggedUser = await _repository.GetLoggedUser();
                 Usuario? usuarioParaVerificarPerfil = null;
                 
-                if (loggedUser.HasValue)
+                if (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId))
                 {
                     usuarioParaVerificarPerfil = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                 }
@@ -1582,7 +1582,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             if (pessoaId <= 0) return null;
             var list = (await _repository.FindBySql<PessoaTelefoneNumeroModel>($@"
-                Select Top 1 pt.NumeroFormatado as Numero From PessoaTelefone pt
+                Select pt.NumeroFormatado as Numero From PessoaTelefone pt
                 Inner Join TipoTelefone tt on pt.TipoTelefone = tt.Id
                 Where pt.Pessoa = {pessoaId} and pt.NumeroFormatado is not null and Ltrim(Rtrim(pt.NumeroFormatado)) <> ''
                   and (Lower(tt.Nome) like '%celular%' or pt.Preferencial = 1)

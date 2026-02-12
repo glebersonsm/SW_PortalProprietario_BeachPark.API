@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NLog.Extensions.Logging;
@@ -159,6 +159,22 @@ builder.Services.AddScoped<SW_PortalProprietario.Infra.Data.Audit.AuditHelper>()
 
 var app = builder.Build();
 app.UseCors("AllowAll");
+
+// Garante charset UTF-8 em respostas JSON para acentuação correta
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        var contentType = context.Response.Headers.ContentType.ToString();
+        if (contentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase)
+            && !contentType.Contains("charset=", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.Headers.ContentType = "application/json; charset=utf-8";
+        }
+        return Task.CompletedTask;
+    });
+    await next();
+});
 
 // Adicionar middleware de contexto de auditoria
 app.UseMiddleware<SW_PortalProprietario.Infra.Data.Middleware.AuditContextMiddleware>();
