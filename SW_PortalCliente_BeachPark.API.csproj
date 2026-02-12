@@ -143,6 +143,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove=".env.production.example" />
     <None Remove="PADRONIZACAO_GENERATION_SERVICES.md" />
     <None Remove="SAGA_PATTERN_README.md" />
     <None Remove="SCHEMA_AUTO_PREFIX_README.md" />

@@ -7,12 +7,6 @@
     "InstaceName": "portal_cliente_bp_",
     "Database": 0
   },
-  "RabbitMqFilaDeAuditoriaNome": "auditoria_bp",
-  "AuditLog": {
-    "ConsumerConcurrency": 5,
-    "RetryAttempts": 3,
-    "RetryDelaySeconds": 30
-  },
   "ReservasCMApiConfig": {
     "BaseUrl": "",
     "CriarAlterarReserva": "/Reserva/v1/efetuarReservasAgendamento",

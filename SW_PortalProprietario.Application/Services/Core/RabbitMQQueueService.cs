@@ -74,9 +74,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                 // Sincronizar filas do RabbitMQ com o banco
                 await SyncQueuesFromRabbitMQ();
 
-                // Buscar filas do banco
+                // Buscar filas do banco e filtrar apenas as que iniciam com PROGRAM_ID
+                var programId = Environment.GetEnvironmentVariable("PROGRAM_ID") ?? "PortalClienteBP_";
                 var queues = (await _repository.FindByHql<RabbitMQQueue>("From RabbitMQQueue q Order By q.Nome")).AsList();
-                var queueViewModels = queues.Select(q => _mapper.Map<RabbitMQQueueViewModel>(q)).ToList();
+                var queueViewModels = queues
+                    .Where(q => string.IsNullOrWhiteSpace(programId) || q.Nome.StartsWith(programId, StringComparison.OrdinalIgnoreCase))
+                    .Select(q => _mapper.Map<RabbitMQQueueViewModel>(q))
+                    .ToList();
 
                 // Buscar estatísticas das filas do RabbitMQ
                 await EnrichQueuesWithStatistics(queueViewModels);
@@ -94,12 +98,11 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             try
             {
-                var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost");
-                var port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int envPort) 
-                    ? envPort 
-                    : _configuration.GetValue<int>("RabbitMqConnectionPort");
-                var user = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser");
-                var pass = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass");
+                var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
+                var port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int envPort)
+                    ? envPort : 5672;
+                var user = Environment.GetEnvironmentVariable("RABBITMQ_USER");
+                var pass = Environment.GetEnvironmentVariable("RABBITMQ_PASS");
 
                 if (string.IsNullOrWhiteSpace(host) || port == 0)
                 {
@@ -110,32 +113,44 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 _repository.BeginTransaction();
 
-                var programId = _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
-                _logger.LogInformation($"ProgramId configurado: '{programId}'");
-                var programIdLower = programId.ToLower();
+                var programId = Environment.GetEnvironmentVariable("PROGRAM_ID") ?? "PortalClienteBP_";
+                _logger.LogInformation($"ProgramId configurado: '{programId}' (filtrando apenas filas que iniciam com este prefixo)");
+                var programIdLower = programId!.ToLower();
+
+                var consumerConcurrency = Environment.GetEnvironmentVariable("RABBITMQ_CONSUMER_CONCURRENCY") ?? "5";
+                var retryAttempts = Environment.GetEnvironmentVariable("RABBITMQ_RETRY_ATTEMPTS") ?? "3";
+                var retryDelaySeconds = Environment.GetEnvironmentVariable("RABBITMQ_RETRY_DELAY_SECONDS") ?? "30";
 
                 // Lista de filas conhecidas com suas configurações
                 var knownQueues = new Dictionary<string, (string tipo, string descricao, int? consumerConcurrency, int? retryAttempts, int? retryDelaySeconds)>
                 {
                     {
-                        $"{programId}{_configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp")}".Replace(" ", "").ToLower(),
+                        $"{programId}{Environment.GetEnvironmentVariable("RABBITMQ_LOG_AUDIT_FILA")}".Replace(" ", "").ToLower(),
                         ("Auditoria", "Fila de processamento de logs de auditoria", 
-                         _configuration.GetValue<int?>("AuditLog:ConsumerConcurrency"),
-                         _configuration.GetValue<int?>("AuditLog:RetryAttempts"),
-                         _configuration.GetValue<int?>("AuditLog:RetryDelaySeconds"))
+                         int.Parse(consumerConcurrency),
+                         int.Parse(retryAttempts),
+                         int.Parse(retryDelaySeconds))
                     },
                     {
-                        $"{programId}{_configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc")}".Replace(" ", "").ToLower(),
-                        ("Log", "Fila de processamento de logs de acesso", null, null, null)
+                        $"{programId}{Environment.GetEnvironmentVariable("RABBITMQ_LOG_ACESSO_FILA")}".Replace(" ", "").ToLower(),
+                        ("Log", "Fila de processamento de logs de acesso", int.Parse(consumerConcurrency),
+                         int.Parse(retryAttempts),
+                         int.Parse(retryDelaySeconds))
                     },
                     {
-                        $"{programId}{_configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc")}".Replace(" ", "").ToLower(),
-                        ("Email", "Fila de processamento de envio de e-mails", null, null, null)
+                        $"{programId}{Environment.GetEnvironmentVariable("RABBITMQ_EMAIL_FILA")}".Replace(" ", "").ToLower(),
+                        ("Email", "Fila de processamento de envio de e-mails", int.Parse(consumerConcurrency) , int.Parse(retryAttempts) , int.Parse(retryDelaySeconds))
                     }
                 };
 
                 // Tentar obter TODAS as filas via Management API (lista todas as filas do broker)
-                var discoveredQueues = await GetQueuesFromManagementApi(host, user, pass);
+                var allDiscoveredQueues = await GetQueuesFromManagementApi(host, user, pass);
+                // Filtrar apenas filas que iniciam com PROGRAM_ID
+                var discoveredQueues = allDiscoveredQueues
+                    .Where(q => !string.IsNullOrWhiteSpace(programId) && q.StartsWith(programId, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (allDiscoveredQueues.Count > 0)
+                    _logger.LogInformation($"Filtrando filas por PROGRAM_ID '{programId}': {discoveredQueues.Count} de {allDiscoveredQueues.Count} filas");
 
                 // Se Management API não retornou filas, fallback: tentar filas conhecidas via AMQP
                 if (discoveredQueues.Count == 0)
@@ -154,9 +169,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                         using var connection = await factory.CreateConnectionAsync();
                         using var channel = await connection.CreateChannelAsync();
 
-                        var queueAuditoriaNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp");
-                        var queueLogNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc");
-                        var queueEmailNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc");
+                        var queueAuditoriaNomeRaw =  Environment.GetEnvironmentVariable("RABBITMQ_FILA_AUDITORIA") ??  "Auditoria_BP_";
+                        var queueLogNomeRaw = Environment.GetEnvironmentVariable("RABBITMQ_LOG_AUDIT_FILA") ?? "FilaLogAuditPortalClienteBP_";
+                        var queueEmailNomeRaw = Environment.GetEnvironmentVariable("RABBITMQ_EMAIL_FILA") ?? "FilaLogAcessoPortalClienteBP_";
 
                         var queueAuditoriaNomeExact = $"{programId}{queueAuditoriaNomeRaw}".Replace(" ", "");
                         var queueLogNomeExact = $"{programId}{queueLogNomeRaw}".Replace(" ", "");
@@ -319,12 +334,11 @@ namespace SW_PortalProprietario.Application.Services.Core
         /// </summary>
         private async Task<List<string>> GetQueuesFromManagementApi(string host, string? user, string? pass)
         {
-            var managementPort = Environment.GetEnvironmentVariable("RABBITMQ_MANAGEMENT_PORT")
-                ?? _configuration.GetValue<string>("RabbitMqManagementPort");
-            var port = int.TryParse(managementPort, out int p) ? p : 15672;
-            var useHttps = _configuration.GetValue<bool>("RabbitMqManagementUseHttps");
-            var scheme = useHttps ? "https" : "http";
-            var vhost = _configuration.GetValue<string>("RabbitMqVhost", "/");
+            var managementPort = Environment.GetEnvironmentVariable("RABBITMQ_MANAGEMENT_PORT") ?? "1572";
+            var port = int.TryParse(managementPort, out int p);
+            var useHttps = Environment.GetEnvironmentVariable("RABBITMQ_MANAGEMENT_USE_HTTPS") ?? "S";
+            var scheme = useHttps == "S" ? "https" : "http";
+            var vhost = Environment.GetEnvironmentVariable("RABBITMQ_MANAGEMENT_MQ_VHOST") ?? "/";
             var vhostEncoded = Uri.EscapeDataString(vhost);
             var url = $"{scheme}://{host}:{port}/api/queues/{vhostEncoded}?columns=name";
 
@@ -371,14 +385,18 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 _repository.BeginTransaction();
 
-                var programId = _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
+                var programId = Environment.GetEnvironmentVariable("PROGRAM_ID") ?? "PortalClienteBP_";
                 _logger.LogInformation($"SyncConfiguredQueues - ProgramId configurado: '{programId}'");
-                
+
                 // Definir filas configuradas no sistema
-                var queueAuditoriaNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp");
-                var queueLogNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc");
-                var queueEmailNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc");
-                
+                var queueAuditoriaNomeRaw = Environment.GetEnvironmentVariable("RABBITMQ_FILA_AUDITORIA") ?? "Auditoria_BP_";
+                var queueLogNomeRaw = Environment.GetEnvironmentVariable("RABBITMQ_LOG_AUDIT_FILA") ?? "FilaLogAuditPortalClienteBP_";
+                var queueEmailNomeRaw = Environment.GetEnvironmentVariable("RABBITMQ_EMAIL_FILA") ?? "FilaLogAcessoPortalClienteBP_";
+
+                var consumerConcurrency = Environment.GetEnvironmentVariable("RABBITMQ_CONSUMER_CONCURRENCY") ?? "5";
+                var retryAttempts = Environment.GetEnvironmentVariable("RABBITMQ_RETRY_ATTEMPTS") ?? "3";
+                var retryDelaySeconds = Environment.GetEnvironmentVariable("RABBITMQ_RETRY_DELAY_SECONDS") ?? "30";
+
                 _logger.LogInformation($"SyncConfiguredQueues - Nomes brutos - Auditoria: '{queueAuditoriaNomeRaw}', Log: '{queueLogNomeRaw}', Email: '{queueEmailNomeRaw}'");
                 
                 var configuredQueues = new List<(string nome, string tipo, string descricao, int? consumerConcurrency, int? retryAttempts, int? retryDelaySeconds)>
@@ -387,25 +405,25 @@ namespace SW_PortalProprietario.Application.Services.Core
                         queueAuditoriaNomeRaw,
                         "Auditoria",
                         "Fila de processamento de logs de auditoria",
-                        _configuration.GetValue<int?>("AuditLog:ConsumerConcurrency"),
-                        _configuration.GetValue<int?>("AuditLog:RetryAttempts"),
-                        _configuration.GetValue<int?>("AuditLog:RetryDelaySeconds")
+                        int.Parse(consumerConcurrency),
+                        int.Parse(retryAttempts),
+                        int.Parse(retryDelaySeconds)
                     ),
                     (
                         queueLogNomeRaw,
                         "Log",
                         "Fila de processamento de logs de acesso",
-                        null,
-                        null,
-                        null
+                        int.Parse(consumerConcurrency),
+                        int.Parse(retryAttempts),
+                        int.Parse(retryDelaySeconds)
                     ),
                     (
                         queueEmailNomeRaw,
                         "Email",
                         "Fila de processamento de envio de e-mails",
-                        null,
-                        null,
-                        null
+                        int.Parse(consumerConcurrency),
+                        int.Parse(retryAttempts),
+                        int.Parse(retryDelaySeconds)
                     )
                 };
 
@@ -517,12 +535,11 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             try
             {
-                var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost");
-                var port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int envPort) 
-                    ? envPort 
-                    : _configuration.GetValue<int>("RabbitMqConnectionPort");
-                var user = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser");
-                var pass = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass");
+                var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
+                var port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int envPort)
+                    ? envPort : 5672;
+                var user = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "swsolucoes";
+                var pass = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? "SW@dba#2024!";
 
                 if (string.IsNullOrWhiteSpace(host) || port == 0)
                 {
