@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Text.Json;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -132,59 +134,65 @@ namespace SW_PortalProprietario.Application.Services.Core
                     }
                 };
 
-                // Tentar conectar ao RabbitMQ e listar filas
-                try
+                // Tentar obter TODAS as filas via Management API (lista todas as filas do broker)
+                var discoveredQueues = await GetQueuesFromManagementApi(host, user, pass);
+
+                // Se Management API não retornou filas, fallback: tentar filas conhecidas via AMQP
+                if (discoveredQueues.Count == 0)
                 {
-                    var factory = new ConnectionFactory
+                    _logger.LogInformation("Management API não disponível ou sem filas, tentando descobrir filas conhecidas via AMQP");
+                    try
                     {
-                        HostName = host,
-                        Port = port,
-                        UserName = user ?? "guest",
-                        Password = pass ?? "guest25"
-                    };
-
-                    using var connection = await factory.CreateConnectionAsync();
-                    using var channel = await connection.CreateChannelAsync();
-
-                    // Listar todas as filas do RabbitMQ usando Management API via HTTP
-                    // Como alternativa, vamos tentar descobrir filas conhecidas tentando declará-las passivamente
-                    var discoveredQueues = new List<string>();
-
-                    // Construir nomes exatos das filas
-                    var queueAuditoriaNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp");
-                    var queueLogNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc");
-                    var queueEmailNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc");
-                    
-                    _logger.LogInformation($"Nomes de filas configurados - Auditoria: '{queueAuditoriaNomeRaw}', Log: '{queueLogNomeRaw}', Email: '{queueEmailNomeRaw}'");
-                    
-                    var queueAuditoriaNomeExact = $"{programId}{queueAuditoriaNomeRaw}".Replace(" ", "");
-                    var queueLogNomeExact = $"{programId}{queueLogNomeRaw}".Replace(" ", "");
-                    var queueEmailNomeExact = $"{programId}{queueEmailNomeRaw}".Replace(" ", "");
-                    
-                    _logger.LogInformation($"Nomes completos das filas - Auditoria: '{queueAuditoriaNomeExact}', Log: '{queueLogNomeExact}', Email: '{queueEmailNomeExact}'");
-
-                    // Tentar descobrir filas conhecidas usando nomes exatos
-                    var queuesToTry = new[] 
-                    { 
-                        (queueAuditoriaNomeExact, queueAuditoriaNomeExact.ToLower()),
-                        (queueLogNomeExact, queueLogNomeExact.ToLower()),
-                        (queueEmailNomeExact, queueEmailNomeExact.ToLower())
-                    };
-
-                    foreach (var (queueNameExact, queueNameLower) in queuesToTry)
-                    {
-                        try
+                        var factory = new ConnectionFactory
                         {
-                            var queueInfo = await channel.QueueDeclarePassiveAsync(queueNameExact);
-                            discoveredQueues.Add(queueNameExact);
-                            _logger.LogInformation($"Fila encontrada no RabbitMQ: {queueNameExact} (mensagens pendentes: {queueInfo.MessageCount})");
-                        }
-                        catch (Exception ex)
+                            HostName = host,
+                            Port = port,
+                            UserName = user ?? "guest",
+                            Password = pass ?? "guest25"
+                        };
+
+                        using var connection = await factory.CreateConnectionAsync();
+                        using var channel = await connection.CreateChannelAsync();
+
+                        var queueAuditoriaNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp");
+                        var queueLogNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc");
+                        var queueEmailNomeRaw = _configuration.GetValue<string>("RabbitMqFilaDeEmailNome", "emails_mvc");
+
+                        var queueAuditoriaNomeExact = $"{programId}{queueAuditoriaNomeRaw}".Replace(" ", "");
+                        var queueLogNomeExact = $"{programId}{queueLogNomeRaw}".Replace(" ", "");
+                        var queueEmailNomeExact = $"{programId}{queueEmailNomeRaw}".Replace(" ", "");
+
+                        var queuesToTry = new[] { queueAuditoriaNomeExact, queueLogNomeExact, queueEmailNomeExact };
+
+                        foreach (var queueNameExact in queuesToTry)
                         {
-                            _logger.LogDebug(ex, $"Fila não encontrada no RabbitMQ: {queueNameExact}");
-                            // Fila não existe, continuar
+                            try
+                            {
+                                var queueInfo = await channel.QueueDeclarePassiveAsync(queueNameExact);
+                                discoveredQueues.Add(queueNameExact);
+                                _logger.LogInformation($"Fila encontrada no RabbitMQ: {queueNameExact} (mensagens pendentes: {queueInfo.MessageCount})");
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogDebug(ex, $"Fila não encontrada no RabbitMQ: {queueNameExact}");
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Não foi possível conectar ao RabbitMQ para listar filas, usando apenas configurações");
+                        await SyncConfiguredQueues();
+                        _repository.Rollback();
+                        return;
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation($"Management API retornou {discoveredQueues.Count} filas do RabbitMQ");
+                }
+
+                if (discoveredQueues.Count > 0)
+                {
 
                     // Buscar todas as filas do banco
                     var existingQueuesInDb = (await _repository.FindByHql<RabbitMQQueue>("From RabbitMQQueue q")).ToList();
@@ -269,12 +277,11 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                     _logger.LogInformation($"Total de filas sincronizadas do RabbitMQ: {syncCount}");
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogWarning(ex, "Não foi possível conectar ao RabbitMQ para listar filas, usando apenas configurações");
-                    // Fallback: sincronizar apenas filas configuradas
-                    await SyncConfiguredQueues();
+                    _logger.LogInformation("Nenhuma fila encontrada, executando sincronização de filas configuradas");
                     _repository.Rollback();
+                    await SyncConfiguredQueues();
                     return;
                 }
 
@@ -302,6 +309,59 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
                     _logger.LogError(fallbackErr, "Erro também no fallback de sincronização");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Obtém todas as filas do RabbitMQ via Management API (HTTP).
+        /// Requer o plugin rabbitmq_management habilitado no broker (porta 15672).
+        /// Retorna lista vazia se Management API não estiver disponível.
+        /// </summary>
+        private async Task<List<string>> GetQueuesFromManagementApi(string host, string? user, string? pass)
+        {
+            var managementPort = Environment.GetEnvironmentVariable("RABBITMQ_MANAGEMENT_PORT")
+                ?? _configuration.GetValue<string>("RabbitMqManagementPort");
+            var port = int.TryParse(managementPort, out int p) ? p : 15672;
+            var useHttps = _configuration.GetValue<bool>("RabbitMqManagementUseHttps");
+            var scheme = useHttps ? "https" : "http";
+            var vhost = _configuration.GetValue<string>("RabbitMqVhost", "/");
+            var vhostEncoded = Uri.EscapeDataString(vhost);
+            var url = $"{scheme}://{host}:{port}/api/queues/{vhostEncoded}?columns=name";
+
+            try
+            {
+                using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(15);
+                var authValue = Convert.ToBase64String(
+                    System.Text.Encoding.ASCII.GetBytes($"{user ?? "guest"}:{pass ?? "guest"}"));
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Basic", authValue);
+
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogDebug("Management API retornou {StatusCode} para {Url}", response.StatusCode, url);
+                    return new List<string>();
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                var queues = new List<string>();
+                foreach (var elem in doc.RootElement.EnumerateArray())
+                {
+                    if (elem.TryGetProperty("name", out var nameProp))
+                    {
+                        var name = nameProp.GetString();
+                        if (!string.IsNullOrWhiteSpace(name))
+                            queues.Add(name);
+                    }
+                }
+                return queues;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Não foi possível obter filas via Management API em {Url}", url);
+                return new List<string>();
             }
         }
 
