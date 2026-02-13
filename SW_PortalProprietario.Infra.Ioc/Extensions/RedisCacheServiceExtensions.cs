@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Newtonsoft;
@@ -37,6 +37,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             // Monta a configuração do Redis manualmente
             var redisConfiguration = new RedisConfiguration
             {
+                Name = programId,
                 Password = redisPassword,
                 AllowAdmin = false,
                 Ssl = false,

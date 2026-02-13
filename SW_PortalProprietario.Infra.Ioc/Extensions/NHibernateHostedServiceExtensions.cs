@@ -1,4 +1,4 @@
-﻿using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,7 +46,6 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
                                 .Database(OracleManagedDataClientConfiguration.Oracle10.ConnectionString(connectionString)
-                                .ShowSql()
                                 .AdoNetBatchSize(50)
                                 .Raw("throw_on_error", "true"))
                                 .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AutomappingConfigurationDefault>());
@@ -62,7 +61,6 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
                                 .Database(SQLiteConfiguration.Standard.ConnectionString(connectionString)
-                                .ShowSql()
                                 .AdoNetBatchSize(50)
                                 .Raw("throw_on_error", "true"))
                                 .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AutomappingConfigurationDefault>());
@@ -78,7 +76,6 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
                                 .Database(MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
-                                .ShowSql()
                                 .AdoNetBatchSize(50)
                                 .Raw("throw_on_error", "true"))
                                 .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AutomappingConfigurationDefault>());

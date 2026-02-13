@@ -1,4 +1,4 @@
-﻿using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,8 +49,6 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
                                 .Database(OracleManagedDataClientConfiguration.Oracle10.ConnectionString(connectionString)
-                                .ShowSql()
-                                .FormatSql()
                                 .AdoNetBatchSize(50)
                                 .Raw("throw_on_error", "true"))
                                 .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AutomappingConfigurationDefault>());
@@ -71,8 +69,6 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
             .Database(PostgreSQLConfiguration.Standard.ConnectionString(connectionString)
-            .ShowSql()  // Exibir SQL gerado
-            .FormatSql()  // Formatar SQL para melhor legibilidade
             .Raw("hibernate.connection.provider", "NHibernate.Connection.C3P0ConnectionProvider") // Configuração do provedor de conexão
             .Raw("hibernate.c3p0.min_size", "5")  // Tamanho mínimo do pool de conexões
             .Raw("hibernate.c3p0.max_size", "300") // Tamanho máximo do pool de conexões
@@ -98,8 +94,6 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
                                 .Database(MsSqlConfiguration.MsSql2012.ConnectionString(connectionString)
-                                .ShowSql()
-                                .FormatSql()
                                 .AdoNetBatchSize(50)
                                 .Raw("throw_on_error", "true"))
                                 .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AutomappingConfigurationDefault>());
@@ -119,8 +113,6 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
                                 .Database(SQLiteConfiguration.Standard.ConnectionString(connectionString)
-                                .ShowSql()
-                                .FormatSql()
                                 .AdoNetBatchSize(50)
                                 .Raw("throw_on_error", "true"))
                                 .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AutomappingConfigurationDefault>());
