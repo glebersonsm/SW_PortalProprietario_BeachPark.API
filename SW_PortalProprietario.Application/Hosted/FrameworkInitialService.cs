@@ -332,14 +332,14 @@ namespace SW_PortalProprietario.Application.Hosted
                 {
                     _logger.LogInformation("Iniciando importa??o h?brida de usu?rios ativos (CM + Esolution)");
 
-                    var usuariosCm = await hybridProvider.GetUsuariosAtivosSistemaLegado_Cm();
-                    if (usuariosCm != null && usuariosCm.Any())
-                    {
-                        foreach (var usuario in usuariosCm)
-                            usuario.ProviderName = "CM";
-                        usuariosLegado.AddRange(usuariosCm);
-                        _logger.LogInformation($"Importados {usuariosCm.Count} usu?rios ativos do sistema CM");
-                    }
+                    //var usuariosCm = await hybridProvider.GetUsuariosAtivosSistemaLegado_Cm();
+                    //if (usuariosCm != null && usuariosCm.Any())
+                    //{
+                    //    foreach (var usuario in usuariosCm)
+                    //        usuario.ProviderName = "CM";
+                    //    usuariosLegado.AddRange(usuariosCm);
+                    //    _logger.LogInformation($"Importados {usuariosCm.Count} usu?rios ativos do sistema CM");
+                    //}
 
                     var usuariosEsol = await hybridProvider.GetUsuariosAtivosSistemaLegado_Esol();
                     if (usuariosEsol != null && usuariosEsol.Any())

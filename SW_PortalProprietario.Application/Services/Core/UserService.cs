@@ -159,8 +159,8 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             if (!string.IsNullOrEmpty(searchModel.Email))
             {
-                sb.AppendLine(@$" and (Lower(p.EmailPreferencial) like '{searchModel.Email.TrimEnd().ToLower()}%' or  
-                    Lower(p.EmailAlternativo) like '{searchModel.Email.TrimEnd().ToLower()}%')");
+                sb.AppendLine(@$" and (Lower(p.EmailPreferencial) like '%{searchModel.Email.TrimEnd().ToLower()}%' or  
+                    Lower(p.EmailAlternativo) like '%{searchModel.Email.TrimEnd().ToLower()}%')");
             }
 
             if (!string.IsNullOrEmpty(searchModel.CpfCnpj))
