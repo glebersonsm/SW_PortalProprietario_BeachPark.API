@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.LogsBackGround;
@@ -11,81 +12,117 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
     {
         private readonly IConfiguration _configuration;
         private readonly ICacheStore _cache;
-        public RabbitMQRegisterLogMessageToQueueProducer(IConfiguration configuration, ICacheStore cache)
+        private readonly IRabbitMQConnectionManager _connectionManager;
+        private readonly ILogger<RabbitMQRegisterLogMessageToQueueProducer> _logger;
+
+        public RabbitMQRegisterLogMessageToQueueProducer(
+            IConfiguration configuration, 
+            ICacheStore cache,
+            IRabbitMQConnectionManager connectionManager,
+            ILogger<RabbitMQRegisterLogMessageToQueueProducer> logger)
         {
             _configuration = configuration;
             _cache = cache;
-
+            _connectionManager = connectionManager;
+            _logger = logger;
         }
 
         public async Task AddLogMessage()
         {
-            var factory = new ConnectionFactory
+            IChannel? channel = null;
+            try
             {
-                HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost"),
-                Password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass"),
-                UserName = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser"),
-                Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : _configuration.GetValue<int>("RabbitMqConnectionPort"),
-                ClientProvidedName = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "ProcessamentoFilaLog"),
-                ConsumerDispatchConcurrency = 1
-            };
+                var connection = await _connectionManager.GetProducerConnectionAsync();
+                channel = await _connectionManager.CreateChannelAsync(connection);
 
-            using var connection = await factory.CreateConnectionAsync();
-            using var channel = await connection.CreateChannelAsync();
+                var programId = Environment.GetEnvironmentVariable("PROGRAM_ID") 
+                    ?? _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
+                
+                var filaLog = Environment.GetEnvironmentVariable("RABBITMQ_FILA_LOG") 
+                    ?? _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc");
 
-            var exchangeAndQueueName = $"{_configuration.GetValue<string>("ProgramId", "PORTALPROP_")}{_configuration.GetValue<string>("RabbitMqFilaDeLogNome", "ProcessamentoFilaLog")}";
-            exchangeAndQueueName = exchangeAndQueueName.Replace(" ", "");
-            await channel.ExchangeDeclareAsync(exchange: exchangeAndQueueName, type: ExchangeType.Direct, durable: true);
+                var exchangeAndQueueName = $"{programId}{filaLog}".Replace(" ", "");
+                
+                await channel.ExchangeDeclareAsync(
+                    exchange: exchangeAndQueueName, 
+                    type: ExchangeType.Direct, 
+                    durable: true);
 
-            var messagesToPublish = new List<OperationSystemLogModelEvent>();
-            foreach (var message in messagesToPublish)
-            {
-                var jsonMsg = System.Text.Json.JsonSerializer.Serialize(message);
-
-                var body = Encoding.UTF8.GetBytes(jsonMsg);
-                await channel.BasicPublishAsync(exchangeAndQueueName, exchangeAndQueueName, body);
+                var messagesToPublish = new List<OperationSystemLogModelEvent>();
+                foreach (var message in messagesToPublish)
+                {
+                    var jsonMsg = System.Text.Json.JsonSerializer.Serialize(message);
+                    var body = Encoding.UTF8.GetBytes(jsonMsg);
+                    await channel.BasicPublishAsync(exchangeAndQueueName, exchangeAndQueueName, body);
+                }
             }
-
-            channel.Dispose();
-            connection.Dispose();
-
-            await Task.CompletedTask;
-
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao enfileirar logs de acesso");
+            }
+            finally
+            {
+                if (channel != null)
+                {
+                    try
+                    {
+                        await channel.CloseAsync();
+                        channel.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Erro ao fechar channel de log");
+                    }
+                }
+            }
         }
 
         public async Task AddLogMessage(OperationSystemLogModelEvent message)
         {
-            var factory = new ConnectionFactory
+            IChannel? channel = null;
+            try
             {
-                HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost"),
-                Password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass"),
-                UserName = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser"),
-                Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : _configuration.GetValue<int>("RabbitMqConnectionPort"),
-                ClientProvidedName = _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "ProcessamentoFilaLog"),
-                ConsumerDispatchConcurrency = 1
-            };
+                var connection = await _connectionManager.GetProducerConnectionAsync();
+                channel = await _connectionManager.CreateChannelAsync(connection);
 
+                var programId = Environment.GetEnvironmentVariable("PROGRAM_ID") 
+                    ?? _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
+                
+                var filaLog = Environment.GetEnvironmentVariable("RABBITMQ_FILA_LOG") 
+                    ?? _configuration.GetValue<string>("RabbitMqFilaDeLogNome", "gravacaoLogs_mvc");
 
-            using var connection = await factory.CreateConnectionAsync();
-            using var channel = await connection.CreateChannelAsync();
+                var exchangeAndQueueName = $"{programId}{filaLog}".Replace(" ", "");
+                
+                await channel.ExchangeDeclareAsync(
+                    exchange: exchangeAndQueueName, 
+                    type: ExchangeType.Direct, 
+                    durable: true);
 
-            var exchangeAndQueueName = $"{_configuration.GetValue<string>("ProgramId", "PORTALPROP_")}{_configuration.GetValue<string>("RabbitMqFilaDeLogNome", "ProcessamentoFilaLog")}";
-            exchangeAndQueueName = exchangeAndQueueName.Replace(" ", "");
-            await channel.ExchangeDeclareAsync(exchange: exchangeAndQueueName, type: ExchangeType.Direct, durable: true);
-
-            var jsonMsg = System.Text.Json.JsonSerializer.Serialize(message);
-
-
-
-            var body = Encoding.UTF8.GetBytes(jsonMsg);
-            await channel.BasicPublishAsync(exchangeAndQueueName, exchangeAndQueueName, body);
-
-
-            channel.Dispose();
-            connection.Dispose();
-
-            await Task.CompletedTask;
+                var jsonMsg = System.Text.Json.JsonSerializer.Serialize(message);
+                var body = Encoding.UTF8.GetBytes(jsonMsg);
+                
+                await channel.BasicPublishAsync(exchangeAndQueueName, exchangeAndQueueName, body);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao enfileirar log de acesso");
+            }
+            finally
+            {
+                if (channel != null)
+                {
+                    try
+                    {
+                        await channel.CloseAsync();
+                        channel.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Erro ao fechar channel de log");
+                    }
+                }
+            }
         }
-
     }
 }
+

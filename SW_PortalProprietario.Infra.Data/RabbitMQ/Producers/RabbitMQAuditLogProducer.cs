@@ -4,6 +4,7 @@ using SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.LogsBackG
 using SW_Utils.Models;
 using RabbitMQ.Client;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
 {
@@ -11,52 +12,70 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
     {
         private readonly IConfiguration _configuration;
         private readonly ICacheStore _cache;
+        private readonly IRabbitMQConnectionManager _connectionManager;
+        private readonly ILogger<RabbitMQAuditLogProducer> _logger;
 
-        public RabbitMQAuditLogProducer(IConfiguration configuration, ICacheStore cache)
+        public RabbitMQAuditLogProducer(
+            IConfiguration configuration, 
+            ICacheStore cache,
+            IRabbitMQConnectionManager connectionManager,
+            ILogger<RabbitMQAuditLogProducer> logger)
         {
             _configuration = configuration;
             _cache = cache;
+            _connectionManager = connectionManager;
+            _logger = logger;
         }
 
         public async Task EnqueueAuditLogAsync(AuditLogMessageEvent message)
         {
+            IChannel? channel = null;
             try
             {
-                var factory = new ConnectionFactory
-                {
-                    HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? _configuration.GetValue<string>("RabbitMqConnectionHost"),
-                    Password = Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? _configuration.GetValue<string>("RabbitMqConnectionPass"),
-                    UserName = Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? _configuration.GetValue<string>("RabbitMqConnectionUser"),
-                    Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out int port) ? port : _configuration.GetValue<int>("RabbitMqConnectionPort"),
-                    ClientProvidedName = _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "ProcessamentoFilaAuditoria"),
-                    ConsumerDispatchConcurrency = 1
-                };
+                // ? Reutiliza conexão compartilhada ao invés de criar uma nova
+                var connection = await _connectionManager.GetProducerConnectionAsync();
+                channel = await _connectionManager.CreateChannelAsync(connection);
 
-                using var connection = await factory.CreateConnectionAsync();
-                using var channel = await connection.CreateChannelAsync();
+                var programId = Environment.GetEnvironmentVariable("PROGRAM_ID") 
+                    ?? _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
+                
+                var filaAuditoria = Environment.GetEnvironmentVariable("RABBITMQ_FILA_AUDITORIA") 
+                    ?? _configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp");
 
-                var exchangeAndQueueName = $"{_configuration.GetValue<string>("ProgramId", "PORTALPROP_")}{_configuration.GetValue<string>("RabbitMqFilaDeAuditoriaNome", "auditoria_bp")}";
-                exchangeAndQueueName = exchangeAndQueueName.Replace(" ", "");
+                var exchangeAndQueueName = $"{programId}{filaAuditoria}".Replace(" ", "");
 
-                await channel.ExchangeDeclareAsync(exchange: exchangeAndQueueName, type: ExchangeType.Direct, durable: true);
+                await channel.ExchangeDeclareAsync(
+                    exchange: exchangeAndQueueName, 
+                    type: ExchangeType.Direct, 
+                    durable: true);
 
                 var jsonMsg = System.Text.Json.JsonSerializer.Serialize(message);
                 var body = Encoding.UTF8.GetBytes(jsonMsg);
 
                 await channel.BasicPublishAsync(exchangeAndQueueName, exchangeAndQueueName, body: body);
-
-                channel.Dispose();
-                connection.Dispose();
             }
             catch (Exception ex)
             {
-                // Log error but don't throw - we don't want to break the main operation
-                // Consider logging to a fallback mechanism
-                System.Diagnostics.Debug.WriteLine($"Erro ao enfileirar log de auditoria: {ex.Message}");
+                _logger.LogError(ex, "Erro ao enfileirar log de auditoria");
             }
-
-            await Task.CompletedTask;
+            finally
+            {
+                // ? Fecha apenas o channel, não a conexão (conexão é reutilizada)
+                if (channel != null)
+                {
+                    try
+                    {
+                        await channel.CloseAsync();
+                        channel.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Erro ao fechar channel de auditoria");
+                    }
+                }
+            }
         }
     }
 }
+
 

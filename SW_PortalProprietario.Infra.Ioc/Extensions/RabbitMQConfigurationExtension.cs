@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.Communication.Email;
 using SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.LogsBackGround;
+using SW_PortalProprietario.Infra.Data.RabbitMQ;
 using SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers;
 using SW_PortalProprietario.Infra.Data.RabbitMQ.Producers;
 
@@ -11,6 +12,9 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
     {
         public static IServiceCollection ConfigureRabbitMQ(this IServiceCollection services)
         {
+            // Connection Manager - Singleton para gerenciar pool de conexões
+            services.TryAddSingleton<IRabbitMQConnectionManager, RabbitMQConnectionManager>();
+
             //Producer de logs de acesso e de alterações do sistema no RabbitMQ
             services.TryAddSingleton<ILogMessageToQueueProducer, RabbitMQRegisterLogMessageToQueueProducer>();
             //Consummer da fila de logs de acesso e de alterações do sistema do RabbitMQ para o banco de dados
@@ -32,3 +36,4 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
 
     }
 }
+
