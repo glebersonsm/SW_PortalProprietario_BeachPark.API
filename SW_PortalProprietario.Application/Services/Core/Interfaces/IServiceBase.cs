@@ -16,12 +16,12 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         int? UsuarioId { get; set; }
         Task<List<T>> SetUserName<T>(List<T> models) where T : ModelBase;
         Task<T> SetUserName<T>(T models) where T : ModelBase;
-        Task<PessoaSistemaXProviderModel?> GetPessoaSistemaVinculadaPessoaProvider(string pessoaSistema, string? providerName = null);
-        Task<PessoaSistemaXProviderModel?> GetPessoaProviderVinculadaPessoaSistema(string pessoaProvider, string? providerName = null);
-        Task<PessoaSistemaXProviderModel?> GetPessoaProviderVinculadaUsuarioSistema(int usuarioSistemaId, string? providerName = null);
-        Task<ParametroSistemaViewModel?> GetParametroSistema(string? pessoaProviderId = null);
-        Task<List<EmpresaVinculadaModel>?> GetEmpresasVinculadas();
-        Task<List<DadosContratoModel>?> GetContratos(List<int> pessoasPesquisar);
+        Task<List<PessoaSistemaXProviderModel>?> GetPessoaSistemaVinculadaPessoaProvider(string pessoaSistema, string? providerName = "esolution");
+        Task<List<PessoaSistemaXProviderModel>?> GetPessoaProviderVinculadaPessoaSistema(string pessoaProvider, string? providerName = "esolution");
+        Task<List<PessoaSistemaXProviderModel>?> GetPessoaProviderVinculadaUsuarioSistema(int usuarioSistemaId, string? providerName = "esolution");
+        Task<ParametroSistemaViewModel?> GetParametroSistema(string? pessoaProviderId = null, string providerName = "esolution");
+        Task<List<EmpresaVinculadaModel>?> GetEmpresasVinculadas(string providerName = "esolution");
+        Task<List<DadosContratoModel>?> GetContratos(List<int> pessoasPesquisar, string providerName = "esolution");
         public string? GetProviderName { get; }
         Task<string> getToken();
     }

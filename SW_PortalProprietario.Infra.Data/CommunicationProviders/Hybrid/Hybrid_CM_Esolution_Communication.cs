@@ -35,8 +35,10 @@ using SW_Utils.Auxiliar;
 using SW_Utils.Functions;
 using System;
 using System.Collections.Generic;
+using System.Configuration.Provider;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -99,109 +101,135 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         // OBS: Estes métodos lançam exceção pois a intenção é usar os métodos sufixados específicos (_Cm ou _Esol).
         // =================================================================================================
 
-        public Task<IAccessValidateResultModel> ValidateAccess(string login, string senha, string pessoaProviderId = "")
+        public async Task<IAccessValidateResultModel> ValidateAccess(string login, string senha, string pessoaProviderId = "", string providerName = "esolution")
         {
-            throw new NotImplementedException("Use ValidateAccess_Cm or ValidateAccess_Esol");
+            if (providerName.Contains("esolution", StringComparison.InvariantCultureIgnoreCase))
+                return await ValidateAccess_Esol(login, senha, pessoaProviderId);
+            else if (providerName.Contains("cm", StringComparison.InvariantCultureIgnoreCase))
+                return await ValidateAccess_Cm(login, senha, pessoaProviderId);
+            else
+                throw new NotImplementedException("Use ValidateAccess_Cm or ValidateAccess_Esol");
         }
 
-        public Task<UsuarioValidateResultModel> GerUserFromLegado(UserRegisterInputModel model)
+        public Task<UsuarioValidateResultModel> GerUserFromLegado(UserRegisterInputModel model, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GerUserFromLegado_Cm or GerUserFromLegado_Esol");
+            if (providerName.Contains("esolution", StringComparison.InvariantCultureIgnoreCase))
+                return GerUserFromLegado_Esol(model);
+            else if (providerName.Contains("cm", StringComparison.InvariantCultureIgnoreCase))
+                return GerUserFromLegado_Cm(model);
+            else
+                throw new NotImplementedException("Use GerUserFromLegado_Cm or GerUserFromLegado_Esol");
         }
 
-        public Task<bool> GravarUsuarioNoLegado(string pessoaProviderId, string login, string senha)
+        public async Task<bool> GravarUsuarioNoLegado(string pessoaProviderId, string login, string senha, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GravarUsuarioNoLegado_Cm or GravarUsuarioNoLegado_Esol");
+            if (providerName.Contains("esolution", StringComparison.InvariantCultureIgnoreCase))
+                return await GravarUsuarioNoLegado_Esol(pessoaProviderId, login, senha);
+            else return await GravarUsuarioNoLegado_Cm(pessoaProviderId, login, senha);
         }
 
-        public Task<bool> AlterarSenhaNoLegado(string pessoaProviderId, string login, string senha)
+        public Task<bool> AlterarSenhaNoLegado(string pessoaProviderId, string login, string senha, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use AlterarSenhaNoLegado_Cm or AlterarSenhaNoLegado_Esol");
+            if (providerName.Contains("esolution", StringComparison.InvariantCultureIgnoreCase))
+                return AlterarSenhaNoLegado_Esol(pessoaProviderId, login, senha);
+            else if (providerName.Contains("cm", StringComparison.InvariantCultureIgnoreCase))
+                return AlterarSenhaNoLegado_Cm(pessoaProviderId, login, senha);
+            else
+                throw new NotImplementedException("Use AlterarSenhaNoLegado_Cm or AlterarSenhaNoLegado_Esol");
         }
 
         public Task<bool> IsDefault() => Task.FromResult(false);
 
-        public Task GravarVinculoUsuario(IAccessValidateResultModel result, Domain.Entities.Core.Sistema.Usuario usuario)
+        public async Task GravarVinculoUsuario(IAccessValidateResultModel result, Domain.Entities.Core.Sistema.Usuario usuario, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GravarVinculoUsuario_Cm or GravarVinculoUsuario_Esol");
+            if (providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase))
+                await GravarVinculoUsuario_Esol(result, usuario);
+            else if (providerName.Contains("cm", StringComparison.CurrentCultureIgnoreCase))
+                await GravarVinculoUsuario_Cm(result, usuario);
         }
 
-        public Task<VinculoAccessXPortalBase?> GetOutrosDadosPessoaProvider(string pessoaProviderId)
+        public async Task<VinculoAccessXPortalBase?> GetOutrosDadosPessoaProvider(string pessoaProviderId, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetOutrosDadosPessoaProvider_Cm or GetOutrosDadosPessoaProvider_Esol");
+            return providerName.Contains("esolution",StringComparison.CurrentCultureIgnoreCase) ? await GetOutrosDadosPessoaProvider_Esol(pessoaProviderId) : await GetOutrosDadosPessoaProvider_Cm(pessoaProviderId);
         }
 
-        public Task<EmpresaSimplificadaModel?> GetEmpresaVinculadaLegado(int id)
+        public async Task<EmpresaSimplificadaModel?> GetEmpresaVinculadaLegado(int id, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetEmpresaVinculadaLegado_Cm or GetEmpresaVinculadaLegado_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetEmpresaVinculadaLegado_Esol(id) : await GetEmpresaVinculadaLegado_Cm(id);
         }
 
-        public Task<List<PaisModel>> GetPaisesLegado()
+        public async Task<List<PaisModel>> GetPaisesLegado(string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetPaisesLegado_Cm or GetPaisesLegado_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetPaisesLegado_Esol() : await GetPaisesLegado_Cm();
         }
 
-        public Task<List<EstadoModel>> GetEstadosLegado()
+        public async Task<List<EstadoModel>> GetEstadosLegado(string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetEstadosLegado_Cm or GetEstadosLegado_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetEstadosLegado_Esol() : await GetEstadosLegado_Cm();
         }
 
-        public Task<List<CidadeModel>> GetCidade()
+        public async Task<List<CidadeModel>> GetCidade(string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetCidade_Cm or GetCidade_Esol");
-        }
-        public Task<List<UserRegisterInputModel>> GetUsuariosAtivosSistemaLegado()
-        {
-            throw new NotImplementedException("Use GetUsuariosAtivosSistemaLegado_Cm or GetUsuariosAtivosSistemaLegado_Esol");
-        }
-        public Task<List<UserRegisterInputModel>> GetClientesUsuariosLegado(ParametroSistemaViewModel parametroSistema)
-        {
-            throw new NotImplementedException("Use GetClientesUsuariosLegado_Cm or GetClientesUsuariosLegado_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetCidade_Esol() : await GetCidade_Cm();
         }
 
-        public Task<(int pageNumber, int lastPageNumber, IEnumerable<CidadeModel> cidades)?> SearchCidade(CidadeSearchModel searchModel)
+        public async Task<List<UserRegisterInputModel>> GetUsuariosAtivosSistemaLegado(string providerName = "esolution")
         {
-             throw new NotImplementedException("Use SearchCidade_Cm or SearchCidade_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetUsuariosAtivosSistemaLegado_Esol() : await GetUsuariosAtivosSistemaLegado_Cm();
         }
 
-        public Task<bool> DesativarUsuariosSemCotaOuContrato()
+        public async Task<List<UserRegisterInputModel>> GetClientesUsuariosLegado(ParametroSistemaViewModel parametroSistema, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use DesativarUsuariosSemCotaOuContrato_Cm or DesativarUsuariosSemCotaOuContrato_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetClientesUsuariosLegado_Esol(parametroSistema) : await GetClientesUsuariosLegado_Cm(parametroSistema);
         }
 
-        public Task GetOutrosDadosUsuario(TokenResultModel userReturn)
+        public async Task<(int pageNumber, int lastPageNumber, IEnumerable<CidadeModel> cidades)?> SearchCidade(CidadeSearchModel searchModel, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetOutrosDadosUsuario_Cm or GetOutrosDadosUsuario_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await SearchCidade_Esol(searchModel) : await SearchCidade_Cm(searchModel);
         }
 
-        public Task<List<DadosContratoModel>?> GetContratos(List<int> pessoasPesquisar)
+        public async Task<bool> DesativarUsuariosSemCotaOuContrato(string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetContratos_Cm or GetContratos_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await DesativarUsuariosSemCotaOuContrato_Esol() : await DesativarUsuariosSemCotaOuContrato_Cm();
         }
 
-        public Task<List<EmpresaVinculadaModel>?> GetEmpresasVinculadas(List<string> empresasIds)
+        public async Task GetOutrosDadosUsuario(TokenResultModel userReturn, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetEmpresasVinculadas_Cm or GetEmpresasVinculadas_Esol");
+            if (userReturn == null) throw new Exception("A propriedade userReturn deve ser informada!");
+            if (providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase))
+                await GetOutrosDadosUsuario_Esol(userReturn);
+            else if (providerName.Contains("cm", StringComparison.CurrentCultureIgnoreCase))
+                await GetOutrosDadosUsuario_Cm(userReturn);
         }
 
-        public Task<List<UserRegisterInputModel>> GetUsuariosClientesSemCotasAtivoasNoSistemaLegado()
+        public async Task<List<DadosContratoModel>?> GetContratos(List<int> pessoasPesquisar, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Cm or GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetContratos_Esol(pessoasPesquisar) : await GetContratos_Cm(pessoasPesquisar);
         }
 
-        public Task<List<ClientesInadimplentes>> Inadimplentes(List<int>? pessoasPesquisar = null)
+        public async Task<List<EmpresaVinculadaModel>?> GetEmpresasVinculadas(List<string> empresasIds, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use Inadimplentes_Cm or Inadimplentes_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetEmpresasVinculadas_Esol(empresasIds) : await GetEmpresasVinculadas_Cm(empresasIds);
         }
 
-        public Task<List<ReservaInfo>> GetReservasWithCheckInDateMultiPropriedadeAsync(DateTime checkInDate, bool simulacao = false)
+        public async Task<List<UserRegisterInputModel>> GetUsuariosClientesSemCotasAtivoasNoSistemaLegado(string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetReservasWithCheckInDateMultiPropriedadeAsync_Cm or GetReservasWithCheckInDateMultiPropriedadeAsync_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Esol() : await GetUsuariosClientesSemCotasAtivoasNoSistemaLegado_Cm();
         }
 
-        public Task<List<ReservaInfo>> GetReservasWithCheckInDateTimeSharingAsync(DateTime checkInDate, bool simulacao = false)
+        public async Task<List<ClientesInadimplentes>> Inadimplentes(List<int>? pessoasPesquisar = null, string providerName = "esolution")
         {
-            throw new NotImplementedException("Use GetReservasWithCheckInDateTimeSharingAsync_Cm or GetReservasWithCheckInDateTimeSharingAsync_Esol");
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await Inadimplentes_Esol(pessoasPesquisar) : await Inadimplentes_Cm(pessoasPesquisar);
+        }
+
+        public async Task<List<ReservaInfo>> GetReservasWithCheckInDateMultiPropriedadeAsync(DateTime checkInDate, bool simulacao = false, string providerName = "esolution")
+        {
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetReservasWithCheckInDateMultiPropriedadeAsync_Esol(checkInDate, simulacao) : await GetReservasWithCheckInDateMultiPropriedadeAsync_Cm(checkInDate, simulacao);
+        }
+
+        public async Task<List<ReservaInfo>> GetReservasWithCheckInDateTimeSharingAsync(DateTime checkInDate, bool simulacao = false, string providerName = "esolution")
+        {
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? await GetReservasWithCheckInDateTimeSharingAsync_Esol(checkInDate, simulacao) : await GetReservasWithCheckInDateTimeSharingAsync_Cm(checkInDate, simulacao);
         }
 
         public bool? ShouldSendEmailForReserva_Cm(ReservaInfo reserva, AutomaticCommunicationConfigModel config, List<DadosContratoModel>? contratos, List<ClientesInadimplentes>? inadimplentes)
@@ -209,7 +237,11 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
             //To-do implementar validão inadimplência e status CRC
             return true;
         }
-        public bool? ShouldSendEmailForReserva(ReservaInfo reserva, AutomaticCommunicationConfigModel config, List<DadosContratoModel>? contratos, List<ClientesInadimplentes>? inadimplentes) => throw new NotImplementedException("Use ShouldSendEmailForReserva_Cm or ShouldSendEmailForReserva_Esol");
+
+        public bool? ShouldSendEmailForReserva(ReservaInfo reserva, AutomaticCommunicationConfigModel config, List<DadosContratoModel>? contratos, List<ClientesInadimplentes>? inadimplentes, string providerName = "esolution")
+        {
+            return providerName.Contains("esolution", StringComparison.CurrentCultureIgnoreCase) ? ShouldSendEmailForReserva_Esol(reserva, config, contratos, inadimplentes) : ShouldSendEmailForReserva_Cm(reserva, config, contratos, inadimplentes);
+        }
 
         // =================================================================================================
         // IMPLEMENTAÇÕES CM (_Cm)

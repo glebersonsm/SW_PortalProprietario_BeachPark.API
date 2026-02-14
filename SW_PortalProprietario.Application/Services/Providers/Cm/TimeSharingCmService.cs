@@ -381,23 +381,25 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             if (loggedUser == null)
                 throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
 
+            List<PessoaSistemaXProviderModel> pessoasVinculadas = new List<PessoaSistemaXProviderModel>();
+
             // Se IdCliente foi fornecido, verifica se o usuário é administrador
             var admAsUser = false;
             if (searchModel.IdCliente.HasValue)
             {
                 if (!loggedUser.Value.isAdm)
                 {
-                    var clienteVinculado = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
-                    if (clienteVinculado == null || int.Parse(clienteVinculado.PessoaProvider!) != searchModel.IdCliente)
-                        throw new UnauthorizedAccessException("Apenas administradores podem visualizar reservas de outros clientes");
+                    if (searchModel.IdCliente.GetValueOrDefault(0) <= 0)
+                        throw new ArgumentException("IdCliente deve ser fornecido para usuários não administradores.");
 
+                    pessoasVinculadas = await _serviceBase.GetPessoaSistemaVinculadaPessoaProvider(searchModel.IdCliente.GetValueOrDefault(0).ToString(), "cm");
                 }
                 else admAsUser = true;
             }
 
             var pessoaVinculadaSistema = searchModel.IdCliente.GetValueOrDefault(0) > 0 ? 
                 new PessoaSistemaXProviderModel() { PessoaProvider = searchModel.IdCliente.GetValueOrDefault().ToString()} : 
-                await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
+                pessoasVinculadas.FirstOrDefault();
             if (pessoaVinculadaSistema == null)
                 throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
@@ -453,7 +455,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                             WHERE
                             COALESCE(vxc.FLGREVERTIDO,'N')  = 'N' AND
                             COALESCE(vxc.FLGCANCELADO, 'N') = 'N' AND
-                            p.IdPessoa = {pessoaVinculadaSistema.PessoaProvider}")).AsList();
+                            p.IdPessoa in ( {string.Join(",", pessoaVinculadaSistema.PessoaProvider)})")).AsList();
 
                 return (1, 1, contratosRetornar.AsList());
             }
@@ -1973,7 +1975,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             if (pessoaVinculadaSistema == null)
                 throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-            if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
+            if (pessoaVinculadaSistema.Any(a => string.IsNullOrEmpty(a.PessoaProvider)) || !pessoaVinculadaSistema.All(a => Helper.IsNumeric(a.PessoaProvider)))
                 throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
 
@@ -2147,7 +2149,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                AND H.IDPESSOA             = RF.IDHOTEL
                                                AND V.IDATENDCLIENTETS     = A.IDATENDCLIENTETS
                                                AND A.IDCLIENTE            = CR.IDPESSOA
-                                               AND CR.IDPESSOA = {pessoaVinculadaSistema.PessoaProvider}
+                                               AND CR.IDPESSOA in ({string.Join(",", pessoaVinculadaSistema.Select(a => a.PessoaProvider))})
                                                AND RF.IDHOTEL             = M.IDHOTEL
                                                AND RF.IDRESERVASFRONT     = M.IDRESERVASFRONT
                                                AND HP.IDHOSPEDE           = M.IDHOSPEDE
@@ -2286,7 +2288,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                 AND TUH.IDTIPOUH            = RM.IDTIPOUH
                                                 AND TUH.IDHOTEL             = RM.IDHOTEL
                                                 AND CL.IDPESSOA             = A.IDCLIENTE
-                                                AND CL.IDPESSOA = {pessoaVinculadaSistema.PessoaProvider}
+                                                AND CL.IDPESSOA IN ({string.Join(",", pessoaVinculadaSistema.Select(a => a.PessoaProvider))})
                                                 AND A.IDHOTEL               = HO.IDHOTEL
                                                 AND ((RV.IDREVCONTRATOTS IS NULL AND VAL.IDREVCONTRATOTS IS NULL) OR (RV.IDREVCONTRATOTS = VAL.IDREVCONTRATOTS))
                                                 AND HO.IDPESSOA             = {empresaCmId}
@@ -2406,11 +2408,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     txtPeriodo += " AND COALESCE(M.DATAPARTREAL,M.DATAPARTPREVISTA) <= :partidaFinal ";
             }
 
-
-
             var loggedUser = await _repository.GetLoggedUser();
             if (loggedUser == null)
                 throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
+
+            List<PessoaSistemaXProviderModel> pessoas = new List<PessoaSistemaXProviderModel>();
 
             // Se IdCliente foi fornecido, verifica se o usuário é administrador
             bool admAsCLiente = false;
@@ -2418,22 +2420,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             {
                 if (!loggedUser.Value.isAdm)
                 {
-                    var clienteVinculado = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
-                    if (clienteVinculado == null || int.Parse(clienteVinculado.PessoaProvider!) != searchModel.IdCliente)
+                    pessoas = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
+                    if (pessoas == null || !pessoas.Any())
                         throw new UnauthorizedAccessException("Apenas administradores podem visualizar reservas de outros clientes");
 
                 }
                 else admAsCLiente = true;
             }
 
-            var pessoaVinculadaSistema = admAsCLiente ? new PessoaSistemaXProviderModel() { PessoaProvider = searchModel.IdCliente.ToString()} : 
-                await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
-            if (pessoaVinculadaSistema == null)
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
-
-
-            if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
             var sb = new StringBuilder(@$"SELECT
 	                                    CASE
@@ -3092,7 +3086,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             }
             else
             {
-                sb.AppendLine($" AND PRO.IDPESSOA = {pessoaVinculadaSistema.PessoaProvider} {txtExibirTodosOsHospedes}");
+                sb.AppendLine($" AND PRO.IDPESSOA in ( {string.Join(",", pessoas)}) {txtExibirTodosOsHospedes}");
             }
 
             if (!string.IsNullOrEmpty(searchModel.NumeroContrato))
@@ -3116,17 +3110,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var totalRegistros = await _repository.CountTotalEntry(sql, session: null, parameters.ToArray());
 
-            // Usa IdCliente se fornecido, senão usa a pessoa vinculada ao usuário logado
-            var clienteIdParaReservaTimeSharing = searchModel.IdCliente.HasValue
-                ? searchModel.IdCliente.Value
-                : Convert.ToInt32(pessoaVinculadaSistema.PessoaProvider);
 
             var reservaTimeSharing = parameters.Any(b => b.Name == "chegadaInicial") && parameters.Any(b => b.Name == "chegadaFinal") ? (await _repositorySystem.FindBySql<ReservaTimeSharing>(@$"Select 
                                                                                                 * 
                                                                                                From 
                                                                                                 ReservaTimeSharing 
                                                                                                Where 
-                                                                                                ClienteReservante = {clienteIdParaReservaTimeSharing} and 
+                                                                                                ClienteReservante in ( {string.Join(",", pessoas)} ) and 
                                                                                                 Upper(StatusCM) = 'PENDENTE' and 
                                                                                                 IdReservasFront is null and 
                                                                                                 TipoUtilizacao like 'RCI%INTER%' AND 

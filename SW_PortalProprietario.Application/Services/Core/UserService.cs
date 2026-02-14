@@ -90,12 +90,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
 
                     var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(user.Id, _communicationProvider.CommunicationProviderName);
-                    if (pessoaProvider == null || string.IsNullOrEmpty(pessoaProvider.PessoaProvider))
+                    if (pessoaProvider == null || !pessoaProvider.Any() || pessoaProvider.Any(a=> string.IsNullOrEmpty(a.PessoaProvider)))
                         throw new Exception($"Não foi possível alterar a senha do usuário no sistema legado: {_communicationProvider.CommunicationProviderName}");
 
                     if (_communicationProvider.CommunicationProviderName.Contains("ESOLUTION", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        await _communicationProvider.AlterarSenhaNoLegado(pessoaProvider.PessoaProvider, user.Login!, SW_Utils.Functions.Helper.CriptografarPadraoEsol("", changePasswordInputModel.NewPassword));
+                        await _communicationProvider.AlterarSenhaNoLegado(pessoaProvider.First().PessoaProvider, user.Login!, SW_Utils.Functions.Helper.CriptografarPadraoEsol("", changePasswordInputModel.NewPassword));
                     }
                 }
 

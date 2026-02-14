@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NHibernate;
 using NHibernate.Dialect.Schema;
+using NHibernate.Util;
 using PuppeteerSharp;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -181,8 +182,6 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             }
 
             return (1, 1, result);
-
-
         }
 
         public async Task<(int pageNumber, int lastPageNumber, List<ProprietarioSimplificadoModel> contratos)?> GetMyContracts_Esol(SearchMyContractsModel searchModel)
@@ -224,16 +223,16 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (loggedUser == null)
                 throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
 
-            var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), CommunicationProviderName);
-            if (pessoaVinculadaSistema == null)
+            var pessoasVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), CommunicationProviderName);
+            if (pessoasVinculadaSistema == null)
                 throw new ArgumentException($"Não foi encontrada pessoa do provider: {CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-            if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
+            if (pessoasVinculadaSistema.Any(a=> string.IsNullOrEmpty(a.PessoaProvider) || !Helper.IsNumeric(a.PessoaProvider)))
                 throw new ArgumentException($"Não foi encontrada pessoa do provider: {CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-            List<int> pessoasPesquiar = new List<int>() { Convert.ToInt32(pessoaVinculadaSistema.PessoaProvider) };
+            List<int> pessoasPesquiar = pessoasVinculadaSistema.Select(b=> Convert.ToInt32(b.PessoaProvider)).AsList();
 
-            await GetOutrasPessoasVinculadas(pessoaVinculadaSistema, pessoasPesquiar);
+            await GetOutrasPessoasVinculadas(pessoasVinculadaSistema.First(), pessoasPesquiar);
 
             List<Parameter> parameters = new List<Parameter>();
 
@@ -657,110 +656,111 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         public async Task<bool> GerarCodigoVerificacaoLiberacaoPool_Esol(int agendamentoId)
         {
-            var loggedUser = await _repositorySystem.GetLoggedUser();
-            var usuario = (await _repositorySystem.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0 ")).FirstOrDefault();
-            if (usuario == null || usuario.Pessoa == null)
-                throw new FileNotFoundException("Não foi possível identificar o usuário logado para envio do código de confirmação para liberação da cota para POOL");
+            throw new ArgumentException();
+            //var loggedUser = await _repositorySystem.GetLoggedUser();
+            //var usuario = (await _repositorySystem.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0 ")).FirstOrDefault();
+            //if (usuario == null || usuario.Pessoa == null)
+            //    throw new FileNotFoundException("Não foi possível identificar o usuário logado para envio do código de confirmação para liberação da cota para POOL");
 
-            var empresa = (await _repositorySystem.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e Where 1 = 1 Order by e.Id desc")).FirstOrDefault();
+            //var empresa = (await _repositorySystem.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e Where 1 = 1 Order by e.Id desc")).FirstOrDefault();
 
-            if (empresa == null)
-                throw new FileNotFoundException("Não foi possível identificar a empresa logada no sistema.");
+            //if (empresa == null)
+            //    throw new FileNotFoundException("Não foi possível identificar a empresa logada no sistema.");
 
-            var emailCliente = "";
+            //var emailCliente = "";
 
-            if (string.IsNullOrEmpty(usuario.Pessoa.EmailPreferencial) &&
-                string.IsNullOrEmpty(usuario.Pessoa.EmailAlternativo))
-            {
-                var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuario.Id, CommunicationProviderName);
-                if (pessoaProvider != null && !string.IsNullOrEmpty(pessoaProvider.PessoaProvider))
-                {
-                    var pessoaSistemaLegado = (await _repositoryNHAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Pessoa>($"From Pessoa p Where p.Id = {pessoaProvider.PessoaProvider}")).FirstOrDefault();
-                    if (pessoaSistemaLegado != null && !string.IsNullOrEmpty(pessoaSistemaLegado.eMail) && pessoaSistemaLegado.eMail.Contains("@"))
-                        emailCliente = pessoaSistemaLegado.eMail.Split(';')[0];
+            //if (string.IsNullOrEmpty(usuario.Pessoa.EmailPreferencial) &&
+            //    string.IsNullOrEmpty(usuario.Pessoa.EmailAlternativo))
+            //{
+            //    var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuario.Id, CommunicationProviderName);
+            //    if (pessoaProvider != null && !string.IsNullOrEmpty(pessoaProvider.PessoaProvider))
+            //    {
+            //        var pessoaSistemaLegado = (await _repositoryNHAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Pessoa>($"From Pessoa p Where p.Id = {pessoaProvider.PessoaProvider}")).FirstOrDefault();
+            //        if (pessoaSistemaLegado != null && !string.IsNullOrEmpty(pessoaSistemaLegado.eMail) && pessoaSistemaLegado.eMail.Contains("@"))
+            //            emailCliente = pessoaSistemaLegado.eMail.Split(';')[0];
 
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(usuario.Pessoa.EmailPreferencial))
-                    emailCliente = usuario.Pessoa.EmailPreferencial.Split(';')[0];
-                else if (!string.IsNullOrEmpty(usuario.Pessoa.EmailAlternativo))
-                    emailCliente = usuario.Pessoa.EmailAlternativo.Split(';')[0];
-            }
+            //    }
+            //}
+            //else
+            //{
+            //    if (!string.IsNullOrEmpty(usuario.Pessoa.EmailPreferencial))
+            //        emailCliente = usuario.Pessoa.EmailPreferencial.Split(';')[0];
+            //    else if (!string.IsNullOrEmpty(usuario.Pessoa.EmailAlternativo))
+            //        emailCliente = usuario.Pessoa.EmailAlternativo.Split(';')[0];
+            //}
 
-            if (!string.IsNullOrEmpty(emailCliente) && emailCliente.Contains("@"))
-            {
-                try
-                {
-                    _repositorySystem.BeginTransaction();
+            //if (!string.IsNullOrEmpty(emailCliente) && emailCliente.Contains("@"))
+            //{
+            //    try
+            //    {
+            //        _repositorySystem.BeginTransaction();
 
-                    var agendamento = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade pcd Where pcd.Id = {agendamentoId}")).FirstOrDefault();
-                    if (agendamento == null)
-                        throw new FileNotFoundException($"Não foi foi encontrado o agendamento com o Id: {agendamentoId}");
+            //        var agendamento = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade pcd Where pcd.Id = {agendamentoId}")).FirstOrDefault();
+            //        if (agendamento == null)
+            //            throw new FileNotFoundException($"Não foi foi encontrado o agendamento com o Id: {agendamentoId}");
 
-                    if (agendamento.DataInicial.GetValueOrDefault().Date <= DateTime.Today)
-                        throw new FileNotFoundException($"A data de Check-in: {agendamento.DataInicial.GetValueOrDefault().Date:dd/MM/yyyy} do agendamento Id: {agendamentoId} não permite liberação para o POOL");
+            //        if (agendamento.DataInicial.GetValueOrDefault().Date <= DateTime.Today)
+            //            throw new FileNotFoundException($"A data de Check-in: {agendamento.DataInicial.GetValueOrDefault().Date:dd/MM/yyyy} do agendamento Id: {agendamentoId} não permite liberação para o POOL");
 
-                    var codigoDeConfirmacao = $"LS{Helper.GenerateRandomCode(6)}";
+            //        var codigoDeConfirmacao = $"LS{Helper.GenerateRandomCode(6)}";
 
-                    var emailsPermitidos = _configuration.GetValue<string>("DestinatarioEmailPermitido");
-                    var enviarEmailApenasParaDestinatariosPermitidos = _configuration.GetValue<bool>("EnviarEmailApenasParaDestinatariosPermitidos", true);
+            //        var emailsPermitidos = _configuration.GetValue<string>("DestinatarioEmailPermitido");
+            //        var enviarEmailApenasParaDestinatariosPermitidos = _configuration.GetValue<bool>("EnviarEmailApenasParaDestinatariosPermitidos", true);
 
 
-                    if (enviarEmailApenasParaDestinatariosPermitidos)
-                    {
-                        if (string.IsNullOrEmpty(emailsPermitidos) || string.IsNullOrEmpty(emailCliente) ||
-                                            !emailsPermitidos.Contains(emailCliente, StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            emailCliente = "glebersonsm@gmail.com";
-                        }
-                    }
+            //        if (enviarEmailApenasParaDestinatariosPermitidos)
+            //        {
+            //            if (string.IsNullOrEmpty(emailsPermitidos) || string.IsNullOrEmpty(emailCliente) ||
+            //                                !emailsPermitidos.Contains(emailCliente, StringComparison.CurrentCultureIgnoreCase))
+            //            {
+            //                emailCliente = "glebersonsm@gmail.com";
+            //            }
+            //        }
 
-                    var emailResult = await _emailService.SaveInternal(new EmailInputInternalModel()
-                    {
-                        UsuarioCriacao = usuario.Id,
-                        Assunto = "Código de validação para liberação de semana para o POOL de hospedagem",
-                        EmpresaId = empresa.Id,
-                        Destinatario = emailCliente,
-                        ConteudoEmail = @$"<div>Olá, {usuario.Pessoa?.Nome}!</div>
-                        <div>
-                        Favor utilize o código: <b>{codigoDeConfirmacao}</b> válido até: <b>{DateTime.Now.AddMinutes(10).AddSeconds(-5):dd/MM/yyyy HH:mm:ss}</b>
-                        <div>
-                            Para efetivação da liberação do seu agendamento de semana com Id: <b>{agendamentoId}</b>
-                        </div>
-                        <div>
-                            Ref. ao período de hospedagem com Check-in em: <b>{agendamento.DataInicial:dd/MM/yyyy}</b> e Check-out em: <b>{agendamento.DataFinal.GetValueOrDefault().AddDays(1):dd/MM/yyyy}</b> 
-                            <div>para o POOL de hospedagem!</div>
-                        </div>"
-                    });
+            //        var emailResult = await _emailService.SaveInternal(new EmailInputInternalModel()
+            //        {
+            //            UsuarioCriacao = usuario.Id,
+            //            Assunto = "Código de validação para liberação de semana para o POOL de hospedagem",
+            //            EmpresaId = empresa.Id,
+            //            Destinatario = emailCliente,
+            //            ConteudoEmail = @$"<div>Olá, {usuario.Pessoa?.Nome}!</div>
+            //            <div>
+            //            Favor utilize o código: <b>{codigoDeConfirmacao}</b> válido até: <b>{DateTime.Now.AddMinutes(10).AddSeconds(-5):dd/MM/yyyy HH:mm:ss}</b>
+            //            <div>
+            //                Para efetivação da liberação do seu agendamento de semana com Id: <b>{agendamentoId}</b>
+            //            </div>
+            //            <div>
+            //                Ref. ao período de hospedagem com Check-in em: <b>{agendamento.DataInicial:dd/MM/yyyy}</b> e Check-out em: <b>{agendamento.DataFinal.GetValueOrDefault().AddDays(1):dd/MM/yyyy}</b> 
+            //                <div>para o POOL de hospedagem!</div>
+            //            </div>"
+            //        });
 
-                    var confirmacaoLiberacaoPool = new ConfirmacaoLiberacaoPool()
-                    {
-                        UsuarioCriacao = usuario.Id,
-                        DataHoraCriacao = DateTime.Now,
-                        CodigoEnviadoAoCliente = codigoDeConfirmacao,
-                        Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.Id },
-                        Email = emailResult != null && emailResult.Id > 0 ? new Email() { Id = emailResult.Id.GetValueOrDefault() } : null,
-                        AgendamentoId = agendamentoId
-                    };
+            //        var confirmacaoLiberacaoPool = new ConfirmacaoLiberacaoPool()
+            //        {
+            //            UsuarioCriacao = usuario.Id,
+            //            DataHoraCriacao = DateTime.Now,
+            //            CodigoEnviadoAoCliente = codigoDeConfirmacao,
+            //            Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.Id },
+            //            Email = emailResult != null && emailResult.Id > 0 ? new Email() { Id = emailResult.Id.GetValueOrDefault() } : null,
+            //            AgendamentoId = agendamentoId
+            //        };
 
-                    await _repositorySystem.Save(confirmacaoLiberacaoPool);
+            //        await _repositorySystem.Save(confirmacaoLiberacaoPool);
 
-                    var commitResult = await _repositorySystem.CommitAsync();
-                    if (!commitResult.executed)
-                        throw commitResult.exception ?? new Exception("Erro na operação.");
-                }
-                catch (Exception err)
-                {
-                    _repositorySystem.Rollback();
-                    _logger.LogError(err, err.Message);
-                    throw;
-                }
+            //        var commitResult = await _repositorySystem.CommitAsync();
+            //        if (!commitResult.executed)
+            //            throw commitResult.exception ?? new Exception("Erro na operação.");
+            //    }
+            //    catch (Exception err)
+            //    {
+            //        _repositorySystem.Rollback();
+            //        _logger.LogError(err, err.Message);
+            //        throw;
+            //    }
 
-                return true;
-            }
-            else throw new ArgumentException("Não foi possível identificar o email do usuário logado. (Consultamos no cadastro de usuário e também no sistema legado");
+            //    return true;
+            //}
+            //else throw new ArgumentException("Não foi possível identificar o email do usuário logado. (Consultamos no cadastro de usuário e também no sistema legado");
 
         }
 
@@ -1232,9 +1232,9 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                 if (pessoaProvider == null)
                     throw new ArgumentException("Erro: Não foi possível identificar o usuário logado.");
 
-                var outrasPessoas = await GetOutrasPessoasVinculadas(pessoaProvider, new List<int>() { int.Parse(pessoaProvider.PessoaProvider!) });
+                var outrasPessoas = await GetOutrasPessoasVinculadas(pessoaProvider.First(), pessoaProvider.Where(c=> !string.IsNullOrEmpty(c.PessoaProvider)).Select(b=> int.Parse(b.PessoaProvider)).AsList());
 
-                contratosDoCliente = await _serviceBase.GetContratos(outrasPessoas != null && outrasPessoas.Any() ? outrasPessoas : new List<int>() { int.Parse(pessoaProvider.PessoaProvider!) }) ?? new List<DadosContratoModel>();
+                contratosDoCliente = await _serviceBase.GetContratos(outrasPessoas != null && outrasPessoas.Any() ? outrasPessoas : new List<int>() { int.Parse(pessoaProvider.First().PessoaProvider!) }) ?? new List<DadosContratoModel>();
                 if (contratosDoCliente != null && contratosDoCliente.Any(b => !b.DataCancelamento.HasValue && b.Status == "A" && b.CotaStatus == "V" && b.Cota == model.CotaAcId))
                 {
                     var fstNaoCancelada = contratosDoCliente.FirstOrDefault(b => !b.DataCancelamento.HasValue && b.Status == "A" && b.CotaStatus == "V" && b.Cota == model.CotaAcId);
@@ -1931,325 +1931,327 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         public async Task<ResultModel<bool>?> LiberarSemanaPool_Esol(LiberacaoAgendamentoInputModel modelAgendamentoPool)
         {
-            var result = new ResultModel<bool>();
 
-            try
-            {
-                _repositorySystem.BeginTransaction();
+            throw new NotImplementedException();
+            //var result = new ResultModel<bool>();
 
-                var loggedUser = await _repositorySystem.GetLoggedUser();
-                if (string.IsNullOrEmpty(loggedUser.Value.userId))
-                    throw new FileNotFoundException("Não foi possível identificar o usuário logado.");
+            //try
+            //{
+            //    _repositorySystem.BeginTransaction();
 
-                var empresa = (await _repositorySystem.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e Where 1 = 1 Order by e.Id desc")).FirstOrDefault();
+            //    var loggedUser = await _repositorySystem.GetLoggedUser();
+            //    if (string.IsNullOrEmpty(loggedUser.Value.userId))
+            //        throw new FileNotFoundException("Não foi possível identificar o usuário logado.");
 
-                if (empresa == null)
-                    throw new FileNotFoundException("Não foi possível identificar a empresa logada no sistema.");
+            //    var empresa = (await _repositorySystem.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e Where 1 = 1 Order by e.Id desc")).FirstOrDefault();
 
-                if (modelAgendamentoPool.AgendamentoId.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException("Deve ser informado o AgendamentoId");
+            //    if (empresa == null)
+            //        throw new FileNotFoundException("Não foi possível identificar a empresa logada no sistema.");
 
-                if (modelAgendamentoPool.InventarioId.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException("Deve ser informado o InventárioId");
+            //    if (modelAgendamentoPool.AgendamentoId.GetValueOrDefault(0) == 0)
+            //        throw new ArgumentException("Deve ser informado o AgendamentoId");
 
-                var agendamento = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade Where Id = {modelAgendamentoPool.AgendamentoId.GetValueOrDefault()}")).FirstOrDefault();
-                if (agendamento == null)
-                    throw new FileNotFoundException($"Não foi foi encontrado o agendamento com o Id: {modelAgendamentoPool.AgendamentoId}");
+            //    if (modelAgendamentoPool.InventarioId.GetValueOrDefault(0) == 0)
+            //        throw new ArgumentException("Deve ser informado o InventárioId");
 
-                if (agendamento.DataInicial.GetValueOrDefault().Date <= DateTime.Today)
-                    throw new FileNotFoundException($"A data de Check-in: {agendamento.DataInicial.GetValueOrDefault().Date:dd/MM/yyyy} do agendamento Id: {modelAgendamentoPool.AgendamentoId} não permite liberação para o POOL");
+            //    var agendamento = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade Where Id = {modelAgendamentoPool.AgendamentoId.GetValueOrDefault()}")).FirstOrDefault();
+            //    if (agendamento == null)
+            //        throw new FileNotFoundException($"Não foi foi encontrado o agendamento com o Id: {modelAgendamentoPool.AgendamentoId}");
 
-
-                if (!loggedUser.Value.isAdm)
-                {
-                    var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId));
-                    if (usuarioProvider != null)
-                    {
-                        if (agendamento != null)
-                        {
-                            var cotaAtual = await GetCotaAccessCenterPelosDadosPortal(new GetHtmlValuesModel() { PeriodoCotaDisponibilidadeId = agendamento.Id, UhCondominioId = agendamento.UhCondominio, CotaOrContratoId = agendamento.Cota });
-                            if (cotaAtual != null)
-                            {
-                                if (!string.IsNullOrEmpty(usuarioProvider.PessoaProvider))
-                                {
-                                    var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(usuarioProvider.PessoaProvider!) });
-                                    if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => cotaAtual.FrAtendimentoVenda.GetValueOrDefault() == b.FrAtendimentoVendaId.GetValueOrDefault() &&
-                                    (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
-                                    {
-                                        throw new ArgumentException("Não foi possível localizar as disponibilidades, motivo 0001BL");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            //    if (agendamento.DataInicial.GetValueOrDefault().Date <= DateTime.Today)
+            //        throw new FileNotFoundException($"A data de Check-in: {agendamento.DataInicial.GetValueOrDefault().Date:dd/MM/yyyy} do agendamento Id: {modelAgendamentoPool.AgendamentoId} não permite liberação para o POOL");
 
 
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var liberarPoolUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:LiberarSemanaPool");
-                var fullUrl = baseUrl + liberarPoolUrl;
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, modelAgendamentoPool);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    _logger.LogInformation(resultMessage);
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result != null)
-                            result.Status = (int)HttpStatusCode.OK;
-                    }
-                    else
-                    {
-                        result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result != null)
-                        {
-                            result.Status = (int)HttpStatusCode.NotFound;
-                            result.Success = false;
-                        }
-                    }
-
-                }
-
-                //Ajustar formato conta, conta digito, agencia e agencia digito
-                if (!string.IsNullOrEmpty(modelAgendamentoPool.ContaNumero))
-                {
-                    modelAgendamentoPool.ContaNumero = modelAgendamentoPool.ContaNumero.TrimEnd().TrimStart();
-                    if (modelAgendamentoPool.ContaNumero.Contains(" "))
-                    {
-                        var conta = modelAgendamentoPool.ContaNumero.Split(" ")[0];
-                        var contaDigito = "0";
-                        if (modelAgendamentoPool.ContaNumero.Split(" ").Length > 1)
-                        {
-                            contaDigito = modelAgendamentoPool.ContaNumero.Split(" ")[1];
-                        }
-                        modelAgendamentoPool.ContaNumero = conta;
-                        modelAgendamentoPool.ContaDigito = contaDigito;
-                    }
-                    else if (modelAgendamentoPool.ContaNumero.Contains("-"))
-                    {
-                        var conta = modelAgendamentoPool.ContaNumero.Split("-")[0];
-                        var contaDigito = "0";
-                        if (modelAgendamentoPool.ContaNumero.Split("-").Length > 1)
-                        {
-                            contaDigito = modelAgendamentoPool.ContaNumero.Split("-")[1];
-                        }
-                        modelAgendamentoPool.ContaNumero = conta;
-                        modelAgendamentoPool.ContaDigito = contaDigito;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(modelAgendamentoPool.Agencia))
-                {
-                    modelAgendamentoPool.Agencia = modelAgendamentoPool.Agencia.TrimEnd().TrimStart();
-                    if (modelAgendamentoPool.Agencia.Contains(" "))
-                    {
-                        var agencia = modelAgendamentoPool.Agencia.Split(" ")[0];
-                        var agenciaDigito = "0";
-                        if (modelAgendamentoPool.Agencia.Split(" ").Length > 1)
-                        {
-                            agenciaDigito = modelAgendamentoPool.Agencia.Split(" ")[1];
-                        }
-                        modelAgendamentoPool.Agencia = agencia;
-                        modelAgendamentoPool.AgenciaDigito = agenciaDigito;
-                    }
-                    else if (modelAgendamentoPool.Agencia.Contains("-"))
-                    {
-                        var agencia = modelAgendamentoPool.Agencia.Split("-")[0];
-                        var agenciaDigito = "0";
-                        if (modelAgendamentoPool.Agencia.Split("-").Length > 1)
-                        {
-                            agenciaDigito = modelAgendamentoPool.Agencia.Split("-")[1];
-                        }
-                        modelAgendamentoPool.Agencia = agencia;
-                        modelAgendamentoPool.AgenciaDigito = agenciaDigito;
-                    }
-                }
+            //    if (!loggedUser.Value.isAdm)
+            //    {
+            //        var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId));
+            //        if (usuarioProvider != null)
+            //        {
+            //            if (agendamento != null)
+            //            {
+            //                var cotaAtual = await GetCotaAccessCenterPelosDadosPortal(new GetHtmlValuesModel() { PeriodoCotaDisponibilidadeId = agendamento.Id, UhCondominioId = agendamento.UhCondominio, CotaOrContratoId = agendamento.Cota });
+            //                if (cotaAtual != null)
+            //                {
+            //                    if (!string.IsNullOrEmpty(usuarioProvider.PessoaProvider))
+            //                    {
+            //                        var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(usuarioProvider.PessoaProvider!) });
+            //                        if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => cotaAtual.FrAtendimentoVenda.GetValueOrDefault() == b.FrAtendimentoVendaId.GetValueOrDefault() &&
+            //                        (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
+            //                        {
+            //                            throw new ArgumentException("Não foi possível localizar as disponibilidades, motivo 0001BL");
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
 
 
-                var confirmacaoLiberacaoPool = new ConfirmacaoLiberacaoPool()
-                {
-                    UsuarioCriacao = Convert.ToInt32(loggedUser.Value.userId),
-                    DataHoraCriacao = DateTime.Now,
-                    Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.Id },
-                    AgendamentoId = modelAgendamentoPool.AgendamentoId,
-                    LiberacaoConfirmada = Domain.Enumns.EnumSimNao.Sim,
-                    LiberacaoDiretaPeloCliente = Domain.Enumns.EnumSimNao.Não,
-                    Banco = modelAgendamentoPool.CodigoBanco,
-                    Conta = modelAgendamentoPool.ContaNumero,
-                    ContaDigito = modelAgendamentoPool.ContaDigito,
-                    Agencia = modelAgendamentoPool.Agencia,
-                    AgenciaDigito = modelAgendamentoPool.AgenciaDigito,
-                    ChavePix = modelAgendamentoPool.ChavePix,
-                    Tipo = modelAgendamentoPool.Variacao,
-                    Variacao = modelAgendamentoPool.Variacao,
-                    TipoConta = modelAgendamentoPool.Variacao,
-                    Preferencial = modelAgendamentoPool.Preferencial.GetValueOrDefault(false) ? "S" : "N",
-                    TipoChavePix = modelAgendamentoPool.TipoChavePix,
-                    IdCidade = $"{modelAgendamentoPool.IdCidade}"
-                };
+            //    var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
+            //    var liberarPoolUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:LiberarSemanaPool");
+            //    var fullUrl = baseUrl + liberarPoolUrl;
+            //    var token = await _serviceBase.getToken();
 
-                await _repositorySystem.Save(confirmacaoLiberacaoPool);
+            //    using (HttpClient client = new HttpClient())
+            //    {
+            //        client.BaseAddress = new Uri(fullUrl);
+            //        client.DefaultRequestHeaders.Clear();
+            //        client.DefaultRequestHeaders.Add("accept", "application/json");
+            //        client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
+            //        HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, modelAgendamentoPool);
 
-                var resultCommit = await _repositorySystem.CommitAsync();
+            //        string resultMessage = await responseResult.Content.ReadAsStringAsync();
 
-            }
-            catch (Exception err)
-            {
-                _repositorySystem.Rollback();
-                _logger.LogError(err, err.Message);
-                if (result != null)
-                {
-                    result.Message = err.Message;
-                    result.Errors = new List<string>() { err.Message };
-                    result.Success = false;
-                }
-            }
-            return result;
+            //        _logger.LogInformation(resultMessage);
+
+            //        if (responseResult.IsSuccessStatusCode)
+            //        {
+            //            result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            //            if (result != null)
+            //                result.Status = (int)HttpStatusCode.OK;
+            //        }
+            //        else
+            //        {
+            //            result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            //            if (result != null)
+            //            {
+            //                result.Status = (int)HttpStatusCode.NotFound;
+            //                result.Success = false;
+            //            }
+            //        }
+
+            //    }
+
+            //    //Ajustar formato conta, conta digito, agencia e agencia digito
+            //    if (!string.IsNullOrEmpty(modelAgendamentoPool.ContaNumero))
+            //    {
+            //        modelAgendamentoPool.ContaNumero = modelAgendamentoPool.ContaNumero.TrimEnd().TrimStart();
+            //        if (modelAgendamentoPool.ContaNumero.Contains(" "))
+            //        {
+            //            var conta = modelAgendamentoPool.ContaNumero.Split(" ")[0];
+            //            var contaDigito = "0";
+            //            if (modelAgendamentoPool.ContaNumero.Split(" ").Length > 1)
+            //            {
+            //                contaDigito = modelAgendamentoPool.ContaNumero.Split(" ")[1];
+            //            }
+            //            modelAgendamentoPool.ContaNumero = conta;
+            //            modelAgendamentoPool.ContaDigito = contaDigito;
+            //        }
+            //        else if (modelAgendamentoPool.ContaNumero.Contains("-"))
+            //        {
+            //            var conta = modelAgendamentoPool.ContaNumero.Split("-")[0];
+            //            var contaDigito = "0";
+            //            if (modelAgendamentoPool.ContaNumero.Split("-").Length > 1)
+            //            {
+            //                contaDigito = modelAgendamentoPool.ContaNumero.Split("-")[1];
+            //            }
+            //            modelAgendamentoPool.ContaNumero = conta;
+            //            modelAgendamentoPool.ContaDigito = contaDigito;
+            //        }
+            //    }
+
+            //    if (!string.IsNullOrEmpty(modelAgendamentoPool.Agencia))
+            //    {
+            //        modelAgendamentoPool.Agencia = modelAgendamentoPool.Agencia.TrimEnd().TrimStart();
+            //        if (modelAgendamentoPool.Agencia.Contains(" "))
+            //        {
+            //            var agencia = modelAgendamentoPool.Agencia.Split(" ")[0];
+            //            var agenciaDigito = "0";
+            //            if (modelAgendamentoPool.Agencia.Split(" ").Length > 1)
+            //            {
+            //                agenciaDigito = modelAgendamentoPool.Agencia.Split(" ")[1];
+            //            }
+            //            modelAgendamentoPool.Agencia = agencia;
+            //            modelAgendamentoPool.AgenciaDigito = agenciaDigito;
+            //        }
+            //        else if (modelAgendamentoPool.Agencia.Contains("-"))
+            //        {
+            //            var agencia = modelAgendamentoPool.Agencia.Split("-")[0];
+            //            var agenciaDigito = "0";
+            //            if (modelAgendamentoPool.Agencia.Split("-").Length > 1)
+            //            {
+            //                agenciaDigito = modelAgendamentoPool.Agencia.Split("-")[1];
+            //            }
+            //            modelAgendamentoPool.Agencia = agencia;
+            //            modelAgendamentoPool.AgenciaDigito = agenciaDigito;
+            //        }
+            //    }
+
+
+            //    var confirmacaoLiberacaoPool = new ConfirmacaoLiberacaoPool()
+            //    {
+            //        UsuarioCriacao = Convert.ToInt32(loggedUser.Value.userId),
+            //        DataHoraCriacao = DateTime.Now,
+            //        Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.Id },
+            //        AgendamentoId = modelAgendamentoPool.AgendamentoId,
+            //        LiberacaoConfirmada = Domain.Enumns.EnumSimNao.Sim,
+            //        LiberacaoDiretaPeloCliente = Domain.Enumns.EnumSimNao.Não,
+            //        Banco = modelAgendamentoPool.CodigoBanco,
+            //        Conta = modelAgendamentoPool.ContaNumero,
+            //        ContaDigito = modelAgendamentoPool.ContaDigito,
+            //        Agencia = modelAgendamentoPool.Agencia,
+            //        AgenciaDigito = modelAgendamentoPool.AgenciaDigito,
+            //        ChavePix = modelAgendamentoPool.ChavePix,
+            //        Tipo = modelAgendamentoPool.Variacao,
+            //        Variacao = modelAgendamentoPool.Variacao,
+            //        TipoConta = modelAgendamentoPool.Variacao,
+            //        Preferencial = modelAgendamentoPool.Preferencial.GetValueOrDefault(false) ? "S" : "N",
+            //        TipoChavePix = modelAgendamentoPool.TipoChavePix,
+            //        IdCidade = $"{modelAgendamentoPool.IdCidade}"
+            //    };
+
+            //    await _repositorySystem.Save(confirmacaoLiberacaoPool);
+
+            //    var resultCommit = await _repositorySystem.CommitAsync();
+
+            //}
+            //catch (Exception err)
+            //{
+            //    _repositorySystem.Rollback();
+            //    _logger.LogError(err, err.Message);
+            //    if (result != null)
+            //    {
+            //        result.Message = err.Message;
+            //        result.Errors = new List<string>() { err.Message };
+            //        result.Success = false;
+            //    }
+            //}
+            //return result;
 
         }
 
         public async Task<ResultModel<bool>?> LiberarMinhaSemanaPool_Esol(LiberacaoMeuAgendamentoInputModel modelAgendamentoPool)
         {
-            bool liberacaoEfetuada = false;
+            throw new NotImplementedException();
+            //bool liberacaoEfetuada = false;
 
-            ResultModel<bool> retornoVinculo =
-            new ResultModel<bool>(false)
-            {
-                Success = false,
-                Errors = new List<string>() { "Falha na liberação do agendamento para o POOL" },
-                Message = "Falha na liberação do agendamento para o POOL"
-            };
+            //ResultModel<bool> retornoVinculo =
+            //new ResultModel<bool>(false)
+            //{
+            //    Success = false,
+            //    Errors = new List<string>() { "Falha na liberação do agendamento para o POOL" },
+            //    Message = "Falha na liberação do agendamento para o POOL"
+            //};
 
-            var agendamento = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade Where Id = {modelAgendamentoPool.AgendamentoId.GetValueOrDefault()}")).FirstOrDefault();
-            if (agendamento == null)
-                throw new FileNotFoundException($"Não foi foi encontrado o agendamento com o Id: {modelAgendamentoPool.AgendamentoId}");
+            //var agendamento = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade Where Id = {modelAgendamentoPool.AgendamentoId.GetValueOrDefault()}")).FirstOrDefault();
+            //if (agendamento == null)
+            //    throw new FileNotFoundException($"Não foi foi encontrado o agendamento com o Id: {modelAgendamentoPool.AgendamentoId}");
 
-            var emitirEspanhol = false;
+            //var emitirEspanhol = false;
 
-            var loggedUserValue = await _repositorySystem.GetLoggedUser();
-            if (!loggedUserValue.Value.isAdm)
-            {
-                var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUserValue.Value.userId));
-                if (usuarioProvider != null)
-                {
-                    if (agendamento != null)
-                    {
-                        var cotaAtual = await GetCotaAccessCenterPelosDadosPortal(new GetHtmlValuesModel() { PeriodoCotaDisponibilidadeId = agendamento.Id, UhCondominioId = agendamento.UhCondominio, CotaOrContratoId = agendamento.Cota });
-                        if (cotaAtual != null)
-                        {
-                            if (!string.IsNullOrEmpty(usuarioProvider.PessoaProvider))
-                            {
-                                var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(usuarioProvider.PessoaProvider!) });
-                                if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => cotaAtual.FrAtendimentoVenda.GetValueOrDefault() == b.FrAtendimentoVendaId.GetValueOrDefault() &&
-                                (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
-                                {
-                                    throw new ArgumentException("Não foi possível localizar as disponibilidades, motivo 0001BL");
-                                }
-                            }
-                        }
-                    }
+            //var loggedUserValue = await _repositorySystem.GetLoggedUser();
+            //if (!loggedUserValue.Value.isAdm)
+            //{
+            //    var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUserValue.Value.userId));
+            //    if (usuarioProvider != null)
+            //    {
+            //        if (agendamento != null)
+            //        {
+            //            var cotaAtual = await GetCotaAccessCenterPelosDadosPortal(new GetHtmlValuesModel() { PeriodoCotaDisponibilidadeId = agendamento.Id, UhCondominioId = agendamento.UhCondominio, CotaOrContratoId = agendamento.Cota });
+            //            if (cotaAtual != null)
+            //            {
+            //                if (!string.IsNullOrEmpty(usuarioProvider.PessoaProvider))
+            //                {
+            //                    var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(usuarioProvider.PessoaProvider!) });
+            //                    if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => cotaAtual.FrAtendimentoVenda.GetValueOrDefault() == b.FrAtendimentoVendaId.GetValueOrDefault() &&
+            //                    (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
+            //                    {
+            //                        throw new ArgumentException("Não foi possível localizar as disponibilidades, motivo 0001BL");
+            //                    }
+            //                }
+            //            }
+            //        }
 
-                    var pessoa = (await _repositoryNHAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Pessoa>($"From Pessoa p Where p.Id = {usuarioProvider.PessoaProvider}")).FirstOrDefault();
-                    if (pessoa != null && pessoa.Estrangeiro == "S")
-                    {
-                        emitirEspanhol = true;
-                    }
+            //        var pessoa = (await _repositoryNHAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Pessoa>($"From Pessoa p Where p.Id = {usuarioProvider.PessoaProvider}")).FirstOrDefault();
+            //        if (pessoa != null && pessoa.Estrangeiro == "S")
+            //        {
+            //            emitirEspanhol = true;
+            //        }
 
-                    var resultInadimplente = await Inadimplente(usuarioProvider);
-                    if (resultInadimplente != null)
-                        throw new ArgumentException("Não foi possível realizar a operação: PF");
+            //        var resultInadimplente = await Inadimplente(usuarioProvider);
+            //        if (resultInadimplente != null)
+            //            throw new ArgumentException("Não foi possível realizar a operação: PF");
 
-                }
+            //    }
 
-            }
+            //}
 
-            if (!string.IsNullOrEmpty(modelAgendamentoPool.Agencia) && (string.IsNullOrEmpty(modelAgendamentoPool.CodigoBanco) || modelAgendamentoPool.CodigoBanco == "000"))
-                throw new ArgumentException("Não foi possível encontrar o banco de código 000");
+            //if (!string.IsNullOrEmpty(modelAgendamentoPool.Agencia) && (string.IsNullOrEmpty(modelAgendamentoPool.CodigoBanco) || modelAgendamentoPool.CodigoBanco == "000"))
+            //    throw new ArgumentException("Não foi possível encontrar o banco de código 000");
 
-            string? pathGeracao, htmlDocumentPath;
-            ValidarPathArquivosLiberacaoPool(out pathGeracao, out htmlDocumentPath, emitirEspanhol);
-
-
-
-            try
-            {
-                _repositoryNHAccessCenter.BeginTransaction();
-                _repositorySystem.BeginTransaction();
-
-                (PeriodoCotaDisponibilidade? periodoCotaDisponibilidade, ParametroSistemaViewModel? parametros,
-                    (string userId, string providerKeyUser, string companyId, bool isAdm)? loggedUser,
-                    Domain.Entities.Core.Sistema.Usuario? usuario,
-                    Domain.Entities.Core.Framework.Empresa? empresa) =
-                    await ValidarLiberacaoSemanaPool(modelAgendamentoPool);
-
-                ClienteContaBancaria? clienteContaBancaria = null;
-                PessoaSistemaXProviderModel? pessoaProviderUtiizar = null;
-                if (!string.IsNullOrEmpty(modelAgendamentoPool.ContaNumero) || !string.IsNullOrEmpty(modelAgendamentoPool.ChavePix))
-                {
-                    (ClienteContaBancaria? contaBancariaResult, PessoaSistemaXProviderModel? pessoaProvider) = await CadastrarContaBancaria(modelAgendamentoPool, parametros, usuario);
-                    if (contaBancariaResult != null)
-                        clienteContaBancaria = contaBancariaResult;
-
-                }
-
-                (liberacaoEfetuada, retornoVinculo) = await LiberarSemanaParaPoolExecute(modelAgendamentoPool, liberacaoEfetuada, retornoVinculo);
+            //string? pathGeracao, htmlDocumentPath;
+            //ValidarPathArquivosLiberacaoPool(out pathGeracao, out htmlDocumentPath, emitirEspanhol);
 
 
-                if (empresa == null)
-                {
-                    empresa = (await _repositorySystem.FindBySql<Domain.Entities.Core.Framework.Empresa>("Select e.* From Empresa e Order by e.Id Desc")).FirstOrDefault();
-                    if (empresa == null)
-                        throw new ArgumentException("Não foi localizada a empresa");
-                }
 
-                var commitResult = await _repositoryNHAccessCenter.CommitAsync();
-                if (!commitResult.executed)
-                    throw commitResult.exception ?? new Exception("Não foi possível realizar a operação");
+            //try
+            //{
+            //    _repositoryNHAccessCenter.BeginTransaction();
+            //    _repositorySystem.BeginTransaction();
 
-                await GravarConfirmacaoLiberacaoParaPool(modelAgendamentoPool, pathGeracao, htmlDocumentPath, periodoCotaDisponibilidade, empresa, clienteContaBancaria, pessoaProviderUtiizar);
+            //    (PeriodoCotaDisponibilidade? periodoCotaDisponibilidade, ParametroSistemaViewModel? parametros,
+            //        (string userId, string providerKeyUser, string companyId, bool isAdm)? loggedUser,
+            //        Domain.Entities.Core.Sistema.Usuario? usuario,
+            //        Domain.Entities.Core.Framework.Empresa? empresa) =
+            //        await ValidarLiberacaoSemanaPool(modelAgendamentoPool);
 
-                var resultCommit = await _repositorySystem.CommitAsync();
+            //    ClienteContaBancaria? clienteContaBancaria = null;
+            //    List<PessoaSistemaXProviderModel>? pessoaProviderUtilizar = null;
+            //    if (!string.IsNullOrEmpty(modelAgendamentoPool.ContaNumero) || !string.IsNullOrEmpty(modelAgendamentoPool.ChavePix))
+            //    {
+            //        (ClienteContaBancaria? contaBancariaResult, List<PessoaSistemaXProviderModel>? pessoaProvider) = await CadastrarContaBancaria(modelAgendamentoPool, parametros, usuario);
+            //        if (contaBancariaResult != null)
+            //            clienteContaBancaria = contaBancariaResult;
 
-                return new ResultModel<bool>()
-                {
-                    Data = true,
-                    Message = "Liberação efetuada com sucesso",
-                    Success = true,
-                    Errors = new List<string>()
-                };
+            //    }
 
-            }
-            catch (Exception err)
-            {
-                _repositoryNHAccessCenter.Rollback();
-                _repositorySystem.Rollback();
-                if (liberacaoEfetuada)
-                {
-                    var result = await RetirarSemanaPool_Esol(new AgendamentoInventarioModel()
-                    {
-                        AgendamentoId = modelAgendamentoPool.AgendamentoId,
-                        AcaoInterna = true
-                    });
-                }
+            //    (liberacaoEfetuada, retornoVinculo) = await LiberarSemanaParaPoolExecute(modelAgendamentoPool, liberacaoEfetuada, retornoVinculo);
 
-                if (retornoVinculo != null)
-                {
-                    retornoVinculo.Message = err.Message;
-                    retornoVinculo.Errors = new List<string>() { err.Message };
-                    retornoVinculo.Success = false;
-                }
-                throw;
-            }
+            //    if (empresa == null)
+            //    {
+            //        empresa = (await _repositorySystem.FindBySql<Domain.Entities.Core.Framework.Empresa>("Select e.* From Empresa e Order by e.Id Desc")).FirstOrDefault();
+            //        if (empresa == null)
+            //            throw new ArgumentException("Não foi localizada a empresa");
+            //    }
+
+            //    var commitResult = await _repositoryNHAccessCenter.CommitAsync();
+            //    if (!commitResult.executed)
+            //        throw commitResult.exception ?? new Exception("Não foi possível realizar a operação");
+
+            //    await GravarConfirmacaoLiberacaoParaPool(modelAgendamentoPool, pathGeracao, htmlDocumentPath, periodoCotaDisponibilidade, empresa, clienteContaBancaria, pessoaProviderUtilizar);
+
+            //    var resultCommit = await _repositorySystem.CommitAsync();
+
+            //    return new ResultModel<bool>()
+            //    {
+            //        Data = true,
+            //        Message = "Liberação efetuada com sucesso",
+            //        Success = true,
+            //        Errors = new List<string>()
+            //    };
+
+            //}
+            //catch (Exception err)
+            //{
+            //    _repositoryNHAccessCenter.Rollback();
+            //    _repositorySystem.Rollback();
+            //    if (liberacaoEfetuada)
+            //    {
+            //        var result = await RetirarSemanaPool_Esol(new AgendamentoInventarioModel()
+            //        {
+            //            AgendamentoId = modelAgendamentoPool.AgendamentoId,
+            //            AcaoInterna = true
+            //        });
+            //    }
+
+            //    if (retornoVinculo != null)
+            //    {
+            //        retornoVinculo.Message = err.Message;
+            //        retornoVinculo.Errors = new List<string>() { err.Message };
+            //        retornoVinculo.Success = false;
+            //    }
+            //    throw;
+            //}
 
         }
 
@@ -2306,155 +2308,156 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             PeriodoCotaDisponibilidade? periodoCotaDisponibilidade,
             Domain.Entities.Core.Framework.Empresa empresa,
             ClienteContaBancaria? contaBancariaResult,
-            PessoaSistemaXProviderModel? pessoaProvider)
+            List<PessoaSistemaXProviderModel>? pessoaProvider)
         {
-            var loggedUser = await _repositorySystem.GetLoggedUser();
-            if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.userId))
-                throw new ArgumentException("Falha na gravação da liberação para POOL");
+            throw new NotImplementedException();
+            //var loggedUser = await _repositorySystem.GetLoggedUser();
+            //if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.userId))
+            //    throw new ArgumentException("Falha na gravação da liberação para POOL");
 
-            var pesProvider = pessoaProvider ?? await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId));
-            if (pesProvider == null)
-                throw new ArgumentException("Falha na gravação da liberação para POOL");
+            //var pesProvider = pessoaProvider ?? await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId));
+            //if (pesProvider == null)
+            //    throw new ArgumentException("Falha na gravação da liberação para POOL");
 
-            //Ajustar formato conta, conta digito, agencia e agencia digito
-            if (!string.IsNullOrEmpty(modelAgendamentoPool.ContaNumero))
-            {
-                modelAgendamentoPool.ContaNumero = modelAgendamentoPool.ContaNumero.TrimEnd().TrimStart();
-                if (modelAgendamentoPool.ContaNumero.Contains(" "))
-                {
-                    var conta = modelAgendamentoPool.ContaNumero.Split(" ")[0];
-                    var contaDigito = "0";
-                    if (modelAgendamentoPool.ContaNumero.Split(" ").Length > 1)
-                    {
-                        contaDigito = modelAgendamentoPool.ContaNumero.Split(" ")[1];
-                    }
-                    modelAgendamentoPool.ContaNumero = conta;
-                    modelAgendamentoPool.ContaDigito = contaDigito;
-                }
-                else if (modelAgendamentoPool.ContaNumero.Contains("-"))
-                {
-                    var conta = modelAgendamentoPool.ContaNumero.Split("-")[0];
-                    var contaDigito = "0";
-                    if (modelAgendamentoPool.ContaNumero.Split("-").Length > 1)
-                    {
-                        contaDigito = modelAgendamentoPool.ContaNumero.Split("-")[1];
-                    }
-                    modelAgendamentoPool.ContaNumero = conta;
-                    modelAgendamentoPool.ContaDigito = contaDigito;
-                }
-            }
+            ////Ajustar formato conta, conta digito, agencia e agencia digito
+            //if (!string.IsNullOrEmpty(modelAgendamentoPool.ContaNumero))
+            //{
+            //    modelAgendamentoPool.ContaNumero = modelAgendamentoPool.ContaNumero.TrimEnd().TrimStart();
+            //    if (modelAgendamentoPool.ContaNumero.Contains(" "))
+            //    {
+            //        var conta = modelAgendamentoPool.ContaNumero.Split(" ")[0];
+            //        var contaDigito = "0";
+            //        if (modelAgendamentoPool.ContaNumero.Split(" ").Length > 1)
+            //        {
+            //            contaDigito = modelAgendamentoPool.ContaNumero.Split(" ")[1];
+            //        }
+            //        modelAgendamentoPool.ContaNumero = conta;
+            //        modelAgendamentoPool.ContaDigito = contaDigito;
+            //    }
+            //    else if (modelAgendamentoPool.ContaNumero.Contains("-"))
+            //    {
+            //        var conta = modelAgendamentoPool.ContaNumero.Split("-")[0];
+            //        var contaDigito = "0";
+            //        if (modelAgendamentoPool.ContaNumero.Split("-").Length > 1)
+            //        {
+            //            contaDigito = modelAgendamentoPool.ContaNumero.Split("-")[1];
+            //        }
+            //        modelAgendamentoPool.ContaNumero = conta;
+            //        modelAgendamentoPool.ContaDigito = contaDigito;
+            //    }
+            //}
 
-            if (!string.IsNullOrEmpty(modelAgendamentoPool.Agencia))
-            {
-                modelAgendamentoPool.Agencia = modelAgendamentoPool.Agencia.TrimEnd().TrimStart();
-                if (modelAgendamentoPool.Agencia.Contains(" "))
-                {
-                    var agencia = modelAgendamentoPool.Agencia.Split(" ")[0];
-                    var agenciaDigito = "0";
-                    if (modelAgendamentoPool.Agencia.Split(" ").Length > 1)
-                    {
-                        agenciaDigito = modelAgendamentoPool.Agencia.Split(" ")[1];
-                    }
-                    modelAgendamentoPool.Agencia = agencia;
-                    modelAgendamentoPool.AgenciaDigito = agenciaDigito;
-                }
-                else if (modelAgendamentoPool.Agencia.Contains("-"))
-                {
-                    var agencia = modelAgendamentoPool.Agencia.Split("-")[0];
-                    var agenciaDigito = "0";
-                    if (modelAgendamentoPool.Agencia.Split("-").Length > 1)
-                    {
-                        agenciaDigito = modelAgendamentoPool.Agencia.Split("-")[1];
-                    }
-                    modelAgendamentoPool.Agencia = agencia;
-                    modelAgendamentoPool.AgenciaDigito = agenciaDigito;
-                }
-            }
+            //if (!string.IsNullOrEmpty(modelAgendamentoPool.Agencia))
+            //{
+            //    modelAgendamentoPool.Agencia = modelAgendamentoPool.Agencia.TrimEnd().TrimStart();
+            //    if (modelAgendamentoPool.Agencia.Contains(" "))
+            //    {
+            //        var agencia = modelAgendamentoPool.Agencia.Split(" ")[0];
+            //        var agenciaDigito = "0";
+            //        if (modelAgendamentoPool.Agencia.Split(" ").Length > 1)
+            //        {
+            //            agenciaDigito = modelAgendamentoPool.Agencia.Split(" ")[1];
+            //        }
+            //        modelAgendamentoPool.Agencia = agencia;
+            //        modelAgendamentoPool.AgenciaDigito = agenciaDigito;
+            //    }
+            //    else if (modelAgendamentoPool.Agencia.Contains("-"))
+            //    {
+            //        var agencia = modelAgendamentoPool.Agencia.Split("-")[0];
+            //        var agenciaDigito = "0";
+            //        if (modelAgendamentoPool.Agencia.Split("-").Length > 1)
+            //        {
+            //            agenciaDigito = modelAgendamentoPool.Agencia.Split("-")[1];
+            //        }
+            //        modelAgendamentoPool.Agencia = agencia;
+            //        modelAgendamentoPool.AgenciaDigito = agenciaDigito;
+            //    }
+            //}
 
-            bool emitirEmEspanhol = false;
-            var pessoa = (await _repositoryNHAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Pessoa>($"From Pessoa p Where p.Id = {pesProvider.PessoaProvider}")).FirstOrDefault();
-            if (pessoa != null && pessoa.Estrangeiro == "S")
-            {
-                emitirEmEspanhol = true;
-            }
+            //bool emitirEmEspanhol = false;
+            //var pessoa = (await _repositoryNHAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Pessoa>($"From Pessoa p Where p.Id = {pesProvider.PessoaProvider}")).FirstOrDefault();
+            //if (pessoa != null && pessoa.Estrangeiro == "S")
+            //{
+            //    emitirEmEspanhol = true;
+            //}
 
-            ConfirmacaoLiberacaoPool? confirmacao = null;
+            //ConfirmacaoLiberacaoPool? confirmacao = null;
 
-            confirmacao =
-                (await _repositorySystem.FindByHql<ConfirmacaoLiberacaoPool>(@$"From 
-                                                                    ConfirmacaoLiberacaoPool c 
-                                                                Where 
-                                                                    c.AgendamentoId = {modelAgendamentoPool.AgendamentoId} 
-                                                                    and c.UsuarioCriacao = {Convert.ToInt32(loggedUser.Value.userId)}")).FirstOrDefault();
-            if (confirmacao == null)
-            {
-                confirmacao = new ConfirmacaoLiberacaoPool()
-                {
-                    UsuarioCriacao = Convert.ToInt32(loggedUser.Value.userId),
-                    DataHoraCriacao = DateTime.Now,
-                    Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.Id },
-                    AgendamentoId = modelAgendamentoPool.AgendamentoId,
-                    LiberacaoConfirmada = Domain.Enumns.EnumSimNao.Sim,
-                    CodigoEnviadoAoCliente = modelAgendamentoPool.CodigoVerificacao,
-                    DataConfirmacao = DateTime.Now,
-                    LiberacaoDiretaPeloCliente = Domain.Enumns.EnumSimNao.Sim,
-                    Banco = modelAgendamentoPool.CodigoBanco,
-                    Agencia = modelAgendamentoPool.Agencia,
-                    AgenciaDigito = modelAgendamentoPool.AgenciaDigito,
-                    Conta = modelAgendamentoPool.ContaNumero,
-                    ContaDigito = modelAgendamentoPool.ContaDigito,
-                    ChavePix = modelAgendamentoPool.ChavePix,
-                    Tipo = modelAgendamentoPool.Variacao,
-                    Variacao = modelAgendamentoPool.Variacao,
-                    TipoConta = modelAgendamentoPool.Variacao,
-                    Preferencial = modelAgendamentoPool.Preferencial.GetValueOrDefault(false) ? "N" : "S",
-                    TipoChavePix = modelAgendamentoPool.TipoChavePix,
-                    IdCidade = $"{modelAgendamentoPool.IdCidade.GetValueOrDefault(0)}"
-                };
+            //confirmacao =
+            //    (await _repositorySystem.FindByHql<ConfirmacaoLiberacaoPool>(@$"From 
+            //                                                        ConfirmacaoLiberacaoPool c 
+            //                                                    Where 
+            //                                                        c.AgendamentoId = {modelAgendamentoPool.AgendamentoId} 
+            //                                                        and c.UsuarioCriacao = {Convert.ToInt32(loggedUser.Value.userId)}")).FirstOrDefault();
+            //if (confirmacao == null)
+            //{
+            //    confirmacao = new ConfirmacaoLiberacaoPool()
+            //    {
+            //        UsuarioCriacao = Convert.ToInt32(loggedUser.Value.userId),
+            //        DataHoraCriacao = DateTime.Now,
+            //        Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.Id },
+            //        AgendamentoId = modelAgendamentoPool.AgendamentoId,
+            //        LiberacaoConfirmada = Domain.Enumns.EnumSimNao.Sim,
+            //        CodigoEnviadoAoCliente = modelAgendamentoPool.CodigoVerificacao,
+            //        DataConfirmacao = DateTime.Now,
+            //        LiberacaoDiretaPeloCliente = Domain.Enumns.EnumSimNao.Sim,
+            //        Banco = modelAgendamentoPool.CodigoBanco,
+            //        Agencia = modelAgendamentoPool.Agencia,
+            //        AgenciaDigito = modelAgendamentoPool.AgenciaDigito,
+            //        Conta = modelAgendamentoPool.ContaNumero,
+            //        ContaDigito = modelAgendamentoPool.ContaDigito,
+            //        ChavePix = modelAgendamentoPool.ChavePix,
+            //        Tipo = modelAgendamentoPool.Variacao,
+            //        Variacao = modelAgendamentoPool.Variacao,
+            //        TipoConta = modelAgendamentoPool.Variacao,
+            //        Preferencial = modelAgendamentoPool.Preferencial.GetValueOrDefault(false) ? "N" : "S",
+            //        TipoChavePix = modelAgendamentoPool.TipoChavePix,
+            //        IdCidade = $"{modelAgendamentoPool.IdCidade.GetValueOrDefault(0)}"
+            //    };
 
-                await _repositorySystem.Save(confirmacao);
-            }
+            //    await _repositorySystem.Save(confirmacao);
+            //}
 
-            var cotaAccessCenter = await GetCotaAccessCenterPelosDadosPortal(new GetHtmlValuesModel()
-            {
-                CotaOrContratoId = periodoCotaDisponibilidade.Cota,
-                UhCondominioId = periodoCotaDisponibilidade.UhCondominio,
-                PeriodoCotaDisponibilidadeId = periodoCotaDisponibilidade.Id
-            });
+            //var cotaAccessCenter = await GetCotaAccessCenterPelosDadosPortal(new GetHtmlValuesModel()
+            //{
+            //    CotaOrContratoId = periodoCotaDisponibilidade.Cota,
+            //    UhCondominioId = periodoCotaDisponibilidade.UhCondominio,
+            //    PeriodoCotaDisponibilidadeId = periodoCotaDisponibilidade.Id
+            //});
 
-            if (cotaAccessCenter == null)
-                throw new ArgumentException("Não foi encontrada a cota vinculada.");
-
-
-            var contratoExistente = (await _repositorySystem.FindByHql<ContratoVinculoSCPEsol>(@$"From 
-                        ContratoVinculoSCPEsol con 
-                        Inner Join Fetch con.Empresa emp
-                    Where 
-                        emp.Id = {empresa.Id} and 
-                        con.PessoaLegadoId = {pesProvider.PessoaProvider} and 
-                        con.CotaPortalId = {periodoCotaDisponibilidade.Cota} and 
-                        con.UhCondominioId = {periodoCotaDisponibilidade.UhCondominio} and 
-                        con.CotaAccessCenterId = {cotaAccessCenter.CotaId} Order by con.Id Desc")).FirstOrDefault();
+            //if (cotaAccessCenter == null)
+            //    throw new ArgumentException("Não foi encontrada a cota vinculada.");
 
 
-            if (contratoExistente == null)
-            {
-                contratoExistente = new ContratoVinculoSCPEsol()
-                {
-                    CodigoVerificacao = modelAgendamentoPool.CodigoVerificacao,
-                    Empresa = empresa,
-                    CotaAccessCenterId = cotaAccessCenter.CotaId,
-                    CotaPortalId = periodoCotaDisponibilidade.Cota,
-                    UhCondominioId = periodoCotaDisponibilidade.UhCondominio,
-                    PessoaLegadoId = int.Parse(pesProvider.PessoaProvider),
-                    Idioma = emitirEmEspanhol ? 2 : 0,
-                };
-            }
+            //var contratoExistente = (await _repositorySystem.FindByHql<ContratoVinculoSCPEsol>(@$"From 
+            //            ContratoVinculoSCPEsol con 
+            //            Inner Join Fetch con.Empresa emp
+            //        Where 
+            //            emp.Id = {empresa.Id} and 
+            //            con.PessoaLegadoId in ({string.Join(",", pesProvider.Select(p => p.PessoaProvider))}) and 
+            //            con.CotaPortalId = {periodoCotaDisponibilidade.Cota} and 
+            //            con.UhCondominioId = {periodoCotaDisponibilidade.UhCondominio} and 
+            //            con.CotaAccessCenterId = {cotaAccessCenter.CotaId} Order by con.Id Desc")).AsList();
 
-            if (contratoExistente != null)
-            {
-                await GerarContratoExecute(confirmacao, contaBancariaResult, contratoExistente, empresa.Id, emitirEmEspanhol || contratoExistente.Idioma == 2);
-            }
+
+            //if (contratoExistente == null || !contratoExistente.Any())
+            //{
+            //    contratoExistente = new List<ContratoVinculoSCPEsol>() { new ContratoVinculoSCPEsol()
+            //    {
+            //        CodigoVerificacao = modelAgendamentoPool.CodigoVerificacao,
+            //        Empresa = empresa,
+            //        CotaAccessCenterId = cotaAccessCenter.CotaId,
+            //        CotaPortalId = periodoCotaDisponibilidade.Cota,
+            //        UhCondominioId = periodoCotaDisponibilidade.UhCondominio,
+            //        PessoaLegadoId = int.Parse(pesProvider.First().PessoaProvider),
+            //        Idioma = emitirEmEspanhol ? 2 : 0,
+            //    } };
+            //}
+
+            //if (contratoExistente != null)
+            //{
+            //    await GerarContratoExecute(confirmacao, contaBancariaResult, contratoExistente, empresa.Id, emitirEmEspanhol || contratoExistente.Idioma == 2);
+            //}
         }
 
         private async Task GerarContratoExecute(ConfirmacaoLiberacaoPool confirmacaoLiberacaoCotaPool,
@@ -2547,100 +2550,102 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             Domain.Entities.Core.Sistema.Usuario? usuario,
             Domain.Entities.Core.Framework.Empresa? empresa)> ValidarLiberacaoSemanaPool(LiberacaoMeuAgendamentoInputModel modelAgendamentoPool)
         {
-            ResultModel<List<InventarioModel>>? inventariosVinculadosAoAgendamentoNoPool = await ConsultarInventarios_Esol(new InventarioSearchModel()
-            {
-                Agendamentoid = modelAgendamentoPool.AgendamentoId,
-                NoPool = "S"
-            });
+            throw new NotImplementedException();
+            //ResultModel<List<InventarioModel>>? inventariosVinculadosAoAgendamentoNoPool = await ConsultarInventarios_Esol(new InventarioSearchModel()
+            //{
+            //    Agendamentoid = modelAgendamentoPool.AgendamentoId,
+            //    NoPool = "S"
+            //});
 
-            if (inventariosVinculadosAoAgendamentoNoPool == null ||
-                !inventariosVinculadosAoAgendamentoNoPool.Success ||
-                inventariosVinculadosAoAgendamentoNoPool.Data == null ||
-                !inventariosVinculadosAoAgendamentoNoPool.Data.Any() ||
-                inventariosVinculadosAoAgendamentoNoPool.Data.Count() > 1)
-                throw new FileNotFoundException($"Não foi possível identificar o inventário/Pool compatível para utilização no agendamento Id: {modelAgendamentoPool.AgendamentoId.GetValueOrDefault()}");
+            //if (inventariosVinculadosAoAgendamentoNoPool == null ||
+            //    !inventariosVinculadosAoAgendamentoNoPool.Success ||
+            //    inventariosVinculadosAoAgendamentoNoPool.Data == null ||
+            //    !inventariosVinculadosAoAgendamentoNoPool.Data.Any() ||
+            //    inventariosVinculadosAoAgendamentoNoPool.Data.Count() > 1)
+            //    throw new FileNotFoundException($"Não foi possível identificar o inventário/Pool compatível para utilização no agendamento Id: {modelAgendamentoPool.AgendamentoId.GetValueOrDefault()}");
 
-            modelAgendamentoPool.InventarioId = inventariosVinculadosAoAgendamentoNoPool.Data.First().Id;
+            //modelAgendamentoPool.InventarioId = inventariosVinculadosAoAgendamentoNoPool.Data.First().Id;
 
-            InventarioModel? inventarioUtilizar = null;
+            //InventarioModel? inventarioUtilizar = null;
 
-            if (modelAgendamentoPool.InventarioId.GetValueOrDefault(0) > 0)
-            {
-                inventarioUtilizar = inventariosVinculadosAoAgendamentoNoPool.Data.First(a => a.Id == modelAgendamentoPool.InventarioId);
-                if (inventarioUtilizar == null)
-                    throw new ArgumentException($"Não foi possível encontrar o inventário Pool para utilização no agendamento Id: {modelAgendamentoPool.InventarioId.GetValueOrDefault()}");
-            }
+            //if (modelAgendamentoPool.InventarioId.GetValueOrDefault(0) > 0)
+            //{
+            //    inventarioUtilizar = inventariosVinculadosAoAgendamentoNoPool.Data.First(a => a.Id == modelAgendamentoPool.InventarioId);
+            //    if (inventarioUtilizar == null)
+            //        throw new ArgumentException($"Não foi possível encontrar o inventário Pool para utilização no agendamento Id: {modelAgendamentoPool.InventarioId.GetValueOrDefault()}");
+            //}
 
-            var periodoCotaDisponibilidade = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade p Where p.Id = {modelAgendamentoPool.AgendamentoId}")).FirstOrDefault();
-            if (periodoCotaDisponibilidade == null)
-                throw new ArgumentException($"Não foi encontrado agendamento com Id: {modelAgendamentoPool.AgendamentoId}");
+            //var periodoCotaDisponibilidade = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade p Where p.Id = {modelAgendamentoPool.AgendamentoId}")).FirstOrDefault();
+            //if (periodoCotaDisponibilidade == null)
+            //    throw new ArgumentException($"Não foi encontrado agendamento com Id: {modelAgendamentoPool.AgendamentoId}");
 
-            var parametros = await _repositorySystem.GetParametroSistemaViewModel();
-            if (parametros == null || string.IsNullOrEmpty(parametros.ExibirFinanceirosDasEmpresaIds))
-                throw new FileNotFoundException("Não foi encontrado a configuração das empresas vinculadas nos parâmetros do sistema.");
+            //var parametros = await _repositorySystem.GetParametroSistemaViewModel();
+            //if (parametros == null || string.IsNullOrEmpty(parametros.ExibirFinanceirosDasEmpresaIds))
+            //    throw new FileNotFoundException("Não foi encontrado a configuração das empresas vinculadas nos parâmetros do sistema.");
 
-            if (modelAgendamentoPool.AgendamentoId.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Deve ser informado o AgendamentoId");
+            //if (modelAgendamentoPool.AgendamentoId.GetValueOrDefault(0) == 0)
+            //    throw new ArgumentException("Deve ser informado o AgendamentoId");
 
-            if (modelAgendamentoPool.InventarioId.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Deve ser informado o InventárioId");
-
-
-            var loggedUser = await _repositorySystem.GetLoggedUser();
-            var usuario = (await _repositorySystem.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
-            if (usuario == null || usuario.Pessoa == null)
-                throw new FileNotFoundException("Não foi possível identificar o usuário logado para validar o código de confirmação para liberação da cota para POOL");
-
-            var contratoAssinadoAnteriormente = false;
-
-            if (loggedUser != null && !loggedUser.Value.isAdm)
-            {
-                var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId));
-                if (!string.IsNullOrEmpty(usuarioProvider?.PessoaProvider) && int.TryParse(usuarioProvider.PessoaProvider, out _))
-                {
-                    var hasContract = (await _repositorySystem.FindBySql<ContratoSCPModel>($"Select a.Id From ContratoVinculoSCPEsol a Where a.PessoaLegadoId = {usuarioProvider.PessoaProvider}")).FirstOrDefault();
-                    if (hasContract == null)
-                    {
-                        if (string.IsNullOrEmpty(modelAgendamentoPool.CodigoVerificacao))
-                            throw new ArgumentException("Deve ser informado o código de verificação recebido no seu eMail de cadastro");
-                    }
-                    else contratoAssinadoAnteriormente = true;
-                }
-
-                if (inventarioUtilizar?.DiasMinimoInicioAgendamentoAdicionar.GetValueOrDefault(0) > -1)
-                {
-                    if (periodoCotaDisponibilidade.DataInicial.GetValueOrDefault().Date.Subtract(DateTime.Today).Days <
-                        inventarioUtilizar.DiasMinimoInicioAgendamentoAdicionar.GetValueOrDefault())
-                        throw new ArgumentException($"Só é possível liberar período para o POOL com no mímino: {inventarioUtilizar.DiasMinimoInicioAgendamentoAdicionar.GetValueOrDefault()} dias de antecedência.");
-                }
-
-            }
+            //if (modelAgendamentoPool.InventarioId.GetValueOrDefault(0) == 0)
+            //    throw new ArgumentException("Deve ser informado o InventárioId");
 
 
-            var empresa = (await _repositorySystem.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e Where 1 = 1 Order by e.Id desc")).FirstOrDefault();
+            //var loggedUser = await _repositorySystem.GetLoggedUser();
+            //var usuario = (await _repositorySystem.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
+            //if (usuario == null || usuario.Pessoa == null)
+            //    throw new FileNotFoundException("Não foi possível identificar o usuário logado para validar o código de confirmação para liberação da cota para POOL");
 
-            if (empresa == null)
-                throw new FileNotFoundException("Não foi possível identificar a empresa logada no sistema.");
-            if (!contratoAssinadoAnteriormente)
-            {
-                bool codigoValido = await ValidarCodigo_Esol(modelAgendamentoPool.AgendamentoId.GetValueOrDefault(), modelAgendamentoPool.CodigoVerificacao, false);
-                if (!codigoValido)
-                    throw new ArgumentException("O código de verificação informado não é válido");
-            }
+            //var contratoAssinadoAnteriormente = false;
 
-            return (periodoCotaDisponibilidade, parametros, loggedUser, usuario, empresa);
+            //if (loggedUser != null && !loggedUser.Value.isAdm)
+            //{
+            //    var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId));
+            //    if (!string.IsNullOrEmpty(usuarioProvider?.PessoaProvider) && int.TryParse(usuarioProvider.PessoaProvider, out _))
+            //    {
+            //        var hasContract = (await _repositorySystem.FindBySql<ContratoSCPModel>($"Select a.Id From ContratoVinculoSCPEsol a Where a.PessoaLegadoId = {usuarioProvider.PessoaProvider}")).FirstOrDefault();
+            //        if (hasContract == null)
+            //        {
+            //            if (string.IsNullOrEmpty(modelAgendamentoPool.CodigoVerificacao))
+            //                throw new ArgumentException("Deve ser informado o código de verificação recebido no seu eMail de cadastro");
+            //        }
+            //        else contratoAssinadoAnteriormente = true;
+            //    }
+
+            //    if (inventarioUtilizar?.DiasMinimoInicioAgendamentoAdicionar.GetValueOrDefault(0) > -1)
+            //    {
+            //        if (periodoCotaDisponibilidade.DataInicial.GetValueOrDefault().Date.Subtract(DateTime.Today).Days <
+            //            inventarioUtilizar.DiasMinimoInicioAgendamentoAdicionar.GetValueOrDefault())
+            //            throw new ArgumentException($"Só é possível liberar período para o POOL com no mímino: {inventarioUtilizar.DiasMinimoInicioAgendamentoAdicionar.GetValueOrDefault()} dias de antecedência.");
+            //    }
+
+            //}
+
+
+            //var empresa = (await _repositorySystem.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e Where 1 = 1 Order by e.Id desc")).FirstOrDefault();
+
+            //if (empresa == null)
+            //    throw new FileNotFoundException("Não foi possível identificar a empresa logada no sistema.");
+            //if (!contratoAssinadoAnteriormente)
+            //{
+            //    bool codigoValido = await ValidarCodigo_Esol(modelAgendamentoPool.AgendamentoId.GetValueOrDefault(), modelAgendamentoPool.CodigoVerificacao, false);
+            //    if (!codigoValido)
+            //        throw new ArgumentException("O código de verificação informado não é válido");
+            //}
+
+            //return (periodoCotaDisponibilidade, parametros, loggedUser, usuario, empresa);
         }
 
-        private async Task<(ClienteContaBancaria? contaBancariaResult, PessoaSistemaXProviderModel? pessoaProvider)> CadastrarContaBancaria(LiberacaoMeuAgendamentoInputModel model, ParametroSistemaViewModel parametros, Domain.Entities.Core.Sistema.Usuario usuario)
+        private async Task<(ClienteContaBancaria? contaBancariaResult, List<PessoaSistemaXProviderModel>? pessoaProvider)> CadastrarContaBancaria(LiberacaoMeuAgendamentoInputModel model, 
+            ParametroSistemaViewModel parametros, 
+            Domain.Entities.Core.Sistema.Usuario usuario)
         {
             ClienteContaBancaria? contaBancariaResult =
                                 model.ClienteContaBancariaId.GetValueOrDefault(0) > 0 ?
                                 (await _repositoryNHAccessCenter.FindByHql<ClienteContaBancaria>($"From ClienteContaBancaria ccb Where ccb.Id = {model.ClienteContaBancariaId.GetValueOrDefault(0)}")).FirstOrDefault() : null;
 
-            var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuario.Id, ProviderName);
-            if (pessoaProvider == null)
+            var pessoasProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuario.Id, ProviderName);
+            if (pessoasProvider == null || !pessoasProvider.Any())
                 throw new FileNotFoundException("Não foi possível identificar a pessoa no sistema legado");
-
 
             if (contaBancariaResult == null)
             {
@@ -2649,7 +2654,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                                 From 
                                                     Cliente cli 
                                                 Where 
-                                                    cli.Pessoa = {pessoaProvider.PessoaProvider} and 
+                                                    cli.Pessoa in ({string.Join(",", pessoasProvider.Select(b=> b .PessoaProvider))}) and 
                                                     cli.Empresa in ({parametros.ExibirFinanceirosDasEmpresaIds})")).AsList();
 
                 if (clientesIds == null || clientesIds.Count == 0)
@@ -2730,7 +2735,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                 });
             }
 
-            return (contaBancariaResult, pessoaProvider);
+            return (contaBancariaResult, pessoasProvider);
         }
 
         private void ValidarPathArquivosLiberacaoPool(out string? pathGeracao, out string htmlDocumentPath, bool espanhol = false)
@@ -3755,30 +3760,37 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             }
         }
 
-        private async Task<ClientesInadimplentes?> Inadimplente(PessoaSistemaXProviderModel usuarioProvider)
+        private async Task<List<ClientesInadimplentes>?> Inadimplente(List<PessoaSistemaXProviderModel> usuariosProvider)
         {
             //if (Debugger.IsAttached) return null;
+            List<ClientesInadimplentes> pessoasComPendenciaFinanceiras = new List<ClientesInadimplentes>();
 
-            var clienteInadimplenteRetorno = await _cacheStore.GetAsync<ClientesInadimplentes>($"ClienteInadimplenteId_{usuarioProvider.PessoaProvider}", 2, _repositorySystem.CancellationToken);
-            if (clienteInadimplenteRetorno != null) return clienteInadimplenteRetorno;
+            foreach (var item in usuariosProvider)
+            {
+                var clienteInadimplenteRetorno = await _cacheStore.GetAsync<ClientesInadimplentes>($"ClienteInadimplenteId_{item.PessoaProvider}", 2, _repositorySystem.CancellationToken);
+                if (clienteInadimplenteRetorno != null)
+                {
+                    pessoasComPendenciaFinanceiras.Add(clienteInadimplenteRetorno);
+                    break;
+                }
 
-            var tiposContasReceberConsiderar = _configuration.GetValue<string>("TiposContasReceberIdsConsiderarNoPortal");
-            var strQueryAdicional = "";
-            if (!string.IsNullOrEmpty(tiposContasReceberConsiderar))
-                strQueryAdicional += $" and tcr.Id in ({tiposContasReceberConsiderar}) ";
+                var tiposContasReceberConsiderar = _configuration.GetValue<string>("TiposContasReceberIdsConsiderarNoPortal");
+                var strQueryAdicional = "";
+                if (!string.IsNullOrEmpty(tiposContasReceberConsiderar))
+                    strQueryAdicional += $" and tcr.Id in ({tiposContasReceberConsiderar}) ";
 
-            var tiposContaReceberConsiderarBaixados = _configuration.GetValue<string>("TiposContasReceberIdsConsiderarBaixados");
-            if (!string.IsNullOrEmpty(tiposContaReceberConsiderarBaixados))
-                strQueryAdicional += $" and tcr.Id not in ({tiposContaReceberConsiderarBaixados}) ";
+                var tiposContaReceberConsiderarBaixados = _configuration.GetValue<string>("TiposContasReceberIdsConsiderarBaixados");
+                if (!string.IsNullOrEmpty(tiposContaReceberConsiderarBaixados))
+                    strQueryAdicional += $" and tcr.Id not in ({tiposContaReceberConsiderarBaixados}) ";
 
-            var parametrosSistema = await _repositorySystem.GetParametroSistemaViewModel();
+                var parametrosSistema = await _repositorySystem.GetParametroSistemaViewModel();
 
-            if (parametrosSistema != null && !string.IsNullOrEmpty(parametrosSistema.ExibirFinanceirosDasEmpresaIds))
-                strQueryAdicional += $" AND cr.Empresa in ({parametrosSistema.ExibirFinanceirosDasEmpresaIds}) ";
+                if (parametrosSistema != null && !string.IsNullOrEmpty(parametrosSistema.ExibirFinanceirosDasEmpresaIds))
+                    strQueryAdicional += $" AND cr.Empresa in ({parametrosSistema.ExibirFinanceirosDasEmpresaIds}) ";
 
 
-            var pendenciasFinanceiras =
-                                        (await _repositoryNHAccessCenter.FindBySql<ClientesInadimplentes>($@"Select 
+                var pendenciasFinanceiras =
+                                            (await _repositoryNHAccessCenter.FindBySql<ClientesInadimplentes>($@"Select 
                                         cli.Pessoa as PessoaProviderId,
                                         pes.Nome,
                                         Case when pes.Tipo = 'F' then pes.cpf else pes.Cnpj end as CpfCnpj, 
@@ -3792,21 +3804,24 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                         Inner Join Cliente cli on cr.Cliente = cli.Id 
                                         Inner Join Pessoa pes ON cli.Pessoa = pes.Id
                                     Where
-                                        cli.Pessoa = {usuarioProvider.PessoaProvider} and 
+                                        cli.Pessoa = {item.PessoaProvider} and 
                                         crp.Vencimento <= :dataCorte and 
                                         crp.Status = 'P' and 
                                         crp.SaldoPendente > 0 {strQueryAdicional} 
                                     Group by cli.Pessoa, pes.Nome, Case when pes.Tipo = 'F' then pes.cpf else pes.Cnpj end, pes.Email",
-                                        new Parameter("dataCorte", DateTime.Today.AddDays(-5).Date))).FirstOrDefault();
+                                            new Parameter("dataCorte", DateTime.Today.AddDays(-5).Date))).FirstOrDefault();
 
 
-            if (pendenciasFinanceiras != null && pendenciasFinanceiras.TotalInadimplencia.GetValueOrDefault(0) > 0)
-            {
-                await _cacheStore.AddAsync($"ClienteInadimplenteId_{usuarioProvider.PessoaProvider}", pendenciasFinanceiras, DateTimeOffset.Now.AddMinutes(5), 2, _repositorySystem.CancellationToken);
+                if (pendenciasFinanceiras != null && pendenciasFinanceiras.TotalInadimplencia.GetValueOrDefault(0) > 0)
+                {
+                    await _cacheStore.AddAsync($"ClienteInadimplenteId_{item.PessoaProvider}", pendenciasFinanceiras, DateTimeOffset.Now.AddMinutes(5), 2, _repositorySystem.CancellationToken);
 
-                return pendenciasFinanceiras;
+                    pessoasComPendenciaFinanceiras.Add(pendenciasFinanceiras);
+                    break;
+                }
             }
-            else return null;
+
+            return pessoasComPendenciaFinanceiras;
         }
 
         public async Task<List<ClientesInadimplentes>> Inadimplentes_Esol(List<int>? pessoasPesquisar = null)
@@ -4045,12 +4060,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
         private async Task VerificarInadimplencia(IncluirSemanaInputModel model, CotaAccessCenterModel cotaPortalUtilizar,
             (string userId, string providerKeyUser, string companyId, bool isAdm)? loggedUser, Domain.Entities.Core.Sistema.Usuario usuario)
         {
+            var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuario.Id);
+
             if (!loggedUser.Value.isAdm)
             {
-                var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuario.Id);
-                if (usuarioProvider != null)
+                if (usuarioProvider != null && usuarioProvider.Any())
                 {
-                    var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(usuarioProvider.PessoaProvider!) }!);
+                    var propCache = await _serviceBase.GetContratos(usuarioProvider.Select(b=> int.Parse(b.PessoaProvider!)).AsList());
                     if (!string.IsNullOrEmpty(cotaPortalUtilizar.CotaNome))
                     {
                         if (propCache != null && propCache.Any(b => !string.IsNullOrEmpty(b.GrupoCotaTipoCotaNome) && b.GrupoCotaTipoCotaNome!.RemoveAccents() == cotaPortalUtilizar.CotaNome.RemoveAccents() && b.frAtendimentoStatusCrcModels.Any(b => (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
@@ -4079,7 +4095,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                     var cotaAcModel = await GetCotaPortalOuCotaAccessCenter(model.CotaAcId, true);
                     if (cotaAcModel != null)
                     {
-                        var resultInadimplente = await Inadimplente(new PessoaSistemaXProviderModel() { PessoaProvider = cotaAcModel!.PessoaProviderId.ToString() });
+                        var resultInadimplente = await Inadimplente(new List<PessoaSistemaXProviderModel>() { new PessoaSistemaXProviderModel() { PessoaProvider = cotaAcModel.PessoaProviderId.ToString() } });
                         if (resultInadimplente != null)
                             throw new ArgumentException("Não foi possível realizar a operação favor procure a Central de Atendimento aos Clientes.");
 
@@ -4221,365 +4237,366 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         public async Task<DownloadContratoResultModel?> DownloadContratoSCP_Esol(int cotaId)
         {
-            try
-            {
-                _repositorySystem.BeginTransaction();
-
-                var loggedUser = await _repositorySystem.GetLoggedUser();
-                if (loggedUser == null)
-                    throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
-
-                ContratoVinculoSCPEsol? contrato = null;
-
-                if (!loggedUser.Value.isAdm)
-                {
+            throw new NotImplementedException();
+            //try
+            //{
+            //    _repositorySystem.BeginTransaction();
+
+            //    var loggedUser = await _repositorySystem.GetLoggedUser();
+            //    if (loggedUser == null)
+            //        throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
+
+            //    ContratoVinculoSCPEsol? contrato = null;
+
+            //    if (!loggedUser.Value.isAdm)
+            //    {
 
-                    var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), CommunicationProviderName);
-                    if (pessoaVinculadaSistema == null)
-                        throw new ArgumentException($"Não foi encontrada pessoa do provider: {CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
+            //        var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), CommunicationProviderName);
+            //        if (pessoaVinculadaSistema == null)
+            //            throw new ArgumentException($"Não foi encontrada pessoa do provider: {CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-                    if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
-                        throw new ArgumentException($"Não foi encontrada pessoa do provider: {CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
+            //        if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
+            //            throw new ArgumentException($"Não foi encontrada pessoa do provider: {CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
 
-                    contrato = (await _repositorySystem.FindByHql<ContratoVinculoSCPEsol>(@$"From 
-                                        ContratoVinculoSCPEsol c 
-                                        Inner Join Fetch c.Empresa e 
-                                    Where 
-                                        c.CotaAccessCenterId = {cotaId} and
-                                        c.PessoaLegadoId = {pessoaVinculadaSistema.PessoaProvider}
-                                    Order by c.Id desc ")).FirstOrDefault();
+            //        contrato = (await _repositorySystem.FindByHql<ContratoVinculoSCPEsol>(@$"From 
+            //                            ContratoVinculoSCPEsol c 
+            //                            Inner Join Fetch c.Empresa e 
+            //                        Where 
+            //                            c.CotaAccessCenterId = {cotaId} and
+            //                            c.PessoaLegadoId = {pessoaVinculadaSistema.PessoaProvider}
+            //                        Order by c.Id desc ")).FirstOrDefault();
+
+
+            //    }
+            //    else
+            //    {
+            //        contrato = (await _repositorySystem.FindByHql<ContratoVinculoSCPEsol>(@$"From 
+            //                            ContratoVinculoSCPEsol c 
+            //                            Inner Join Fetch c.Empresa e 
+            //                        Where 
+            //                            c.CotaAccessCenterId = {cotaId}
+            //                        Order by c.Id desc ")).FirstOrDefault();
+
+            //    }
+
+            //    if (contrato == null)
+            //        throw new ArgumentException($"Não foi encontrado contrato SCP vinculado a Cota AccessCenterCotaId: {cotaId}");
+
+            //    var clienteContaBancarias = (await _repositoryNHAccessCenter.FindByHql<ClienteContaBancaria>(@$"
+            //                                                                        From 
+            //                                                                            ClienteContaBancaria ccb
+            //                                                                        Where 
+            //                                                                            Exists(Select cli.Id From Cliente cli Where cli.Pessoa = {contrato.PessoaLegadoId} and cli.Id = ccb.Cliente)")).AsList();
 
-
-                }
-                else
-                {
-                    contrato = (await _repositorySystem.FindByHql<ContratoVinculoSCPEsol>(@$"From 
-                                        ContratoVinculoSCPEsol c 
-                                        Inner Join Fetch c.Empresa e 
-                                    Where 
-                                        c.CotaAccessCenterId = {cotaId}
-                                    Order by c.Id desc ")).FirstOrDefault();
-
-                }
-
-                if (contrato == null)
-                    throw new ArgumentException($"Não foi encontrado contrato SCP vinculado a Cota AccessCenterCotaId: {cotaId}");
-
-                var clienteContaBancarias = (await _repositoryNHAccessCenter.FindByHql<ClienteContaBancaria>(@$"
-                                                                                    From 
-                                                                                        ClienteContaBancaria ccb
-                                                                                    Where 
-                                                                                        Exists(Select cli.Id From Cliente cli Where cli.Pessoa = {contrato.PessoaLegadoId} and cli.Id = ccb.Cliente)")).AsList();
+            //    bool emitirEmEspanhol = false;
+            //    var pessoa = (await _repositoryNHAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Pessoa>($"From Pessoa p Where p.Id = {contrato.PessoaLegadoId}")).FirstOrDefault();
+            //    if (pessoa != null && pessoa.Estrangeiro == "S")
+            //    {
+            //        emitirEmEspanhol = true;
+            //    }
 
-                bool emitirEmEspanhol = false;
-                var pessoa = (await _repositoryNHAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Pessoa>($"From Pessoa p Where p.Id = {contrato.PessoaLegadoId}")).FirstOrDefault();
-                if (pessoa != null && pessoa.Estrangeiro == "S")
-                {
-                    emitirEmEspanhol = true;
-                }
+            //    if (emitirEmEspanhol)
+            //    {
+            //        if (!string.IsNullOrEmpty(contrato.DocumentoFull) && (!contrato.DocumentoFull.Contains("INSTRUMENTO PRIVADO PARA LA CONSTITUCIÓN") ||
+            //            !contrato.DocumentoFull.Contains("CÓDIGO RECIBIDO EN CORREO ELECTRÓNICO Y CONFIRMADO POR EL CLIENTE:")))
+            //        {
 
-                if (emitirEmEspanhol)
-                {
-                    if (!string.IsNullOrEmpty(contrato.DocumentoFull) && (!contrato.DocumentoFull.Contains("INSTRUMENTO PRIVADO PARA LA CONSTITUCIÓN") ||
-                        !contrato.DocumentoFull.Contains("CÓDIGO RECIBIDO EN CORREO ELECTRÓNICO Y CONFIRMADO POR EL CLIENTE:")))
-                    {
+            //            var confirmacaoLiberacaoPool =
+            //                (await _repositorySystem.FindByHql<ConfirmacaoLiberacaoPool>($@"From 
+            //                                                            ConfirmacaoLiberacaoPool c 
+            //                                                            Inner Join Fetch c.Empresa e 
+            //                                                        Where 
+            //                                                            c.CodigoEnviadoAoCliente = '{contrato.CodigoVerificacao}' and 
+            //                                                            c.LiberacaoConfirmada = 1 and 
+            //                                                            (c.LiberacaoDiretaPeloCliente = 'Sim' or c.LiberacaoDiretaPeloCliente  = '1')")).FirstOrDefault();
 
-                        var confirmacaoLiberacaoPool =
-                            (await _repositorySystem.FindByHql<ConfirmacaoLiberacaoPool>($@"From 
-                                                                        ConfirmacaoLiberacaoPool c 
-                                                                        Inner Join Fetch c.Empresa e 
-                                                                    Where 
-                                                                        c.CodigoEnviadoAoCliente = '{contrato.CodigoVerificacao}' and 
-                                                                        c.LiberacaoConfirmada = 1 and 
-                                                                        (c.LiberacaoDiretaPeloCliente = 'Sim' or c.LiberacaoDiretaPeloCliente  = '1')")).FirstOrDefault();
+            //            if (confirmacaoLiberacaoPool == null)
+            //                throw new ArgumentException($"Não foi possível encontrar a confirmação de liberação para o POOL relacionada ao contrato: {contrato.Id}");
 
-                        if (confirmacaoLiberacaoPool == null)
-                            throw new ArgumentException($"Não foi possível encontrar a confirmação de liberação para o POOL relacionada ao contrato: {contrato.Id}");
 
+            //            var contaBancariaUtilizar = clienteContaBancarias.LastOrDefault(a => a.Preferencial == "S") ??
+            //                clienteContaBancarias.LastOrDefault();
 
-                        var contaBancariaUtilizar = clienteContaBancarias.LastOrDefault(a => a.Preferencial == "S") ??
-                            clienteContaBancarias.LastOrDefault();
 
+            //            await GerarContratoExecute(confirmacaoLiberacaoPool, contaBancariaUtilizar, contrato, contrato.Empresa!.Id!, emitirEmEspanhol);
 
-                        await GerarContratoExecute(confirmacaoLiberacaoPool, contaBancariaUtilizar, contrato, contrato.Empresa!.Id!, emitirEmEspanhol);
+            //            if (!string.IsNullOrEmpty(contrato.DocumentoFull))
+            //            {
+            //                var pathGeracao = _configuration.GetValue<string>($"CertidoesConfig:GeracaoPdfContratoPath");
+            //                if (string.IsNullOrEmpty(pathGeracao))
+            //                    throw new FileNotFoundException("Não foi encontrada a path para gravação  do contrato, necessário para liberação da semana para POOL");
+
+            //                if (!Directory.Exists(pathGeracao))
+            //                    Directory.CreateDirectory(pathGeracao);
 
-                        if (!string.IsNullOrEmpty(contrato.DocumentoFull))
-                        {
-                            var pathGeracao = _configuration.GetValue<string>($"CertidoesConfig:GeracaoPdfContratoPath");
-                            if (string.IsNullOrEmpty(pathGeracao))
-                                throw new FileNotFoundException("Não foi encontrada a path para gravação  do contrato, necessário para liberação da semana para POOL");
+            //                string fileName = $"{contrato.CotaAccessCenterId}_{contrato.CotaPortalId}_{contrato.UhCondominioId}.pdf";
+            //                var fullPath = Path.Combine(pathGeracao, fileName);
+            //                if (File.Exists(fullPath))
+            //                    File.Delete(fullPath);
+
+            //                var launchOptions = new LaunchOptions
+            //                {
+            //                    Headless = true
+            //                };
 
-                            if (!Directory.Exists(pathGeracao))
-                                Directory.CreateDirectory(pathGeracao);
+            //                await new BrowserFetcher().DownloadAsync();
+            //                using var browser = await Puppeteer.LaunchAsync(launchOptions);
+            //                using var page = await browser.NewPageAsync();
 
-                            string fileName = $"{contrato.CotaAccessCenterId}_{contrato.CotaPortalId}_{contrato.UhCondominioId}.pdf";
-                            var fullPath = Path.Combine(pathGeracao, fileName);
-                            if (File.Exists(fullPath))
-                                File.Delete(fullPath);
+            //                await page.SetContentAsync(contrato.DocumentoFull);
 
-                            var launchOptions = new LaunchOptions
-                            {
-                                Headless = true
-                            };
+            //                await page.PdfAsync(fullPath);
+
+            //                contrato.PdfPath = fullPath;
+
+            //                await _repositorySystem.Save(contrato);
+
+            //                await _repositorySystem.CommitAsync();
+
+            //                return new DownloadContratoResultModel()
+            //                {
+            //                    Path = contrato.PdfPath
+            //                };
+
+            //            }
+            //        }
+            //        else
+            //        {
+            //            if (!string.IsNullOrEmpty(contrato.PdfPath) &&
+            //                string.IsNullOrEmpty(contrato.DocumentoFull))
+            //            {
+            //                if (File.Exists(contrato.PdfPath))
+            //                {
+            //                    return new DownloadContratoResultModel()
+            //                    {
+            //                        Path = contrato.PdfPath
+            //                    };
+            //                }
+            //            }
+
+            //            string pathItemAnterior = contrato != null && !string.IsNullOrEmpty(contrato?.PdfPath) ? contrato.PdfPath : "";
 
-                            await new BrowserFetcher().DownloadAsync();
-                            using var browser = await Puppeteer.LaunchAsync(launchOptions);
-                            using var page = await browser.NewPageAsync();
 
-                            await page.SetContentAsync(contrato.DocumentoFull);
+            //            if (!string.IsNullOrEmpty(contrato?.DocumentoFull))
+            //            {
+            //                var pathGeracao = _configuration.GetValue<string>($"CertidoesConfig:GeracaoPdfContratoPath");
+            //                if (string.IsNullOrEmpty(pathGeracao))
+            //                    throw new FileNotFoundException("Não foi encontrada a path para gravação do contrato, necessária para liberação da semana para POOL");
+
 
-                            await page.PdfAsync(fullPath);
-
-                            contrato.PdfPath = fullPath;
-
-                            await _repositorySystem.Save(contrato);
-
-                            await _repositorySystem.CommitAsync();
-
-                            return new DownloadContratoResultModel()
-                            {
-                                Path = contrato.PdfPath
-                            };
-
-                        }
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(contrato.PdfPath) &&
-                            string.IsNullOrEmpty(contrato.DocumentoFull))
-                        {
-                            if (File.Exists(contrato.PdfPath))
-                            {
-                                return new DownloadContratoResultModel()
-                                {
-                                    Path = contrato.PdfPath
-                                };
-                            }
-                        }
 
-                        string pathItemAnterior = contrato != null && !string.IsNullOrEmpty(contrato?.PdfPath) ? contrato.PdfPath : "";
+            //                if (!Directory.Exists(pathGeracao))
+            //                    Directory.CreateDirectory(pathGeracao);
+
+            //                string fileName = $"{contrato.CotaAccessCenterId}_{contrato.CotaPortalId}_{contrato.UhCondominioId}.pdf";
+            //                var fullPath = Path.Combine(pathGeracao, fileName);
+            //                if (File.Exists(fullPath))
+            //                    File.Delete(fullPath);
 
+            //                var launchOptions = new LaunchOptions
+            //                {
+            //                    Headless = true // Define se o navegador será exibido ou não
+            //                };
 
-                        if (!string.IsNullOrEmpty(contrato?.DocumentoFull))
-                        {
-                            var pathGeracao = _configuration.GetValue<string>($"CertidoesConfig:GeracaoPdfContratoPath");
-                            if (string.IsNullOrEmpty(pathGeracao))
-                                throw new FileNotFoundException("Não foi encontrada a path para gravação do contrato, necessária para liberação da semana para POOL");
-
+            //                // Inicializar o PuppeteerSharp
+            //                await new BrowserFetcher().DownloadAsync();
+            //                using var browser = await Puppeteer.LaunchAsync(launchOptions);
+            //                using var page = await browser.NewPageAsync();
 
+            //                // Carregar o conteúdo HTML na página
+            //                await page.SetContentAsync(contrato.DocumentoFull);
 
-                            if (!Directory.Exists(pathGeracao))
-                                Directory.CreateDirectory(pathGeracao);
-
-                            string fileName = $"{contrato.CotaAccessCenterId}_{contrato.CotaPortalId}_{contrato.UhCondominioId}.pdf";
-                            var fullPath = Path.Combine(pathGeracao, fileName);
-                            if (File.Exists(fullPath))
-                                File.Delete(fullPath);
+            //                // Gerar o PDF
+            //                await page.PdfAsync(fullPath);
 
-                            var launchOptions = new LaunchOptions
-                            {
-                                Headless = true // Define se o navegador será exibido ou não
-                            };
+            //                contrato.PdfPath = fullPath;
 
-                            // Inicializar o PuppeteerSharp
-                            await new BrowserFetcher().DownloadAsync();
-                            using var browser = await Puppeteer.LaunchAsync(launchOptions);
-                            using var page = await browser.NewPageAsync();
+            //                await _repositorySystem.Save(contrato);
 
-                            // Carregar o conteúdo HTML na página
-                            await page.SetContentAsync(contrato.DocumentoFull);
+            //                await _repositorySystem.CommitAsync();
 
-                            // Gerar o PDF
-                            await page.PdfAsync(fullPath);
+            //                //if (!string.IsNullOrEmpty(pathItemAnterior))
+            //                //{
+            //                //    if (File.Exists(pathItemAnterior))
+            //                //    {
+            //                //        try
+            //                //        {
+            //                //            File.Delete(pathItemAnterior);
+            //                //        }
+            //                //        catch
+            //                //        {
+
+            //                //        }
+            //                //    }
+            //                //}
+
+            //                return new DownloadContratoResultModel()
+            //                {
+            //                    Path = contrato.PdfPath
+            //                };
 
-                            contrato.PdfPath = fullPath;
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
 
-                            await _repositorySystem.Save(contrato);
+            //        if ((clienteContaBancarias != null &&
+            //            clienteContaBancarias.Any() &&
+            //            (contrato.DataHoraCriacao <= new DateTime(2025, 7, 18) ||
+            //            (!string.IsNullOrEmpty(contrato.DocumentoFull) &&
+            //            (contrato.DocumentoFull.Contains("<td>[DADOSBANCARIOS]</td>", StringComparison.InvariantCultureIgnoreCase) ||
+            //            !contrato.DocumentoFull.Contains("<td>Banco:", StringComparison.InvariantCultureIgnoreCase))))) ||
+            //            (!string.IsNullOrEmpty(contrato.DocumentoFull) && !contrato.DocumentoFull.Contains("CÓDIGO RECEBIDO NO EMAIL E CONFIRMADO PELO CLIENTE:")))
+            //        {
 
-                            await _repositorySystem.CommitAsync();
+            //            var confirmacaoLiberacaoPool =
+            //                (await _repositorySystem.FindByHql<ConfirmacaoLiberacaoPool>($@"From 
+            //                                                            ConfirmacaoLiberacaoPool c 
+            //                                                            Inner Join Fetch c.Empresa e 
+            //                                                        Where 
+            //                                                            c.CodigoEnviadoAoCliente = '{contrato.CodigoVerificacao}' and 
+            //                                                            c.LiberacaoConfirmada = 1 and 
+            //                                                            (c.LiberacaoDiretaPeloCliente = 'Sim' or c.LiberacaoDiretaPeloCliente  = '1')")).FirstOrDefault();
 
-                            //if (!string.IsNullOrEmpty(pathItemAnterior))
-                            //{
-                            //    if (File.Exists(pathItemAnterior))
-                            //    {
-                            //        try
-                            //        {
-                            //            File.Delete(pathItemAnterior);
-                            //        }
-                            //        catch
-                            //        {
+            //            if (confirmacaoLiberacaoPool == null)
+            //                throw new ArgumentException($"Não foi possível encontrar a confirmação de liberação para o POOL relacionada ao contrato: {contrato.Id}");
 
-                            //        }
-                            //    }
-                            //}
 
-                            return new DownloadContratoResultModel()
-                            {
-                                Path = contrato.PdfPath
-                            };
+            //            var contaBancariaUtilizar = clienteContaBancarias.LastOrDefault(a => a.Preferencial == "S") ??
+            //                clienteContaBancarias.LastOrDefault();
 
-                        }
-                    }
-                }
-                else
-                {
 
-                    if ((clienteContaBancarias != null &&
-                        clienteContaBancarias.Any() &&
-                        (contrato.DataHoraCriacao <= new DateTime(2025, 7, 18) ||
-                        (!string.IsNullOrEmpty(contrato.DocumentoFull) &&
-                        (contrato.DocumentoFull.Contains("<td>[DADOSBANCARIOS]</td>", StringComparison.InvariantCultureIgnoreCase) ||
-                        !contrato.DocumentoFull.Contains("<td>Banco:", StringComparison.InvariantCultureIgnoreCase))))) ||
-                        (!string.IsNullOrEmpty(contrato.DocumentoFull) && !contrato.DocumentoFull.Contains("CÓDIGO RECEBIDO NO EMAIL E CONFIRMADO PELO CLIENTE:")))
-                    {
+            //            await GerarContratoExecute(confirmacaoLiberacaoPool, contaBancariaUtilizar, contrato, contrato.Empresa!.Id!, false);
 
-                        var confirmacaoLiberacaoPool =
-                            (await _repositorySystem.FindByHql<ConfirmacaoLiberacaoPool>($@"From 
-                                                                        ConfirmacaoLiberacaoPool c 
-                                                                        Inner Join Fetch c.Empresa e 
-                                                                    Where 
-                                                                        c.CodigoEnviadoAoCliente = '{contrato.CodigoVerificacao}' and 
-                                                                        c.LiberacaoConfirmada = 1 and 
-                                                                        (c.LiberacaoDiretaPeloCliente = 'Sim' or c.LiberacaoDiretaPeloCliente  = '1')")).FirstOrDefault();
+            //            if (!string.IsNullOrEmpty(contrato.DocumentoFull))
+            //            {
+            //                var pathGeracao = _configuration.GetValue<string>($"CertidoesConfig:GeracaoPdfContratoPath");
+            //                if (string.IsNullOrEmpty(pathGeracao))
+            //                    throw new FileNotFoundException("Não foi encontrada a path para geração do contrato, necessária para liberação da semana para POOL");
 
-                        if (confirmacaoLiberacaoPool == null)
-                            throw new ArgumentException($"Não foi possível encontrar a confirmação de liberação para o POOL relacionada ao contrato: {contrato.Id}");
+            //                if (!Directory.Exists(pathGeracao))
+            //                    Directory.CreateDirectory(pathGeracao);
 
+            //                string fileName = $"{contrato.CotaAccessCenterId}_{contrato.CotaPortalId}_{contrato.UhCondominioId}.pdf";
+            //                var fullPath = Path.Combine(pathGeracao, fileName);
+            //                if (File.Exists(fullPath))
+            //                    File.Delete(fullPath);
 
-                        var contaBancariaUtilizar = clienteContaBancarias.LastOrDefault(a => a.Preferencial == "S") ??
-                            clienteContaBancarias.LastOrDefault();
+            //                var launchOptions = new LaunchOptions
+            //                {
+            //                    Headless = true
+            //                };
 
+            //                await new BrowserFetcher().DownloadAsync();
+            //                using var browser = await Puppeteer.LaunchAsync(launchOptions);
+            //                using var page = await browser.NewPageAsync();
 
-                        await GerarContratoExecute(confirmacaoLiberacaoPool, contaBancariaUtilizar, contrato, contrato.Empresa!.Id!, false);
+            //                await page.SetContentAsync(contrato.DocumentoFull);
+
+            //                await page.PdfAsync(fullPath);
 
-                        if (!string.IsNullOrEmpty(contrato.DocumentoFull))
-                        {
-                            var pathGeracao = _configuration.GetValue<string>($"CertidoesConfig:GeracaoPdfContratoPath");
-                            if (string.IsNullOrEmpty(pathGeracao))
-                                throw new FileNotFoundException("Não foi encontrada a path para geração do contrato, necessária para liberação da semana para POOL");
+            //                contrato.PdfPath = fullPath;
 
-                            if (!Directory.Exists(pathGeracao))
-                                Directory.CreateDirectory(pathGeracao);
+            //                await _repositorySystem.Save(contrato);
 
-                            string fileName = $"{contrato.CotaAccessCenterId}_{contrato.CotaPortalId}_{contrato.UhCondominioId}.pdf";
-                            var fullPath = Path.Combine(pathGeracao, fileName);
-                            if (File.Exists(fullPath))
-                                File.Delete(fullPath);
+            //                await _repositorySystem.CommitAsync();
 
-                            var launchOptions = new LaunchOptions
-                            {
-                                Headless = true
-                            };
+            //                return new DownloadContratoResultModel()
+            //                {
+            //                    Path = contrato.PdfPath
+            //                };
 
-                            await new BrowserFetcher().DownloadAsync();
-                            using var browser = await Puppeteer.LaunchAsync(launchOptions);
-                            using var page = await browser.NewPageAsync();
+            //            }
+            //        }
+            //        else
+            //        {
+            //            if (!string.IsNullOrEmpty(contrato.PdfPath) &&
+            //                string.IsNullOrEmpty(contrato.DocumentoFull))
+            //            {
+            //                if (File.Exists(contrato.PdfPath))
+            //                {
+            //                    return new DownloadContratoResultModel()
+            //                    {
+            //                        Path = contrato.PdfPath
+            //                    };
+            //                }
+            //            }
 
-                            await page.SetContentAsync(contrato.DocumentoFull);
+            //            string pathItemAnterior = contrato != null && !string.IsNullOrEmpty(contrato?.PdfPath) ? contrato.PdfPath : "";
 
-                            await page.PdfAsync(fullPath);
 
-                            contrato.PdfPath = fullPath;
+            //            if (!string.IsNullOrEmpty(contrato?.DocumentoFull))
+            //            {
+            //                var pathGeracao = _configuration.GetValue<string>($"CertidoesConfig:GeracaoPdfContratoPath");
+            //                if (string.IsNullOrEmpty(pathGeracao))
+            //                    throw new FileNotFoundException("Não foi encontrada a path para geração do contrato, necessária para liberação da semana para POOL");
 
-                            await _repositorySystem.Save(contrato);
 
-                            await _repositorySystem.CommitAsync();
 
-                            return new DownloadContratoResultModel()
-                            {
-                                Path = contrato.PdfPath
-                            };
+            //                if (!Directory.Exists(pathGeracao))
+            //                    Directory.CreateDirectory(pathGeracao);
 
-                        }
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(contrato.PdfPath) &&
-                            string.IsNullOrEmpty(contrato.DocumentoFull))
-                        {
-                            if (File.Exists(contrato.PdfPath))
-                            {
-                                return new DownloadContratoResultModel()
-                                {
-                                    Path = contrato.PdfPath
-                                };
-                            }
-                        }
+            //                string fileName = $"{contrato.CotaAccessCenterId}_{contrato.CotaPortalId}_{contrato.UhCondominioId}.pdf";
+            //                var fullPath = Path.Combine(pathGeracao, fileName);
+            //                if (File.Exists(fullPath))
+            //                    File.Delete(fullPath);
 
-                        string pathItemAnterior = contrato != null && !string.IsNullOrEmpty(contrato?.PdfPath) ? contrato.PdfPath : "";
+            //                var launchOptions = new LaunchOptions
+            //                {
+            //                    Headless = true // Define se o navegador será exibido ou não
+            //                };
 
+            //                // Inicializar o PuppeteerSharp
+            //                await new BrowserFetcher().DownloadAsync();
+            //                using var browser = await Puppeteer.LaunchAsync(launchOptions);
+            //                using var page = await browser.NewPageAsync();
 
-                        if (!string.IsNullOrEmpty(contrato?.DocumentoFull))
-                        {
-                            var pathGeracao = _configuration.GetValue<string>($"CertidoesConfig:GeracaoPdfContratoPath");
-                            if (string.IsNullOrEmpty(pathGeracao))
-                                throw new FileNotFoundException("Não foi encontrada a path para geração do contrato, necessária para liberação da semana para POOL");
+            //                // Carregar o conteúdo HTML na página
+            //                await page.SetContentAsync(contrato.DocumentoFull);
 
+            //                // Gerar o PDF
+            //                await page.PdfAsync(fullPath);
 
+            //                contrato.PdfPath = fullPath;
 
-                            if (!Directory.Exists(pathGeracao))
-                                Directory.CreateDirectory(pathGeracao);
+            //                await _repositorySystem.Save(contrato);
 
-                            string fileName = $"{contrato.CotaAccessCenterId}_{contrato.CotaPortalId}_{contrato.UhCondominioId}.pdf";
-                            var fullPath = Path.Combine(pathGeracao, fileName);
-                            if (File.Exists(fullPath))
-                                File.Delete(fullPath);
+            //                await _repositorySystem.CommitAsync();
 
-                            var launchOptions = new LaunchOptions
-                            {
-                                Headless = true // Define se o navegador será exibido ou não
-                            };
+            //                //if (!string.IsNullOrEmpty(pathItemAnterior))
+            //                //{
+            //                //    if (File.Exists(pathItemAnterior))
+            //                //    {
+            //                //        try
+            //                //        {
+            //                //            File.Delete(pathItemAnterior);
+            //                //        }
+            //                //        catch
+            //                //        {
 
-                            // Inicializar o PuppeteerSharp
-                            await new BrowserFetcher().DownloadAsync();
-                            using var browser = await Puppeteer.LaunchAsync(launchOptions);
-                            using var page = await browser.NewPageAsync();
+            //                //        }
+            //                //    }
+            //                //}
 
-                            // Carregar o conteúdo HTML na página
-                            await page.SetContentAsync(contrato.DocumentoFull);
+            //                return new DownloadContratoResultModel()
+            //                {
+            //                    Path = contrato.PdfPath
+            //                };
 
-                            // Gerar o PDF
-                            await page.PdfAsync(fullPath);
+            //            }
+            //        }
+            //    }
 
-                            contrato.PdfPath = fullPath;
+            //}
+            //catch (Exception)
+            //{
+            //    _repositorySystem.Rollback();
+            //    throw;
+            //}
 
-                            await _repositorySystem.Save(contrato);
-
-                            await _repositorySystem.CommitAsync();
-
-                            //if (!string.IsNullOrEmpty(pathItemAnterior))
-                            //{
-                            //    if (File.Exists(pathItemAnterior))
-                            //    {
-                            //        try
-                            //        {
-                            //            File.Delete(pathItemAnterior);
-                            //        }
-                            //        catch
-                            //        {
-
-                            //        }
-                            //    }
-                            //}
-
-                            return new DownloadContratoResultModel()
-                            {
-                                Path = contrato.PdfPath
-                            };
-
-                        }
-                    }
-                }
-
-            }
-            catch (Exception)
-            {
-                _repositorySystem.Rollback();
-                throw;
-            }
-
-            return default;
+            //return default;
         }
 
         #region Forma via API

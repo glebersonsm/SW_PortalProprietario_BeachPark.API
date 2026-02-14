@@ -392,7 +392,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (pessoaVinculadaSistema == null)
                 throw new ArgumentException($"Não foi encontrada pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-            if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
+            if (pessoaVinculadaSistema.Any(a=> string.IsNullOrEmpty(a.PessoaProvider) || !Helper.IsNumeric(a.PessoaProvider)))
                 throw new ArgumentException($"Não foi encontrada pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
             var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
@@ -418,9 +418,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
             List<int> itensJaPagos = contasVinculadas.Select(b => b.ItemId.GetValueOrDefault(0)).Distinct().AsList();
 
-            List<int> pessoasPesquiar = new List<int>() { Convert.ToInt32(pessoaVinculadaSistema.PessoaProvider) };
-
-            await GetOutrasPessoasVinculadas(pessoaVinculadaSistema, pessoasPesquiar);
+            List<int> pessoasPesquiar = pessoaVinculadaSistema.Select(a => Convert.ToInt32(a.PessoaProvider)).AsList();
 
 
             var sb = new StringBuilder(@$"Select
@@ -597,9 +595,9 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
             if (!loggedUser.Value.isAdm && lisResult.Any())
             {
-                if (!string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider))
+                if (!string.IsNullOrEmpty(pessoaVinculadaSistema.First().PessoaProvider))
                 {
-                    var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(pessoaVinculadaSistema.PessoaProvider!) });
+                    var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(pessoaVinculadaSistema.First().PessoaProvider!) });
                     if (propCache != null && propCache.Any())
                     {
                         foreach (var itens in lisResult.GroupBy(a => a.Contrato))
@@ -1191,226 +1189,229 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         public async Task<List<ContaPendenteModel>> GetContasParaPagamentoEmCartaoDoUsuario_Esol(DoTransactionCardInputModel getContasParaPagamentoEmCartaoModel)
         {
-            var loggedUser = await _repositorySystem.GetLoggedUser();
+            throw new NotImplementedException();
+            //var loggedUser = await _repositorySystem.GetLoggedUser();
 
-            if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
-                throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
-
-
-            var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{getContasParaPagamentoEmCartaoModel.PessoaId.GetValueOrDefault()}", ProviderName_Esol);
-            if (pessoaProvider == null)
-                throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {ProviderName_Esol} vinculada a pessoa: {getContasParaPagamentoEmCartaoModel.PessoaId.GetValueOrDefault()}");
+            //if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
+            //    throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
 
 
-            if (getContasParaPagamentoEmCartaoModel.ItensToPay == null || !getContasParaPagamentoEmCartaoModel.ItensToPay.Any())
-                throw new ArgumentException($"Deve ser informado pelo menos uma conta a ser paga no array ItensToPay");
+            //var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{getContasParaPagamentoEmCartaoModel.PessoaId.GetValueOrDefault()}", ProviderName_Esol);
+            //if (pessoaProvider == null)
+            //    throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {ProviderName_Esol} vinculada a pessoa: {getContasParaPagamentoEmCartaoModel.PessoaId.GetValueOrDefault()}");
 
-            var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
-            if (string.IsNullOrEmpty(empreendimentoId))
-                throw new ArgumentException("Empreendimento não configurado.");
 
-            //PessoaId:3567|UsuarioId:256
+            //if (getContasParaPagamentoEmCartaoModel.ItensToPay == null || !getContasParaPagamentoEmCartaoModel.ItensToPay.Any())
+            //    throw new ArgumentException($"Deve ser informado pelo menos uma conta a ser paga no array ItensToPay");
 
-            var itensEncontrados = await GetContasDoUsuarioParaPagamento(getContasParaPagamentoEmCartaoModel.ItensToPay, empreendimentoId, pessoaProvider?.PessoaProvider ?? "");
+            //var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
+            //if (string.IsNullOrEmpty(empreendimentoId))
+            //    throw new ArgumentException("Empreendimento não configurado.");
 
-            if (itensEncontrados.Count() != getContasParaPagamentoEmCartaoModel.ItensToPay.Count())
-                throw new ArgumentException($"A quantidade de contas encontradas: {itensEncontrados.Count()} é diferente da quantidade esperada: {getContasParaPagamentoEmCartaoModel.ItensToPay.Count()}");
+            ////PessoaId:3567|UsuarioId:256
 
-            if (Math.Round(itensEncontrados.Sum(a => Math.Round(a.ValorAtualizado.GetValueOrDefault(), 2)), 2) != Math.Round(getContasParaPagamentoEmCartaoModel.ValorTotal.GetValueOrDefault(), 2))
-                throw new ArgumentException($"O valor total das contas encontradas: {Math.Round(itensEncontrados.Sum(a => Math.Round(a.Valor.GetValueOrDefault(), 2)), 2):N2} é diferente do valor total esperado: {Math.Round(getContasParaPagamentoEmCartaoModel.ValorTotal.GetValueOrDefault(), 2):N2}");
+            //var itensEncontrados = await GetContasDoUsuarioParaPagamento(getContasParaPagamentoEmCartaoModel.ItensToPay, empreendimentoId, pessoaProvider?.PessoaProvider ?? "");
 
-            return itensEncontrados;
+            //if (itensEncontrados.Count() != getContasParaPagamentoEmCartaoModel.ItensToPay.Count())
+            //    throw new ArgumentException($"A quantidade de contas encontradas: {itensEncontrados.Count()} é diferente da quantidade esperada: {getContasParaPagamentoEmCartaoModel.ItensToPay.Count()}");
+
+            //if (Math.Round(itensEncontrados.Sum(a => Math.Round(a.ValorAtualizado.GetValueOrDefault(), 2)), 2) != Math.Round(getContasParaPagamentoEmCartaoModel.ValorTotal.GetValueOrDefault(), 2))
+            //    throw new ArgumentException($"O valor total das contas encontradas: {Math.Round(itensEncontrados.Sum(a => Math.Round(a.Valor.GetValueOrDefault(), 2)), 2):N2} é diferente do valor total esperado: {Math.Round(getContasParaPagamentoEmCartaoModel.ValorTotal.GetValueOrDefault(), 2):N2}");
+
+            //return itensEncontrados;
 
         }
 
         private async Task<List<ContaPendenteModel>> GetContasDoUsuarioParaPagamento(List<int> itensToPay, string empreendimentoId, string pessoaProviderId)
         {
-            var parametrosSistema = await _repositorySystem.GetParametroSistemaViewModel();
-            if (parametrosSistema == null)
-                throw new FileNotFoundException("Não foi encontrado os parâmetros do sistema.");
+            throw new NotImplementedException();
+            //var parametrosSistema = await _repositorySystem.GetParametroSistemaViewModel();
+            //if (parametrosSistema == null)
+            //    throw new FileNotFoundException("Não foi encontrado os parâmetros do sistema.");
 
-            if (string.IsNullOrEmpty(pessoaProviderId))
-                throw new ArgumentException("Deve ser informado o parâmetro pessoaProviderId para localizar contas pendentes do usuário logado");
+            //if (string.IsNullOrEmpty(pessoaProviderId))
+            //    throw new ArgumentException("Deve ser informado o parâmetro pessoaProviderId para localizar contas pendentes do usuário logado");
 
-            var loggedUser = await _repositoryAccessCenter.GetLoggedUser();
+            //var loggedUser = await _repositoryAccessCenter.GetLoggedUser();
 
-            var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), ProviderName_Esol);
-            if (pessoaVinculadaSistema == null)
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
-
-
-            if (!loggedUser.Value.isAdm)
-            {
-
-                if (!string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider))
-                {
-                    var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(pessoaVinculadaSistema.PessoaProvider!) });
-                    if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
-                    {
-                        throw new ArgumentException("Não foi possível localiza as contas pendentes, motivo 0001BL");
-                    }
-                }
-            }
+            //var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), ProviderName_Esol);
+            //if (pessoaVinculadaSistema == null)
+            //    throw new ArgumentException($"Não foi encontrada pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
 
-            var contasVinculadas = (await _repositorySystem.FindBySql<PaymentItemModel>(@$"Select 
-                        pcti.* 
-                    From 
-                        PaymentCardTokenizedItem pcti 
-                        Inner Join PaymentCardTokenized pct on pcti.PaymentCardTokenized = pct.Id
-                    Where 
-                        Lower(pct.Status) like '%captured%'")).AsList();
+            //if (!loggedUser.Value.isAdm)
+            //{
 
-            List<int> itensJaPagos = contasVinculadas.Select(b => b.ItemId.GetValueOrDefault(0)).Distinct().AsList();
+            //    if (!string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider))
+            //    {
+            //        var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(pessoaVinculadaSistema.PessoaProvider!) });
+            //        if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
+            //        {
+            //            throw new ArgumentException("Não foi possível localiza as contas pendentes, motivo 0001BL");
+            //        }
+            //    }
+            //}
 
 
-            var filtroEmpresa = !string.IsNullOrEmpty(parametrosSistema.ExibirFinanceirosDasEmpresaIds) ? $" and cr.Empresa in ({parametrosSistema.ExibirFinanceirosDasEmpresaIds.TrimEnd()})"
-                : $" and emp.Id in ({empreendimentoId}) ";
+            //var contasVinculadas = (await _repositorySystem.FindBySql<PaymentItemModel>(@$"Select 
+            //            pcti.* 
+            //        From 
+            //            PaymentCardTokenizedItem pcti 
+            //            Inner Join PaymentCardTokenized pct on pcti.PaymentCardTokenized = pct.Id
+            //        Where 
+            //            Lower(pct.Status) like '%captured%'")).AsList();
 
-            List<Parameter> parameters = new List<Parameter>();
+            //List<int> itensJaPagos = contasVinculadas.Select(b => b.ItemId.GetValueOrDefault(0)).Distinct().AsList();
 
-            var sb = new StringBuilder(@$"Select
-                                        crp.Id,
-                                        Coalesce(crp.DataHoraCriacao,crp.DataHoraAlteracao) as DataHoraCriacao,
-                                        Case when crbp.Status <> 'C' then crbp.Id else null end as BoletoId,
-                                        p.Id as PessoaProviderId,
-                                        Case when crbp.Status <> 'C' then Round(Coalesce(crbp.ValorBoleto,crp.Valor),2) else crp.Valor end as Valor,
-                                        Case 
-                                            when tcr.Id in ({idsTiposContasReceberConsiderarBaixado}) then 'Paga'
-                                            when crp.Status = 'P' then 'Em aberto' 
-                                            else 'Paga' end as StatusParcela,
-                                        crp.Vencimento as Vencimento,
-                                        tcr.Codigo as CodigoTipoConta,
-                                        tcr.Nome as NomeTipoConta,
-                                        Case when crbp.Status <> 'C' then crbp.LinhaDigitavel else null end as LinhaDigitavelBoleto,
-                                        cr.Observacao,
-                                        p.Nome as NomePessoa,
-                                        pemp.CNPJ as EmpreendimentoCnpj,
-                                        'MY MABU' as EmpreendimentoNome,
-                                        pemp.Id as PessoaEmpreendimentoId,
-                                        i.Numero as NumeroImovel,
-                                        gctc.Codigo as FracaoCota,
-                                        ib.Codigo as BlocoCodigo,
-                                        crbp.LimitePagamentoTransmitido,
-                                        crbp.ComLimitePagamentoTra,
-                                        crbp.ComLimitePagamento,
-                                        crbp.ValorJuroDiario,
-                                        crbp.PercentualJuroDiario,
-                                        crbp.PercentualJuroMensal,
-                                        crbp.ValorJuroMensal,
-                                        crbp.PercentualMulta,
-                                        crp.PercentualJuroDiario as PercentualJuroDiarioCar,
-                                        crp.PercentualMulta as PercentualMultaCar, 
-                                        tcr.TaxaJuroMensalProcessamento,
-                                        tcr.TaxaMultaMensalProcessamento,
-                                        cremp.Id as EmpresaId,
-                                        pemp.Nome as EmpresaNome,
-                                        tcr.TaxaJuroMensalProcessamento,
-                                        tcr.TaxaMultaMensalProcessamento,
-                                        (Select Max(av.Codigo) From FrAtendimentoVendaContaRec avcr Inner Join FrAtendimentoVenda av on avcr.FrAtendimentoVenda = av.Id Where avcr.ContaReceber = cr.Id) as Contrato,
-                                        COALESCE((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
-                                        Case when COALESCE((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta
-                                        From 
-                                            ContaReceberParcela crp
-                                            Inner Join TipoContaReceber tcr on crp.TipoContaReceber = tcr.Id
-                                            Inner Join ContaReceber cr on crp.ContaReceber = cr.Id
-                                            Inner Join Empresa cremp on cr.Empresa = cremp.Id
-                                            Left Outer Join Cota co on cr.Cota = co.Id
-                                            Left Outer Join GrupoCotaTipoCota gctc on co.GrupoCotaTipoCota = gctc.Id
-                                            Left Outer Join GrupoCota gc on gctc.GrupoCota = gc.Id
-                                            Left Outer Join Imovel i on co.Imovel = i.Id
-                                            LEFT OUTER JOIN ImovelBloco ib ON i.ImovelBloco = ib.Id
-                                            Left Outer Join Empreendimento emp on i.Empreendimento = emp.Id
-                                            Left Outer Join Filial f on emp.Filial = f.Id
-                                            Left Outer Join Empresa e on f.Empresa = e.Id
-                                            Left Outer Join Pessoa pemp on e.Pessoa = pemp.Id
-                                            Left Outer Join
-                                            (
-                                            select 
-	                                            crpb.ContaReceberParcela,
-	                                            crb.*
-	                                        from
-	                                            ContaReceberParcelaBoleto crpb
-                                                Inner Join ContaReceberBoleto crb on crpb.ContaReceberBoleto = crb.Id
-                                                Inner Join ContaFinVariConCob cfcc on crb.ContaFinVariConCob = cfcc.Id
-                                                Inner Join ContaFinanceiraVariacao cfv on cfcc.ContaFinanceiraVariacao = cfv.Id
-                                                Inner Join ContaFinanceira cf on cfv.ContaFinanceira = cf.Id
-                                                Inner Join Banco b on cf.Banco = b.Id
-                                            Where
-                                                crpb.ContaReceberBoleto = (select Max(crpb1.ContaReceberBoleto) From ContaReceberParcelaBoleto crpb1 Where crpb1.ContaReceberParcela = crpb.ContaReceberParcela)
-                                            ) crbp on crp.Id = crbp.ContaReceberParcela
-                                            Inner Join Cliente cli on cr.Cliente = cli.Id
-                                            Inner Join Pessoa p on cli.Pessoa = p.Id
-                                        Where 
-                                        crp.Status <> 'B' and
-                                        tcr.Id in ({idsTiposContasReceberConsiderar}) and
-                                        tcr.Id not in ({idsTiposContasReceberConsiderarBaixado})
-                                        and crp.SaldoPendente > 0 and
-                                        crp.Id in ({string.Join(",", itensToPay)})
-                                        {filtroEmpresa}
-                                        and p.Id = {pessoaProviderId} 
-                                        and exists(Select co.Proprietario From Cota co INNER JOIN cliente ccli ON co.PROPRIETARIO  = ccli.id Where ccli.PESSOA = p.Id) ");
 
-            if (itensJaPagos.Any())
-            {
-                if (itensJaPagos.Count <= 1000)
-                {
-                    sb.AppendLine($" AND crp.Id not in ({string.Join(",", itensJaPagos)}) ");
-                }
-            }
+            //var filtroEmpresa = !string.IsNullOrEmpty(parametrosSistema.ExibirFinanceirosDasEmpresaIds) ? $" and cr.Empresa in ({parametrosSistema.ExibirFinanceirosDasEmpresaIds.TrimEnd()})"
+            //    : $" and emp.Id in ({empreendimentoId}) ";
 
-            IList<ContaPendenteModel> itensEncontrados = (await _repositoryAccessCenter.FindBySql<ContaPendenteModel>(sb.ToString(), parameters.ToArray())).AsList();
+            //List<Parameter> parameters = new List<Parameter>();
 
-            if (itensJaPagos.Any() && itensJaPagos.Count > 1000)
-            {
-                foreach (var item in itensEncontrados.Reverse())
-                {
-                    if (itensJaPagos.Any(b => b == item.Id))
-                        itensEncontrados.Remove(item);
-                }
-            }
+            //var sb = new StringBuilder(@$"Select
+            //                            crp.Id,
+            //                            Coalesce(crp.DataHoraCriacao,crp.DataHoraAlteracao) as DataHoraCriacao,
+            //                            Case when crbp.Status <> 'C' then crbp.Id else null end as BoletoId,
+            //                            p.Id as PessoaProviderId,
+            //                            Case when crbp.Status <> 'C' then Round(Coalesce(crbp.ValorBoleto,crp.Valor),2) else crp.Valor end as Valor,
+            //                            Case 
+            //                                when tcr.Id in ({idsTiposContasReceberConsiderarBaixado}) then 'Paga'
+            //                                when crp.Status = 'P' then 'Em aberto' 
+            //                                else 'Paga' end as StatusParcela,
+            //                            crp.Vencimento as Vencimento,
+            //                            tcr.Codigo as CodigoTipoConta,
+            //                            tcr.Nome as NomeTipoConta,
+            //                            Case when crbp.Status <> 'C' then crbp.LinhaDigitavel else null end as LinhaDigitavelBoleto,
+            //                            cr.Observacao,
+            //                            p.Nome as NomePessoa,
+            //                            pemp.CNPJ as EmpreendimentoCnpj,
+            //                            'MY MABU' as EmpreendimentoNome,
+            //                            pemp.Id as PessoaEmpreendimentoId,
+            //                            i.Numero as NumeroImovel,
+            //                            gctc.Codigo as FracaoCota,
+            //                            ib.Codigo as BlocoCodigo,
+            //                            crbp.LimitePagamentoTransmitido,
+            //                            crbp.ComLimitePagamentoTra,
+            //                            crbp.ComLimitePagamento,
+            //                            crbp.ValorJuroDiario,
+            //                            crbp.PercentualJuroDiario,
+            //                            crbp.PercentualJuroMensal,
+            //                            crbp.ValorJuroMensal,
+            //                            crbp.PercentualMulta,
+            //                            crp.PercentualJuroDiario as PercentualJuroDiarioCar,
+            //                            crp.PercentualMulta as PercentualMultaCar, 
+            //                            tcr.TaxaJuroMensalProcessamento,
+            //                            tcr.TaxaMultaMensalProcessamento,
+            //                            cremp.Id as EmpresaId,
+            //                            pemp.Nome as EmpresaNome,
+            //                            tcr.TaxaJuroMensalProcessamento,
+            //                            tcr.TaxaMultaMensalProcessamento,
+            //                            (Select Max(av.Codigo) From FrAtendimentoVendaContaRec avcr Inner Join FrAtendimentoVenda av on avcr.FrAtendimentoVenda = av.Id Where avcr.ContaReceber = cr.Id) as Contrato,
+            //                            COALESCE((Select Max(crpav.Data) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'J' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),crp.Vencimento) as DataBaseAplicacaoJurosMultas,
+            //                            Case when COALESCE((Select Max(crpav.Id) From ContaReceberParcelaAltVal crpav Inner Join AlteradorValor alv on crpav.AlteradorValor = alv.Id and alv.AlteradorValorAplicacao = 'R' and alv.Categoria = 'M' Where crpav.Estornado = 'N' and crpav.ContaReceberParcela = crp.Id),0) > 1 then 'N' else 'S' end as PodeAplicarMulta
+            //                            From 
+            //                                ContaReceberParcela crp
+            //                                Inner Join TipoContaReceber tcr on crp.TipoContaReceber = tcr.Id
+            //                                Inner Join ContaReceber cr on crp.ContaReceber = cr.Id
+            //                                Inner Join Empresa cremp on cr.Empresa = cremp.Id
+            //                                Left Outer Join Cota co on cr.Cota = co.Id
+            //                                Left Outer Join GrupoCotaTipoCota gctc on co.GrupoCotaTipoCota = gctc.Id
+            //                                Left Outer Join GrupoCota gc on gctc.GrupoCota = gc.Id
+            //                                Left Outer Join Imovel i on co.Imovel = i.Id
+            //                                LEFT OUTER JOIN ImovelBloco ib ON i.ImovelBloco = ib.Id
+            //                                Left Outer Join Empreendimento emp on i.Empreendimento = emp.Id
+            //                                Left Outer Join Filial f on emp.Filial = f.Id
+            //                                Left Outer Join Empresa e on f.Empresa = e.Id
+            //                                Left Outer Join Pessoa pemp on e.Pessoa = pemp.Id
+            //                                Left Outer Join
+            //                                (
+            //                                select 
+	           //                                 crpb.ContaReceberParcela,
+	           //                                 crb.*
+	           //                             from
+	           //                                 ContaReceberParcelaBoleto crpb
+            //                                    Inner Join ContaReceberBoleto crb on crpb.ContaReceberBoleto = crb.Id
+            //                                    Inner Join ContaFinVariConCob cfcc on crb.ContaFinVariConCob = cfcc.Id
+            //                                    Inner Join ContaFinanceiraVariacao cfv on cfcc.ContaFinanceiraVariacao = cfv.Id
+            //                                    Inner Join ContaFinanceira cf on cfv.ContaFinanceira = cf.Id
+            //                                    Inner Join Banco b on cf.Banco = b.Id
+            //                                Where
+            //                                    crpb.ContaReceberBoleto = (select Max(crpb1.ContaReceberBoleto) From ContaReceberParcelaBoleto crpb1 Where crpb1.ContaReceberParcela = crpb.ContaReceberParcela)
+            //                                ) crbp on crp.Id = crbp.ContaReceberParcela
+            //                                Inner Join Cliente cli on cr.Cliente = cli.Id
+            //                                Inner Join Pessoa p on cli.Pessoa = p.Id
+            //                            Where 
+            //                            crp.Status <> 'B' and
+            //                            tcr.Id in ({idsTiposContasReceberConsiderar}) and
+            //                            tcr.Id not in ({idsTiposContasReceberConsiderarBaixado})
+            //                            and crp.SaldoPendente > 0 and
+            //                            crp.Id in ({string.Join(",", itensToPay)})
+            //                            {filtroEmpresa}
+            //                            and p.Id = {pessoaProviderId} 
+            //                            and exists(Select co.Proprietario From Cota co INNER JOIN cliente ccli ON co.PROPRIETARIO  = ccli.id Where ccli.PESSOA = p.Id) ");
 
-            await AtualizarValores(itensEncontrados.AsList());
+            //if (itensJaPagos.Any())
+            //{
+            //    if (itensJaPagos.Count <= 1000)
+            //    {
+            //        sb.AppendLine($" AND crp.Id not in ({string.Join(",", itensJaPagos)}) ");
+            //    }
+            //}
 
-            return itensEncontrados.AsList();
+            //IList<ContaPendenteModel> itensEncontrados = (await _repositoryAccessCenter.FindBySql<ContaPendenteModel>(sb.ToString(), parameters.ToArray())).AsList();
+
+            //if (itensJaPagos.Any() && itensJaPagos.Count > 1000)
+            //{
+            //    foreach (var item in itensEncontrados.Reverse())
+            //    {
+            //        if (itensJaPagos.Any(b => b == item.Id))
+            //            itensEncontrados.Remove(item);
+            //    }
+            //}
+
+            //await AtualizarValores(itensEncontrados.AsList());
+
+            //return itensEncontrados.AsList();
         }
 
         public async Task<List<ContaPendenteModel>> GetContasParaPagamentoEmPixDoUsuario_Esol(DoTransactionPixInputModel getContasParaPagamentoEmPixModel)
         {
-            var loggedUser = await _repositorySystem.GetLoggedUser();
+            throw new NotImplementedException();
+            //var loggedUser = await _repositorySystem.GetLoggedUser();
 
-            if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
-                throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
+            //if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
+            //    throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
 
-            var dadosVinculacaoProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), ProviderName_Esol);
-            if (dadosVinculacaoProvider == null)
-                throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
+            //var dadosVinculacaoProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), ProviderName_Esol);
+            //if (dadosVinculacaoProvider == null)
+            //    throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-            if (string.IsNullOrEmpty(dadosVinculacaoProvider.PessoaProvider) || !Helper.IsNumeric(dadosVinculacaoProvider.PessoaProvider))
-                throw new ArgumentException("Não foi encontrada a pessoa vinculada ao usuário logado");
-
-
-            if (getContasParaPagamentoEmPixModel.ItensToPay == null || !getContasParaPagamentoEmPixModel.ItensToPay.Any())
-                throw new ArgumentException($"Deve ser informado pelo menos uma conta a ser paga no array ItensToPay");
+            //if (dadosVinculacaoProvider.Any(a => string.IsNullOrEmpty(a.PessoaProvider) ) || !Helper.IsNumeric(dadosVinculacaoProvider.PessoaProvider))
+            //    throw new ArgumentException("Não foi encontrada a pessoa vinculada ao usuário logado");
 
 
-            var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
-            if (string.IsNullOrEmpty(empreendimentoId))
-                throw new ArgumentException("Empreendimento não configurado.");
+            //if (getContasParaPagamentoEmPixModel.ItensToPay == null || !getContasParaPagamentoEmPixModel.ItensToPay.Any())
+            //    throw new ArgumentException($"Deve ser informado pelo menos uma conta a ser paga no array ItensToPay");
 
-            //PessoaId:3567|UsuarioId:256
 
-            var itensEncontrados = await GetContasDoUsuarioParaPagamento(getContasParaPagamentoEmPixModel.ItensToPay, empreendimentoId, dadosVinculacaoProvider.PessoaProvider);
+            //var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
+            //if (string.IsNullOrEmpty(empreendimentoId))
+            //    throw new ArgumentException("Empreendimento não configurado.");
 
-            if (itensEncontrados.Count() != getContasParaPagamentoEmPixModel.ItensToPay.Count())
-                throw new ArgumentException($"A quantidade de contas encontradas: {itensEncontrados.Count()} é diferente da quantidade esperada: {getContasParaPagamentoEmPixModel.ItensToPay.Count()}");
+            ////PessoaId:3567|UsuarioId:256
 
-            var totalEncontrado = Math.Round(itensEncontrados.Sum(a => Math.Round(a.ValorAtualizado.GetValueOrDefault(), 2)), 2);
+            //var itensEncontrados = await GetContasDoUsuarioParaPagamento(getContasParaPagamentoEmPixModel.ItensToPay, empreendimentoId, dadosVinculacaoProvider.PessoaProvider);
 
-            if (Math.Abs(totalEncontrado - Math.Round(getContasParaPagamentoEmPixModel.ValorTotal.GetValueOrDefault(), 2)) != 0.00m)
-                throw new ArgumentException($"O valor total das contas encontradas: {Math.Round(itensEncontrados.Sum(a => Math.Round(a.ValorAtualizado.GetValueOrDefault(), 2)), 2):N2} é diferente do valor total esperado: {Math.Round(getContasParaPagamentoEmPixModel.ValorTotal.GetValueOrDefault(), 2):N2}");
+            //if (itensEncontrados.Count() != getContasParaPagamentoEmPixModel.ItensToPay.Count())
+            //    throw new ArgumentException($"A quantidade de contas encontradas: {itensEncontrados.Count()} é diferente da quantidade esperada: {getContasParaPagamentoEmPixModel.ItensToPay.Count()}");
 
-            return itensEncontrados;
+            //var totalEncontrado = Math.Round(itensEncontrados.Sum(a => Math.Round(a.ValorAtualizado.GetValueOrDefault(), 2)), 2);
+
+            //if (Math.Abs(totalEncontrado - Math.Round(getContasParaPagamentoEmPixModel.ValorTotal.GetValueOrDefault(), 2)) != 0.00m)
+            //    throw new ArgumentException($"O valor total das contas encontradas: {Math.Round(itensEncontrados.Sum(a => Math.Round(a.ValorAtualizado.GetValueOrDefault(), 2)), 2):N2} é diferente do valor total esperado: {Math.Round(getContasParaPagamentoEmPixModel.ValorTotal.GetValueOrDefault(), 2):N2}");
+
+            //return itensEncontrados;
         }
 
         public async Task<List<CotaPeriodoModel>> GetCotaPeriodo_Esol(int pessoaId, DateTime? dataInicial, DateTime? dataFinal)
@@ -2908,69 +2909,70 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         public async Task<int> SalvarMinhaContaBancaria_Esol(ClienteContaBancariaInputModel model)
         {
-            try
-            {
-                _repositoryAccessCenter.BeginTransaction();
+            throw new NotImplementedException();
+            //try
+            //{
+            //    _repositoryAccessCenter.BeginTransaction();
 
-                var loggedUser = await _repositorySystem.GetLoggedUser();
+            //    var loggedUser = await _repositorySystem.GetLoggedUser();
 
-                if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
+            //    if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
+            //        throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
 
-                var dadosVinculacaoProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), ProviderName_Esol);
-                if (dadosVinculacaoProvider == null)
-                    throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
+            //    var dadosVinculacaoProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), ProviderName_Esol);
+            //    if (dadosVinculacaoProvider == null)
+            //        throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-                if (string.IsNullOrEmpty(dadosVinculacaoProvider.PessoaProvider) || !Helper.IsNumeric(dadosVinculacaoProvider.PessoaProvider))
-                    throw new ArgumentException("Não foi encontrada a pessoa vinculada ao usuário logado");
+            //    if (string.IsNullOrEmpty(dadosVinculacaoProvider.PessoaProvider) || !Helper.IsNumeric(dadosVinculacaoProvider.PessoaProvider))
+            //        throw new ArgumentException("Não foi encontrada a pessoa vinculada ao usuário logado");
 
-                var parametrosSistema = await _repositorySystem.GetParametroSistemaViewModel();
-                if (parametrosSistema == null)
-                    throw new FileNotFoundException("Não foi encontrado os parâmetros para a empresa logada");
+            //    var parametrosSistema = await _repositorySystem.GetParametroSistemaViewModel();
+            //    if (parametrosSistema == null)
+            //        throw new FileNotFoundException("Não foi encontrado os parâmetros para a empresa logada");
 
-                var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
-                if (string.IsNullOrEmpty(empreendimentoId))
-                    throw new ArgumentException("Empreendimento não configurado.");
+            //    var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
+            //    if (string.IsNullOrEmpty(empreendimentoId))
+            //        throw new ArgumentException("Empreendimento não configurado.");
 
-                var empreendimento = (await _repositoryAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Empreendimento>($"From Empreendimento emp Where emp.Id in ({empreendimentoId})")).FirstOrDefault();
+            //    var empreendimento = (await _repositoryAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Empreendimento>($"From Empreendimento emp Where emp.Id in ({empreendimentoId})")).FirstOrDefault();
 
-                if (empreendimento == null)
-                    throw new ArgumentException($"Não foi encontrado o empreendimento com o Id: {empreendimentoId}");
+            //    if (empreendimento == null)
+            //        throw new ArgumentException($"Não foi encontrado o empreendimento com o Id: {empreendimentoId}");
 
-                model.EmpreendimentoId = empreendimento?.Id;
-                model.EmpresaId = empreendimento?.Empresa;
+            //    model.EmpreendimentoId = empreendimento?.Id;
+            //    model.EmpresaId = empreendimento?.Empresa;
 
-                var filtroEmpresa = !string.IsNullOrEmpty(parametrosSistema.ExibirFinanceirosDasEmpresaIds) ? $" and e.Id in ({parametrosSistema.ExibirFinanceirosDasEmpresaIds.TrimEnd()})"
-                    : $" and e.Id = {empreendimento!.Empresa.GetValueOrDefault()} ";
+            //    var filtroEmpresa = !string.IsNullOrEmpty(parametrosSistema.ExibirFinanceirosDasEmpresaIds) ? $" and e.Id in ({parametrosSistema.ExibirFinanceirosDasEmpresaIds.TrimEnd()})"
+            //        : $" and e.Id = {empreendimento!.Empresa.GetValueOrDefault()} ";
 
-                var cliente = (await _repositoryAccessCenter.FindByHql<Cliente>(@$"From 
-                                                                                     Cliente cli 
-                                                                                     Inner Join FETCH cli.Empresa e 
-                                                                                     Inner Join Fetch cli.Pessoa p 
-                                                                                   Where 
-                                                                                     p.Id = {dadosVinculacaoProvider.PessoaProvider} {parametrosSistema}")).AsList();
+            //    var cliente = (await _repositoryAccessCenter.FindByHql<Cliente>(@$"From 
+            //                                                                         Cliente cli 
+            //                                                                         Inner Join FETCH cli.Empresa e 
+            //                                                                         Inner Join Fetch cli.Pessoa p 
+            //                                                                       Where 
+            //                                                                         p.Id in ({string.Join(",", dadosVinculacaoProvider.Select(b=>b.PessoaProvider))}) {parametrosSistema}")).AsList();
 
-                if (cliente == null || !cliente.Any())
-                    throw new ArgumentException($"Não foi encontrado um cliente no legado com a pessoa vinculada ao usuário logado: {loggedUser.Value.userId}");
+            //    if (cliente == null || !cliente.Any())
+            //        throw new ArgumentException($"Não foi encontrado um cliente no legado com a pessoa vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-                model.ClienteId = cliente.First().Id;
+            //    model.ClienteId = cliente.First().Id;
 
-                var contaBancariaResult = await SalvarContaBancariaInterna_Esol(model, parametrosSistema);
+            //    var contaBancariaResult = await SalvarContaBancariaInterna_Esol(model, parametrosSistema);
 
-                var resultCommit = await _repositoryAccessCenter.CommitAsync();
-                if (resultCommit.executed)
-                {
-                    return contaBancariaResult!.Id.GetValueOrDefault();
-                }
+            //    var resultCommit = await _repositoryAccessCenter.CommitAsync();
+            //    if (resultCommit.executed)
+            //    {
+            //        return contaBancariaResult!.Id.GetValueOrDefault();
+            //    }
 
-                throw resultCommit.exception ?? new Exception("Erro na operação");
+            //    throw resultCommit.exception ?? new Exception("Erro na operação");
 
-            }
-            catch (Exception err)
-            {
-                _repositoryAccessCenter.Rollback();
-                throw err;
-            }
+            //}
+            //catch (Exception err)
+            //{
+            //    _repositoryAccessCenter.Rollback();
+            //    throw err;
+            //}
         }
 
         public async Task<List<ClienteContaBancariaViewModel>> GetMinhasContasBancarias_Esol()
@@ -2989,7 +2991,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (dadosVinculacaoProvider == null)
                 throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {ProviderName_Esol} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-            if (string.IsNullOrEmpty(dadosVinculacaoProvider.PessoaProvider) || !Helper.IsNumeric(dadosVinculacaoProvider.PessoaProvider))
+            if ( dadosVinculacaoProvider == null || !dadosVinculacaoProvider.Any() || string.IsNullOrEmpty(dadosVinculacaoProvider.First().PessoaProvider) || !Helper.IsNumeric(dadosVinculacaoProvider.First().PessoaProvider))
                 throw new ArgumentException("Não foi encontrada a pessoa vinculada ao usuário logado");
 
             StringBuilder sb = new StringBuilder(@$"Select 
@@ -3021,7 +3023,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                                                     Left Join Banco b on ccb.Banco = b.Id
                                                     Left Join Cidade c on ccb.Cidade = c.Id
                                                     Left Join Estado e on c.Estado = e.Id
-                                                    Where cli.Pessoa = {dadosVinculacaoProvider.PessoaProvider} and ccb.Status = 'A' and 
+                                                    Where cli.Pessoa in ({string.Join(",", dadosVinculacaoProvider.Select(b=>b.PessoaProvider))}) and ccb.Status = 'A' and 
                                                           cli.Empresa in ({string.Join(",", parametrosSistema.ExibirFinanceirosDasEmpresaIds.Split(','))}) and 
                                                           Exists(Select f.Empresa From Empreendimento ef Inner Join Filial f on ef.Filial = f.Id Where f.Empresa = cli.Empresa) ");
 
@@ -3098,179 +3100,180 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
         #region CM Methods
         public async Task<(int pageNumber, int lastPageNumber, List<ContaPendenteModel> contasPendentes)?> GetContaPendenteDoUsuario_CM(SearchContasPendentesUsuarioLogado searchModel)
         {
-            var parametros = new List<Parameter>();
+            return default;
+            //var parametros = new List<Parameter>();
 
-            var empresaCmId = _configuration.GetValue<int>("EmpresaCMId", 3);
+            //var empresaCmId = _configuration.GetValue<int>("EmpresaCMId", 3);
 
-            var loggedUser = await _repositoryNHCm.GetLoggedUser();
-            if (loggedUser == null)
-                throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
+            //var loggedUser = await _repositoryNHCm.GetLoggedUser();
+            //if (loggedUser == null)
+            //    throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
 
-            var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), ProviderName_CM);
-            if (pessoaVinculadaSistema == null)
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {ProviderName_CM} vinculada ao usuário logado: {loggedUser.Value.userId}");
+            //var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), ProviderName_CM);
+            //if (pessoaVinculadaSistema == null)
+            //    throw new ArgumentException($"Não foi encontrada pessoa do provider: {ProviderName_CM} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-            if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {ProviderName_CM} vinculada ao usuário logado: {loggedUser.Value.userId}");
+            //if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
+            //    throw new ArgumentException($"Não foi encontrada pessoa do provider: {ProviderName_CM} vinculada ao usuário logado: {loggedUser.Value.userId}");
 
-            var txtFiltrosAdicionais = $" AND PRO.IdPessoa = {pessoaVinculadaSistema.PessoaProvider} ";
+            //var txtFiltrosAdicionais = $" AND PRO.IdPessoa = {pessoaVinculadaSistema.PessoaProvider} ";
 
-            if (searchModel.VencimentoInicial.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
-            {
-                parametros.Add(new Parameter("vencimentoInicial", searchModel.VencimentoInicial.GetValueOrDefault().Date));
-                txtFiltrosAdicionais += " AND COALESCE(D.DATAPROGRAMADA,D.DATAVENCTO) >= :vencimentoInicial ";
-            }
+            //if (searchModel.VencimentoInicial.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
+            //{
+            //    parametros.Add(new Parameter("vencimentoInicial", searchModel.VencimentoInicial.GetValueOrDefault().Date));
+            //    txtFiltrosAdicionais += " AND COALESCE(D.DATAPROGRAMADA,D.DATAVENCTO) >= :vencimentoInicial ";
+            //}
 
-            if (searchModel.VencimentoFinal.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
-            {
-                parametros.Add(new Parameter("vencimentoFinal", searchModel.VencimentoFinal.GetValueOrDefault().Date.AddDays(1).AddMicroseconds(-1)));
-                txtFiltrosAdicionais += " AND COALESCE(D.DATAPROGRAMADA,D.DATAVENCTO) <= :vencimentoFinal ";
-            }
+            //if (searchModel.VencimentoFinal.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
+            //{
+            //    parametros.Add(new Parameter("vencimentoFinal", searchModel.VencimentoFinal.GetValueOrDefault().Date.AddDays(1).AddMicroseconds(-1)));
+            //    txtFiltrosAdicionais += " AND COALESCE(D.DATAPROGRAMADA,D.DATAVENCTO) <= :vencimentoFinal ";
+            //}
 
-            if (searchModel.Status == "B")
-            {
-                txtFiltrosAdicionais += " AND Exists(Select ld.CodDocumento From LanctoDocum ld Where ld.Operacao = 5 and ld.CodDocumento = l.CodDocumento) ";
-            }
-            else if (searchModel.Status == "P")
-            {
-                txtFiltrosAdicionais += " AND NOT Exists(Select ld.CodDocumento From LanctoDocum ld Where ld.Operacao = 5 and ld.CodDocumento = l.CodDocumento) and SaldoCar.Saldo != 0.00 ";
-            }
-            else if (searchModel.Status == "V")
-            {
-                txtFiltrosAdicionais += " AND Not Exists(Select ld.CodDocumento From LanctoDocum ld Where ld.Operacao = 5 and ld.CodDocumento = l.CodDocumento) and SaldoCar.Saldo != 0.00 and " +
-                    " COALESCE(D.DATAPROGRAMADA,D.DATAVENCTO) <= :dataAtual ";
-                parametros.Add(new Parameter("dataAtual", DateTime.Today.Date));
-            }
+            //if (searchModel.Status == "B")
+            //{
+            //    txtFiltrosAdicionais += " AND Exists(Select ld.CodDocumento From LanctoDocum ld Where ld.Operacao = 5 and ld.CodDocumento = l.CodDocumento) ";
+            //}
+            //else if (searchModel.Status == "P")
+            //{
+            //    txtFiltrosAdicionais += " AND NOT Exists(Select ld.CodDocumento From LanctoDocum ld Where ld.Operacao = 5 and ld.CodDocumento = l.CodDocumento) and SaldoCar.Saldo != 0.00 ";
+            //}
+            //else if (searchModel.Status == "V")
+            //{
+            //    txtFiltrosAdicionais += " AND Not Exists(Select ld.CodDocumento From LanctoDocum ld Where ld.Operacao = 5 and ld.CodDocumento = l.CodDocumento) and SaldoCar.Saldo != 0.00 and " +
+            //        " COALESCE(D.DATAPROGRAMADA,D.DATAVENCTO) <= :dataAtual ";
+            //    parametros.Add(new Parameter("dataAtual", DateTime.Today.Date));
+            //}
 
-            txtFiltrosAdicionais += " AND NOT EXISTS(Select ld.CodDocumento From LanctoDocum ld Where ld.Operacao = 4 and ld.CodAlterador = 521 and ld.CodDocumento = l.CodDocumento) ";
+            //txtFiltrosAdicionais += " AND NOT EXISTS(Select ld.CodDocumento From LanctoDocum ld Where ld.Operacao = 4 and ld.CodAlterador = 521 and ld.CodDocumento = l.CodDocumento) ";
 
 
-            var sb = new StringBuilder(@$"SELECT 
-                                    PRO.EMAIL,
-                                    L.CodDocumento as Id,
-                                    L.TRGDTINCLUSAO AS DataHoraCriacao,
-                                    PRO.IdPessoa as PessoaId,
-                                    PRO.IdPessoa as PessoaProviderId,
-                                    PRO.NOME as NomePessoa,
-                                    PRO.NUMDOCUMENTO AS DOCUMENTOCLIENTE,
-                                    L.DataLancamento as DataCriacao,
-                                    COALESCE(D.DATAPROGRAMADA,D.DATAVENCTO) AS Vencimento,
-                                    TDRP.CODTIPDOC AS CODIGOTIPOCONTA,
-                                    TDRP.DESCRICAO AS NomeTipoConta,
-                                    D.NUMDIGCODBARRAS AS LINHADIGITAVELBOLETO,
-                                    D.NOSSONUMERO AS NOSSONUMEROBOLETO,
-                                    PE.NUMDOCUMENTO AS EMPREENDIMENTOCNPJ,
-                                    PE.NOME AS EMPREENDIMENTONOME,
-                                    PE.IDPESSOA AS PESSOAEMPREENDIMENTOID,
-                                    PE.IDPESSOA AS EMPRESAID,
-                                    PE.NOME AS EMPRESANOME,
-                                    PRO.NUMEROCONTRATO AS NumeroImovel,
-                                    PRO.NUMEROCONTRATO AS Contrato, 
-                                    CASE WHEN SaldoCar.Saldo = 0 then COALESCE(D.DATAVENCTO, L.DATAPAGAMENTO) ELSE NULL end AS DATAHORABAIXA,
-                                    COALESCE(D.DATAVENCTO, L.DATAPAGAMENTO) AS DATAPROCESSAMENTO,
-                                    CASE
-                                       WHEN SUBSTR(L.COMPLDOCUMENTO,1,1) = 'S' THEN 'Sinal: '         || SUBSTR(L.COMPLDOCUMENTO,2,LENGTH(L.COMPLDOCUMENTO)-1)
-                                               WHEN SUBSTR(L.COMPLDOCUMENTO,1,1) = 'E' THEN 'Entrada: '       || SUBSTR(L.COMPLDOCUMENTO,2,LENGTH(L.COMPLDOCUMENTO)-1)
-                                               WHEN SUBSTR(L.COMPLDOCUMENTO,1,1) = 'I' THEN 'Intermediária: ' || SUBSTR(L.COMPLDOCUMENTO,2,LENGTH(L.COMPLDOCUMENTO)-1)
-                                               WHEN SUBSTR(L.COMPLDOCUMENTO,1,1) = 'P' THEN 'Parcela: '       || SUBSTR(L.COMPLDOCUMENTO,2,LENGTH(L.COMPLDOCUMENTO)-1)
-                                            END AS OBSERVACAO,
-                                            (LD.VALOR * Decode(ld.DebCre,'D',-1,1)) AS ValorOriginal,
-                                            SALDOCAR.Saldo,
-                                            (LD.VALOR * Decode(ld.DebCre,'D',-1,1)) AS Valor,
-                                            SALDOCAR.VALORBAIXADO
-                                            FROM
-                                            LANCAMENTOTS L
-                                            INNER JOIN DOCUMENTO D ON L.CODDOCUMENTO = D.CODDOCUMENTO
-                                            INNER JOIN LANCTODOCUM LD ON D.CODDOCUMENTO = LD.CODDOCUMENTO
-                                            INNER JOIN TIPODOCRECPAG TDRP ON D.CODTIPDOC = TDRP.CODTIPDOC
-                                            INNER JOIN PESSOA PE ON D.IDPESSOA = PE.IDPESSOA AND PE.IDPESSOA = 3
-                                            INNER JOIN PARAMTS P ON L.IDHOTEL = P.IDHOTEL
-                                            INNER JOIN (
-                                            SELECT
-                                            ld3.CodDocumento, 
-                                            Sum(ld3.Valor * Decode(ld3.DebCre,'D',-1,1)) AS Saldo,
-                                            Sum(CASE WHEN Ld3.OPERACAO IN (4,5) THEN (ld3.Valor * Decode(ld3.DebCre,'D',-1,1)) ELSE 0 end) AS ValorBaixado,
-                                            Max(ld3.DataLancto) AS DataUltimaAlteracao
-                                            From LanctoDocum ld3 
-                                            WHERE exists(SELECT 
-                                                            lt.CodDocumento 
-                                                         FROM 
-                                                            LancamentoTs lt 
-                                                         WHERE 
-                                                            lt.CodDocumento = ld3.CodDocumento AND 
-                                                            ((LT.FLGREMOVIDO IS NULL) OR (LT.FLGREMOVIDO IS NOT NULL AND (LT.IDLANCESTORNO IS NULL AND LT.IDMOTIVOESTORNO IS NULL) )))
-                                                        GROUP BY ld3.CodDocumento) SALDOCAR ON SALDOCAR.CODDOCUMENTO = D.CODDOCUMENTO
-                                            INNER JOIN (SELECT
-                                                DISTINCT
-                                                V.IDVENDATS,
-                                                VC.IDVENDAXCONTRATO,
-                                                VC.NUMEROCONTRATO,
-                                                PCL.IDPESSOA, 
-                                                PCL.NOME, 
-                                                PCL.NUMDOCUMENTO,
-                                                PCL.EMAIL,
-                                                VC.FLGCANCELADO
-                                              FROM 
-                                                  VENDAXCONTRATOTS VC, 
-                                                  VENDATS V,
-                                                  ATENDCLIENTETS A,
-                                                  PESSOA PCL
-                                              WHERE
-                                               V.IDVENDATS = VC.IDVENDATS
-                                               AND V.IDATENDCLIENTETS = A.IDATENDCLIENTETS
-                                               AND A.IDCLIENTE = PCL.IDPESSOA
-                                              ) PRO ON PRO.IDVENDATS = L.IDVENDATS
-                                                AND LD.NUMLANCTO = (SELECT MIN(LD1.NUMLANCTO) FROM LANCTODOCUM LD1 WHERE LD1.CODDOCUMENTO = D.CODDOCUMENTO)
-                                                AND D.IDPESSOA = 3 AND d.RecPag = 'R'
-                                            AND ((L.FLGREMOVIDO IS NULL) OR (L.FLGREMOVIDO IS NOT NULL AND (L.IDLANCESTORNO IS NULL AND L.IDMOTIVOESTORNO IS NULL) ))
-                                        {txtFiltrosAdicionais} ");
+            //var sb = new StringBuilder(@$"SELECT 
+            //                        PRO.EMAIL,
+            //                        L.CodDocumento as Id,
+            //                        L.TRGDTINCLUSAO AS DataHoraCriacao,
+            //                        PRO.IdPessoa as PessoaId,
+            //                        PRO.IdPessoa as PessoaProviderId,
+            //                        PRO.NOME as NomePessoa,
+            //                        PRO.NUMDOCUMENTO AS DOCUMENTOCLIENTE,
+            //                        L.DataLancamento as DataCriacao,
+            //                        COALESCE(D.DATAPROGRAMADA,D.DATAVENCTO) AS Vencimento,
+            //                        TDRP.CODTIPDOC AS CODIGOTIPOCONTA,
+            //                        TDRP.DESCRICAO AS NomeTipoConta,
+            //                        D.NUMDIGCODBARRAS AS LINHADIGITAVELBOLETO,
+            //                        D.NOSSONUMERO AS NOSSONUMEROBOLETO,
+            //                        PE.NUMDOCUMENTO AS EMPREENDIMENTOCNPJ,
+            //                        PE.NOME AS EMPREENDIMENTONOME,
+            //                        PE.IDPESSOA AS PESSOAEMPREENDIMENTOID,
+            //                        PE.IDPESSOA AS EMPRESAID,
+            //                        PE.NOME AS EMPRESANOME,
+            //                        PRO.NUMEROCONTRATO AS NumeroImovel,
+            //                        PRO.NUMEROCONTRATO AS Contrato, 
+            //                        CASE WHEN SaldoCar.Saldo = 0 then COALESCE(D.DATAVENCTO, L.DATAPAGAMENTO) ELSE NULL end AS DATAHORABAIXA,
+            //                        COALESCE(D.DATAVENCTO, L.DATAPAGAMENTO) AS DATAPROCESSAMENTO,
+            //                        CASE
+            //                           WHEN SUBSTR(L.COMPLDOCUMENTO,1,1) = 'S' THEN 'Sinal: '         || SUBSTR(L.COMPLDOCUMENTO,2,LENGTH(L.COMPLDOCUMENTO)-1)
+            //                                   WHEN SUBSTR(L.COMPLDOCUMENTO,1,1) = 'E' THEN 'Entrada: '       || SUBSTR(L.COMPLDOCUMENTO,2,LENGTH(L.COMPLDOCUMENTO)-1)
+            //                                   WHEN SUBSTR(L.COMPLDOCUMENTO,1,1) = 'I' THEN 'Intermediária: ' || SUBSTR(L.COMPLDOCUMENTO,2,LENGTH(L.COMPLDOCUMENTO)-1)
+            //                                   WHEN SUBSTR(L.COMPLDOCUMENTO,1,1) = 'P' THEN 'Parcela: '       || SUBSTR(L.COMPLDOCUMENTO,2,LENGTH(L.COMPLDOCUMENTO)-1)
+            //                                END AS OBSERVACAO,
+            //                                (LD.VALOR * Decode(ld.DebCre,'D',-1,1)) AS ValorOriginal,
+            //                                SALDOCAR.Saldo,
+            //                                (LD.VALOR * Decode(ld.DebCre,'D',-1,1)) AS Valor,
+            //                                SALDOCAR.VALORBAIXADO
+            //                                FROM
+            //                                LANCAMENTOTS L
+            //                                INNER JOIN DOCUMENTO D ON L.CODDOCUMENTO = D.CODDOCUMENTO
+            //                                INNER JOIN LANCTODOCUM LD ON D.CODDOCUMENTO = LD.CODDOCUMENTO
+            //                                INNER JOIN TIPODOCRECPAG TDRP ON D.CODTIPDOC = TDRP.CODTIPDOC
+            //                                INNER JOIN PESSOA PE ON D.IDPESSOA = PE.IDPESSOA AND PE.IDPESSOA = 3
+            //                                INNER JOIN PARAMTS P ON L.IDHOTEL = P.IDHOTEL
+            //                                INNER JOIN (
+            //                                SELECT
+            //                                ld3.CodDocumento, 
+            //                                Sum(ld3.Valor * Decode(ld3.DebCre,'D',-1,1)) AS Saldo,
+            //                                Sum(CASE WHEN Ld3.OPERACAO IN (4,5) THEN (ld3.Valor * Decode(ld3.DebCre,'D',-1,1)) ELSE 0 end) AS ValorBaixado,
+            //                                Max(ld3.DataLancto) AS DataUltimaAlteracao
+            //                                From LanctoDocum ld3 
+            //                                WHERE exists(SELECT 
+            //                                                lt.CodDocumento 
+            //                                             FROM 
+            //                                                LancamentoTs lt 
+            //                                             WHERE 
+            //                                                lt.CodDocumento = ld3.CodDocumento AND 
+            //                                                ((LT.FLGREMOVIDO IS NULL) OR (LT.FLGREMOVIDO IS NOT NULL AND (LT.IDLANCESTORNO IS NULL AND LT.IDMOTIVOESTORNO IS NULL) )))
+            //                                            GROUP BY ld3.CodDocumento) SALDOCAR ON SALDOCAR.CODDOCUMENTO = D.CODDOCUMENTO
+            //                                INNER JOIN (SELECT
+            //                                    DISTINCT
+            //                                    V.IDVENDATS,
+            //                                    VC.IDVENDAXCONTRATO,
+            //                                    VC.NUMEROCONTRATO,
+            //                                    PCL.IDPESSOA, 
+            //                                    PCL.NOME, 
+            //                                    PCL.NUMDOCUMENTO,
+            //                                    PCL.EMAIL,
+            //                                    VC.FLGCANCELADO
+            //                                  FROM 
+            //                                      VENDAXCONTRATOTS VC, 
+            //                                      VENDATS V,
+            //                                      ATENDCLIENTETS A,
+            //                                      PESSOA PCL
+            //                                  WHERE
+            //                                   V.IDVENDATS = VC.IDVENDATS
+            //                                   AND V.IDATENDCLIENTETS = A.IDATENDCLIENTETS
+            //                                   AND A.IDCLIENTE = PCL.IDPESSOA
+            //                                  ) PRO ON PRO.IDVENDATS = L.IDVENDATS
+            //                                    AND LD.NUMLANCTO = (SELECT MIN(LD1.NUMLANCTO) FROM LANCTODOCUM LD1 WHERE LD1.CODDOCUMENTO = D.CODDOCUMENTO)
+            //                                    AND D.IDPESSOA = 3 AND d.RecPag = 'R'
+            //                                AND ((L.FLGREMOVIDO IS NULL) OR (L.FLGREMOVIDO IS NOT NULL AND (L.IDLANCESTORNO IS NULL AND L.IDMOTIVOESTORNO IS NULL) ))
+            //                            {txtFiltrosAdicionais} ");
 
-            var sql = sb.ToString();
+            //var sql = sb.ToString();
 
-            var totalRegistros = await _repositoryNHCm.CountTotalEntry(sql, session: null, parametros.ToArray());
-            if (totalRegistros == 0)
-                return (1, 1, new List<ContaPendenteModel>());
+            //var totalRegistros = await _repositoryNHCm.CountTotalEntry(sql, session: null, parametros.ToArray());
+            //if (totalRegistros == 0)
+            //    return (1, 1, new List<ContaPendenteModel>());
 
-            if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) == 0)
-                searchModel.QuantidadeRegistrosRetornar = Convert.ToInt32(totalRegistros) < 30 ? Convert.ToInt32(totalRegistros) : 30;
+            //if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) == 0)
+            //    searchModel.QuantidadeRegistrosRetornar = Convert.ToInt32(totalRegistros) < 30 ? Convert.ToInt32(totalRegistros) : 30;
 
-            if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0 && searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > Convert.ToInt32(totalRegistros))
-                searchModel.QuantidadeRegistrosRetornar = Convert.ToInt32(totalRegistros);
+            //if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0 && searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > Convert.ToInt32(totalRegistros))
+            //    searchModel.QuantidadeRegistrosRetornar = Convert.ToInt32(totalRegistros);
 
-            if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
-            totalRegistros <= (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault() * searchModel.NumeroDaPagina.GetValueOrDefault()) - searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1))
-            {
-                long totalPage = SW_Utils.Functions.Helper.TotalPaginas(searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(100), totalRegistros);
-                if (totalPage < searchModel.NumeroDaPagina)
-                    searchModel.NumeroDaPagina = Convert.ToInt32(totalPage);
-            }
+            //if (searchModel.NumeroDaPagina.GetValueOrDefault(0) == 0 ||
+            //totalRegistros <= (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault() * searchModel.NumeroDaPagina.GetValueOrDefault()) - searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1))
+            //{
+            //    long totalPage = SW_Utils.Functions.Helper.TotalPaginas(searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(100), totalRegistros);
+            //    if (totalPage < searchModel.NumeroDaPagina)
+            //        searchModel.NumeroDaPagina = Convert.ToInt32(totalPage);
+            //}
 
-            sb.AppendLine("ORDER BY L.IDLANCAMENTOTS");
+            //sb.AppendLine("ORDER BY L.IDLANCAMENTOTS");
 
-            var result = (await _repositoryNHCm.FindBySql<ContaPendenteModel>(sb.ToString(), searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1), searchModel.NumeroDaPagina.GetValueOrDefault(0), parametros.ToArray())).AsList();
+            //var result = (await _repositoryNHCm.FindBySql<ContaPendenteModel>(sb.ToString(), searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(1), searchModel.NumeroDaPagina.GetValueOrDefault(0), parametros.ToArray())).AsList();
 
-            if (result.Any())
-            {
-                if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0)
-                {
-                    foreach (var item in result)
-                    {
-                        if (item.Saldo.GetValueOrDefault(0) != 0.00m || item.DataHoraBaixa is null)
-                            item.StatusParcela = "Em aberto";
-                        else item.StatusParcela = "Paga";
+            //if (result.Any())
+            //{
+            //    if (searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(0) > 0)
+            //    {
+            //        foreach (var item in result)
+            //        {
+            //            if (item.Saldo.GetValueOrDefault(0) != 0.00m || item.DataHoraBaixa is null)
+            //                item.StatusParcela = "Em aberto";
+            //            else item.StatusParcela = "Paga";
 
-                        item.Valor = item.Valor * (-1);
-                        item.Saldo = item.Saldo * (-1);
-                        item.ValorAtualizado = item.Saldo;
-                    }
+            //            item.Valor = item.Valor * (-1);
+            //            item.Saldo = item.Saldo * (-1);
+            //            item.ValorAtualizado = item.Saldo;
+            //        }
 
-                    long totalPage = Helper.TotalPaginas(searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(), totalRegistros);
-                    return (searchModel.NumeroDaPagina.GetValueOrDefault(1), Convert.ToInt32(totalPage), result);
-                }
+            //        long totalPage = Helper.TotalPaginas(searchModel.QuantidadeRegistrosRetornar.GetValueOrDefault(), totalRegistros);
+            //        return (searchModel.NumeroDaPagina.GetValueOrDefault(1), Convert.ToInt32(totalPage), result);
+            //    }
 
-            }
+            //}
 
-            return (1, 1, result);
+            //return (1, 1, result);
         }
 
         public async Task<(int pageNumber, int lastPageNumber, List<ContaPendenteModel> contasPendentes)?> GetContaPendenteGeral_CM(SearchContasPendentesGeral searchModel)

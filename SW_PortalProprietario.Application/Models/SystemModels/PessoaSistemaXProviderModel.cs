@@ -6,5 +6,6 @@
         public string? PessoaSistema { get; set; }
         public string? PessoaProvider { get; set; }
         public int? UsuarioSistemaId { get; set; }
+        public VinculoAccessXPortalBase? VinculoAccess { get; set; }
     }
 }

@@ -20,26 +20,6 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public EnumSimNao? PermitirUsuarioAlterarSeuDoc { get; set; }
         public EnumSimNao? IntegradoComMultiPropriedade { get; set; }
         public EnumSimNao? IntegradoComTimeSharing { get; set; }
-        public string? ImagemHomeUrl1 { get; set; }
-        public string? ImagemHomeUrl2 { get; set; }
-        public string? ImagemHomeUrl3 { get; set; }
-        public string? ImagemHomeUrl4 { get; set; }
-        public string? ImagemHomeUrl5 { get; set; }
-        public string? ImagemHomeUrl6 { get; set; }
-        public string? ImagemHomeUrl7 { get; set; }
-        public string? ImagemHomeUrl8 { get; set; }
-        public string? ImagemHomeUrl9 { get; set; }
-        public string? ImagemHomeUrl10 { get; set; }
-        public string? ImagemHomeUrl11 { get; set; }
-        public string? ImagemHomeUrl12 { get; set; }
-        public string? ImagemHomeUrl13 { get; set; }
-        public string? ImagemHomeUrl14 { get; set; }
-        public string? ImagemHomeUrl15 { get; set; }
-        public string? ImagemHomeUrl16 { get; set; }
-        public string? ImagemHomeUrl17 { get; set; }
-        public string? ImagemHomeUrl18 { get; set; }
-        public string? ImagemHomeUrl19 { get; set; }
-        public string? ImagemHomeUrl20 { get; set; }
         public string? ServerAddress { get; set; }
         public string? NomeCondominio { get; set; }
         public string? CnpjCondominio { get; set; }
@@ -50,6 +30,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? EnderecoAdministradoraCondominio { get; set; }
         public int? EmpreendimentoId { get; set; }
         public int? PontosRci { get; set; }
+        public List<PessoaSistemaXProviderModel>? PessoaSistemaXProviders { get; set; }
         
         #region Configurações de Reserva - Campos Obrigatórios para Hóspedes Convidados
         public EnumSimNao? ExigeEnderecoHospedeConvidado { get; set; }

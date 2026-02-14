@@ -956,7 +956,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var senha = userLoginInputModel.Senha;
                 bool novoUsuario = false;
-                PessoaSistemaXProviderModel? pessoaLegado = null;
+                List<PessoaSistemaXProviderModel>? pessoasLegado = null;
 
                 List<Usuario>? usuarios = await GetUsuario(userLoginInputModel);
                 Usuario? usuarioManter = null;
@@ -980,11 +980,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 if (usuarioManter != null)
                 {
-                    var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuarioManter.Id, _communicationProvider.CommunicationProviderName);
-                    if (pessoaProvider != null && !string.IsNullOrEmpty(pessoaProvider.PessoaProvider))
-                    {
-                        pessoaLegado = pessoaProvider;
-                    }
+                    pessoasLegado = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuarioManter.Id, _communicationProvider.CommunicationProviderName);
                 }
 
                 bool byPassPasswordValidation = false;
@@ -1046,12 +1042,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                         }
                         else
                         {
-                            var pessoaProvider = pessoaLegado ?? await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{usuarioManter.Pessoa?.Id}", _communicationProvider.CommunicationProviderName);
-                            if (pessoaProvider == null)
+                            var res = await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{usuarioManter.Pessoa?.Id}", _communicationProvider.CommunicationProviderName);
+                            if (res == null || !res.Any())
                                 throw new Exception("Não foi possível logar no sistema, não foi encontrado o vínculo do usuário com o sistema legado.");
-                            pessoaProviderId = pessoaProvider.PessoaProvider!;
+                            pessoasLegado = res.AsList();
 
-                            vinculo = await _communicationProvider.GetOutrosDadosPessoaProvider(pessoaProviderId);
+                            vinculo = await _communicationProvider.GetOutrosDadosPessoaProvider(pessoasLegado.First().PessoaProvider!);
                             if (vinculo != null && vinculo.AcPessoaProprietarioId.HasValue)
                             {
                                 pessoaProviderId = $"{vinculo.AcPessoaProprietarioId}";
@@ -1132,9 +1128,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                                     };
                                     await _repository.Save(psxpp);
                                     novoUsuario = true;
-                                    if (pessoaLegado == null)
-                                        pessoaLegado = new PessoaSistemaXProviderModel() { PessoaProvider = accessValidateResult.PessoaId };
-                                    else pessoaLegado.PessoaProvider = accessValidateResult.PessoaId;
+                                    if (pessoasLegado == null)
+                                        pessoasLegado = new List<PessoaSistemaXProviderModel>() { new PessoaSistemaXProviderModel() { PessoaProvider = accessValidateResult.PessoaId } };
+                                    else pessoasLegado.First().PessoaProvider = accessValidateResult.PessoaId;
 
                                     if (!string.IsNullOrEmpty(psxpp.PessoaProvider))
                                     {
@@ -1160,19 +1156,18 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                                 _serviceBase.UsuarioId = usuarioManter.Id;
 
-                                if (loginByAccessCenter && novoUsuario && usuarioManter != null && !string.IsNullOrEmpty(usuarioManter.Login) && pessoaLegado != null)
+                                if (loginByAccessCenter && novoUsuario && usuarioManter != null && !string.IsNullOrEmpty(usuarioManter.Login) && pessoasLegado != null)
                                 {
-                                    await _communicationProvider.GravarUsuarioNoLegado(pessoaLegado.PessoaProvider!, usuarioManter.Login, Helper.CriptografarPadraoEsol("", userLoginInputModel.Senha));
+                                    await _communicationProvider.GravarUsuarioNoLegado(pessoasLegado.First().PessoaProvider!, usuarioManter.Login, Helper.CriptografarPadraoEsol("", userLoginInputModel.Senha));
                                 }
 
                                 if (!userReturn.IsAdmin)
                                 {
-                                    if (pessoaLegado != null)
-                                        userReturn.ProviderKeyUser = pessoaLegado.PessoaProvider;
+                                    if (pessoasLegado != null)
+                                        userReturn.ProviderKeyUser = pessoasLegado.First().PessoaProvider;
                                 }
 
-                                await SetarOutrosDadosDoUsuario(userReturn, pessoaLegado?.PessoaProvider ?? "");
-
+                                await SetarOutrosDadosDoUsuario(userReturn, pessoasLegado?.First().PessoaProvider ?? "");
 
                             }
                             else
@@ -1203,18 +1198,18 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                         _serviceBase.UsuarioId = usuarioManter.Id;
 
-                        if (loginByAccessCenter && novoUsuario && usuarioManter != null && !string.IsNullOrEmpty(usuarioManter.Login) && pessoaLegado != null)
+                        if (loginByAccessCenter && novoUsuario && usuarioManter != null && !string.IsNullOrEmpty(usuarioManter.Login) && pessoasLegado != null)
                         {
-                            await _communicationProvider.GravarUsuarioNoLegado(pessoaLegado.PessoaProvider!, usuarioManter.Login, Helper.CriptografarPadraoEsol("", userLoginInputModel.Senha));
+                            await _communicationProvider.GravarUsuarioNoLegado(pessoasLegado.First().PessoaProvider!, usuarioManter.Login, Helper.CriptografarPadraoEsol("", userLoginInputModel.Senha));
                         }
 
                         if (!userReturn.IsAdmin)
                         {
-                            if (pessoaLegado != null)
-                                userReturn.ProviderKeyUser = pessoaLegado.PessoaProvider;
+                            if (pessoasLegado != null)
+                                userReturn.ProviderKeyUser = pessoasLegado.First().PessoaProvider;
                         }
 
-                        await SetarOutrosDadosDoUsuario(userReturn, pessoaLegado?.PessoaProvider ?? "");
+                        await SetarOutrosDadosDoUsuario(userReturn, pessoasLegado?.First().PessoaProvider ?? "");
 
                     }
 
@@ -1259,9 +1254,9 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                         if (_communicationProvider.CommunicationProviderName.Contains("esolution", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            if (pessoaProvider != null && !string.IsNullOrEmpty(pessoaProvider.PessoaProvider))
+                            if (pessoaProvider != null && !string.IsNullOrEmpty(pessoaProvider.First().PessoaProvider))
                             {
-                                var contratos = await _communicationProvider.GetContratos(new List<int>() { int.Parse(pessoaProvider.PessoaProvider) });
+                                var contratos = await _communicationProvider.GetContratos(new List<int>() { int.Parse(pessoaProvider.First().PessoaProvider) });
                                 if (contratos != null && !contratos.Any(b => b.Status == "A"))
                                 {
                                     throw new ArgumentException("Não foi encontrado nanhum contrato ativo no sistema");
@@ -1315,9 +1310,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                     if (userProvider == null)
                         throw new Exception("Não foi possível validar o acesso do usuário no sistema, entre em contato com a Central de Atendimento ao Cliente.");
 
-                    var dadosCLienteLegado = await _communicationProvider.ValidateAccess(userReturn.Login!,userLoginInputModel.Senha!, userProvider.PessoaProvider!);
-                    if (dadosCLienteLegado == null || dadosCLienteLegado.LoginResult == null || dadosCLienteLegado.LoginResult.dadosCliente == null)
-                        throw new ArgumentException("Não foi encontrado nanhum contrato ativo no sistema");
+                    //var dadosCLienteLegado = await _communicationProvider.ValidateAccess(userReturn.Login!,userLoginInputModel.Senha!, userProvider.PessoaProvider!);
+                    //if (dadosCLienteLegado == null || dadosCLienteLegado.LoginResult == null || dadosCLienteLegado.LoginResult.dadosCliente == null)
+                    //    throw new ArgumentException("Não foi encontrado nanhum contrato ativo no sistema");
                 }
 
                 var commitResult = await _repository.CommitAsync();

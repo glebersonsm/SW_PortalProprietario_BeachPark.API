@@ -92,193 +92,193 @@ namespace SW_PortalProprietario.Application.Services.Core
         public async Task<TransactionCardResultModel?> DoCardTransaction(DoTransactionCardInputModel doTransactionModel)
         {
             throw new NotImplementedException();
-            TransactionCardResultModel? transactionCardResultModel = null;
-            var jsonBodyRequest = string.Empty;
-            var jsonBodyResponse = string.Empty;
+            //TransactionCardResultModel? transactionCardResultModel = null;
+            //var jsonBodyRequest = string.Empty;
+            //var jsonBodyResponse = string.Empty;
 
-            var loggedUser = await _repository.GetLoggedUser();
-
-
-            if (_repository.IsAdm)
-            {
-                var systemConfiguration = await _repository.GetParametroSistemaViewModel();
-                if (systemConfiguration != null && systemConfiguration.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
-                    throw new ArgumentException("O sistema está configurado para não permitir pagamento em cartão de crédito/débito.");
-            }
-
-            try
-            {
-                _repository.BeginTransaction();
-
-                if (doTransactionModel.PessoaId.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException("Deve ser informado o parâmetro PessoaId");
-
-                var vinculoPessoaProvider = (await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{doTransactionModel.PessoaId.GetValueOrDefault()}", _financeiroProviderService.ProviderName));
-                if (vinculoPessoaProvider == null || string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
-                    throw new ArgumentException($"Não foi encontrado vínculos da PessoaId informada: {doTransactionModel.PessoaId}");
-
-                if (!loggedUser.Value.isAdm)
-                {
-                    if (vinculoPessoaProvider == null)
-                        throw new ArgumentException("Não foi possível identificar os dados no sistema legado");
-
-                    if (!string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
-                    {
-                        var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(vinculoPessoaProvider.PessoaProvider!) });
-                        if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
-                        {
-                            throw new ArgumentException("Não foi possível efetuar o pagamento em cartão, motivo 0001BL");
-                        }
-                    }
-                }
+            //var loggedUser = await _repository.GetLoggedUser();
 
 
-                string idPessoaUtilizar = vinculoPessoaProvider != null && !string.IsNullOrEmpty(vinculoPessoaProvider.PessoaSistema) ? vinculoPessoaProvider.PessoaSistema : $"{doTransactionModel.PessoaId.GetValueOrDefault()}";
+            //if (_repository.IsAdm)
+            //{
+            //    var systemConfiguration = await _repository.GetParametroSistemaViewModel();
+            //    if (systemConfiguration != null && systemConfiguration.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
+            //        throw new ArgumentException("O sistema está configurado para não permitir pagamento em cartão de crédito/débito.");
+            //}
 
-                var pessoa = await _repository.FindById<Domain.Entities.Core.DadosPessoa.Pessoa>(Convert.ToInt32(idPessoaUtilizar));
-                if (pessoa == null)
-                    throw new ArgumentException($"Não foi encontrada pessoa com o Id: {idPessoaUtilizar}");
+            //try
+            //{
+            //    _repository.BeginTransaction();
 
-                if (doTransactionModel.CardTokenizedId.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException($"Deve ser informado o CardTokenizedId");
+            //    if (doTransactionModel.PessoaId.GetValueOrDefault(0) == 0)
+            //        throw new ArgumentException("Deve ser informado o parâmetro PessoaId");
 
-                var usuarioVinculadoPessoa = (await _repository.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where p.Id = {pessoa.Id} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
+            //    var vinculoPessoaProvider = (await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{doTransactionModel.PessoaId.GetValueOrDefault()}", _financeiroProviderService.ProviderName));
+            //    if (vinculoPessoaProvider == null || string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
+            //        throw new ArgumentException($"Não foi encontrado vínculos da PessoaId informada: {doTransactionModel.PessoaId}");
 
-                var cardExistente = (await _repository.FindByHql<CardTokenized>(@$"From 
-                        CardTokenized ct 
-                        Inner Join Fetch ct.Pessoa p 
-                    Where 
-                        p.Id = {pessoa.Id} and 
-                        ct.Id = {doTransactionModel.CardTokenizedId.GetValueOrDefault()} and 
-                        ct.Visivel = 1 ")).FirstOrDefault();
+            //    if (!loggedUser.Value.isAdm)
+            //    {
+            //        if (vinculoPessoaProvider == null)
+            //            throw new ArgumentException("Não foi possível identificar os dados no sistema legado");
 
-                if (cardExistente == null)
-                    throw new ArgumentException($"Não foi localizado o CardTokenized com o id informado: {doTransactionModel.CardTokenizedId} vinculado a pessoa id: {idPessoaUtilizar}");
-
-                var contas = await _financeiroProviderService.GetContasParaPagamentoEmCartaoGeral(doTransactionModel);
-                await ValidarPagamentoEmDuplicidade(contas, pessoa);
-
-                var dadosPessoa = await _financeiroProviderService.GetDadosPessoa(Convert.ToInt32(vinculoPessoaProvider?.PessoaProvider));
-                if (dadosPessoa == null)
-                    throw new ArgumentException($"Não foi possível encontrar a pessoa com Id: {vinculoPessoaProvider?.PessoaProvider} no provider: {_financeiroProviderService.ProviderName}");
-
-
-                var cardUtilizar = await GetCardUtilizar(cardExistente.Acquirer,cardExistente.Brand,cardExistente.CardNumber,cardExistente.ClienteId,cardExistente.Pessoa,contas.First().EmpresaId);
-
-                var customerUtilizar = new CustomerModel()
-                {
-                    rid = pessoa.Id,
-                    type = pessoa.TipoPessoa == 0 ? "F" : "J",
-                    name = pessoa.Nome,
-                    document = pessoa.TipoPessoa == 0 ? dadosPessoa?.Cpf?.PadLeft(11, '0') : dadosPessoa?.Cnpj?.PadLeft(14, '0'),
-                    document_type = pessoa.TipoPessoa == 0 ? "CPF" : "CNPJ",
-                    email = !string.IsNullOrEmpty(dadosPessoa.Email) && dadosPessoa.Email.Contains(";") ? dadosPessoa.Email.Split(";")[0] : dadosPessoa?.Email,
-                    phones = new List<PhoneModel>()
-                    {
-                        new PhoneModel()
-                        {
-                            type = dadosPessoa != null && !string.IsNullOrEmpty(dadosPessoa.TipoTelefone) && dadosPessoa.TipoTelefone.StartsWith("CELU", StringComparison.InvariantCultureIgnoreCase) ? "cellphone" : "home",
-                            number = Helper.ApenasNumeros(dadosPessoa?.NumeroTelefone)
-                        }
-                    },
-                    address =
-                            new AddressModel()
-                            {
-                                street = dadosPessoa?.Logradouro,
-                                number = dadosPessoa?.Numero,
-                                neighborhood = dadosPessoa?.Bairro,
-                                zip_code = dadosPessoa?.Cep,
-                                city = dadosPessoa?.CidadeNome,
-                                state = !string.IsNullOrEmpty(dadosPessoa?.EstadoSigla) && dadosPessoa?.EstadoSigla.Length > 2 ? dadosPessoa?.EstadoSigla.Substring(0, 2) : "",
-                                country = dadosPessoa?.SiglaPais
-                            },
-                    foreigner = dadosPessoa?.SiglaPais != "BR",
-                    gender = dadosPessoa?.Sexo ?? "M",
-                    birth = $"{dadosPessoa?.DataNascimento.GetValueOrDefault().Date:yyyy-MM-dd} 00:00:00",
-                    registered = true,
-                    created = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}"
-                };
+            //        if (!string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
+            //        {
+            //            var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(vinculoPessoaProvider.PessoaProvider!) });
+            //            if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
+            //            {
+            //                throw new ArgumentException("Não foi possível efetuar o pagamento em cartão, motivo 0001BL");
+            //            }
+            //        }
+            //    }
 
 
-                //Monto o objeto para a transação no cartão
-                var transactionModel = new TransactionCardModel()
-                {
-                    merchant_id = $"{_financeiroProviderService.PrefixoTransacaoFinanceira}PessoaId_{doTransactionModel.PessoaId}_{DateTime.Now:ddMMyyyyHHmmss}",
-                    channel = "SWPortalProprietario",
-                    customer = customerUtilizar,
-                    description = "PAGTOCONTAS",
-                    payment = new PaymentModel()
-                    {
-                        value = doTransactionModel.ValorTotal,
-                        installments = 1,
-                        capture = true,
-                        card = new TransactionTokenizedCardModel()
-                        {
-                            token = cardUtilizar.Token
-                        },
-                        items = new List<TransactionItemInputModel>()
-                    {
-                        new TransactionItemInputModel()
-                        {
-                            item_id = $"{contas.First().Id}",
-                            value = doTransactionModel.ValorTotal,
-                            name = "PGTOCONTAS",
-                            amount = doTransactionModel.ValorTotal,
-                            date = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-                            end_date = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-                            travelers_amount = 1,
-                            category = "PGTOCONTAS",
-                            travelers = new List<CustomerModel>()
-                            {
-                                customerUtilizar
-                            }
-                        }
-                    }
-                    },
-                    ip = null,
-                    vip = false,
-                    fligth = false,
-                    finger_print = null
+            //    string idPessoaUtilizar = vinculoPessoaProvider != null && !string.IsNullOrEmpty(vinculoPessoaProvider.PessoaSistema) ? vinculoPessoaProvider.PessoaSistema : $"{doTransactionModel.PessoaId.GetValueOrDefault()}";
 
-                };
+            //    var pessoa = await _repository.FindById<Domain.Entities.Core.DadosPessoa.Pessoa>(Convert.ToInt32(idPessoaUtilizar));
+            //    if (pessoa == null)
+            //        throw new ArgumentException($"Não foi encontrada pessoa com o Id: {idPessoaUtilizar}");
+
+            //    if (doTransactionModel.CardTokenizedId.GetValueOrDefault(0) == 0)
+            //        throw new ArgumentException($"Deve ser informado o CardTokenizedId");
+
+            //    var usuarioVinculadoPessoa = (await _repository.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where p.Id = {pessoa.Id} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
+
+            //    var cardExistente = (await _repository.FindByHql<CardTokenized>(@$"From 
+            //            CardTokenized ct 
+            //            Inner Join Fetch ct.Pessoa p 
+            //        Where 
+            //            p.Id = {pessoa.Id} and 
+            //            ct.Id = {doTransactionModel.CardTokenizedId.GetValueOrDefault()} and 
+            //            ct.Visivel = 1 ")).FirstOrDefault();
+
+            //    if (cardExistente == null)
+            //        throw new ArgumentException($"Não foi localizado o CardTokenized com o id informado: {doTransactionModel.CardTokenizedId} vinculado a pessoa id: {idPessoaUtilizar}");
+
+            //    var contas = await _financeiroProviderService.GetContasParaPagamentoEmCartaoGeral(doTransactionModel);
+            //    await ValidarPagamentoEmDuplicidade(contas, pessoa);
+
+            //    var dadosPessoa = await _financeiroProviderService.GetDadosPessoa(Convert.ToInt32(vinculoPessoaProvider?.PessoaProvider));
+            //    if (dadosPessoa == null)
+            //        throw new ArgumentException($"Não foi possível encontrar a pessoa com Id: {vinculoPessoaProvider?.PessoaProvider} no provider: {_financeiroProviderService.ProviderName}");
 
 
-                transactionCardResultModel = await _broker.DoCardTransaction(transactionModel, contas.First().EmpresaId.GetValueOrDefault());
+            //    var cardUtilizar = await GetCardUtilizar(cardExistente.Acquirer,cardExistente.Brand,cardExistente.CardNumber,cardExistente.ClienteId,cardExistente.Pessoa,contas.First().EmpresaId);
 
-                await GravarPaymentCardHistory(transactionModel, transactionCardResultModel, doTransactionModel, contas);
+            //    var customerUtilizar = new CustomerModel()
+            //    {
+            //        rid = pessoa.Id,
+            //        type = pessoa.TipoPessoa == 0 ? "F" : "J",
+            //        name = pessoa.Nome,
+            //        document = pessoa.TipoPessoa == 0 ? dadosPessoa?.Cpf?.PadLeft(11, '0') : dadosPessoa?.Cnpj?.PadLeft(14, '0'),
+            //        document_type = pessoa.TipoPessoa == 0 ? "CPF" : "CNPJ",
+            //        email = !string.IsNullOrEmpty(dadosPessoa.Email) && dadosPessoa.Email.Contains(";") ? dadosPessoa.Email.Split(";")[0] : dadosPessoa?.Email,
+            //        phones = new List<PhoneModel>()
+            //        {
+            //            new PhoneModel()
+            //            {
+            //                type = dadosPessoa != null && !string.IsNullOrEmpty(dadosPessoa.TipoTelefone) && dadosPessoa.TipoTelefone.StartsWith("CELU", StringComparison.InvariantCultureIgnoreCase) ? "cellphone" : "home",
+            //                number = Helper.ApenasNumeros(dadosPessoa?.NumeroTelefone)
+            //            }
+            //        },
+            //        address =
+            //                new AddressModel()
+            //                {
+            //                    street = dadosPessoa?.Logradouro,
+            //                    number = dadosPessoa?.Numero,
+            //                    neighborhood = dadosPessoa?.Bairro,
+            //                    zip_code = dadosPessoa?.Cep,
+            //                    city = dadosPessoa?.CidadeNome,
+            //                    state = !string.IsNullOrEmpty(dadosPessoa?.EstadoSigla) && dadosPessoa?.EstadoSigla.Length > 2 ? dadosPessoa?.EstadoSigla.Substring(0, 2) : "",
+            //                    country = dadosPessoa?.SiglaPais
+            //                },
+            //        foreigner = dadosPessoa?.SiglaPais != "BR",
+            //        gender = dadosPessoa?.Sexo ?? "M",
+            //        birth = $"{dadosPessoa?.DataNascimento.GetValueOrDefault().Date:yyyy-MM-dd} 00:00:00",
+            //        registered = true,
+            //        created = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}"
+            //    };
 
-                jsonBodyRequest = System.Text.Json.JsonSerializer.Serialize(transactionModel);
-                jsonBodyResponse = System.Text.Json.JsonSerializer.Serialize(transactionCardResultModel);
-                //Efetuar alteração nas contas relacionadas ao pagamento efetuado
+
+            //    //Monto o objeto para a transação no cartão
+            //    var transactionModel = new TransactionCardModel()
+            //    {
+            //        merchant_id = $"{_financeiroProviderService.PrefixoTransacaoFinanceira}PessoaId_{doTransactionModel.PessoaId}_{DateTime.Now:ddMMyyyyHHmmss}",
+            //        channel = "SWPortalProprietario",
+            //        customer = customerUtilizar,
+            //        description = "PAGTOCONTAS",
+            //        payment = new PaymentModel()
+            //        {
+            //            value = doTransactionModel.ValorTotal,
+            //            installments = 1,
+            //            capture = true,
+            //            card = new TransactionTokenizedCardModel()
+            //            {
+            //                token = cardUtilizar.Token
+            //            },
+            //            items = new List<TransactionItemInputModel>()
+            //        {
+            //            new TransactionItemInputModel()
+            //            {
+            //                item_id = $"{contas.First().Id}",
+            //                value = doTransactionModel.ValorTotal,
+            //                name = "PGTOCONTAS",
+            //                amount = doTransactionModel.ValorTotal,
+            //                date = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+            //                end_date = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+            //                travelers_amount = 1,
+            //                category = "PGTOCONTAS",
+            //                travelers = new List<CustomerModel>()
+            //                {
+            //                    customerUtilizar
+            //                }
+            //            }
+            //        }
+            //        },
+            //        ip = null,
+            //        vip = false,
+            //        fligth = false,
+            //        finger_print = null
+
+            //    };
 
 
-                var result = await _repository.CommitAsync();
-                if (!result.executed)
-                    throw result.exception ?? new Exception("Erro na operação");
+            //    transactionCardResultModel = await _broker.DoCardTransaction(transactionModel, contas.First().EmpresaId.GetValueOrDefault());
 
-                return transactionCardResultModel;
-            }
-            catch (Exception err)
-            {
-                _repository.Rollback();
-                try
-                {
-                    _repository.BeginTransaction();
+            //    await GravarPaymentCardHistory(transactionModel, transactionCardResultModel, doTransactionModel, contas);
 
-                    transactionCardResultModel = transactionCardResultModel ?? new TransactionCardResultModel() { status = "undefinid", errors = new List<string>() { err.Message, err.InnerException?.Message } };
-                    jsonBodyResponse = System.Text.Json.JsonSerializer.Serialize(transactionCardResultModel);
-                    if (string.IsNullOrEmpty(jsonBodyRequest))
-                        jsonBodyRequest = System.Text.Json.JsonSerializer.Serialize(doTransactionModel);
+            //    jsonBodyRequest = System.Text.Json.JsonSerializer.Serialize(transactionModel);
+            //    jsonBodyResponse = System.Text.Json.JsonSerializer.Serialize(transactionCardResultModel);
+            //    //Efetuar alteração nas contas relacionadas ao pagamento efetuado
 
-                    await GravarTentativa(transactionCardResultModel ?? new TransactionCardResultModel() { status = "undefinid", errors = new List<string>() { err.Message, err.InnerException?.Message } }, doTransactionModel, jsonBodyRequest, jsonBodyResponse);
-                    var result = await _repository.CommitAsync();
-                }
-                catch
-                {
-                    _repository.Rollback();
-                }
-                throw;
-            }
+
+            //    var result = await _repository.CommitAsync();
+            //    if (!result.executed)
+            //        throw result.exception ?? new Exception("Erro na operação");
+
+            //    return transactionCardResultModel;
+            //}
+            //catch (Exception err)
+            //{
+            //    _repository.Rollback();
+            //    try
+            //    {
+            //        _repository.BeginTransaction();
+
+            //        transactionCardResultModel = transactionCardResultModel ?? new TransactionCardResultModel() { status = "undefinid", errors = new List<string>() { err.Message, err.InnerException?.Message } };
+            //        jsonBodyResponse = System.Text.Json.JsonSerializer.Serialize(transactionCardResultModel);
+            //        if (string.IsNullOrEmpty(jsonBodyRequest))
+            //            jsonBodyRequest = System.Text.Json.JsonSerializer.Serialize(doTransactionModel);
+
+            //        await GravarTentativa(transactionCardResultModel ?? new TransactionCardResultModel() { status = "undefinid", errors = new List<string>() { err.Message, err.InnerException?.Message } }, doTransactionModel, jsonBodyRequest, jsonBodyResponse);
+            //        var result = await _repository.CommitAsync();
+            //    }
+            //    catch
+            //    {
+            //        _repository.Rollback();
+            //    }
+            //    throw;
+            //}
         }
 
         private async Task<CardTokenized> GetCardUtilizar(string? acquirer, 
@@ -442,139 +442,140 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         public async Task<TransactionPixResultModel?> GeneratePixTransaction(DoTransactionPixInputModel doTransactionModel)
         {
-            if (_repository.IsAdm)
-            {
-                var systemConfiguration = await _repository.GetParametroSistemaViewModel();
-                if (systemConfiguration != null && systemConfiguration.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
-                    throw new ArgumentException("O sistema está configurado para não permitir pagamento em PIX.");
-            }
+            throw new NotImplementedException();
+            //if (_repository.IsAdm)
+            //{
+            //    var systemConfiguration = await _repository.GetParametroSistemaViewModel();
+            //    if (systemConfiguration != null && systemConfiguration.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
+            //        throw new ArgumentException("O sistema está configurado para não permitir pagamento em PIX.");
+            //}
 
-            try
-            {
-                _repository.BeginTransaction();
+            //try
+            //{
+            //    _repository.BeginTransaction();
 
-                if (doTransactionModel.PessoaId.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException("Deve ser informado o parâmetro PessoaId");
+            //    if (doTransactionModel.PessoaId.GetValueOrDefault(0) == 0)
+            //        throw new ArgumentException("Deve ser informado o parâmetro PessoaId");
 
-                var vinculoPessoaProvider = (await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{doTransactionModel.PessoaId.GetValueOrDefault()}", _financeiroProviderService.ProviderName));
-                if (vinculoPessoaProvider == null || string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
-                    throw new ArgumentException($"Não foi encontrado vínculos da PessoaId informada: {doTransactionModel.PessoaId}");
+            //    var vinculoPessoaProvider = (await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{doTransactionModel.PessoaId.GetValueOrDefault()}", _financeiroProviderService.ProviderName));
+            //    if (vinculoPessoaProvider == null || string.IsNullOrEmpty(vinculoPessoaProvider.PessoaProvider))
+            //        throw new ArgumentException($"Não foi encontrado vínculos da PessoaId informada: {doTransactionModel.PessoaId}");
 
-                string idPessoaUtilizar = vinculoPessoaProvider != null && !string.IsNullOrEmpty(vinculoPessoaProvider.PessoaSistema) ? vinculoPessoaProvider.PessoaSistema : $"{doTransactionModel.PessoaId.GetValueOrDefault()}";
-                if (vinculoPessoaProvider == null)
-                    throw new ArgumentException("Deve ser informado o parâmetro PessoaId");
+            //    string idPessoaUtilizar = vinculoPessoaProvider != null && !string.IsNullOrEmpty(vinculoPessoaProvider.PessoaSistema) ? vinculoPessoaProvider.PessoaSistema : $"{doTransactionModel.PessoaId.GetValueOrDefault()}";
+            //    if (vinculoPessoaProvider == null)
+            //        throw new ArgumentException("Deve ser informado o parâmetro PessoaId");
 
-                if (string.IsNullOrEmpty(idPessoaUtilizar))
-                    throw new ArgumentException($"Não foi encontrada a pessoa do sistema com os dados informados Pessoaid: {doTransactionModel.PessoaId}");
+            //    if (string.IsNullOrEmpty(idPessoaUtilizar))
+            //        throw new ArgumentException($"Não foi encontrada a pessoa do sistema com os dados informados Pessoaid: {doTransactionModel.PessoaId}");
 
-                var pessoa = await _repository.FindById<Domain.Entities.Core.DadosPessoa.Pessoa>(Convert.ToInt32(idPessoaUtilizar));
-                if (pessoa == null)
-                    throw new ArgumentException($"Não foi encontrada pessoa com o Id: {doTransactionModel.PessoaId.GetValueOrDefault()}");
+            //    var pessoa = await _repository.FindById<Domain.Entities.Core.DadosPessoa.Pessoa>(Convert.ToInt32(idPessoaUtilizar));
+            //    if (pessoa == null)
+            //        throw new ArgumentException($"Não foi encontrada pessoa com o Id: {doTransactionModel.PessoaId.GetValueOrDefault()}");
 
-                var usuarioVinculadoPessoa = (await _repository.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where p.Id = {pessoa.Id} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0 ")).FirstOrDefault();
+            //    var usuarioVinculadoPessoa = (await _repository.FindByHql<Domain.Entities.Core.Sistema.Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where p.Id = {pessoa.Id} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0 ")).FirstOrDefault();
 
-                if (usuarioVinculadoPessoa == null)
-                    throw new ArgumentException($"Não foi encontrado usuário no sistema com a pessoa id: {doTransactionModel.PessoaId.GetValueOrDefault()}, primeiro é necessário cadastrar a pessoa como usuário do sistema");
-
-
-                var contas = await _financeiroProviderService.GetContasParaPagamentoEmPixGeral(doTransactionModel);
-                await ValidarPagamentoEmDuplicidade(contas, pessoa);
-
-                var dadosPessoa = await _financeiroProviderService.GetDadosPessoa(Convert.ToInt32(vinculoPessoaProvider.PessoaProvider));
-                if (dadosPessoa == null)
-                    throw new ArgumentException($"Não foi possível encontrar a pessoa com Id: {vinculoPessoaProvider.PessoaProvider} no provider: {_financeiroProviderService.ProviderName}");
-
-                var customerUtilizar = new CustomerModel()
-                {
-                    rid = pessoa.Id,
-                    type = pessoa.TipoPessoa == 0 ? "F" : "J",
-                    name = pessoa.Nome,
-                    document = pessoa.TipoPessoa == 0 ? dadosPessoa?.Cpf?.PadLeft(11, '0') : dadosPessoa?.Cnpj?.PadLeft(14, '0'),
-                    document_type = pessoa.TipoPessoa == 0 ? "CPF" : "CNPJ",
-                    email = !string.IsNullOrEmpty(dadosPessoa.Email) && dadosPessoa.Email.Contains(";") ? dadosPessoa.Email.Split(";")[0] : dadosPessoa?.Email,
-                    phones = new List<PhoneModel>()
-                    {
-                        new PhoneModel()
-                        {
-                            type = dadosPessoa != null && !string.IsNullOrEmpty(dadosPessoa.TipoTelefone) && dadosPessoa.TipoTelefone.StartsWith("CELU", StringComparison.InvariantCultureIgnoreCase) ? "cellphone" : "home",
-                            number = Helper.ApenasNumeros(dadosPessoa?.NumeroTelefone)
-                        }
-                    },
-                    address =
-                            new AddressModel()
-                            {
-                                street = dadosPessoa.Logradouro,
-                                number = dadosPessoa.Numero,
-                                neighborhood = dadosPessoa.Bairro,
-                                zip_code = dadosPessoa.Cep,
-                                city = dadosPessoa.CidadeNome,
-                                state = !string.IsNullOrEmpty(dadosPessoa?.EstadoSigla) && dadosPessoa?.EstadoSigla.Length > 2 ? dadosPessoa?.EstadoSigla.Substring(0, 2) : "",
-                                country = dadosPessoa.SiglaPais
-                            },
-                    foreigner = dadosPessoa.SiglaPais != "BR",
-                    gender = dadosPessoa.Sexo ?? "M",
-                    birth = $"{dadosPessoa.DataNascimento.GetValueOrDefault().Date:yyyy-MM-dd} 00:00:00",
-                    registered = true,
-                    created = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}"
-                };
+            //    if (usuarioVinculadoPessoa == null)
+            //        throw new ArgumentException($"Não foi encontrado usuário no sistema com a pessoa id: {doTransactionModel.PessoaId.GetValueOrDefault()}, primeiro é necessário cadastrar a pessoa como usuário do sistema");
 
 
-                //Monto o objeto para a transação no PIX
-                var transactionModel = new TransactionPixModel()
-                {
-                    merchant_id = $"{_financeiroProviderService.PrefixoTransacaoFinanceira}PessoaId_{doTransactionModel.PessoaId}_{DateTime.Now:ddMMyyyyHHmmss}",
-                    channel = "SWPortalProprietario",
-                    customer = customerUtilizar,
-                    description = "PAGTOCONTAS",
-                    web_payment = new WebPaymentModel()
-                    {
-                        value = doTransactionModel.ValorTotal,
-                        items = new List<TransactionItemInputModel>()
-                    {
-                        new TransactionItemInputModel()
-                        {
-                            item_id = $"{contas.First().Id}",
-                            value = doTransactionModel.ValorTotal,
-                            name = "PGTOCONTAS",
-                            amount = doTransactionModel.ValorTotal,
-                            date = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-                            end_date = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-                            travelers_amount = 1,
-                            category = "PGTOCONTAS",
-                            travelers = new List<CustomerModel>()
-                            {
-                                customerUtilizar
-                            }
-                        }
-                    }
-                    },
-                    ip = null,
-                    vip = false,
-                    fligth = false,
-                    finger_print = null
+            //    var contas = await _financeiroProviderService.GetContasParaPagamentoEmPixGeral(doTransactionModel);
+            //    await ValidarPagamentoEmDuplicidade(contas, pessoa);
 
-                };
+            //    var dadosPessoa = await _financeiroProviderService.GetDadosPessoa(Convert.ToInt32(vinculoPessoaProvider.PessoaProvider));
+            //    if (dadosPessoa == null)
+            //        throw new ArgumentException($"Não foi possível encontrar a pessoa com Id: {vinculoPessoaProvider.PessoaProvider} no provider: {_financeiroProviderService.ProviderName}");
 
-
-                var transactionCardResultModel = await _broker.GeneratePixTransaction(transactionModel, contas.First().EmpresaId.GetValueOrDefault());
-
-                await GravarGeracaoPixHistory(transactionModel, transactionCardResultModel, doTransactionModel, contas);
-
-
-                //Efetuar alteração nas contas relacionadas ao pagamento efetuado
+            //    var customerUtilizar = new CustomerModel()
+            //    {
+            //        rid = pessoa.Id,
+            //        type = pessoa.TipoPessoa == 0 ? "F" : "J",
+            //        name = pessoa.Nome,
+            //        document = pessoa.TipoPessoa == 0 ? dadosPessoa?.Cpf?.PadLeft(11, '0') : dadosPessoa?.Cnpj?.PadLeft(14, '0'),
+            //        document_type = pessoa.TipoPessoa == 0 ? "CPF" : "CNPJ",
+            //        email = !string.IsNullOrEmpty(dadosPessoa.Email) && dadosPessoa.Email.Contains(";") ? dadosPessoa.Email.Split(";")[0] : dadosPessoa?.Email,
+            //        phones = new List<PhoneModel>()
+            //        {
+            //            new PhoneModel()
+            //            {
+            //                type = dadosPessoa != null && !string.IsNullOrEmpty(dadosPessoa.TipoTelefone) && dadosPessoa.TipoTelefone.StartsWith("CELU", StringComparison.InvariantCultureIgnoreCase) ? "cellphone" : "home",
+            //                number = Helper.ApenasNumeros(dadosPessoa?.NumeroTelefone)
+            //            }
+            //        },
+            //        address =
+            //                new AddressModel()
+            //                {
+            //                    street = dadosPessoa.Logradouro,
+            //                    number = dadosPessoa.Numero,
+            //                    neighborhood = dadosPessoa.Bairro,
+            //                    zip_code = dadosPessoa.Cep,
+            //                    city = dadosPessoa.CidadeNome,
+            //                    state = !string.IsNullOrEmpty(dadosPessoa?.EstadoSigla) && dadosPessoa?.EstadoSigla.Length > 2 ? dadosPessoa?.EstadoSigla.Substring(0, 2) : "",
+            //                    country = dadosPessoa.SiglaPais
+            //                },
+            //        foreigner = dadosPessoa.SiglaPais != "BR",
+            //        gender = dadosPessoa.Sexo ?? "M",
+            //        birth = $"{dadosPessoa.DataNascimento.GetValueOrDefault().Date:yyyy-MM-dd} 00:00:00",
+            //        registered = true,
+            //        created = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}"
+            //    };
 
 
-                var result = await _repository.CommitAsync();
-                if (!result.executed)
-                    throw result.exception ?? new Exception("Erro na operação");
+            //    //Monto o objeto para a transação no PIX
+            //    var transactionModel = new TransactionPixModel()
+            //    {
+            //        merchant_id = $"{_financeiroProviderService.PrefixoTransacaoFinanceira}PessoaId_{doTransactionModel.PessoaId}_{DateTime.Now:ddMMyyyyHHmmss}",
+            //        channel = "SWPortalProprietario",
+            //        customer = customerUtilizar,
+            //        description = "PAGTOCONTAS",
+            //        web_payment = new WebPaymentModel()
+            //        {
+            //            value = doTransactionModel.ValorTotal,
+            //            items = new List<TransactionItemInputModel>()
+            //        {
+            //            new TransactionItemInputModel()
+            //            {
+            //                item_id = $"{contas.First().Id}",
+            //                value = doTransactionModel.ValorTotal,
+            //                name = "PGTOCONTAS",
+            //                amount = doTransactionModel.ValorTotal,
+            //                date = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+            //                end_date = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+            //                travelers_amount = 1,
+            //                category = "PGTOCONTAS",
+            //                travelers = new List<CustomerModel>()
+            //                {
+            //                    customerUtilizar
+            //                }
+            //            }
+            //        }
+            //        },
+            //        ip = null,
+            //        vip = false,
+            //        fligth = false,
+            //        finger_print = null
 
-                return transactionCardResultModel;
-            }
-            catch (Exception err)
-            {
-                _repository.Rollback();
-                throw;
-            }
+            //    };
+
+
+            //    var transactionCardResultModel = await _broker.GeneratePixTransaction(transactionModel, contas.First().EmpresaId.GetValueOrDefault());
+
+            //    await GravarGeracaoPixHistory(transactionModel, transactionCardResultModel, doTransactionModel, contas);
+
+
+            //    //Efetuar alteração nas contas relacionadas ao pagamento efetuado
+
+
+            //    var result = await _repository.CommitAsync();
+            //    if (!result.executed)
+            //        throw result.exception ?? new Exception("Erro na operação");
+
+            //    return transactionCardResultModel;
+            //}
+            //catch (Exception err)
+            //{
+            //    _repository.Rollback();
+            //    throw;
+            //}
         }
 
         private async Task GravarGeracaoPixHistory(TransactionPixModel transactionModel, TransactionPixResultModel transactionPixResultModel, DoTransactionPixInputModel doTransactionModel, List<ContaPendenteModel> contas)
@@ -650,74 +651,74 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         public async Task<List<CardTokenizedModel>> GetAllTokenizedCardFromUser(SearchTokenizedCardFromUserModel searchModel)
         {
-
-            var sb = new StringBuilder(@"From 
-                            CardTokenized ct 
-                            Inner Join Fetch ct.Pessoa p 
-                            Where 1 = 1 ");
-
-
-
-            if (searchModel.PessoaId.GetValueOrDefault(0) > 0)
-            {
-                sb.AppendLine($" and p.Id = {searchModel.PessoaId} ");
-            }
-
-            if (searchModel.PessoaProviderId.GetValueOrDefault(0) > 0)
-            {
-                var vinculoPessoaProvider = searchModel.PessoaProviderId.GetValueOrDefault(0) > 0 ?
-                    (await _serviceBase.GetPessoaSistemaVinculadaPessoaProvider($"{searchModel.PessoaProviderId.GetValueOrDefault()}", _financeiroProviderService.ProviderName)) :
-                    null;
-
-                if (vinculoPessoaProvider != null && !string.IsNullOrEmpty(vinculoPessoaProvider.PessoaSistema))
-                    sb.AppendLine($" and p.Id = {vinculoPessoaProvider.PessoaSistema} ");
-                else throw new ArgumentException($"Não foi encontrada pessoa do sistema vinculada ao PessoaProviderId informado: {searchModel.PessoaProviderId.GetValueOrDefault()}");
-            }
-
-            if (!string.IsNullOrEmpty(searchModel.PessoaNome))
-            {
-                sb.AppendLine($" and Lower(p.Nome) like '{searchModel.PessoaNome.ToLower()}%' ");
-            }
-
-            var cardsExistentes = (await _repository.FindByHql<CardTokenized>(sb.ToString())).AsList();
+             return new List<CardTokenizedModel>();
+            //var sb = new StringBuilder(@"From 
+            //                CardTokenized ct 
+            //                Inner Join Fetch ct.Pessoa p 
+            //                Where 1 = 1 ");
 
 
-            List<CardTokenizedModel> cardsRetornar = new List<CardTokenizedModel>();
 
-            if (cardsExistentes != null && cardsExistentes.Any())
-            {
-                cardsRetornar = cardsExistentes.Select(b =>
-                    new CardTokenizedModel()
-                    {
-                        Id = b.Id,
-                        UsuarioCriacao = b.UsuarioCriacao,
-                        UsuarioAlteracao = b.UsuarioAlteracao,
-                        DataHoraCriacao = b.DataHoraCriacao,
-                        DataHoraAlteracao = b.DataHoraAlteracao,
-                        PessoaId = b.Pessoa?.Id,
-                        PessoaNome = b.Pessoa?.Nome,
-                        CardHolder = b.CardHolder,
-                        card = new CardInputModel()
-                        {
-                            brand = b.Brand,
-                            card_number = b.CardNumber,
-                            cvv = b.Cvv,
-                            due_date = b.DueDate,
-                            card_holder = b.CardHolder
-                        },
-                        token = b.Token,
-                        token2 = b.Token2,
-                        company = new CompanyModel()
-                        {
-                            id = b.CompanyId,
-                            acquirer = b.Acquirer
-                        },
-                        status = b.Status
-                    }).AsList();
-            };
+            //if (searchModel.PessoaId.GetValueOrDefault(0) > 0)
+            //{
+            //    sb.AppendLine($" and p.Id = {searchModel.PessoaId} ");
+            //}
+
+            //if (searchModel.PessoaProviderId.GetValueOrDefault(0) > 0)
+            //{
+            //    var vinculoPessoaProvider = searchModel.PessoaProviderId.GetValueOrDefault(0) > 0 ?
+            //        (await _serviceBase.GetPessoaSistemaVinculadaPessoaProvider($"{searchModel.PessoaProviderId.GetValueOrDefault()}", _financeiroProviderService.ProviderName)) :
+            //        null;
+
+            //    if (vinculoPessoaProvider != null && !string.IsNullOrEmpty(vinculoPessoaProvider.PessoaSistema))
+            //        sb.AppendLine($" and p.Id = {vinculoPessoaProvider.PessoaSistema} ");
+            //    else throw new ArgumentException($"Não foi encontrada pessoa do sistema vinculada ao PessoaProviderId informado: {searchModel.PessoaProviderId.GetValueOrDefault()}");
+            //}
+
+            //if (!string.IsNullOrEmpty(searchModel.PessoaNome))
+            //{
+            //    sb.AppendLine($" and Lower(p.Nome) like '{searchModel.PessoaNome.ToLower()}%' ");
+            //}
+
+            //var cardsExistentes = (await _repository.FindByHql<CardTokenized>(sb.ToString())).AsList();
 
 
-            return cardsRetornar;
+            //List<CardTokenizedModel> cardsRetornar = new List<CardTokenizedModel>();
+
+            //if (cardsExistentes != null && cardsExistentes.Any())
+            //{
+            //    cardsRetornar = cardsExistentes.Select(b =>
+            //        new CardTokenizedModel()
+            //        {
+            //            Id = b.Id,
+            //            UsuarioCriacao = b.UsuarioCriacao,
+            //            UsuarioAlteracao = b.UsuarioAlteracao,
+            //            DataHoraCriacao = b.DataHoraCriacao,
+            //            DataHoraAlteracao = b.DataHoraAlteracao,
+            //            PessoaId = b.Pessoa?.Id,
+            //            PessoaNome = b.Pessoa?.Nome,
+            //            CardHolder = b.CardHolder,
+            //            card = new CardInputModel()
+            //            {
+            //                brand = b.Brand,
+            //                card_number = b.CardNumber,
+            //                cvv = b.Cvv,
+            //                due_date = b.DueDate,
+            //                card_holder = b.CardHolder
+            //            },
+            //            token = b.Token,
+            //            token2 = b.Token2,
+            //            company = new CompanyModel()
+            //            {
+            //                id = b.CompanyId,
+            //                acquirer = b.Acquirer
+            //            },
+            //            status = b.Status
+            //        }).AsList();
+            //};
+
+
+            //return cardsRetornar;
         }
 
         public async Task<TransactionCardResultModel?> GetTransactionResult(string paymentId)

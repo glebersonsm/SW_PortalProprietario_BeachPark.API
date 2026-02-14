@@ -269,7 +269,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     throw new ArgumentNullException("Não foi possível identificar o id do usuário logado.");
 
                 var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
-                if (pessoaProvider == null || string.IsNullOrEmpty(pessoaProvider.PessoaProvider))
+                if (pessoaProvider == null || !pessoaProvider.Any() || pessoaProvider.Any(a => string.IsNullOrEmpty(a.PessoaProvider)))
                     throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
 
             }

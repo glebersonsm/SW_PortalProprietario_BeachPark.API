@@ -59,212 +59,213 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         public async Task<List<FileResultModel>> GerarCertidaoNegativaPositivaDeDebitosFinanceiros(GeracaoCertidaoInputModel geracaoCertidaoInputModel)
         {
-            var httpContext = _httpContextAccessor?.HttpContext?.Request;
-            if (httpContext is null)
-                throw new Exception("Não foi possível identificar a URL do servidor");
+            throw new NotImplementedException();
+            //var httpContext = _httpContextAccessor?.HttpContext?.Request;
+            //if (httpContext is null)
+            //    throw new Exception("Não foi possível identificar a URL do servidor");
 
-            if (geracaoCertidaoInputModel.Data.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
-                geracaoCertidaoInputModel.Data = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-
-
-            List<FileResultModel> listRetorno = new List<FileResultModel>();
-
-            try
-            {
-                _repository.BeginTransaction();
-
-                var pathValidacaoProtocoloBase = $"{_configuration.GetValue<string>($"CertidoesConfig:PathValidacaoProtocolo")}";
-
-                var loggedUser = await _repository.GetLoggedUser();
-                if (loggedUser == null)
-                    throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
-
-                var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _financeiroProviderService.ProviderName);
-                if (pessoaVinculadaSistema == null)
-                    throw new ArgumentException($"Não foi encontrada pessoa do provider: {_financeiroProviderService.ProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
-
-                if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
-                    throw new ArgumentException($"Não foi encontrada pessoa do provider: {_financeiroProviderService.ProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
-
-                var proprietario = await _empreendimentoProviderService.GetProprietarios(new Models.Empreendimento.SearchProprietarioModel() { PessoaProviderId = Convert.ToInt32(pessoaVinculadaSistema.PessoaProvider) });
-                if (proprietario == null || proprietario.Value.proprietarios == null || !proprietario.Value.proprietarios.Any())
-                    throw new ArgumentException($"Não foi encontrada nenhuma cota vinculada a pessoa id: {pessoaVinculadaSistema.PessoaProvider} do provider: {_financeiroProviderService.ProviderName}");
-
-                if (!string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider))
-                {
-                    var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(pessoaVinculadaSistema.PessoaProvider!) });
-                    if (propCache != null && propCache.Any(b=>b.frAtendimentoStatusCrcModels.Any(b=> b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S")))
-                    {
-                        throw new ArgumentException("Não foi possível gerar a certidão, motivo 0001BL");
-                    }
-                }
-
-                var usuarios = await _userService.SearchNotPaginated(new UsuarioSearchModel() { CarregarDadosPessoa = true, Id = Convert.ToInt32(loggedUser.Value.userId) });
-                if (usuarios == null || !usuarios.Any())
-                    throw new ArgumentException($"Não foi encontrado usuário com Id: {loggedUser.Value.userId}");
-
-                var usuario = usuarios.First();
-
-                var contaspendentes = await _financeiroProviderService.GetContaPendenteDoUsuario(new SearchContasPendentesUsuarioLogado()
-                {
-                    VencimentoInicial = DateTime.Today.AddYears(-100).Date,
-                    VencimentoFinal = geracaoCertidaoInputModel.Data.GetValueOrDefault(DateTime.Today).Date,
-                    NumeroDaPagina = 1,
-                    QuantidadeRegistrosRetornar = 2000
-                });
-
-                var certidaoPositivaModeloPorUnidadeNome = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfigPorUnidade");
-                var certidaoNegativaModeloPorUnidadeNome = _configuration.GetValue<string>($"CertidoesConfig:NegativaConfigPorUnidade");
-                var certidaoPositivaModeloPorClienteNome = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfigPorCliente");
-                var certidaoNegativaModeloPorClienteNome = _configuration.GetValue<string>($"CertidoesConfig:NegativaConfigPorCliente");
-
-                var agruparCertidoesPorCliente = _configuration.GetValue<bool>("CertidoesConfig:AgruparCertidaoPorCliente", true);
-
-                var configuration = await _serviceBase.GetParametroSistema();
-                if (configuration != null)
-                    agruparCertidoesPorCliente = configuration.AgruparCertidaoPorCliente.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim;
-
-                var certidoesModeloPath = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfig", "C:\\inetpub\\wwwroot\\ModeloCertidoes\\");
-                var pathGeracaoPdf = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfig", "C:\\inetpub\\wwwroot\\CertidoesFinanceiras\\");
-
-                if (!agruparCertidoesPorCliente)
-                {
-                    if (string.IsNullOrEmpty(certidaoPositivaModeloPorUnidadeNome) || !certidaoPositivaModeloPorUnidadeNome.Contains("|"))
-                        throw new FileNotFoundException($"Não foi encontrada a configuração de modelo para geração de certidão positiva de débitos");
-
-                    if (string.IsNullOrEmpty(certidaoNegativaModeloPorUnidadeNome) || !certidaoNegativaModeloPorUnidadeNome.Contains("|"))
-                        throw new FileNotFoundException($"Não foi encontrada a configuração de modelo para geração de certidão negativa de débitos");
-                }
-                else
-                {
-                    if (string.IsNullOrEmpty(certidaoPositivaModeloPorClienteNome) || !certidaoPositivaModeloPorClienteNome.Contains("|"))
-                        throw new FileNotFoundException($"Não foi encontrada a configuração de modelo para geração de certidão positiva de débitos");
-
-                    if (string.IsNullOrEmpty(certidaoNegativaModeloPorClienteNome) || !certidaoNegativaModeloPorClienteNome.Contains("|"))
-                        throw new FileNotFoundException($"Não foi encontrada a configuração de modelo para geração de certidão negativa de débitos");
-                }
-
-                if (!Directory.Exists(certidoesModeloPath))
-                    throw new FileNotFoundException($"Não foi encontrado o repositório de modelos para emissões de certidões");
-
-                if (!Directory.Exists(pathGeracaoPdf))
-                    throw new ArgumentException($"Não foi encontrado o repositório de gravação temporária das certidões");
-
-                string nomeCertidaoPositiva = !agruparCertidoesPorCliente ? certidaoPositivaModeloPorUnidadeNome!.Split("|")[0] : certidaoPositivaModeloPorClienteNome!.Split("|")[0];
-                if (string.IsNullOrEmpty(nomeCertidaoPositiva))
-                    throw new FileNotFoundException("Não foi encontrado o modelo de certidão para emissão de certidão positiva");
-
-                string nomeCertidaoNegativa = !agruparCertidoesPorCliente ? certidaoNegativaModeloPorUnidadeNome!.Split("|")[0] : certidaoNegativaModeloPorClienteNome!.Split("|")[0];
-                if (string.IsNullOrEmpty(nomeCertidaoPositiva))
-                    throw new FileNotFoundException("Não foi encontrado o modelo de certidão para emissão de certidão negativa");
-
-                string funcaoSubstituicoesEmissaoPositivas = !agruparCertidoesPorCliente ? certidaoPositivaModeloPorUnidadeNome!.Split("|")[1] : certidaoPositivaModeloPorClienteNome!.Split("|")[1];
-
-                if (string.IsNullOrEmpty(funcaoSubstituicoesEmissaoPositivas))
-                    throw new FileNotFoundException("Não foi encontrada a função para emissão de certidão positiva");
-
-                string funcaoSubstituicoesEmissaoNegativa = !agruparCertidoesPorCliente ? certidaoNegativaModeloPorUnidadeNome!.Split("|")[1] : certidaoNegativaModeloPorClienteNome!.Split("|")[1];
-
-                if (string.IsNullOrEmpty(funcaoSubstituicoesEmissaoNegativa))
-                    throw new FileNotFoundException("Não foi encontrada a função para emissão de certidão negativa");
-
-                if (contaspendentes.Value.contasPendentes.Any())
-                {
-                    if (!File.Exists(Path.Combine(certidoesModeloPath, nomeCertidaoPositiva)))
-                        throw new ArgumentException($"Não foi encontrado o documento modelo para emissão de certidão positiva de débitos: '{Path.Combine(certidoesModeloPath, nomeCertidaoPositiva)}' ");
-                }
-                else
-                {
-                    if (!File.Exists(Path.Combine(certidoesModeloPath, nomeCertidaoNegativa)))
-                        throw new ArgumentException($"Não foi encontrado o documento modelo para emissão de certidão negativa de débitos: '{Path.Combine(certidoesModeloPath, nomeCertidaoNegativa)}' ");
-                }
+            //if (geracaoCertidaoInputModel.Data.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
+            //    geracaoCertidaoInputModel.Data = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
 
 
-                if (!Directory.Exists(pathGeracaoPdf))
-                    Directory.CreateDirectory(pathGeracaoPdf);
+            //List<FileResultModel> listRetorno = new List<FileResultModel>();
 
-                var launchOptions = new LaunchOptions
-                {
-                    Headless = true
-                };
+            //try
+            //{
+            //    _repository.BeginTransaction();
 
-                List<CertidaoFinanceira> certidoes = new List<CertidaoFinanceira>();
+            //    var pathValidacaoProtocoloBase = $"{_configuration.GetValue<string>($"CertidoesConfig:PathValidacaoProtocolo")}";
+
+            //    var loggedUser = await _repository.GetLoggedUser();
+            //    if (loggedUser == null)
+            //        throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
+
+            //    var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _financeiroProviderService.ProviderName);
+            //    if (pessoaVinculadaSistema == null)
+            //        throw new ArgumentException($"Não foi encontrada pessoa do provider: {_financeiroProviderService.ProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
+
+            //    if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
+            //        throw new ArgumentException($"Não foi encontrada pessoa do provider: {_financeiroProviderService.ProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
+
+            //    var proprietario = await _empreendimentoProviderService.GetProprietarios(new Models.Empreendimento.SearchProprietarioModel() { PessoaProviderId = Convert.ToInt32(pessoaVinculadaSistema.PessoaProvider) });
+            //    if (proprietario == null || proprietario.Value.proprietarios == null || !proprietario.Value.proprietarios.Any())
+            //        throw new ArgumentException($"Não foi encontrada nenhuma cota vinculada a pessoa id: {pessoaVinculadaSistema.PessoaProvider} do provider: {_financeiroProviderService.ProviderName}");
+
+            //    if (!string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider))
+            //    {
+            //        var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(pessoaVinculadaSistema.PessoaProvider!) });
+            //        if (propCache != null && propCache.Any(b=>b.frAtendimentoStatusCrcModels.Any(b=> b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S")))
+            //        {
+            //            throw new ArgumentException("Não foi possível gerar a certidão, motivo 0001BL");
+            //        }
+            //    }
+
+            //    var usuarios = await _userService.SearchNotPaginated(new UsuarioSearchModel() { CarregarDadosPessoa = true, Id = Convert.ToInt32(loggedUser.Value.userId) });
+            //    if (usuarios == null || !usuarios.Any())
+            //        throw new ArgumentException($"Não foi encontrado usuário com Id: {loggedUser.Value.userId}");
+
+            //    var usuario = usuarios.First();
+
+            //    var contaspendentes = await _financeiroProviderService.GetContaPendenteDoUsuario(new SearchContasPendentesUsuarioLogado()
+            //    {
+            //        VencimentoInicial = DateTime.Today.AddYears(-100).Date,
+            //        VencimentoFinal = geracaoCertidaoInputModel.Data.GetValueOrDefault(DateTime.Today).Date,
+            //        NumeroDaPagina = 1,
+            //        QuantidadeRegistrosRetornar = 2000
+            //    });
+
+            //    var certidaoPositivaModeloPorUnidadeNome = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfigPorUnidade");
+            //    var certidaoNegativaModeloPorUnidadeNome = _configuration.GetValue<string>($"CertidoesConfig:NegativaConfigPorUnidade");
+            //    var certidaoPositivaModeloPorClienteNome = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfigPorCliente");
+            //    var certidaoNegativaModeloPorClienteNome = _configuration.GetValue<string>($"CertidoesConfig:NegativaConfigPorCliente");
+
+            //    var agruparCertidoesPorCliente = _configuration.GetValue<bool>("CertidoesConfig:AgruparCertidaoPorCliente", true);
+
+            //    var configuration = await _serviceBase.GetParametroSistema();
+            //    if (configuration != null)
+            //        agruparCertidoesPorCliente = configuration.AgruparCertidaoPorCliente.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim;
+
+            //    var certidoesModeloPath = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfig", "C:\\inetpub\\wwwroot\\ModeloCertidoes\\");
+            //    var pathGeracaoPdf = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfig", "C:\\inetpub\\wwwroot\\CertidoesFinanceiras\\");
+
+            //    if (!agruparCertidoesPorCliente)
+            //    {
+            //        if (string.IsNullOrEmpty(certidaoPositivaModeloPorUnidadeNome) || !certidaoPositivaModeloPorUnidadeNome.Contains("|"))
+            //            throw new FileNotFoundException($"Não foi encontrada a configuração de modelo para geração de certidão positiva de débitos");
+
+            //        if (string.IsNullOrEmpty(certidaoNegativaModeloPorUnidadeNome) || !certidaoNegativaModeloPorUnidadeNome.Contains("|"))
+            //            throw new FileNotFoundException($"Não foi encontrada a configuração de modelo para geração de certidão negativa de débitos");
+            //    }
+            //    else
+            //    {
+            //        if (string.IsNullOrEmpty(certidaoPositivaModeloPorClienteNome) || !certidaoPositivaModeloPorClienteNome.Contains("|"))
+            //            throw new FileNotFoundException($"Não foi encontrada a configuração de modelo para geração de certidão positiva de débitos");
+
+            //        if (string.IsNullOrEmpty(certidaoNegativaModeloPorClienteNome) || !certidaoNegativaModeloPorClienteNome.Contains("|"))
+            //            throw new FileNotFoundException($"Não foi encontrada a configuração de modelo para geração de certidão negativa de débitos");
+            //    }
+
+            //    if (!Directory.Exists(certidoesModeloPath))
+            //        throw new FileNotFoundException($"Não foi encontrado o repositório de modelos para emissões de certidões");
+
+            //    if (!Directory.Exists(pathGeracaoPdf))
+            //        throw new ArgumentException($"Não foi encontrado o repositório de gravação temporária das certidões");
+
+            //    string nomeCertidaoPositiva = !agruparCertidoesPorCliente ? certidaoPositivaModeloPorUnidadeNome!.Split("|")[0] : certidaoPositivaModeloPorClienteNome!.Split("|")[0];
+            //    if (string.IsNullOrEmpty(nomeCertidaoPositiva))
+            //        throw new FileNotFoundException("Não foi encontrado o modelo de certidão para emissão de certidão positiva");
+
+            //    string nomeCertidaoNegativa = !agruparCertidoesPorCliente ? certidaoNegativaModeloPorUnidadeNome!.Split("|")[0] : certidaoNegativaModeloPorClienteNome!.Split("|")[0];
+            //    if (string.IsNullOrEmpty(nomeCertidaoPositiva))
+            //        throw new FileNotFoundException("Não foi encontrado o modelo de certidão para emissão de certidão negativa");
+
+            //    string funcaoSubstituicoesEmissaoPositivas = !agruparCertidoesPorCliente ? certidaoPositivaModeloPorUnidadeNome!.Split("|")[1] : certidaoPositivaModeloPorClienteNome!.Split("|")[1];
+
+            //    if (string.IsNullOrEmpty(funcaoSubstituicoesEmissaoPositivas))
+            //        throw new FileNotFoundException("Não foi encontrada a função para emissão de certidão positiva");
+
+            //    string funcaoSubstituicoesEmissaoNegativa = !agruparCertidoesPorCliente ? certidaoNegativaModeloPorUnidadeNome!.Split("|")[1] : certidaoNegativaModeloPorClienteNome!.Split("|")[1];
+
+            //    if (string.IsNullOrEmpty(funcaoSubstituicoesEmissaoNegativa))
+            //        throw new FileNotFoundException("Não foi encontrada a função para emissão de certidão negativa");
+
+            //    if (contaspendentes.Value.contasPendentes.Any())
+            //    {
+            //        if (!File.Exists(Path.Combine(certidoesModeloPath, nomeCertidaoPositiva)))
+            //            throw new ArgumentException($"Não foi encontrado o documento modelo para emissão de certidão positiva de débitos: '{Path.Combine(certidoesModeloPath, nomeCertidaoPositiva)}' ");
+            //    }
+            //    else
+            //    {
+            //        if (!File.Exists(Path.Combine(certidoesModeloPath, nomeCertidaoNegativa)))
+            //            throw new ArgumentException($"Não foi encontrado o documento modelo para emissão de certidão negativa de débitos: '{Path.Combine(certidoesModeloPath, nomeCertidaoNegativa)}' ");
+            //    }
 
 
-                if (!agruparCertidoesPorCliente)
-                {
-                    if (contaspendentes.Value.contasPendentes.Any())
-                        certidoes.AddRange(await PrepararEmitirCertidoesComPendencias(geracaoCertidaoInputModel, usuario, contaspendentes.Value.contasPendentes, certidoesModeloPath, pathGeracaoPdf, nomeCertidaoPositiva, funcaoSubstituicoesEmissaoPositivas, launchOptions, pathValidacaoProtocoloBase));
+            //    if (!Directory.Exists(pathGeracaoPdf))
+            //        Directory.CreateDirectory(pathGeracaoPdf);
 
-                    foreach (var itemProprietario in proprietario.Value.proprietarios)
-                    {
-                        var existeCertidaoComPendenciaFinanceira = certidoes.Any(b =>
-                        !string.IsNullOrEmpty(b.NumeroFracao) &&
-                        !string.IsNullOrEmpty(itemProprietario.CodigoFracao) &&
-                        !string.IsNullOrEmpty(b.ImovelNumero) &&
-                        !string.IsNullOrEmpty(itemProprietario.ImovelNumero) &&
-                        b.NumeroFracao.Equals(itemProprietario.CodigoFracao, StringComparison.CurrentCultureIgnoreCase) &&
-                        b.ImovelNumero.Equals(itemProprietario.ImovelNumero, StringComparison.InvariantCultureIgnoreCase));
+            //    var launchOptions = new LaunchOptions
+            //    {
+            //        Headless = true
+            //    };
 
-                        if (!existeCertidaoComPendenciaFinanceira)
-                            certidoes.Add(await PrepararEmitirCertidoesNegativasDeDebito(geracaoCertidaoInputModel, usuario, itemProprietario, certidoesModeloPath, pathGeracaoPdf, nomeCertidaoNegativa, funcaoSubstituicoesEmissaoNegativa, launchOptions, pathValidacaoProtocoloBase));
+            //    List<CertidaoFinanceira> certidoes = new List<CertidaoFinanceira>();
 
-                    }
 
-                    foreach (var certidao in certidoes)
-                    {
-                        listRetorno.Add(new FileResultModel()
-                        {
-                            Id = certidao.Id,
-                            DataHoraCriacao = certidao.DataHoraCriacao,
-                            UsuarioCriacao = certidao.UsuarioCriacao,
-                            Path = certidao.PdfPath,
-                            FileName = Path.GetFileName(certidao.PdfPath)
+            //    if (!agruparCertidoesPorCliente)
+            //    {
+            //        if (contaspendentes.Value.contasPendentes.Any())
+            //            certidoes.AddRange(await PrepararEmitirCertidoesComPendencias(geracaoCertidaoInputModel, usuario, contaspendentes.Value.contasPendentes, certidoesModeloPath, pathGeracaoPdf, nomeCertidaoPositiva, funcaoSubstituicoesEmissaoPositivas, launchOptions, pathValidacaoProtocoloBase));
 
-                        });
-                    }
-                }
-                else
-                {
-                    if (contaspendentes.Value.contasPendentes.Any())
-                        certidoes.AddRange(await PrepararEmitirCertidoesComPendenciasAgrupadoPorCliente(geracaoCertidaoInputModel, usuario, contaspendentes.Value.contasPendentes, certidoesModeloPath, pathGeracaoPdf, nomeCertidaoPositiva, funcaoSubstituicoesEmissaoPositivas, launchOptions, pathValidacaoProtocoloBase));
+            //        foreach (var itemProprietario in proprietario.Value.proprietarios)
+            //        {
+            //            var existeCertidaoComPendenciaFinanceira = certidoes.Any(b =>
+            //            !string.IsNullOrEmpty(b.NumeroFracao) &&
+            //            !string.IsNullOrEmpty(itemProprietario.CodigoFracao) &&
+            //            !string.IsNullOrEmpty(b.ImovelNumero) &&
+            //            !string.IsNullOrEmpty(itemProprietario.ImovelNumero) &&
+            //            b.NumeroFracao.Equals(itemProprietario.CodigoFracao, StringComparison.CurrentCultureIgnoreCase) &&
+            //            b.ImovelNumero.Equals(itemProprietario.ImovelNumero, StringComparison.InvariantCultureIgnoreCase));
 
-                    foreach (var itemProprietario in proprietario.Value.proprietarios)
-                    {
-                        var existeCertidaoComPendenciaFinanceira = certidoes.Any();
+            //            if (!existeCertidaoComPendenciaFinanceira)
+            //                certidoes.Add(await PrepararEmitirCertidoesNegativasDeDebito(geracaoCertidaoInputModel, usuario, itemProprietario, certidoesModeloPath, pathGeracaoPdf, nomeCertidaoNegativa, funcaoSubstituicoesEmissaoNegativa, launchOptions, pathValidacaoProtocoloBase));
 
-                        if (!existeCertidaoComPendenciaFinanceira)
-                            certidoes.Add(await PrepararEmitirCertidoesNegativasDeDebitoAgrupadoPorCliente(geracaoCertidaoInputModel, usuario, itemProprietario, certidoesModeloPath, pathGeracaoPdf, nomeCertidaoNegativa, funcaoSubstituicoesEmissaoNegativa, launchOptions, pathValidacaoProtocoloBase));
+            //        }
 
-                    }
+            //        foreach (var certidao in certidoes)
+            //        {
+            //            listRetorno.Add(new FileResultModel()
+            //            {
+            //                Id = certidao.Id,
+            //                DataHoraCriacao = certidao.DataHoraCriacao,
+            //                UsuarioCriacao = certidao.UsuarioCriacao,
+            //                Path = certidao.PdfPath,
+            //                FileName = Path.GetFileName(certidao.PdfPath)
 
-                    foreach (var certidao in certidoes)
-                    {
-                        listRetorno.Add(new FileResultModel()
-                        {
-                            Id = certidao.Id,
-                            DataHoraCriacao = certidao.DataHoraCriacao,
-                            UsuarioCriacao = certidao.UsuarioCriacao,
-                            Path = certidao.PdfPath,
-                            FileName = Path.GetFileName(certidao.PdfPath)
+            //            });
+            //        }
+            //    }
+            //    else
+            //    {
+            //        if (contaspendentes.Value.contasPendentes.Any())
+            //            certidoes.AddRange(await PrepararEmitirCertidoesComPendenciasAgrupadoPorCliente(geracaoCertidaoInputModel, usuario, contaspendentes.Value.contasPendentes, certidoesModeloPath, pathGeracaoPdf, nomeCertidaoPositiva, funcaoSubstituicoesEmissaoPositivas, launchOptions, pathValidacaoProtocoloBase));
 
-                        });
-                    }
-                }
+            //        foreach (var itemProprietario in proprietario.Value.proprietarios)
+            //        {
+            //            var existeCertidaoComPendenciaFinanceira = certidoes.Any();
 
-                var commitResult = await _repository.CommitAsync();
-                if (!commitResult.executed)
-                    throw commitResult.exception ?? new Exception("Não foi possível realizar a operação");
+            //            if (!existeCertidaoComPendenciaFinanceira)
+            //                certidoes.Add(await PrepararEmitirCertidoesNegativasDeDebitoAgrupadoPorCliente(geracaoCertidaoInputModel, usuario, itemProprietario, certidoesModeloPath, pathGeracaoPdf, nomeCertidaoNegativa, funcaoSubstituicoesEmissaoNegativa, launchOptions, pathValidacaoProtocoloBase));
 
-                return listRetorno;
+            //        }
 
-            }
-            catch (Exception err)
-            {
-                _logger.LogError(err, $"Não foi possível gerar a certidão financeira para o usuário logado");
-                _repository.Rollback();
-                throw;
-            }
+            //        foreach (var certidao in certidoes)
+            //        {
+            //            listRetorno.Add(new FileResultModel()
+            //            {
+            //                Id = certidao.Id,
+            //                DataHoraCriacao = certidao.DataHoraCriacao,
+            //                UsuarioCriacao = certidao.UsuarioCriacao,
+            //                Path = certidao.PdfPath,
+            //                FileName = Path.GetFileName(certidao.PdfPath)
+
+            //            });
+            //        }
+            //    }
+
+            //    var commitResult = await _repository.CommitAsync();
+            //    if (!commitResult.executed)
+            //        throw commitResult.exception ?? new Exception("Não foi possível realizar a operação");
+
+            //    return listRetorno;
+
+            //}
+            //catch (Exception err)
+            //{
+            //    _logger.LogError(err, $"Não foi possível gerar a certidão financeira para o usuário logado");
+            //    _repository.Rollback();
+            //    throw;
+            //}
         }
 
         private async Task<List<CertidaoFinanceira>> PrepararEmitirCertidoesComPendencias(GeracaoCertidaoInputModel geracaoCertidaoInputModel, UsuarioModel usuario, List<ContaPendenteModel> contaspendentes, string? certidoesModeloPath, string? pathGeracaoPdf, string nomeCertidao, string funcaoSubstituicoes, LaunchOptions launchOptions, string pathValidacaoProtocoloBase)
