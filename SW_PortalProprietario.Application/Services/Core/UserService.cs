@@ -1456,11 +1456,14 @@ namespace SW_PortalProprietario.Application.Services.Core
             if (twoFAForProfile) return result; // Se tem 2FA, não deve enviar senha por canal
             
             // Retornar canais disponíveis para envio da nova senha
+            // 1. E-mail: exibir se usuário possui e-mail (envio depende da configuração de e-mail do sistema)
             if (!string.IsNullOrEmpty(usuario.Pessoa?.EmailPreferencial) && usuario.Pessoa.EmailPreferencial.Contains("@"))
                 result.Channels.Add(new Login2FAChannelModel { Type = "email", Display = MaskEmail(usuario.Pessoa.EmailPreferencial) });
             
+            // 2. SMS: exibir apenas se endpoint de envio SMS estiver configurado nas configurações
+            var smsEnabled = !string.IsNullOrEmpty(param.EndpointEnvioSms2FA) && !param.EndpointEnvioSms2FA.Equals("string", StringComparison.InvariantCultureIgnoreCase);
             var celular = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
-            if (!string.IsNullOrEmpty(celular))
+            if (smsEnabled && !string.IsNullOrEmpty(celular))
                 result.Channels.Add(new Login2FAChannelModel { Type = "sms", Display = MaskPhone(celular) });
             
             return result;
