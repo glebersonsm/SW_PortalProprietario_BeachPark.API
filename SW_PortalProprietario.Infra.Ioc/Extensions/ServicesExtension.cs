@@ -80,6 +80,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             services.TryAddScoped<IVoucherReservaService, VoucherReservaService>();
             services.TryAddScoped<Application.Services.Core.Interfaces.IIncentivoParaAgendamentoDocumentService, Application.Services.Core.IncentivoParaAgendamentoService>();
             services.TryAddScoped<IAutomaticCommunicationConfigService, AutomaticCommunicationConfigService>();
+            services.TryAddScoped<IVhfConfigService, VhfConfigService>();
             services.TryAddScoped<IAutomaticVoucherService, AutomaticVoucherService>();
 
             // Registrar Communication Handlers e serviços auxiliares
