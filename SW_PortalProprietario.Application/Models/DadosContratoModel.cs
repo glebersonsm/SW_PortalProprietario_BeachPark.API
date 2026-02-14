@@ -9,7 +9,7 @@
         public DateTime? DataCancelamento { get; set; }
         public DateTime? DataReversao { get; set; }
         public DateTime? DataContigencia { get; set; }
-        public DateTime DataValidade { get; set; }
+        public DateTime? DataValidade { get; set; }
         public string? Contigencia { get; set; }
         public int? CotaOriginal { get; set; }
         public int? Cota { get; set; }

@@ -338,7 +338,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
 
 
             if (!string.IsNullOrEmpty(providerName))
-                sb.AppendLine($" and Lower(a.NomeProvider) in ('ESOLUTION','CM','{providerName.ToLower()}') ");
+                sb.AppendLine($" and Lower(a.NomeProvider) in ('esolution','cm','{providerName.ToLower()}') ");
 
             return (await _repository.FindBySql<PessoaSistemaXProviderModel>(sb.ToString())).AsList();
 
