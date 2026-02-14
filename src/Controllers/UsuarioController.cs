@@ -146,6 +146,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
         }
 
         [HttpGet("resetPasswordChannels")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
@@ -173,6 +174,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
         }
 
         [HttpPatch("resetpassword")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ResultModel<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<string>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ResultModel<string>), StatusCodes.Status500InternalServerError)]
