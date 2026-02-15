@@ -13,21 +13,37 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly IFrameworkService _frameworkService;
         private readonly IRepositoryNH _repository;
         private readonly IRepositoryNHCm _repositoryCM;
+        private readonly ICacheStore _cacheStore;
 
-        public VhfConfigService(IFrameworkService frameworkService, IRepositoryNH repository, IRepositoryNHCm repositoryCM)
+        public VhfConfigService(IFrameworkService frameworkService, IRepositoryNH repository, IRepositoryNHCm repositoryCM, ICacheStore cacheStore)
         {
             _frameworkService = frameworkService;
             _repository = repository;
             _repositoryCM = repositoryCM;
+            _cacheStore = cacheStore;
         }
 
         public async Task<VhfConfigOpcoesModel> GetOpcoesAsync()
         {
+            var itemCache = await _cacheStore.GetAsync<VhfConfigOpcoesModel>("Opcoes_Configuracoes_", 2, _repository.CancellationToken);
+            if (itemCache != null)
+                return itemCache;
+                        
+            
             var result = new VhfConfigOpcoesModel();
 
-            // 1. Tipo de utilização (fixo)
+            // 1. Tipo de utilização (fixo). "Não importa" = configuração vale para todos os tipos.
+            result.TipoNegocio = new List<VhfConfigOpcaoItem>
+            {
+                new() { Value = "Não importa", Label = "Não importa" },
+                new() { Value = "Timesharing", Label = "Timesharing" },
+                new() { Value = "Multipropriedade", Label = "Multipropriedade" }
+            };
+
+            // 1. Tipo de utilização (fixo). "Não importa" = configuração vale para todos os tipos.
             result.TipoUtilizacao = new List<VhfConfigOpcaoItem>
             {
+                new() { Value = "Não importa", Label = "Não importa" },
                 new() { Value = "Uso próprio", Label = "Uso próprio" },
                 new() { Value = "Uso convidado", Label = "Uso convidado" }
             };
@@ -124,6 +140,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 new() { Value = "J", Label = "Meia pensão - Café e Jantar (J)" }
             };
 
+            await _cacheStore.AddAsync("Opcoes_Configuracoes_", result, DateTimeOffset.Now.AddMinutes(10), 2, _repository.CancellationToken);
+
             return result;
         }
 
@@ -162,6 +180,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var config = new ConfigReservaVhf
                 {
                     TipoUtilizacao = model.TipoUtilizacao ?? string.Empty,
+                    TipoNegocio = model.TipoNegocio,
                     HotelId = model.HotelId,
                     TipoHospede = model.TipoHospede ?? string.Empty,
                     TipoHospedeCrianca1 = model.TipoHospedeCrianca1,
@@ -206,6 +225,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     ? (int?)uidAlt : null;
 
                 config.TipoUtilizacao = model.TipoUtilizacao ?? string.Empty;
+                config.TipoNegocio = model.TipoNegocio;
                 config.HotelId = model.HotelId;
                 config.TipoHospede = model.TipoHospede ?? string.Empty;
                 config.TipoHospedeCrianca1 = model.TipoHospedeCrianca1;
@@ -257,6 +277,8 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             if (string.IsNullOrWhiteSpace(model.TipoUtilizacao))
                 throw new ArgumentException("Tipo de utilização deve ser informado");
+            if (string.IsNullOrWhiteSpace(model.TipoNegocio))
+                throw new ArgumentException("Tipo de negócio deve ser informado");
             if (string.IsNullOrWhiteSpace(model.TipoHospede))
                 throw new ArgumentException("Tipo de hóspede deve ser informado");
             if (string.IsNullOrWhiteSpace(model.Origem))
@@ -273,6 +295,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 Id = c.Id,
                 TipoUtilizacao = c.TipoUtilizacao,
+                TipoNegocio = c.TipoNegocio,
                 HotelId = c.HotelId,
                 HotelNome = c.HotelId.HasValue && empresaLookup.TryGetValue(c.HotelId.Value, out var nome) ? nome : null,
                 TipoHospedeAdulto = c.TipoHospede,

@@ -8,6 +8,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
     public class VhfConfigModel : ModelBase
     {
         public string TipoUtilizacao { get; set; } = string.Empty;
+        public string? TipoNegocio { get; set; }
         public int? HotelId { get; set; }
         public string? HotelNome { get; set; }
         public string TipoHospedeAdulto { get; set; } = string.Empty;

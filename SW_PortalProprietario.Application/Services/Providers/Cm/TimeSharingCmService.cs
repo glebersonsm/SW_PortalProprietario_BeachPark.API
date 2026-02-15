@@ -8554,9 +8554,9 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     {
                         descricaoPessoas = $"{qtdAdultos} adulto{(qtdAdultos > 1 ? "s" : "")}";
                         if (qtdCriancas1 > 0)
-                            descricaoPessoas += $", {qtdCriancas1} criança{(qtdCriancas1 > 1 ? "s" : "")} (6-11 anos)";
+                            descricaoPessoas += $", {qtdCriancas1} criança{(qtdCriancas1 > 1 ? "s" : "")} (5-12 anos)";
                         if (qtdCriancas2 > 0)
-                            descricaoPessoas += $", {qtdCriancas2} criança{(qtdCriancas2 > 1 ? "s" : "")} (0-5 anos)";
+                            descricaoPessoas += $", {qtdCriancas2} criança{(qtdCriancas2 > 1 ? "s" : "")} (0-4 anos)";
                     }
                     else if (qtdAdultos > 0)
                     {

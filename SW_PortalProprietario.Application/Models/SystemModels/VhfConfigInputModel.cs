@@ -6,6 +6,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
     public class VhfConfigInputModel
     {
         public string TipoUtilizacao { get; set; } = string.Empty;
+        public string? TipoNegocio { get; set; }
         public int? HotelId { get; set; }
         public string TipoHospede { get; set; } = string.Empty;
         public string? TipoHospedeCrianca1 { get; set; }

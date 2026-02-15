@@ -8,6 +8,13 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
     /// </summary>
     public class VhfConfigOpcoesModel
     {
+
+        /// <summary>
+        /// Tipo de negócio: Não importa | Timesharing | Multipropriedade.
+        /// Validação: valor deve estar na lista de opções.
+        /// </summary>
+        public List<VhfConfigOpcaoItem> TipoNegocio { get; set; } = new();
+
         /// <summary>
         /// Tipo de utilização: Uso próprio | Uso convidado.
         /// Validação: valor deve estar na lista de opções.

@@ -7,6 +7,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
     public class ConfigReservaVhf : EntityBaseCore
     {
         public virtual string TipoUtilizacao { get; set; } = string.Empty;
+        public virtual string? TipoNegocio { get; set; }
         public virtual int? HotelId { get; set; }
         public virtual string TipoHospede { get; set; } = string.Empty;
         public virtual string? TipoHospedeCrianca1 { get; set; }
