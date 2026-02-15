@@ -3805,7 +3805,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             decimal? ocupacaoMaxima = 70)
         {
             var periodosVinculados = await GetPeriodosVinculadosContrato(baseSaldoPontos!.IdContratoTs.GetValueOrDefault(),
-                hoteisVinculadosContrato.Select(a => a.HotelId.GetValueOrDefault()).Distinct().AsList(),
+                hoteisVinculadosContrato.Select(a => a.IdHotel.GetValueOrDefault()).Distinct().AsList(),
                 searchModel.DataInicial.GetValueOrDefault(),
                 searchModel.DataFinal.GetValueOrDefault());
 
@@ -3815,11 +3815,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     searchModel.DataInicial.GetValueOrDefault(),
                     searchModel.DataFinal.GetValueOrDefault(),
                     baseSaldoPontos!.IdContratoTs.GetValueOrDefault(),
-                    hoteisVinculadosContrato.Select(a => a.HotelId.GetValueOrDefault()).Distinct().AsList(),
+                    hoteisVinculadosContrato.Select(a => a.IdHotel.GetValueOrDefault()).Distinct().AsList(),
                     periodosVinculados.Select(a => a.IdTipoUh.GetValueOrDefault()).Distinct().AsList());
 
 
-                var disponibilidades = await GetDisponibilidadeExecute(hoteisVinculadosContrato.Select(a => a.HotelId.GetValueOrDefault()).AsList(),
+                var disponibilidades = await GetDisponibilidadeExecute(hoteisVinculadosContrato.Select(a => a.IdHotel.GetValueOrDefault()).AsList(),
                     periodosVinculados.Select(a => a.IdTipoUh.GetValueOrDefault()).Distinct().AsList(),
                     searchModel.DataInicial.GetValueOrDefault(),
                     searchModel.DataFinal.GetValueOrDefault(),ocupacaoMaxima);
@@ -3839,7 +3839,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                             {
 
                                 var tipoFst = itemTipo.First();
-                                var hotel = hoteisVinculadosContrato.First(a => a.HotelId == itemGroupHotel.Key);
+                                var hotel = hoteisVinculadosContrato.First(a => a.IdHotel == itemGroupHotel.Key);
 
                                 var disponibilidadesOrdenadas = itemTipo.OrderBy(d => d.Data).AsList();
                                 List<PeriodoDisponivelResultModel>? periodosPossiveis = await IniciarPeriodos(baseSaldoPontos,
@@ -4170,7 +4170,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                 TipoUhId = itemTipo.Key,
                                 TipoApartamento = $"{tipoFst.CodigoTipoUh} - {tipoFst.NomeTipoApto}",
                                 NomeHotel = hotel.HotelNome,
-                                HotelId = hotel.HotelId,
+                                HotelId = hotel.IdHotel,
                                 CodTipoUh = tipoFst.CodigoTipoUh,
                                 SaldoPontos = baseSaldoPontos?.SaldoPontos.GetValueOrDefault(0),
                                 Capacidade = tipoFst.Capacidade,
@@ -4280,7 +4280,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                             TipoUhId = itemTipo.Key,
                                             TipoApartamento = $"{tipoFst.CodigoTipoUh} - {tipoFst.NomeTipoApto}",
                                             NomeHotel = hotel.HotelNome,
-                                            HotelId = hotel.HotelId,
+                                            HotelId = hotel.IdHotel,
                                             CodTipoUh = tipoFst.CodigoTipoUh,
                                             SaldoPontos = baseSaldoPontos?.SaldoPontos.GetValueOrDefault(0),
                                             Capacidade = tipoFst.Capacidade,
@@ -4386,7 +4386,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                     TipoUhId = itemTipo.Key,
                                     TipoApartamento = $"{tipoFst.CodigoTipoUh} - {tipoFst.NomeTipoApto}",
                                     NomeHotel = hotel.HotelNome,
-                                    HotelId = hotel.HotelId,
+                                    HotelId = hotel.IdHotel,
                                     CodTipoUh = tipoFst.CodigoTipoUh,
                                     SaldoPontos = baseSaldoPontos?.SaldoPontos.GetValueOrDefault(0),
                                     Capacidade = tipoFst.Capacidade,
@@ -4674,7 +4674,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
              ORDER BY P.NOME     ", new Parameter("idContratoTs", idContratoTs))).AsList();
 
             if (!string.IsNullOrEmpty(hotelId) && int.Parse(hotelId) > 0)
-                result = result.Where(a => a.HotelId == int.Parse(hotelId)).AsList();
+                result = result.Where(a => a.IdHotel == int.Parse(hotelId)).AsList();
 
             return result.AsList();
         }

@@ -3,8 +3,10 @@
     public class HotelModel
     {
         public string? HotelNome { get; set; }
-        public int? HotelId { get; set; }
-        
+        public int? IdHotel { get; set; }
+        public int? Id { get; set; }
+        public string? Label => $"{Id} - {HotelNome}";
+
 
     }
 }

@@ -1,3 +1,5 @@
+using SW_PortalProprietario.Application.Models.TimeSharing;
+
 namespace SW_PortalProprietario.Application.Models.SystemModels
 {
     /// <summary>
@@ -16,25 +18,25 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         /// Hotéis/Unidades (CM): identificador da unidade.
         /// Validação: Id deve existir no cadastro de Empresas.
         /// </summary>
-        public List<VhfConfigOpcaoItem> Hoteis { get; set; } = new();
+        public List<HotelModel> Hoteis { get; set; } = new();
 
         /// <summary>
         /// Tipo de Hóspede (CM): categoria padrão (ex: Lazer, Corporativo).
         /// Validação: código deve existir no sistema legado.
         /// </summary>
-        public List<VhfConfigOpcaoItem> TiposHospede { get; set; } = new();
+        public List<TipoHospedeModel> TiposHospede { get; set; } = new();
 
         /// <summary>
         /// Origem (CM): canal de venda padrão (ex: Direto, Motor de Reservas).
         /// Validação: código deve existir no sistema legado.
         /// </summary>
-        public List<VhfConfigOpcaoItem> Origens { get; set; } = new();
+        public List<OrigemReservaModel> Origens { get; set; } = new();
 
         /// <summary>
         /// Tarifa Hotel (CM): código da tarifa base (ex: BAR, Acordo).
         /// Validação: código deve existir no cadastro de tarifas do PMS.
         /// </summary>
-        public List<VhfConfigOpcaoItem> TarifasHotel { get; set; } = new();
+        public List<TarifaHotelModel> TarifasHotel { get; set; } = new();
 
         /// <summary>
         /// Código de Pensão Padrão: regime de alimentação (ex: Café da Manhã, MAP).

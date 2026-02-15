@@ -1,6 +1,8 @@
+using Dapper;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.FrameworkModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
+using SW_PortalProprietario.Application.Models.TimeSharing;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 
@@ -10,11 +12,13 @@ namespace SW_PortalProprietario.Application.Services.Core
     {
         private readonly IFrameworkService _frameworkService;
         private readonly IRepositoryNH _repository;
+        private readonly IRepositoryNHCm _repositoryCM;
 
-        public VhfConfigService(IFrameworkService frameworkService, IRepositoryNH repository)
+        public VhfConfigService(IFrameworkService frameworkService, IRepositoryNH repository, IRepositoryNHCm repositoryCM)
         {
             _frameworkService = frameworkService;
             _repository = repository;
+            _repositoryCM = repositoryCM;
         }
 
         public async Task<VhfConfigOpcoesModel> GetOpcoesAsync()
@@ -31,62 +35,79 @@ namespace SW_PortalProprietario.Application.Services.Core
             // 2. Hotéis (CM): unidades do cadastro de Empresas
             try
             {
-                var empresas = await _frameworkService.SearchCompany(new EmpresaSearchModel());
-                if (empresas != null)
-                {
-                    result.Hoteis = empresas
-                        .Where(e => e.Id.HasValue)
-                        .Select(e => new VhfConfigOpcaoItem
-                        {
-                            Value = e.Id!.Value.ToString(),
-                            Label = e.PessoaEmpresa?.Nome ?? e.Codigo ?? e.Id.Value.ToString()
-                        })
-                        .ToList();
-                }
+                result.Hoteis = (await _repositoryCM.FindBySql<HotelModel>(@$"Select 
+                h.IdHotel as Id,
+                h.IdHotel,
+                p.Nome as HotelNome
+                From 
+                Hotel h 
+                Inner Join Pessoa p on h.IdPessoa = p.IdPessoa
+                Where 
+                1 = 1")).AsList();
             }
             catch
             {
-                result.Hoteis = new List<VhfConfigOpcaoItem>();
+                result.Hoteis = new List<HotelModel>();
             }
 
             // 3. Tipo de Hóspede (CM): categorias padrão
-            result.TiposHospede = new List<VhfConfigOpcaoItem>
+            try
             {
-                new() { Value = "Lazer", Label = "Lazer" },
-                new() { Value = "Corporativo", Label = "Corporativo" },
-                new() { Value = "Grupo", Label = "Grupo" },
-                new() { Value = "Evento", Label = "Evento" }
-            };
+                result.TiposHospede = (await _repositoryCM.FindBySql<TipoHospedeModel>(@$"Select 
+                th.IdTipoHospede as Id,
+                th.CodReduzido as CodReduzido,
+                th.Descricao as Nome,
+                th.IdHotel as IdHotel
+                From 
+                TipoHospede th
+                Where 
+                1 = 1")).AsList();
+            }
+            catch
+            {
+                result.TiposHospede = new List<TipoHospedeModel>();
+            }
+
 
             // 4. Origem (CM): canais de venda
-            result.Origens = new List<VhfConfigOpcaoItem>
+            try
             {
-                new() { Value = "Direto", Label = "Direto" },
-                new() { Value = "Motor de Reservas", Label = "Motor de Reservas" },
-                new() { Value = "Central de Reservas", Label = "Central de Reservas" },
-                new() { Value = "Website", Label = "Website" },
-                new() { Value = "Agência", Label = "Agência" }
-            };
+                result.Origens = (await _repositoryCM.FindBySql<OrigemReservaModel>(@$"SELECT ori.IdOrigem AS Id,
+                ori.CodReduzido,
+                ori.Descricao AS Nome 
+                FROM 
+                origemreserva ori
+                WHERE lower(ori.descricao) NOT LIKE '%falta%'")).AsList();
+            }
+            catch
+            {
+                result.Origens = new List<OrigemReservaModel>();
+            }
 
             // 5. Tarifa Hotel (CM): códigos de tarifa base
-            result.TarifasHotel = new List<VhfConfigOpcaoItem>
+            try
             {
-                new() { Value = "BAR", Label = "BAR (Best Available Rate)" },
-                new() { Value = "Acordo", Label = "Acordo" },
-                new() { Value = "Corporativo", Label = "Corporativo" },
-                new() { Value = "Grupo", Label = "Grupo" },
-                new() { Value = "Promocional", Label = "Promocional" }
-            };
+                result.TarifasHotel = (await _repositoryCM.FindBySql<TarifaHotelModel>(@$"SELECT 
+                    th.IdTarifa AS Id,
+                    th.IdHotel,
+                    th.CodCategoria AS Categoria,
+                    th.Descricao AS Nome
+                    FROM 
+                    TarifaHotel th
+                    WHERE 1 = 1")).AsList();
+            }
+            catch
+            {
+                result.TarifasHotel = new List<TarifaHotelModel>();
+            }
 
             // 6. Código de Pensão Padrão: regimes de alimentação
             result.CodigosPensao = new List<VhfConfigOpcaoItem>
             {
-                new() { Value = "SO", Label = "Sem alimentação (SO)" },
-                new() { Value = "BB", Label = "Café da Manhã (BB)" },
-                new() { Value = "HB", Label = "Meia Pensão (HB)" },
-                new() { Value = "FB", Label = "Pensão Completa (FB)" },
-                new() { Value = "MAP", Label = "MAP (Meia Pensão)" },
-                new() { Value = "AP", Label = "All Inclusive (AP)" }
+                new() { Value = "N", Label = "Sem alimentação (N)" },
+                new() { Value = "C", Label = "Café da Manhã (C)" },
+                new() { Value = "M", Label = "Meia pensão - Café e Almoço (M)" },
+                new() { Value = "J", Label = "Meia pensão - Café e Jantar (J)" }
             };
 
             return result;
@@ -178,7 +199,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 config.DataHoraAlteracao = DateTime.Now;
                 config.UsuarioAlteracao = alteracaoUserId;
 
-                await _repository.Update(config);
+                await _repository.Save(config);
                 await _repository.CommitAsync();
 
                 var empresas = await _frameworkService.SearchCompany(new EmpresaSearchModel());
@@ -203,7 +224,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (config == null)
                     throw new ArgumentException($"Configuração com ID {id} não encontrada");
 
-                await _repository.Delete(config);
+                _repository.Remove(config);
                 await _repository.CommitAsync();
                 return true;
             }
