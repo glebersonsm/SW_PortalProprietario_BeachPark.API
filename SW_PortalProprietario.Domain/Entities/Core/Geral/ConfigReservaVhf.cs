@@ -14,6 +14,8 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual string? TipoHospedeCrianca2 { get; set; }
         public virtual string Origem { get; set; } = string.Empty;
         public virtual string TarifaHotel { get; set; } = string.Empty;
+        public virtual bool EncaixarSemanaSeHouver { get; set; }
+        public virtual string? Segmento { get; set; }
         public virtual string CodigoPensao { get; set; } = string.Empty;
         public virtual bool PermiteIntercambioMultipropriedade { get; set; }
     }

@@ -8,7 +8,9 @@ namespace SW_PortalProprietario.Application.Models.TimeSharing
         public string? IdHotel { get; set; }
         public string? Categoria { get; set; }
         public string? Nome { get; set; }
-        public string? Label => $"{IdHotel} - {Categoria} - {Nome}";
+        public int? IdOrigem { get; set; }
+        public string? CodSegmento { get; set; }
+        public string? Label => $"IdTarifa: {Id} Categoria: {Categoria} - Nome: {Nome}";
 
     }
 }

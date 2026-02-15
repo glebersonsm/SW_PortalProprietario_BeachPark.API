@@ -22,6 +22,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.TipoHospedeCrianca2).Length(100).Nullable();
             Map(b => b.Origem).Length(100).Not.Nullable();
             Map(b => b.TarifaHotel).Length(100).Not.Nullable();
+            Map(b => b.EncaixarSemanaSeHouver).Not.Nullable();
+            Map(b => b.Segmento).Length(100).Nullable();
             Map(b => b.CodigoPensao).Length(100).Not.Nullable();
             Map(b => b.PermiteIntercambioMultipropriedade).Not.Nullable();
 

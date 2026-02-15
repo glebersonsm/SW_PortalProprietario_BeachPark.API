@@ -46,6 +46,12 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public List<TarifaHotelModel> TarifasHotel { get; set; } = new();
 
         /// <summary>
+        /// Segmento Reserva (CM): código do Segmento de reserva
+        /// Validação: código deve existir no cadastro de Segmento do PMS.
+        /// </summary>
+        public List<SegmentoReservaModel> SegmentoReserva { get; set; } = new();
+
+        /// <summary>
         /// Código de Pensão Padrão: regime de alimentação (ex: Café da Manhã, MAP).
         /// Validação: código deve existir no cadastro de pensões do PMS.
         /// </summary>

@@ -104,10 +104,11 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 result.Origens = (await _repositoryCM.FindBySql<OrigemReservaModel>(@$"SELECT ori.IdOrigem AS Id,
                 ori.CodReduzido,
-                ori.Descricao AS Nome 
+                ori.Descricao AS Nome ,
+                ori.IdOrigem
                 FROM 
                 origemreserva ori
-                WHERE lower(ori.descricao) NOT LIKE '%falta%'")).AsList();
+                WHERE lower(ori.descricao) NOT LIKE '%falta%' and ori.FlgAtivo = 'S'")).AsList();
             }
             catch
             {
@@ -121,7 +122,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                     th.IdTarifa AS Id,
                     th.IdHotel,
                     th.CodCategoria AS Categoria,
-                    th.Descricao AS Nome
+                    th.Descricao AS Nome,
+                    th.IdOrigem,
+                    th.CodSegmento
                     FROM 
                     TarifaHotel th
                     WHERE 1 = 1")).AsList();
@@ -131,7 +134,25 @@ namespace SW_PortalProprietario.Application.Services.Core
                 result.TarifasHotel = new List<TarifaHotelModel>();
             }
 
-            // 6. Código de Pensão Padrão: regimes de alimentação
+            // 6. Segmento (CM): códigos de segmento base
+            try
+            {
+                result.SegmentoReserva = (await _repositoryCM.FindBySql<SegmentoReservaModel>(@$"SELECT
+                    seg.IdHotel,
+                    seg.CodSegmento AS Codigo,
+                    seg.Descricao AS Nome
+                    FROM 
+                    Segmento seg
+                    WHERE
+                    seg.ANALITICASINTETIC = 'A' AND 
+                    seg.FLGATIVO = 'S'")).AsList();
+            }
+            catch
+            {
+                result.SegmentoReserva = new List<SegmentoReservaModel>();
+            }
+
+            // 7. Código de Pensão Padrão: regimes de alimentação
             result.CodigosPensao = new List<VhfConfigOpcaoItem>
             {
                 new() { Value = "N", Label = "Sem alimentação (N)" },
@@ -187,6 +208,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     TipoHospedeCrianca2 = model.TipoHospedeCrianca2,
                     Origem = model.Origem ?? string.Empty,
                     TarifaHotel = model.TarifaHotel ?? string.Empty,
+                    EncaixarSemanaSeHouver = model.EncaixarSemanaSeHouver,
+                    Segmento = model.Segmento,
                     CodigoPensao = model.CodigoPensao ?? string.Empty,
                     PermiteIntercambioMultipropriedade = model.PermiteIntercambioMultipropriedade,
                     DataHoraCriacao = DateTime.Now,
@@ -232,6 +255,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 config.TipoHospedeCrianca2 = model.TipoHospedeCrianca2;
                 config.Origem = model.Origem ?? string.Empty;
                 config.TarifaHotel = model.TarifaHotel ?? string.Empty;
+                config.EncaixarSemanaSeHouver = model.EncaixarSemanaSeHouver;
+                config.Segmento = model.Segmento;
                 config.CodigoPensao = model.CodigoPensao ?? string.Empty;
                 config.PermiteIntercambioMultipropriedade = model.PermiteIntercambioMultipropriedade;
                 config.DataHoraAlteracao = DateTime.Now;
@@ -285,6 +310,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw new ArgumentException("Origem deve ser informada");
             if (string.IsNullOrWhiteSpace(model.TarifaHotel))
                 throw new ArgumentException("Tarifa hotel deve ser informada");
+            if (string.IsNullOrWhiteSpace(model.Segmento))
+                throw new ArgumentException("Segmento deve ser informado");
             if (string.IsNullOrWhiteSpace(model.CodigoPensao))
                 throw new ArgumentException("Código de pensão deve ser informado");
         }
@@ -303,6 +330,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 TipoHospedeCrianca2 = c.TipoHospedeCrianca2,
                 Origem = c.Origem,
                 TarifaHotel = c.TarifaHotel,
+                EncaixarSemanaSeHouver = c.EncaixarSemanaSeHouver,
+                Segmento = c.Segmento,
                 CodigoPensao = c.CodigoPensao,
                 PermiteIntercambioMultipropriedade = c.PermiteIntercambioMultipropriedade,
                 DataHoraCriacao = c.DataHoraCriacao,

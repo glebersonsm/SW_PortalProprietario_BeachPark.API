@@ -13,6 +13,8 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? TipoHospedeCrianca2 { get; set; }
         public string Origem { get; set; } = string.Empty;
         public string TarifaHotel { get; set; } = string.Empty;
+        public bool EncaixarSemanaSeHouver { get; set; }
+        public string? Segmento { get; set; }
         public string CodigoPensao { get; set; } = string.Empty;
         public bool PermiteIntercambioMultipropriedade { get; set; }
     }
