@@ -36,14 +36,28 @@ namespace SW_PortalProprietario.Application.Services.Core
             try
             {
                 result.Hoteis = (await _repositoryCM.FindBySql<HotelModel>(@$"Select 
-                h.IdHotel as Id,
-                h.IdHotel,
-                p.Nome as HotelNome
-                From 
-                Hotel h 
-                Inner Join Pessoa p on h.IdPessoa = p.IdPessoa
-                Where 
-                1 = 1")).AsList();
+                    h.IdHotel as Id,
+                    h.IdHotel,
+                    p.Nome as HotelNome
+                    From 
+                    Hotel h 
+                    Inner Join Pessoa p on h.IdPessoa = p.IdPessoa
+                    Where 
+                    1 = 1
+                    AND exists( SELECT 
+			                     b.IdHotel
+                                FROM
+                                 (
+			                    SELECT 
+		                         Count(1) AS Qtde,
+			                     uh.IdHotel 
+		                        FROM 
+		                         uh
+		                        WHERE 
+		                         1 = 1
+		                         GROUP BY uh.IDHOTEL 
+		                         HAVING Count(1) > 10
+		                        ) b WHERE b.IDHOTEL = h.IDHOTEL)")).AsList();
             }
             catch
             {
