@@ -9,6 +9,8 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual string TipoUtilizacao { get; set; } = string.Empty;
         public virtual int? HotelId { get; set; }
         public virtual string TipoHospede { get; set; } = string.Empty;
+        public virtual string? TipoHospedeCrianca1 { get; set; }
+        public virtual string? TipoHospedeCrianca2 { get; set; }
         public virtual string Origem { get; set; } = string.Empty;
         public virtual string TarifaHotel { get; set; } = string.Empty;
         public virtual string CodigoPensao { get; set; } = string.Empty;

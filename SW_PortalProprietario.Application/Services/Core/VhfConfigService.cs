@@ -150,6 +150,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     TipoUtilizacao = model.TipoUtilizacao ?? string.Empty,
                     HotelId = model.HotelId,
                     TipoHospede = model.TipoHospede ?? string.Empty,
+                    TipoHospedeCrianca1 = model.TipoHospedeCrianca1,
+                    TipoHospedeCrianca2 = model.TipoHospedeCrianca2,
                     Origem = model.Origem ?? string.Empty,
                     TarifaHotel = model.TarifaHotel ?? string.Empty,
                     CodigoPensao = model.CodigoPensao ?? string.Empty,
@@ -192,6 +194,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 config.TipoUtilizacao = model.TipoUtilizacao ?? string.Empty;
                 config.HotelId = model.HotelId;
                 config.TipoHospede = model.TipoHospede ?? string.Empty;
+                config.TipoHospedeCrianca1 = model.TipoHospedeCrianca1;
+                config.TipoHospedeCrianca2 = model.TipoHospedeCrianca2;
                 config.Origem = model.Origem ?? string.Empty;
                 config.TarifaHotel = model.TarifaHotel ?? string.Empty;
                 config.CodigoPensao = model.CodigoPensao ?? string.Empty;
@@ -257,7 +261,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 TipoUtilizacao = c.TipoUtilizacao,
                 HotelId = c.HotelId,
                 HotelNome = c.HotelId.HasValue && empresaLookup.TryGetValue(c.HotelId.Value, out var nome) ? nome : null,
-                TipoHospede = c.TipoHospede,
+                TipoHospedeAdulto = c.TipoHospede,
+                TipoHospedeCrianca1 = c.TipoHospedeCrianca1,
+                TipoHospedeCrianca2 = c.TipoHospedeCrianca2,
                 Origem = c.Origem,
                 TarifaHotel = c.TarifaHotel,
                 CodigoPensao = c.CodigoPensao,
