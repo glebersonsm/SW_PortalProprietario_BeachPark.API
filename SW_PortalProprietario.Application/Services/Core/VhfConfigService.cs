@@ -230,7 +230,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
         }
 
-        public async Task<VhfConfigModel> UpdateAsync(int id, VhfConfigInputModel model)
+        public async Task<VhfConfigModel> UpdateAsync( VhfConfigInputModel model)
         {
             ValidateInput(model);
             _repository.BeginTransaction();
@@ -238,10 +238,10 @@ namespace SW_PortalProprietario.Application.Services.Core
             try
             {
                 var configs = await _repository.FindByHql<ConfigReservaVhf>(
-                    "From ConfigReservaVhf c Where c.Id = :id", session: null, new SW_Utils.Auxiliar.Parameter("id", id));
+                    "From ConfigReservaVhf c Where c.Id = :id", session: null, new SW_Utils.Auxiliar.Parameter("id", model.Id));
                 var config = configs.FirstOrDefault();
                 if (config == null)
-                    throw new ArgumentException($"Configuração com ID {id} não encontrada");
+                    throw new ArgumentException($"Configuração com ID {model.Id} não encontrada");
 
                 var loggedUser = await _repository.GetLoggedUser();
                 var alteracaoUserId = (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId) && int.TryParse(loggedUser.Value.userId, out var uidAlt))

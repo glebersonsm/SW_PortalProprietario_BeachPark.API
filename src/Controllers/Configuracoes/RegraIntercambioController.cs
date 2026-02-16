@@ -51,7 +51,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpGet]
+        [HttpGet("Todos")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<List<RegraIntercambioModel>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<List<RegraIntercambioModel>>), StatusCodes.Status500InternalServerError)]
@@ -79,12 +79,12 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("Edit")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById([FromQuery]int id)
         {
             try
             {
@@ -115,7 +115,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpPost]
+        [HttpPost("Salvar")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status400BadRequest)]
@@ -153,17 +153,17 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPost("Alterar")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ResultModel<RegraIntercambioModel>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update(int id, [FromBody] RegraIntercambioInputModel model)
+        public async Task<IActionResult> Update([FromBody] RegraIntercambioInputModel model)
         {
             try
             {
-                var result = await _service.UpdateAsync(id, model);
+                var result = await _service.UpdateAsync(model);
                 return Ok(new ResultModel<RegraIntercambioModel>(result)
                 {
                     Errors = new List<string>(),
@@ -182,7 +182,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao atualizar regra de intercâmbio {Id}", id);
+                _logger.LogError(err, "Erro ao atualizar regra de intercâmbio {Id}", model.Id);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RegraIntercambioModel>(new RegraIntercambioModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -192,7 +192,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpPost("delete{id:int}")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<bool>), StatusCodes.Status400BadRequest)]

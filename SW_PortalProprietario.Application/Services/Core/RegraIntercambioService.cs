@@ -141,17 +141,17 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
         }
 
-        public async Task<RegraIntercambioModel> UpdateAsync(int id, RegraIntercambioInputModel model)
+        public async Task<RegraIntercambioModel> UpdateAsync(RegraIntercambioInputModel model)
         {
             ValidateInput(model);
             _repository.BeginTransaction();
             try
             {
                 var configs = await _repository.FindByHql<RegraIntercambio>(
-                    "From RegraIntercambio r Where r.Id = :id", session: null, new Parameter("id", id));
+                    "From RegraIntercambio r Where r.Id = :id", session: null, new Parameter("id", model.Id));
                 var entity = configs.FirstOrDefault();
                 if (entity == null)
-                    throw new ArgumentException($"Regra de intercâmbio com ID {id} não encontrada");
+                    throw new ArgumentException($"Regra de intercâmbio com ID {model.Id} não encontrada");
 
                 var loggedUser = await _repository.GetLoggedUser();
                 var userId = (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId) && int.TryParse(loggedUser.Value.userId, out var uid))

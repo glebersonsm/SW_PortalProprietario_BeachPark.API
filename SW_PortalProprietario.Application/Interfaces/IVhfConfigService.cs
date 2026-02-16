@@ -13,7 +13,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         Task<List<VhfConfigModel>> GetAllAsync();
         Task<VhfConfigModel?> GetByIdAsync(int id);
         Task<VhfConfigModel> CreateAsync(VhfConfigInputModel model);
-        Task<VhfConfigModel> UpdateAsync(int id, VhfConfigInputModel model);
+        Task<VhfConfigModel> UpdateAsync(VhfConfigInputModel model);
         Task<bool> DeleteAsync(int id);
     }
 }

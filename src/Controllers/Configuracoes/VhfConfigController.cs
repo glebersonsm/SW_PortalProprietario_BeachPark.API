@@ -55,7 +55,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpGet]
+        [HttpGet("Todos")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<List<VhfConfigModel>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<List<VhfConfigModel>>), StatusCodes.Status500InternalServerError)]
@@ -83,12 +83,12 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("Edit")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById([FromQuery]int id)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpPost]
+        [HttpPost("Salvar")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status400BadRequest)]
@@ -157,17 +157,17 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPost("Alterar")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ResultModel<VhfConfigModel>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update(int id, [FromBody] VhfConfigInputModel model)
+        public async Task<IActionResult> Update([FromBody] VhfConfigInputModel model)
         {
             try
             {
-                var result = await _vhfConfigService.UpdateAsync(id, model);
+                var result = await _vhfConfigService.UpdateAsync(model);
                 return Ok(new ResultModel<VhfConfigModel>(result)
                 {
                     Errors = new List<string>(),
@@ -186,7 +186,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao atualizar configuração VHF {Id}", id);
+                _logger.LogError(err, "Erro ao atualizar configuração VHF {Id}", model.Id);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<VhfConfigModel>(new VhfConfigModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -196,12 +196,12 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpPost("deletar")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
         [ProducesResponseType(typeof(ResultModel<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<bool>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ResultModel<bool>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete([FromQuery] int id)
         {
             try
             {

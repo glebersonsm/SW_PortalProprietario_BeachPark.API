@@ -8,7 +8,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         Task<List<RegraIntercambioModel>> GetAllAsync();
         Task<RegraIntercambioModel?> GetByIdAsync(int id);
         Task<RegraIntercambioModel> CreateAsync(RegraIntercambioInputModel model);
-        Task<RegraIntercambioModel> UpdateAsync(int id, RegraIntercambioInputModel model);
+        Task<RegraIntercambioModel> UpdateAsync(RegraIntercambioInputModel model);
         Task<bool> DeleteAsync(int id);
     }
 }
