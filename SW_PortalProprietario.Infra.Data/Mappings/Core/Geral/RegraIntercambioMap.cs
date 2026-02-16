@@ -21,6 +21,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.DataFimVigenciaCriacao).Nullable();
             Map(b => b.DataInicioVigenciaUso).Not.Nullable();
             Map(b => b.DataFimVigenciaUso).Nullable();
+            Map(b => b.TiposUhIds).Length(500).Nullable();
 
             Schema("portalohana");
             Table("RegraIntercambio");

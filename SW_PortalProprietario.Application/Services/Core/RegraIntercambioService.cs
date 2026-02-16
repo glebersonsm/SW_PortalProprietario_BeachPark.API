@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.SystemModels;
+using SW_PortalProprietario.Application.Models.TimeSharing;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 using SW_Utils.Auxiliar;
@@ -80,6 +81,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                 result.TiposContrato = new List<RegraIntercambioOpcaoItem>();
             }
 
+            // 4. Tipos de UH (TipoUh - eSolution/CM)
+            try
+            {
+                result.TiposUh = await GetTiposUhAsync();
+            }
+            catch
+            {
+                result.TiposUh = new List<RegraIntercambioOpcaoItem>();
+            }
+
             await _cacheStore.AddAsync(cacheKey, result, DateTimeOffset.Now.AddMinutes(10), 2, _repository.CancellationToken);
             return result;
         }
@@ -89,7 +100,8 @@ namespace SW_PortalProprietario.Application.Services.Core
             var configs = await _repository.FindByHql<RegraIntercambio>(
                 "From RegraIntercambio r Order by r.Id");
             var tipoContratoLookup = await GetTipoContratoLookupAsync();
-            return configs.Select(c => MapToModel(c, tipoContratoLookup)).ToList();
+            var tipoUhLookup = await GetTipoUhLookupAsync();
+            return configs.Select(c => MapToModel(c, tipoContratoLookup, tipoUhLookup)).ToList();
         }
 
         public async Task<RegraIntercambioModel?> GetByIdAsync(int id)
@@ -99,7 +111,8 @@ namespace SW_PortalProprietario.Application.Services.Core
             var config = configs.FirstOrDefault();
             if (config == null) return null;
             var tipoContratoLookup = await GetTipoContratoLookupAsync();
-            return MapToModel(config, tipoContratoLookup);
+            var tipoUhLookup = await GetTipoUhLookupAsync();
+            return MapToModel(config, tipoContratoLookup, tipoUhLookup);
         }
 
         public async Task<RegraIntercambioModel> CreateAsync(RegraIntercambioInputModel model)
@@ -121,6 +134,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     DataFimVigenciaCriacao = model.DataFimVigenciaCriacao,
                     DataInicioVigenciaUso = model.DataInicioVigenciaUso,
                     DataFimVigenciaUso = model.DataFimVigenciaUso,
+                    TiposUhIds = string.IsNullOrWhiteSpace(model.TiposUhIds) ? null : model.TiposUhIds.Trim(),
                     DataHoraCriacao = DateTime.Now,
                     UsuarioCriacao = userId
                 };
@@ -130,7 +144,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     throw exception ?? new Exception("Operação não realizada.");
                 committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
-                return MapToModel(entity, lookup);
+                var tipoUhLookup = await GetTipoUhLookupAsync();
+                return MapToModel(entity, lookup, tipoUhLookup);
             }
             finally
             {
@@ -163,6 +178,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 entity.DataFimVigenciaCriacao = model.DataFimVigenciaCriacao;
                 entity.DataInicioVigenciaUso = model.DataInicioVigenciaUso;
                 entity.DataFimVigenciaUso = model.DataFimVigenciaUso;
+                entity.TiposUhIds = string.IsNullOrWhiteSpace(model.TiposUhIds) ? null : model.TiposUhIds.Trim();
                 entity.DataHoraAlteracao = DateTime.Now;
                 entity.UsuarioAlteracao = userId;
 
@@ -172,7 +188,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     throw exception ?? new Exception("Operação não realizada.");
                 committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
-                return MapToModel(entity, lookup);
+                var tipoUhLookup = await GetTipoUhLookupAsync();
+                return MapToModel(entity, lookup, tipoUhLookup);
             }
             finally
             {
@@ -255,6 +272,50 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
         }
 
+        private async Task<Dictionary<int, string>> GetTipoUhLookupAsync()
+        {
+            try
+            {
+                var tiposUh = await GetTiposUhAsync();
+                if (tiposUh == null || !tiposUh.Any())
+                    return new Dictionary<int, string>();
+                return tiposUh
+                    .Where(x => x.Id.HasValue)
+                    .ToDictionary(x => x.Id!.Value, x => x.Label ?? "");
+            }
+            catch
+            {
+                return new Dictionary<int, string>();
+            }
+        }
+
+        private async Task<List<RegraIntercambioOpcaoItem>> GetTiposUhAsync()
+        {
+            try
+            {
+                var tiposUh = (await _repositoryCM.FindBySql<TipoUhModel>(
+                    @"SELECT t.IdTipoUh, t.IdHotel, t.CodReduzido, t.Descricao 
+                      FROM TipoUh t 
+                      ORDER BY t.Descricao",
+                    session: null)).AsList();
+
+                return tiposUh?
+                    .Where(x => x.IdTipoUh.HasValue)
+                    .Select(x => new RegraIntercambioOpcaoItem
+                    {
+                        Value = x.IdTipoUh!.Value.ToString(),
+                        Label = $"{x.CodReduzido ?? ""} - {x.Descricao ?? ""}".Trim(' ', '-').Trim() 
+                            ?? x.IdTipoUh.Value.ToString(),
+                        Id = x.IdTipoUh
+                    })
+                    .ToList() ?? new List<RegraIntercambioOpcaoItem>();
+            }
+            catch
+            {
+                return new List<RegraIntercambioOpcaoItem>();
+            }
+        }
+
         private static void ValidateInput(RegraIntercambioInputModel model)
         {
             if (string.IsNullOrWhiteSpace(model.TipoSemanaCedida))
@@ -267,8 +328,15 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw new ArgumentException("Data fim da vigência de uso deve ser maior ou igual à data início");
         }
 
-        private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup)
+        private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup, Dictionary<int, string> tipoUhLookup)
         {
+            var tiposUhNomes = string.IsNullOrWhiteSpace(e.TiposUhIds)
+                ? null
+                : string.Join(", ", e.TiposUhIds
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => int.TryParse(s, out var id) && tipoUhLookup.TryGetValue(id, out var n) ? n : s)
+                    .Where(x => !string.IsNullOrEmpty(x)));
+
             return new RegraIntercambioModel
             {
                 Id = e.Id,
@@ -281,6 +349,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 DataFimVigenciaCriacao = e.DataFimVigenciaCriacao,
                 DataInicioVigenciaUso = e.DataInicioVigenciaUso,
                 DataFimVigenciaUso = e.DataFimVigenciaUso,
+                TiposUhIds = e.TiposUhIds,
+                TiposUhNomes = tiposUhNomes,
                 DataHoraCriacao = e.DataHoraCriacao,
                 DataHoraAlteracao = e.DataHoraAlteracao
             };

@@ -10,5 +10,9 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public DateTime? DataFimVigenciaCriacao { get; set; }
         public DateTime DataInicioVigenciaUso { get; set; }
         public DateTime? DataFimVigenciaUso { get; set; }
+        /// <summary>
+        /// IDs dos tipos de UH permitidos (separados por vírgula). Null/vazio = todos.
+        /// </summary>
+        public string? TiposUhIds { get; set; }
     }
 }
