@@ -9,7 +9,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public List<TipoSemanaModel> TiposSemanaESolution { get; set; } = new();
         public List<TipoSemanaModel> TiposSemanaCM { get; set; } = new();
         public List<RegraIntercambioOpcaoItem> TiposContrato { get; set; } = new();
-        public List<RegraIntercambioOpcaoItem> TiposUh { get; set; } = new();
+        public List<TipoUhEsolModel> TiposUhEsol { get; set; } = new();
     }
 
     public class RegraIntercambioOpcaoItem

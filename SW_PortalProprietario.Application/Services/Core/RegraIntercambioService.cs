@@ -46,7 +46,14 @@ namespace SW_PortalProprietario.Application.Services.Core
             try
             {
                 result.TiposSemanaESolution = (await _repositoryPortal.FindBySql<TipoSemanaModel>(
-                    "SELECT ts.Id, ts.Empresa, ts.Nome FROM TipoSemana ts WHERE ts.UsuarioExclusao is null and ts.DataHoraExclusao is null",
+                    @"SELECT 
+                        ts.Id, 
+                        ts.Empresa, 
+                        ts.Nome 
+                      FROM 
+                        TipoSemana ts 
+                      WHERE 
+                        ts.UsuarioExclusao is null and ts.DataHoraExclusao is null",
                     session: null)).AsList();
             }
             catch
@@ -84,11 +91,11 @@ namespace SW_PortalProprietario.Application.Services.Core
             // 4. Tipos de UH (TipoUh - eSolution/CM)
             try
             {
-                result.TiposUh = await GetTiposUhAsync();
+                result.TiposUhEsol = await GetTiposUhAsync();
             }
             catch
             {
-                result.TiposUh = new List<RegraIntercambioOpcaoItem>();
+                result.TiposUhEsol = new List<TipoUhEsolModel>();
             }
 
             await _cacheStore.AddAsync(cacheKey, result, DateTimeOffset.Now.AddMinutes(10), 2, _repository.CancellationToken);
@@ -289,30 +296,28 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
         }
 
-        private async Task<List<RegraIntercambioOpcaoItem>> GetTiposUhAsync()
+        private async Task<List<TipoUhEsolModel>> GetTiposUhAsync()
         {
             try
             {
-                var tiposUh = (await _repositoryCM.FindBySql<TipoUhModel>(
-                    @"SELECT t.IdTipoUh, t.IdHotel, t.CodReduzido, t.Descricao 
-                      FROM TipoUh t 
-                      ORDER BY t.Descricao",
+                var tiposUh = (await _repositoryCM.FindBySql<TipoUhEsolModel>(
+                    @"SELECT 
+                        t.IdTipoUh, 
+                        t.Hotel as IdHotel, 
+                        t.Codigo, 
+                        t.Nome 
+                      FROM 
+                        TipoUh t
+                      Where t.Status = 'A'
+                      ORDER BY t.Nome",
                     session: null)).AsList();
 
-                return tiposUh?
-                    .Where(x => x.IdTipoUh.HasValue)
-                    .Select(x => new RegraIntercambioOpcaoItem
-                    {
-                        Value = x.IdTipoUh!.Value.ToString(),
-                        Label = $"{x.CodReduzido ?? ""} - {x.Descricao ?? ""}".Trim(' ', '-').Trim() 
-                            ?? x.IdTipoUh.Value.ToString(),
-                        Id = x.IdTipoUh
-                    })
-                    .ToList() ?? new List<RegraIntercambioOpcaoItem>();
+                return tiposUh;
+
             }
             catch
             {
-                return new List<RegraIntercambioOpcaoItem>();
+                return new List<TipoUhEsolModel>();
             }
         }
 

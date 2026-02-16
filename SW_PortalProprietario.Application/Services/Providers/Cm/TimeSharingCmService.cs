@@ -4554,7 +4554,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
         {
             List<(DateTime dataIni, DateTime dataFim)> datas = GetDatasPesquisarTarifarios(dataInicial, dataFinal, DayOfWeek.Sunday);
 
-            var tiposAptosDoHotel = (await _repository.FindBySql<TipoUhModel>($"Select t.IdTipoUh, t.IdHotel From TipoUh t Where t.IdHotel in ({string.Join(",",hoteisIds)})")).AsList();
+            var tiposAptosDoHotel = (await _repository.FindBySql<TipoUhCmModel>($"Select t.IdTipoUh, t.IdHotel From TipoUh t Where t.IdHotel in ({string.Join(",",hoteisIds)})")).AsList();
             if (tiposAptosDoHotel != null && tiposAptosDoHotel.Any())
             {
                 tiposAptosIds = tiposAptosDoHotel.Select(b => b.IdTipoUh.GetValueOrDefault()).Distinct().AsList();
@@ -5312,7 +5312,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var bloqueios = (await _repository.FindBySql<BloqueiosAptoModel>(hqlBloqueios1, new Parameter("dataInicial", dataInicial), new Parameter("dataFinal", dataFinal))).AsList();
 
-            var retTiposApto = (await _repository.FindBySql<TipoUhModel>(tiposDeAtpto)).AsList();
+            var retTiposApto = (await _repository.FindBySql<TipoUhCmModel>(tiposDeAtpto)).AsList();
 
             foreach (var item in retTiposApto.GroupBy(c => c.IdHotel))
             {

@@ -1,6 +1,6 @@
 ﻿namespace SW_PortalProprietario.Application.Models.TimeSharing
 {
-    public class TipoUhModel
+    public class TipoUhCmModel
     {
         public int? IdHotel { get; set; }
         public string? CodReduzido { get; set; }
