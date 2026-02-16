@@ -118,7 +118,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 "From RegraIntercambio r Order by r.Id");
             var tipoContratoLookup = await GetTipoContratoLookupAsync();
             var tipoUhLookup = await GetTipoUhLookupAsync();
-            return configs.Select(c => MapToModel(c, tipoContratoLookup, tipoUhLookup)).ToList();
+            var tipoSemanaEsolLookup = await GetTipoSemanaESolutionLookupAsync();
+            var tipoSemanaCMLookup = await GetTipoSemanaCMLookupAsync();
+            return configs.Select(c => MapToModel(c, tipoContratoLookup, tipoUhLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup)).ToList();
         }
 
         public async Task<RegraIntercambioModel?> GetByIdAsync(int id)
@@ -129,7 +131,9 @@ namespace SW_PortalProprietario.Application.Services.Core
             if (config == null) return null;
             var tipoContratoLookup = await GetTipoContratoLookupAsync();
             var tipoUhLookup = await GetTipoUhLookupAsync();
-            return MapToModel(config, tipoContratoLookup, tipoUhLookup);
+            var tipoSemanaEsolLookup = await GetTipoSemanaESolutionLookupAsync();
+            var tipoSemanaCMLookup = await GetTipoSemanaCMLookupAsync();
+            return MapToModel(config, tipoContratoLookup, tipoUhLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
         }
 
         public async Task<RegraIntercambioModel> CreateAsync(RegraIntercambioInputModel model)
@@ -162,7 +166,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
                 var tipoUhLookup = await GetTipoUhLookupAsync();
-                return MapToModel(entity, lookup, tipoUhLookup);
+                var tipoSemanaEsolLookup = await GetTipoSemanaESolutionLookupAsync();
+                var tipoSemanaCMLookup = await GetTipoSemanaCMLookupAsync();
+                return MapToModel(entity, lookup, tipoUhLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
             }
             finally
             {
@@ -206,7 +212,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
                 var tipoUhLookup = await GetTipoUhLookupAsync();
-                return MapToModel(entity, lookup, tipoUhLookup);
+                var tipoSemanaEsolLookup = await GetTipoSemanaESolutionLookupAsync();
+                var tipoSemanaCMLookup = await GetTipoSemanaCMLookupAsync();
+                return MapToModel(entity, lookup, tipoUhLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
             }
             finally
             {
@@ -243,6 +251,44 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 if (!committed)
                     _repository.Rollback();
+            }
+        }
+
+        private async Task<Dictionary<string, string>> GetTipoSemanaESolutionLookupAsync()
+        {
+            try
+            {
+                var opcoes = await GetOpcoesAsync();
+                var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var x in opcoes.TiposSemanaESolution ?? Enumerable.Empty<TipoSemanaModel>())
+                {
+                    if (x.Id.HasValue && !string.IsNullOrEmpty(x.Nome))
+                        lookup[x.Id.Value.ToString()] = x.Nome;
+                }
+                return lookup;
+            }
+            catch
+            {
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        private async Task<Dictionary<string, string>> GetTipoSemanaCMLookupAsync()
+        {
+            try
+            {
+                var opcoes = await GetOpcoesAsync();
+                var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var x in opcoes.TiposSemanaCM ?? Enumerable.Empty<TipoSemanaModel>())
+                {
+                    if (x.Id.HasValue && !string.IsNullOrEmpty(x.Nome))
+                        lookup[x.Id.Value.ToString()] = x.Nome;
+                }
+                return lookup;
+            }
+            catch
+            {
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
         }
 
@@ -423,7 +469,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw new ArgumentException("Data fim da vigência de uso deve ser maior ou igual à data início");
         }
 
-        private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup, Dictionary<string, string> tipoUhLookup)
+        private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup, Dictionary<string, string> tipoUhLookup, Dictionary<string, string> tipoSemanaEsolLookup, Dictionary<string, string> tipoSemanaCMLookup)
         {
             var tiposUhNomes = string.IsNullOrWhiteSpace(e.TiposUhIds)
                 ? null
@@ -447,13 +493,29 @@ namespace SW_PortalProprietario.Application.Services.Core
                     .Select(s => int.TryParse(s.Trim(), out var id) && tipoContratoLookup.TryGetValue(id, out var n) ? n : s.Trim())
                     .Where(x => !string.IsNullOrEmpty(x)));
 
+            var tipoSemanaCedidaNomes = string.IsNullOrWhiteSpace(e.TipoSemanaCedida)
+                ? "Todos"
+                : string.Join(", ", e.TipoSemanaCedida
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => tipoSemanaEsolLookup.TryGetValue(s.Trim(), out var n) && !string.IsNullOrEmpty(n) ? n : s.Trim())
+                    .Where(x => !string.IsNullOrEmpty(x)));
+
+            var tiposSemanaPermitidosUsoNomes = string.IsNullOrWhiteSpace(e.TiposSemanaPermitidosUso)
+                ? "Todos"
+                : string.Join(", ", e.TiposSemanaPermitidosUso
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => tipoSemanaCMLookup.TryGetValue(s.Trim(), out var n) && !string.IsNullOrEmpty(n) ? n : s.Trim())
+                    .Where(x => !string.IsNullOrEmpty(x)));
+
             return new RegraIntercambioModel
             {
                 Id = e.Id,
                 TipoContratoIds = e.TipoContratoIds,
                 TipoContratoNome = string.IsNullOrEmpty(tipoContratoNomes) ? "Todos" : tipoContratoNomes,
                 TipoSemanaCedida = e.TipoSemanaCedida,
+                TipoSemanaCedidaNome = string.IsNullOrEmpty(tipoSemanaCedidaNomes) ? "Todos" : tipoSemanaCedidaNomes,
                 TiposSemanaPermitidosUso = e.TiposSemanaPermitidosUso,
+                TiposSemanaPermitidosUsoNomes = string.IsNullOrEmpty(tiposSemanaPermitidosUsoNomes) ? "Todos" : tiposSemanaPermitidosUsoNomes,
                 DataInicioVigenciaCriacao = e.DataInicioVigenciaCriacao,
                 DataFimVigenciaCriacao = e.DataFimVigenciaCriacao,
                 DataInicioVigenciaUso = e.DataInicioVigenciaUso,
