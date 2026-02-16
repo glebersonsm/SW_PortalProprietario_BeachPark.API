@@ -88,14 +88,24 @@ namespace SW_PortalProprietario.Application.Services.Core
                 result.TiposContrato = new List<RegraIntercambioOpcaoItem>();
             }
 
-            // 4. Tipos de UH (TipoUh - eSolution/CM)
+            // 4. Tipos de UH (TipoUh - eSolution)
             try
             {
-                result.TiposUhEsol = await GetTiposUhAsync();
+                result.TiposUhEsol = await GetTiposUhEsolAsync();
             }
             catch
             {
                 result.TiposUhEsol = new List<TipoUhEsolModel>();
+            }
+
+            // 5. Tipos de UH (TipoUh - CM)
+            try
+            {
+                result.TiposUhCM = await GetTiposUhCMAsync();
+            }
+            catch
+            {
+                result.TiposUhCM = new List<TipoUhCmModel>();
             }
 
             await _cacheStore.AddAsync(cacheKey, result, DateTimeOffset.Now.AddMinutes(10), 2, _repository.CancellationToken);
@@ -279,30 +289,64 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
         }
 
-        private async Task<Dictionary<int, string>> GetTipoUhLookupAsync()
+        private async Task<Dictionary<string, string>> GetTipoUhLookupAsync()
         {
-            try
-            {
-                var tiposUh = await GetTiposUhAsync();
-                if (tiposUh == null || !tiposUh.Any())
-                    return new Dictionary<int, string>();
-                return tiposUh
-                    .Where(x => x.Id.HasValue)
-                    .ToDictionary(x => x.Id!.Value, x => x.Label ?? "");
-            }
-            catch
-            {
-                return new Dictionary<int, string>();
-            }
+            var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var esolLookup = await GetTipoUhEsolLookupAsync();
+            var cmLookup = await GetTipoUhCMLookupAsync();
+            foreach (var kv in esolLookup)
+                lookup[kv.Key] = kv.Value;
+            foreach (var kv in cmLookup)
+                lookup[kv.Key] = kv.Value;
+            return lookup;
         }
 
-        private async Task<List<TipoUhEsolModel>> GetTiposUhAsync()
+        private async Task<Dictionary<string, string>> GetTipoUhEsolLookupAsync()
+        {
+            var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                var tiposEsol = await GetTiposUhEsolAsync();
+                if (tiposEsol != null)
+                {
+                    foreach (var x in tiposEsol.Where(x => x.Id.HasValue))
+                    {
+                        lookup[$"esol:{x.Id}"] = x.Label ?? "";
+                        lookup[x.Id!.Value.ToString()] = x.Label ?? ""; // backward compat
+                    }
+                }
+            }
+            catch { }
+            return lookup;
+        }
+
+        private async Task<Dictionary<string, string>> GetTipoUhCMLookupAsync()
+        {
+            var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                var tiposCM = await GetTiposUhCMAsync();
+                if (tiposCM != null)
+                {
+                    foreach (var x in tiposCM.Where(x => (x.Id ?? x.IdTipoUh).HasValue))
+                    {
+                        var id = x.Id ?? x.IdTipoUh;
+                        var label = $"{x.Codigo ?? x.CodReduzido ?? ""} - {x.Nome ?? x.Descricao ?? ""}".Trim(' ', '-').Trim();
+                        lookup[$"cm:{id}"] = string.IsNullOrEmpty(label) ? id?.ToString() ?? "" : label;
+                    }
+                }
+            }
+            catch { }
+            return lookup;
+        }
+
+        private async Task<List<TipoUhEsolModel>> GetTiposUhEsolAsync()
         {
             try
             {
-                var tiposUh = (await _repositoryCM.FindBySql<TipoUhEsolModel>(
+                var tiposUh = (await _repositoryPortal.FindBySql<TipoUhEsolModel>(
                     @"SELECT 
-                        t.IdTipoUh, 
+                        t.Id as Id, 
                         t.Hotel as IdHotel, 
                         t.Codigo, 
                         t.Nome 
@@ -321,6 +365,34 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
         }
 
+        private async Task<List<TipoUhCmModel>> GetTiposUhCMAsync()
+        {
+            try
+            {
+                var tiposUh = (await _repositoryCM.FindBySql<TipoUhCmModel>(
+                    @"SELECT 
+                        t.IdHotel,
+                        t.IdTipoUh, 
+                        t.IdTipoUh as Id, 
+                        t.CodReduzido, 
+                        t.CodReduzido as Codigo, 
+                        t.Descricao, 
+                        t.Descricao as Nome 
+                      FROM 
+                        TipoUh t
+                      Where t.FlgAtiva = 'S'
+                      ORDER BY t.Descricao",
+                    session: null)).AsList();
+
+                return tiposUh;
+
+            }
+            catch
+            {
+                return new List<TipoUhCmModel>();
+            }
+        }
+
         private static void ValidateInput(RegraIntercambioInputModel model)
         {
             if (string.IsNullOrWhiteSpace(model.TipoSemanaCedida))
@@ -333,13 +405,21 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw new ArgumentException("Data fim da vigência de uso deve ser maior ou igual à data início");
         }
 
-        private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup, Dictionary<int, string> tipoUhLookup)
+        private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup, Dictionary<string, string> tipoUhLookup)
         {
             var tiposUhNomes = string.IsNullOrWhiteSpace(e.TiposUhIds)
                 ? null
                 : string.Join(", ", e.TiposUhIds
                     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                    .Select(s => int.TryParse(s, out var id) && tipoUhLookup.TryGetValue(id, out var n) ? n : s)
+                    .Select(s =>
+                    {
+                        var trimmed = s.Trim();
+                        if (tipoUhLookup.TryGetValue(trimmed, out var n) && !string.IsNullOrEmpty(n))
+                            return n;
+                        if (int.TryParse(trimmed, out var id) && tipoUhLookup.TryGetValue(id.ToString(), out var n2))
+                            return n2;
+                        return trimmed;
+                    })
                     .Where(x => !string.IsNullOrEmpty(x)));
 
             return new RegraIntercambioModel

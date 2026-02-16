@@ -1,3 +1,5 @@
+using SW_PortalProprietario.Application.Models.TimeSharing;
+
 namespace SW_PortalProprietario.Application.Models.SystemModels
 {
     /// <summary>
@@ -10,6 +12,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public List<TipoSemanaModel> TiposSemanaCM { get; set; } = new();
         public List<RegraIntercambioOpcaoItem> TiposContrato { get; set; } = new();
         public List<TipoUhEsolModel> TiposUhEsol { get; set; } = new();
+        public List<TipoUhCmModel> TiposUhCM { get; set; } = new();
     }
 
     public class RegraIntercambioOpcaoItem
