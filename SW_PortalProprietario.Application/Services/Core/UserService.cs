@@ -1,5 +1,6 @@
 using CMDomain.Models.Pessoa;
 using Dapper;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NHibernate.Linq.Functions;
@@ -33,6 +34,9 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly ICommunicationProvider _communicationProvider;
         private readonly ISmsProvider _smsProvider;
         private readonly IEmailSenderHostedService _emailSenderHostedService;
+        private readonly IMemoryCache _memoryCache;
+
+        private const int VERIFICATION_CODE_EXPIRY_MINUTES = 10;
 
         public UserService(IRepositoryNH repository,
             ILogger<UserService> logger,
@@ -42,7 +46,8 @@ namespace SW_PortalProprietario.Application.Services.Core
             IConfiguration configuration,
             ICommunicationProvider communicationProvider,
             ISmsProvider smsProvider,
-            IEmailSenderHostedService emailSenderHostedService)
+            IEmailSenderHostedService emailSenderHostedService,
+            IMemoryCache memoryCache)
         {
             _repository = repository;
             _logger = logger;
@@ -53,6 +58,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             _communicationProvider = communicationProvider;
             _smsProvider = smsProvider;
             _emailSenderHostedService = emailSenderHostedService;
+            _memoryCache = memoryCache;
         }
 
         public async Task<ChangePasswordResultModel> ChangePassword(ChangePasswordInputModel changePasswordInputModel)
@@ -1502,6 +1508,107 @@ namespace SW_PortalProprietario.Application.Services.Core
                   and (Lower(tt.Nome) like '%celular%' or pt.Preferencial = 1)
                 Order by Case When Lower(tt.Nome) like '%celular%' then 0 else 1 end, Case When pt.Preferencial = 1 then 0 else 1 end")).FirstOrDefault();
             return itemRetorno;
+        }
+
+        public async Task SendEmailVerificationCodeAsync(SendEmailVerificationCodeInputModel model)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+            if (string.IsNullOrEmpty(model.Email) || !model.Email.Contains("@"))
+                throw new ArgumentException("E-mail inválido.");
+            if (model.UserId.GetValueOrDefault(0) <= 0)
+                throw new ArgumentException("Usuário inválido.");
+
+            var loggedUser = await _repository.GetLoggedUser() ?? throw new UnauthorizedAccessException("Usuário não autenticado");
+            if (!loggedUser.Value.isAdm && loggedUser.Value.userId != model.UserId.ToString())
+                throw new UnauthorizedAccessException("Usuário não autorizado a enviar código para outro usuário.");
+
+            var parametroSistema = await _repository.GetParametroSistemaViewModel();
+            var emailHabilitado = parametroSistema?.Habilitar2FAPorEmail.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim
+                || (!string.IsNullOrEmpty(parametroSistema?.SmtpHost) && parametroSistema.SmtpHost != "string");
+
+            if (!emailHabilitado)
+                throw new ArgumentException("O envio de e-mail não está configurado no sistema.");
+
+            var companyConfiguration = await _serviceBase.GetParametroSistema();
+            if (!_repository.IsAdm && companyConfiguration?.PermitirUsuarioAlterarSeuEmail.GetValueOrDefault(EnumSimNao.Não) != EnumSimNao.Sim)
+                throw new ArgumentException("O usuário não tem permissão para alterar o próprio e-mail.");
+
+            Random rd = new();
+            var codToSend = rd.Next(100000, 999999).ToString();
+
+            var cacheKey = $"email_verify_{model.UserId}_{model.Email.Trim().ToLowerInvariant()}";
+            _memoryCache.Set(cacheKey, codToSend, TimeSpan.FromMinutes(VERIFICATION_CODE_EXPIRY_MINUTES));
+
+            var usuarioSistemaId = _configuration.GetValue<int>("UsuarioSistemaId", 1);
+            var assunto = "Código de verificação para alteração de e-mail - Portal do Proprietário";
+            var conteudoEmail = $"Seu código de verificação para alteração de e-mail é: <b>{codToSend}</b>. Este código expira em {VERIFICATION_CODE_EXPIRY_MINUTES} minutos.";
+            var emailModel = await _emailService.SaveInternal(new EmailInputInternalModel()
+            {
+                UsuarioCriacao = usuarioSistemaId,
+                Assunto = assunto,
+                Destinatario = model.Email.Trim(),
+                ConteudoEmail = conteudoEmail
+            });
+            if (emailModel?.Id.GetValueOrDefault(0) > 0)
+            {
+                await _emailSenderHostedService.Send(emailModel);
+                await _emailService.MarcarComoEnviado(emailModel.Id.GetValueOrDefault());
+            }
+        }
+
+        public async Task SendPhoneVerificationCodeAsync(SendPhoneVerificationCodeInputModel model)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+            if (string.IsNullOrEmpty(model.Phone))
+                throw new ArgumentException("Telefone inválido.");
+            if (model.UserId.GetValueOrDefault(0) <= 0)
+                throw new ArgumentException("Usuário inválido.");
+
+            var loggedUser = await _repository.GetLoggedUser() ?? throw new UnauthorizedAccessException("Usuário não autenticado");
+            if (!loggedUser.Value.isAdm && loggedUser.Value.userId != model.UserId.ToString())
+                throw new UnauthorizedAccessException("Usuário não autorizado a enviar código para outro usuário.");
+
+            var parametroSistema = await _repository.GetParametroSistemaViewModel();
+            var smsEnabled = !string.IsNullOrEmpty(parametroSistema?.EndpointEnvioSms2FA) && !parametroSistema.EndpointEnvioSms2FA.Equals("string", StringComparison.InvariantCultureIgnoreCase);
+            if (!smsEnabled)
+                throw new ArgumentException("O envio de SMS não está configurado no sistema.");
+
+            var apenasNumeros = new string(model.Phone.Where(char.IsDigit).ToArray());
+            if (apenasNumeros.Length < 10)
+                throw new ArgumentException("Número de celular inválido (informe DDD + número com 10 ou 11 dígitos).");
+
+            Random rd = new();
+            var codToSend = rd.Next(100000, 999999).ToString();
+
+            var cacheKey = $"phone_verify_{model.UserId}_{apenasNumeros}";
+            _memoryCache.Set(cacheKey, codToSend, TimeSpan.FromMinutes(VERIFICATION_CODE_EXPIRY_MINUTES));
+
+            var usuario = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {model.UserId} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
+            var nomeUsuario = usuario?.Pessoa?.Nome ?? "Usuário";
+            var textoMensagem = $"Olá, {nomeUsuario}! Seu código de verificação para alteração de celular é: {codToSend}. Este código expira em {VERIFICATION_CODE_EXPIRY_MINUTES} minutos.";
+            await _smsProvider.SendSmsAsync(apenasNumeros, textoMensagem, parametroSistema?.EndpointEnvioSms2FA, default);
+        }
+
+        private static string NormalizePhoneForCache(string? phone)
+        {
+            if (string.IsNullOrEmpty(phone)) return "";
+            return new string(phone.Where(char.IsDigit).ToArray());
+        }
+
+        private bool ValidateEmailVerificationCode(int userId, string email, string? code)
+        {
+            if (string.IsNullOrEmpty(code)) return false;
+            var cacheKey = $"email_verify_{userId}_{email.Trim().ToLowerInvariant()}";
+            return _memoryCache.TryGetValue(cacheKey, out string? stored) && stored == code.Trim();
+        }
+
+        private bool ValidatePhoneVerificationCode(int userId, string phone, string? code)
+        {
+            if (string.IsNullOrEmpty(code)) return false;
+            var normalized = NormalizePhoneForCache(phone);
+            if (string.IsNullOrEmpty(normalized)) return false;
+            var cacheKey = $"phone_verify_{userId}_{normalized}";
+            return _memoryCache.TryGetValue(cacheKey, out string? stored) && stored == code.Trim();
         }
     }
 }

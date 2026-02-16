@@ -54,6 +54,7 @@ if (!string.IsNullOrEmpty(includeFile))
 // Sobrescreve as configurações com as variáveis de ambiente do .env
 EnvironmentConfigurationHelper.OverrideConfigurationWithEnvironmentVariables(builder.Configuration);
 
+builder.Services.AddMemoryCache();
 builder.Services.AddRedisCache(builder.Configuration);
 
 var configBrokerNameToUse = builder.Configuration.GetValue("UseBrokerType", "BrokerNaoConfigurado") ?? "BrokerNaoConfigurado";

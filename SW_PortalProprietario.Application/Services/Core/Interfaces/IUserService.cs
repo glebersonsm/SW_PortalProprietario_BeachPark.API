@@ -11,5 +11,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         Task<List<UsuarioModel>?> SearchNotPaginated(UsuarioSearchModel searchModel);
         Task<string> ResetPassword(ResetPasswordoUserModel model);
         Task<Login2FAOptionsResultModel> GetResetPasswordChannelsAsync(string login);
+        Task SendEmailVerificationCodeAsync(SendEmailVerificationCodeInputModel model);
+        Task SendPhoneVerificationCodeAsync(SendPhoneVerificationCodeInputModel model);
     }
 }

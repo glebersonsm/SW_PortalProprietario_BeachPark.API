@@ -22,7 +22,17 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? LoginSistemaVenda { get; set; }
         public string? AvatarBase64 { get; set; }
         public List<string>? MenuPermissions { get; set; }
-
-
+        /// <summary>
+        /// Código de verificação enviado por e-mail quando o usuário altera o e-mail (apenas para não-administradores).
+        /// </summary>
+        public string? EmailVerificationCode { get; set; }
+        /// <summary>
+        /// Código de verificação enviado por SMS quando o usuário altera o telefone celular (apenas para não-administradores).
+        /// </summary>
+        public string? PhoneVerificationCode { get; set; }
+        /// <summary>
+        /// Índice do telefone (no array de telefones) que foi alterado e requer verificação por SMS.
+        /// </summary>
+        public int? PhoneVerificationIndex { get; set; }
     }
 }
