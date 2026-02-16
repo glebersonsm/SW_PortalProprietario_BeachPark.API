@@ -10,8 +10,8 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual string TipoSemanaCedida { get; set; } = string.Empty;
         public virtual string TiposSemanaPermitidosUso { get; set; } = string.Empty;
         public virtual DateTime DataInicioVigenciaCriacao { get; set; }
-        public virtual DateTime DataFimVigenciaCriacao { get; set; }
+        public virtual DateTime? DataFimVigenciaCriacao { get; set; }
         public virtual DateTime DataInicioVigenciaUso { get; set; }
-        public virtual DateTime DataFimVigenciaUso { get; set; }
+        public virtual DateTime? DataFimVigenciaUso { get; set; }
     }
 }

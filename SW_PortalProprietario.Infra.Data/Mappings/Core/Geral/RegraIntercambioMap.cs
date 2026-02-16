@@ -18,9 +18,9 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.TipoSemanaCedida).Length(50).Not.Nullable();
             Map(b => b.TiposSemanaPermitidosUso).Length(500).Not.Nullable();
             Map(b => b.DataInicioVigenciaCriacao).Not.Nullable();
-            Map(b => b.DataFimVigenciaCriacao).Not.Nullable();
+            Map(b => b.DataFimVigenciaCriacao).Nullable();
             Map(b => b.DataInicioVigenciaUso).Not.Nullable();
-            Map(b => b.DataFimVigenciaUso).Not.Nullable();
+            Map(b => b.DataFimVigenciaUso).Nullable();
 
             Schema("portalohana");
             Table("RegraIntercambio");
