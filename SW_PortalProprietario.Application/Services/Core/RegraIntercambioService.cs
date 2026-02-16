@@ -417,10 +417,6 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         private static void ValidateInput(RegraIntercambioInputModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.TipoSemanaCedida))
-                throw new ArgumentException("Tipo de semana cedida (eSolution) deve ser informado");
-            if (string.IsNullOrWhiteSpace(model.TiposSemanaPermitidosUso))
-                throw new ArgumentException("Tipos de semana permitidos para uso (CM) devem ser informados");
             if (model.DataFimVigenciaCriacao.HasValue && model.DataFimVigenciaCriacao.Value < model.DataInicioVigenciaCriacao)
                 throw new ArgumentException("Data fim da vigência de criação deve ser maior ou igual à data início");
             if (model.DataFimVigenciaUso.HasValue && model.DataFimVigenciaUso.Value < model.DataInicioVigenciaUso)
