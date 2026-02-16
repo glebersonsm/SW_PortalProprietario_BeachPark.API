@@ -117,10 +117,11 @@ namespace SW_PortalProprietario.Application.Services.Core
             var configs = await _repository.FindByHql<RegraIntercambio>(
                 "From RegraIntercambio r Order by r.Id");
             var tipoContratoLookup = await GetTipoContratoLookupAsync();
-            var tipoUhLookup = await GetTipoUhLookupAsync();
+            var tipoUhEsolLookup = await GetTipoUhEsolLookupAsync();
+            var tipoUhCmLookup = await GetTipoUhCMLookupAsync();
             var tipoSemanaEsolLookup = await GetTipoSemanaESolutionLookupAsync();
             var tipoSemanaCMLookup = await GetTipoSemanaCMLookupAsync();
-            return configs.Select(c => MapToModel(c, tipoContratoLookup, tipoUhLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup)).ToList();
+            return configs.Select(c => MapToModel(c, tipoContratoLookup, tipoUhEsolLookup, tipoUhCmLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup)).ToList();
         }
 
         public async Task<RegraIntercambioModel?> GetByIdAsync(int id)
@@ -130,10 +131,11 @@ namespace SW_PortalProprietario.Application.Services.Core
             var config = configs.FirstOrDefault();
             if (config == null) return null;
             var tipoContratoLookup = await GetTipoContratoLookupAsync();
-            var tipoUhLookup = await GetTipoUhLookupAsync();
+            var tipoUhEsolLookup = await GetTipoUhEsolLookupAsync();
+            var tipoUhCmLookup = await GetTipoUhCMLookupAsync();
             var tipoSemanaEsolLookup = await GetTipoSemanaESolutionLookupAsync();
             var tipoSemanaCMLookup = await GetTipoSemanaCMLookupAsync();
-            return MapToModel(config, tipoContratoLookup, tipoUhLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
+            return MapToModel(config, tipoContratoLookup, tipoUhEsolLookup, tipoUhCmLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
         }
 
         public async Task<RegraIntercambioModel> CreateAsync(RegraIntercambioInputModel model)
@@ -155,7 +157,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     DataFimVigenciaCriacao = model.DataFimVigenciaCriacao,
                     DataInicioVigenciaUso = model.DataInicioVigenciaUso,
                     DataFimVigenciaUso = model.DataFimVigenciaUso,
-                    TiposUhIds = string.IsNullOrWhiteSpace(model.TiposUhIds) ? null : model.TiposUhIds.Trim(),
+                    TiposUhEsolIds = string.IsNullOrWhiteSpace(model.TiposUhEsolIds) ? null : model.TiposUhEsolIds.Trim(),
+                    TiposUhCmIds = string.IsNullOrWhiteSpace(model.TiposUhCmIds) ? null : model.TiposUhCmIds.Trim(),
                     DataHoraCriacao = DateTime.Now,
                     UsuarioCriacao = userId
                 };
@@ -165,10 +168,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     throw exception ?? new Exception("Operação não realizada.");
                 committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
-                var tipoUhLookup = await GetTipoUhLookupAsync();
+                var tipoUhEsolLookup = await GetTipoUhEsolLookupAsync();
+                var tipoUhCmLookup = await GetTipoUhCMLookupAsync();
                 var tipoSemanaEsolLookup = await GetTipoSemanaESolutionLookupAsync();
                 var tipoSemanaCMLookup = await GetTipoSemanaCMLookupAsync();
-                return MapToModel(entity, lookup, tipoUhLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
+                return MapToModel(entity, lookup, tipoUhEsolLookup, tipoUhCmLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
             }
             finally
             {
@@ -201,7 +205,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 entity.DataFimVigenciaCriacao = model.DataFimVigenciaCriacao;
                 entity.DataInicioVigenciaUso = model.DataInicioVigenciaUso;
                 entity.DataFimVigenciaUso = model.DataFimVigenciaUso;
-                entity.TiposUhIds = string.IsNullOrWhiteSpace(model.TiposUhIds) ? null : model.TiposUhIds.Trim();
+                entity.TiposUhEsolIds = string.IsNullOrWhiteSpace(model.TiposUhEsolIds) ? null : model.TiposUhEsolIds.Trim();
+                entity.TiposUhCmIds = string.IsNullOrWhiteSpace(model.TiposUhCmIds) ? null : model.TiposUhCmIds.Trim();
                 entity.DataHoraAlteracao = DateTime.Now;
                 entity.UsuarioAlteracao = userId;
 
@@ -211,10 +216,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     throw exception ?? new Exception("Operação não realizada.");
                 committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
-                var tipoUhLookup = await GetTipoUhLookupAsync();
+                var tipoUhEsolLookup = await GetTipoUhEsolLookupAsync();
+                var tipoUhCmLookup = await GetTipoUhCMLookupAsync();
                 var tipoSemanaEsolLookup = await GetTipoSemanaESolutionLookupAsync();
                 var tipoSemanaCMLookup = await GetTipoSemanaCMLookupAsync();
-                return MapToModel(entity, lookup, tipoUhLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
+                return MapToModel(entity, lookup, tipoUhEsolLookup, tipoUhCmLookup, tipoSemanaEsolLookup, tipoSemanaCMLookup);
             }
             finally
             {
@@ -335,18 +341,6 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
         }
 
-        private async Task<Dictionary<string, string>> GetTipoUhLookupAsync()
-        {
-            var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var esolLookup = await GetTipoUhEsolLookupAsync();
-            var cmLookup = await GetTipoUhCMLookupAsync();
-            foreach (var kv in esolLookup)
-                lookup[kv.Key] = kv.Value;
-            foreach (var kv in cmLookup)
-                lookup[kv.Key] = kv.Value;
-            return lookup;
-        }
-
         private async Task<Dictionary<string, string>> GetTipoUhEsolLookupAsync()
         {
             var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -378,7 +372,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                     {
                         var id = x.Id ?? x.IdTipoUh;
                         var label = $"{x.Codigo ?? x.CodReduzido ?? ""} - {x.Nome ?? x.Descricao ?? ""}".Trim(' ', '-').Trim();
-                        lookup[$"cm:{id}"] = string.IsNullOrEmpty(label) ? id?.ToString() ?? "" : label;
+                        var labelVal = string.IsNullOrEmpty(label) ? id?.ToString() ?? "" : label;
+                        lookup[$"cm:{id}"] = labelVal;
+                        lookup[id!.Value.ToString()] = labelVal;
                     }
                 }
             }
@@ -469,22 +465,21 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw new ArgumentException("Data fim da vigência de uso deve ser maior ou igual à data início");
         }
 
-        private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup, Dictionary<string, string> tipoUhLookup, Dictionary<string, string> tipoSemanaEsolLookup, Dictionary<string, string> tipoSemanaCMLookup)
+        private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup, Dictionary<string, string> tipoUhEsolLookup, Dictionary<string, string> tipoUhCmLookup, Dictionary<string, string> tipoSemanaEsolLookup, Dictionary<string, string> tipoSemanaCMLookup)
         {
-            var tiposUhNomes = string.IsNullOrWhiteSpace(e.TiposUhIds)
-                ? null
-                : string.Join(", ", e.TiposUhIds
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                    .Select(s =>
-                    {
-                        var trimmed = s.Trim();
-                        if (tipoUhLookup.TryGetValue(trimmed, out var n) && !string.IsNullOrEmpty(n))
-                            return n;
-                        if (int.TryParse(trimmed, out var id) && tipoUhLookup.TryGetValue(id.ToString(), out var n2))
-                            return n2;
-                        return trimmed;
-                    })
-                    .Where(x => !string.IsNullOrEmpty(x)));
+            var esolNomes = string.IsNullOrWhiteSpace(e.TiposUhEsolIds)
+                ? Array.Empty<string>()
+                : e.TiposUhEsolIds.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => tipoUhEsolLookup.TryGetValue(s.Trim(), out var n) && !string.IsNullOrEmpty(n) ? n : s.Trim())
+                    .Where(x => !string.IsNullOrEmpty(x));
+            var cmNomes = string.IsNullOrWhiteSpace(e.TiposUhCmIds)
+                ? Array.Empty<string>()
+                : e.TiposUhCmIds.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => tipoUhCmLookup.TryGetValue(s.Trim(), out var n) && !string.IsNullOrEmpty(n) ? n : s.Trim())
+                    .Where(x => !string.IsNullOrEmpty(x));
+            var tiposUhNomes = esolNomes.Concat(cmNomes).Any()
+                ? string.Join(", ", esolNomes.Concat(cmNomes))
+                : null;
 
             var tipoContratoNomes = string.IsNullOrWhiteSpace(e.TipoContratoIds)
                 ? "Todos"
@@ -520,7 +515,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 DataFimVigenciaCriacao = e.DataFimVigenciaCriacao,
                 DataInicioVigenciaUso = e.DataInicioVigenciaUso,
                 DataFimVigenciaUso = e.DataFimVigenciaUso,
-                TiposUhIds = e.TiposUhIds,
+                TiposUhEsolIds = e.TiposUhEsolIds,
+                TiposUhCmIds = e.TiposUhCmIds,
                 TiposUhNomes = tiposUhNomes,
                 DataHoraCriacao = e.DataHoraCriacao,
                 DataHoraAlteracao = e.DataHoraAlteracao

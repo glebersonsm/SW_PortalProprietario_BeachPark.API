@@ -16,6 +16,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         /// <summary>
         /// IDs dos tipos de UH permitidos (separados por vírgula). Null/vazio = todos.
         /// </summary>
-        public string? TiposUhIds { get; set; }
+        public string? TiposUhEsolIds { get; set; }
+        public string? TiposUhCmIds { get; set; }
     }
 }

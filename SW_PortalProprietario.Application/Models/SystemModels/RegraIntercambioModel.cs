@@ -21,7 +21,8 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public DateTime? DataFimVigenciaCriacao { get; set; }
         public DateTime DataInicioVigenciaUso { get; set; }
         public DateTime? DataFimVigenciaUso { get; set; }
-        public string? TiposUhIds { get; set; }
+        public string? TiposUhEsolIds { get; set; }
+        public string? TiposUhCmIds { get; set; }
         public string? TiposUhNomes { get; set; }
     }
 }

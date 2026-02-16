@@ -115,3 +115,8 @@
 - Usar contexto de autenticação quando disponível
 - Validar autenticação antes de acessar rotas protegidas
 
+### Banco de Dados (NHibernate)
+- **NUNCA criar scripts SQL de migração ou alteração de banco**
+- Todos os ajustes de schema são processados automaticamente pelo NHibernate
+- Alterações em entidades e mapeamentos (FluentNHibernate) são suficientes
+

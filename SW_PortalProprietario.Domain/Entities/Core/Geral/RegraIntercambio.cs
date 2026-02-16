@@ -17,8 +17,12 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual DateTime DataInicioVigenciaUso { get; set; }
         public virtual DateTime? DataFimVigenciaUso { get; set; }
         /// <summary>
-        /// IDs dos tipos de UH (TipoUh do eSolution) permitidos, separados por vírgula. Null/vazio = todos.
+        /// IDs dos tipos de UH (TipoUh do eSolution), separados por vírgula. Null/vazio = todos.
         /// </summary>
-        public virtual string? TiposUhIds { get; set; }
+        public virtual string? TiposUhEsolIds { get; set; }
+        /// <summary>
+        /// IDs dos tipos de UH (TipoUh do CM), separados por vírgula. Null/vazio = todos.
+        /// </summary>
+        public virtual string? TiposUhCmIds { get; set; }
     }
 }
