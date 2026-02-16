@@ -7,7 +7,7 @@
         public string? Nome { get; set; }
         public string? Capacidade { get; set; }
         public int? IdHotel { get; set; }
-        public string? Label => $"{Codigo} - {Nome}";
+        public string? Label => $"Hotel: {IdHotel} - {Codigo} - {Nome}";
 
     }
 
