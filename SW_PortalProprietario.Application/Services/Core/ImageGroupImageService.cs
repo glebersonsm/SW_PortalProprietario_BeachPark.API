@@ -186,7 +186,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"EmpresaID: {tagParaRemover.ImagemGrupoImagem?.GrupoImagem?.Empresa?.Id} | " +
                                           $"TipoRemocao: Sincronização");
 
-                    _repository.Remove(tagParaRemover);
+                    await _repository.Remove(tagParaRemover);
                 }
             }
 
@@ -305,7 +305,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     await _repository.Save(tagRelacionada);
                 }
 
-                _repository.Remove(image);
+                await _repository.Remove(image);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)

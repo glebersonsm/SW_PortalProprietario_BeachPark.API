@@ -123,11 +123,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"EmpresaID: {tagRelacionada.GrupoImagemHome?.Empresa?.Id} | " +
                                           $"TipoRemocao: Exclusão do grupo");
 
-                    _repository.Remove(tagRelacionada);
+                    await _repository.Remove(tagRelacionada);
                 }
 
                 await _repository.ExecuteSqlCommand($"Delete From ImagemGrupoImagemHome Where GrupoImagemHome = {id}");
-                _repository.Remove(grupoImagemHome);
+                await _repository.Remove(grupoImagemHome);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -276,7 +276,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"EmpresaID: {tagParaRemover.GrupoImagemHome?.Empresa?.Id} | " +
                                           $"TipoRemocao: Sincronização");
 
-                     _repository.Remove(tagParaRemover);
+                     await _repository.Remove(tagParaRemover);
                 }
             }
 

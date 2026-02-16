@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -54,7 +54,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 _repository.BeginTransaction();
                 await _repository.ExecuteSqlCommand($"Delete From FaqTags Where Faq = {id}");
-                _repository.Remove(faq);
+                await _repository.Remove(faq);
                 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)

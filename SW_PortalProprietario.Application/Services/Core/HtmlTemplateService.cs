@@ -56,7 +56,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 _repository.BeginTransaction();
-                _repository.Remove(htmlTemlate);
+                await _repository.Remove(htmlTemlate);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)

@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
 
                 _repository.BeginTransaction();
-                _repository.Remove(pessoaEndereco);
+                await _repository.Remove(pessoaEndereco);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)

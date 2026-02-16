@@ -161,7 +161,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 _repository.BeginTransaction();
-                _repository.Remove(email);
+                await _repository.Remove(email);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)

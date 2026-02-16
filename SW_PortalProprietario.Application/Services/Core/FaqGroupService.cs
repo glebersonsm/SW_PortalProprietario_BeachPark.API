@@ -58,7 +58,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 await _repository.ExecuteSqlCommand($"Delete From FaqTags Where Faq in (Select f.Id From Faq f Where f.GrupoFaq = {id})");
                 await _repository.ExecuteSqlCommand($"Delete From Faq Where GrupoFaq is not null and GrupoFaq = {id}");
                 await _repository.ExecuteSqlCommand($"Delete From GrupoFaq Where IdGrupoFaqPai is not null and IdGrupoFaqPai = {id}");
-                _repository.Remove(grupoFaq);
+                await _repository.Remove(grupoFaq);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)

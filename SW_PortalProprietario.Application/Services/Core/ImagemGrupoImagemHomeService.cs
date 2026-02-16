@@ -164,10 +164,10 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"GrupoImagemHomeNome: {tagRelacionada.ImagemGrupoImagemHome?.GrupoImagemHome?.Nome} | " +
                                           $"TipoRemocao: Exclusão da imagem");
 
-                    _repository.Remove(tagRelacionada);
+                    await _repository.Remove(tagRelacionada);
                 }
 
-                _repository.Remove(imagemGrupoImagemHome);
+                await _repository.Remove(imagemGrupoImagemHome);
 
                 var resultCommit = await _repository.CommitAsync();
                 if (resultCommit.executed)
@@ -477,7 +477,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"GrupoImagemHomeNome: {tagParaRemover.ImagemGrupoImagemHome?.GrupoImagemHome?.Nome} | " +
                                           $"TipoRemocao: Sincronização");
 
-                    _repository.Remove(tagParaRemover);
+                    await _repository.Remove(tagParaRemover);
                 }
             }
 

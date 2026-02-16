@@ -12,6 +12,7 @@ using SW_PortalProprietario.Infra.Data.Audit;
 using SW_Utils.Auxiliar;
 using SW_Utils.Enum;
 using SW_Utils.Functions;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +20,12 @@ using System.Text;
 
 namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 {
+    /// <summary>
+    /// Entrada pendente de auditoria - processada APÓS o commit da transação principal,
+    /// garantindo segregação entre a session da operação e a que grava os logs.
+    /// </summary>
+    public enum PendingAuditAction { Create, Update, Delete }
+
     public class RepositoryNH : IRepositoryNH
     {
         private readonly IUnitOfWorkNHDefault _unitOfWork;
@@ -27,6 +34,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
         private IConfiguration _configuration;
         private readonly bool _forceRollback = false;
         private readonly AuditHelper? _auditHelper;
+        private readonly ConcurrentQueue<(PendingAuditAction Action, EntityBaseCore? Entity1, EntityBaseCore? Entity2)> _pendingAudits = new();
         public IStatelessSession? Session => _unitOfWork.Session;
 
         public CancellationToken CancellationToken => _unitOfWork.CancellationToken;
@@ -184,11 +192,11 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             var usuario = await _authenticatedBaseService.GetLoggedUserAsync();
             ArgumentNullException.ThrowIfNull(Session, nameof(Session));
 
-            // Log de auditoria para exclusão (antes de deletar)
-            if (_auditHelper != null && entity is EntityBaseCore objEntity)
+            if (entity is EntityBaseCore objEntity)
             {
                 objEntity.UsuarioRemocaoId = !string.IsNullOrEmpty(usuario.userId) ? int.Parse(usuario.userId) : null;
-                _ = Task.Run(async () => await _auditHelper.LogDeleteAsync(objEntity));
+                if (_auditHelper != null)
+                    _pendingAudits.Enqueue((PendingAuditAction.Delete, objEntity, null));
             }
 
             await Session.DeleteAsync(entity, CancellationToken);
@@ -202,7 +210,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             {
                 entity.UsuarioRemocaoId = !string.IsNullOrEmpty(usuario.userId) ? int.Parse(usuario.userId) : null;
                 if (_auditHelper != null)
-                    _ = Task.Run(async () => await _auditHelper.LogDeleteAsync(entity));
+                    _pendingAudits.Enqueue((PendingAuditAction.Delete, entity, null));
 
                 await Session.DeleteAsync(entity, CancellationToken);
             }
@@ -227,11 +235,9 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                     objEntity.ObjectGuid = $"{Guid.NewGuid()}";
                     await Session.InsertAsync(objEntity, CancellationToken);
 
-                    // Log de auditoria para criação (não bloqueia a operação)
+                    // Auditoria: enfileirar para processar APÓS o commit (segregação de sessão)
                     if (_auditHelper != null)
-                    {
-                        _ = Task.Run(async () => await _auditHelper.LogCreateAsync(objEntity));
-                    }
+                        _pendingAudits.Enqueue((PendingAuditAction.Create, objEntity, null));
                 }
                 else
                 {
@@ -315,11 +321,9 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                         objEntity.ObjectGuid = $"{Guid.NewGuid()}";
                     await Session.UpdateAsync(objEntity, CancellationToken);
 
-                    // Log de auditoria para atualização (não bloqueia a operação)
+                    // Auditoria: enfileirar para processar APÓS o commit (segregação de sessão)
                     if (_auditHelper != null && oldEntity != null)
-                    {
-                        _ = Task.Run(async () => await _auditHelper.LogUpdateAsync(oldEntity, objEntity));
-                    }
+                        _pendingAudits.Enqueue((PendingAuditAction.Update, oldEntity, objEntity));
                 }
             }
             return entity;
@@ -478,14 +482,55 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             if (_forceRollback)
             {
                 _unitOfWork.Rollback();
-                return (true, null); ;
+                ClearPendingAudits();
+                return (true, null);
             }
-            else return await _unitOfWork.CommitAsync();
+            var result = await _unitOfWork.CommitAsync();
+            if (result.executed && result.exception == null && _auditHelper != null)
+                await ProcessPendingAuditsAsync();
+            return result;
         }
 
         public void Rollback()
         {
             _unitOfWork?.Rollback();
+            ClearPendingAudits();
+        }
+
+        /// <summary>
+        /// Processa os logs de auditoria enfileirados - executado APÓS o commit da transação principal.
+        /// Garante segregação: a session da operação já foi liberada; os logs vão para a fila (RabbitMQ)
+        /// e serão persistidos pelo consumer em sessão isolada.
+        /// </summary>
+        private async Task ProcessPendingAuditsAsync()
+        {
+            while (_pendingAudits.TryDequeue(out var entry))
+            {
+                try
+                {
+                    switch (entry.Action)
+                    {
+                        case PendingAuditAction.Create when entry.Entity1 != null:
+                            await _auditHelper!.LogCreateAsync(entry.Entity1);
+                            break;
+                        case PendingAuditAction.Update when entry.Entity1 != null && entry.Entity2 != null:
+                            await _auditHelper!.LogUpdateAsync(entry.Entity1, entry.Entity2);
+                            break;
+                        case PendingAuditAction.Delete when entry.Entity1 != null:
+                            await _auditHelper!.LogDeleteAsync(entry.Entity1);
+                            break;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Não relançar - auditoria não deve quebrar a operação principal
+                }
+            }
+        }
+
+        private void ClearPendingAudits()
+        {
+            while (_pendingAudits.TryDequeue(out _)) { }
         }
 
         public async Task<T> ForcedSave<T>(T entity)
@@ -769,10 +814,9 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                     objEntity.ObjectGuid = $"{Guid.NewGuid()}";
                     await sessionToUse.InsertAsync(objEntity, CancellationToken);
 
-                    if (_auditHelper != null)
-                    {
-                        _ = Task.Run(async () => await _auditHelper.LogCreateAsync(objEntity));
-                    }
+                    // Auditoria: enfileirar para processar APÓS o commit (segregação de sessão)
+                    if (_auditHelper != null && session == null)
+                        _pendingAudits.Enqueue((PendingAuditAction.Create, objEntity, null));
                 }
                 else
                 {
@@ -834,10 +878,9 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                         objEntity.ObjectGuid = $"{Guid.NewGuid()}";
                     await sessionToUse.UpdateAsync(objEntity, CancellationToken);
 
-                    if (_auditHelper != null && oldEntity != null)
-                    {
-                        _ = Task.Run(async () => await _auditHelper.LogUpdateAsync(oldEntity, objEntity));
-                    }
+                    // Auditoria: enfileirar para processar APÓS o commit (segregação de sessão)
+                    if (_auditHelper != null && oldEntity != null && session == null)
+                        _pendingAudits.Enqueue((PendingAuditAction.Update, oldEntity, objEntity));
                 }
             }
             return entity;
@@ -926,23 +969,23 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             return entities;
         }
 
-        public void Remove<T>(T entity, IStatelessSession? session = null)
+        public async Task Remove<T>(T entity, IStatelessSession? session = null)
         {
             var sessionToUse = session ?? Session;
             ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
             
-            var usuario = _authenticatedBaseService.GetLoggedUserAsync().Result;
+            var usuario = await _authenticatedBaseService.GetLoggedUserAsync();
             if (entity is EntityBaseCore objEntity)
             {
                 objEntity.UsuarioRemocaoId = !string.IsNullOrEmpty(usuario.userId) ? int.Parse(usuario.userId) : null;
-                if (_auditHelper != null)
-                    _ = Task.Run(async () => await _auditHelper.LogDeleteAsync(objEntity));
-
-                sessionToUse.DeleteAsync(entity, CancellationToken);
+                if (_auditHelper != null && session == null)
+                    _pendingAudits.Enqueue((PendingAuditAction.Delete, objEntity, null));
             }
+
+            await sessionToUse.DeleteAsync(entity, CancellationToken);
         }
 
-        public async void RemoveRange<T>(IList<T> entities, IStatelessSession? session = null)
+        public async Task RemoveRange<T>(IList<T> entities, IStatelessSession? session = null)
         {
             var sessionToUse = session ?? Session;
             ArgumentNullException.ThrowIfNull(sessionToUse, nameof(sessionToUse));
@@ -951,8 +994,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             foreach (var entity in entities.Cast<EntityBaseCore>())
             {
                 entity.UsuarioRemocaoId = !string.IsNullOrEmpty(usuario.userId) ? int.Parse(usuario.userId) : null;
-                if (_auditHelper != null)
-                    _ = Task.Run(async () => await _auditHelper.LogDeleteAsync(entity));
+                if (_auditHelper != null && session == null)
+                    _pendingAudits.Enqueue((PendingAuditAction.Delete, entity, null));
 
                 await sessionToUse.DeleteAsync(entity, CancellationToken);
             }
@@ -1051,9 +1094,14 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                     if (_forceRollback)
                     {
                         _unitOfWork.Rollback();
+                        ClearPendingAudits();
                         return (true, null);
                     }
-                    else return await _unitOfWork.CommitAsync();
+                    var result = await _unitOfWork.CommitAsync();
+                    // Processar auditorias APÓS o commit bem-sucedido (segregação: transação principal já finalizada)
+                    if (result.executed && result.exception == null && _auditHelper != null)
+                        await ProcessPendingAuditsAsync();
+                    return result;
                 }
                 else
                 {
@@ -1071,11 +1119,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                 currentTransaction.Rollback();
                                 return (true, null);
                             }
-                            else
-                            {
-                                await currentTransaction.CommitAsync();
-                                return (true, null);
-                            }
+                            await currentTransaction.CommitAsync();
+                            return (true, null);
                         }
                         return (false, new Exception("A transação não estava ativa"));
                     }
@@ -1098,6 +1143,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 if (session == null)
                 {
                     _unitOfWork?.Rollback();
+                    ClearPendingAudits();
                 }
                 else
                 {

@@ -1,4 +1,4 @@
-﻿using SW_PortalProprietario.Application.Models.AuthModels;
+using SW_PortalProprietario.Application.Models.AuthModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_Utils.Auxiliar;
 using SW_Utils.Enum;
@@ -12,8 +12,8 @@ namespace SW_PortalProprietario.Application.Interfaces
         Task<T> Insert<T>(T entity, NHibernate.IStatelessSession? session = null);
         Task<decimal> GetValueFromSequenceName(string sequenceName, NHibernate.IStatelessSession? session = null);
         Task<IList<T>> SaveRange<T>(IList<T> entities, NHibernate.IStatelessSession? session = null);
-        void Remove<T>(T entity, NHibernate.IStatelessSession? session = null);
-        void RemoveRange<T>(IList<T> entities, NHibernate.IStatelessSession? session = null);
+        Task Remove<T>(T entity, NHibernate.IStatelessSession? session = null);
+        Task RemoveRange<T>(IList<T> entities, NHibernate.IStatelessSession? session = null);
         Task<T> FindById<T>(int id, NHibernate.IStatelessSession? session = null);
         Task<IList<T>> FindBySql<T>(string sql, int pageSize, int pageNumber, params Parameter[] parameters);
         Task<IList<T>> FindByHql<T>(string hql, NHibernate.IStatelessSession? session = null, params Parameter[] parameters);

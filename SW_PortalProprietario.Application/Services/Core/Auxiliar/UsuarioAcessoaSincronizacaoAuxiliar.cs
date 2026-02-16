@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
@@ -45,7 +45,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                         empresasIdsList = new List<int>();
 
                     if (!empresasIdsList.Any(c => c == empresaUsuario.Empresa?.Id))
-                        _repository.Remove(empresaUsuario);
+                        await _repository.Remove(empresaUsuario);
 
                 }
             }
@@ -79,7 +79,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                         grupoUsuariosIdsList = new List<int>();
 
                     if (!grupoUsuariosIdsList.Any(c => c == grupoUsuario.GrupoUsuario?.Id))
-                        _repository.Remove(grupoUsuario);
+                        await _repository.Remove(grupoUsuario);
 
                 }
             }

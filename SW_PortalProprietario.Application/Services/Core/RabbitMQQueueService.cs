@@ -647,7 +647,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (queue == null)
                     throw new ArgumentException($"Fila com id {id} não encontrada");
 
-                _repository.Remove(queue);
+                await _repository.Remove(queue);
 
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)

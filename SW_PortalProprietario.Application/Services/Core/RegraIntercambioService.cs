@@ -1,4 +1,5 @@
 using Dapper;
+using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.SystemModels;
@@ -15,17 +16,20 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly IRepositoryNHEsolPortal _repositoryPortal;
         private readonly IRepositoryNHCm _repositoryCM;
         private readonly ICacheStore _cacheStore;
+        private ILogger<RegraIntercambioService> _logger;
 
         public RegraIntercambioService(
             IRepositoryNH repository,
             IRepositoryNHCm repositoryCM,
             IRepositoryNHEsolPortal repositoryPortal,
-            ICacheStore cacheStore)
+            ICacheStore cacheStore,
+            ILogger<RegraIntercambioService> logger)
         {
             _repository = repository;
             _repositoryPortal = repositoryPortal;
             _cacheStore = cacheStore;
             _repositoryCM = repositoryCM;
+            _logger = logger;
         }
 
         public async Task<RegraIntercambioOpcoesModel> GetOpcoesAsync()
@@ -102,6 +106,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             ValidateInput(model);
             _repository.BeginTransaction();
+            var committed = false;
             try
             {
                 var loggedUser = await _repository.GetLoggedUser();
@@ -120,14 +125,17 @@ namespace SW_PortalProprietario.Application.Services.Core
                     UsuarioCriacao = userId
                 };
                 await _repository.Save(entity);
-                await _repository.CommitAsync();
+                var (executed, exception) = await _repository.CommitAsync();
+                if (!executed)
+                    throw exception ?? new Exception("Operação não realizada.");
+                committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
                 return MapToModel(entity, lookup);
             }
-            catch
+            finally
             {
-                _repository.Rollback();
-                throw;
+                if (!committed)
+                    _repository.Rollback();
             }
         }
 
@@ -135,10 +143,11 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             ValidateInput(model);
             _repository.BeginTransaction();
+            var committed = false;
             try
             {
-                var configs = await _repository.FindByHql<RegraIntercambio>(
-                    "From RegraIntercambio r Where r.Id = :id", session: null, new Parameter("id", model.Id));
+                var configs = (await _repository.FindByHql<RegraIntercambio>(
+                    "From RegraIntercambio r Where r.Id = :id", session: null, new Parameter("id", model.Id))).ToList();
                 var entity = configs.FirstOrDefault();
                 if (entity == null)
                     throw new ArgumentException($"Regra de intercâmbio com ID {model.Id} não encontrada");
@@ -158,37 +167,48 @@ namespace SW_PortalProprietario.Application.Services.Core
                 entity.UsuarioAlteracao = userId;
 
                 await _repository.Save(entity);
-                await _repository.CommitAsync();
+                var (executed, exception) = await _repository.CommitAsync();
+                if (!executed)
+                    throw exception ?? new Exception("Operação não realizada.");
+                committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
                 return MapToModel(entity, lookup);
             }
-            catch
+            finally
             {
-                _repository.Rollback();
-                throw;
+                if (!committed)
+                    _repository.Rollback();
             }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             _repository.BeginTransaction();
+            var committed = false;
             try
             {
-                var configs = await _repository.FindByHql<RegraIntercambio>(
-                    "From RegraIntercambio r Where r.Id = :id", session: null, new Parameter("id", id));
+                var configs = (await _repository.FindByHql<RegraIntercambio>(
+                    "From RegraIntercambio r Where r.Id = :id", session: null, new Parameter("id", id))).ToList();
                 var entity = configs.FirstOrDefault();
                 if (entity == null)
                     throw new ArgumentException($"Regra de intercâmbio com ID {id} não encontrada");
-                _repository.Remove(entity);
-                var resultCommit = await _repository.CommitAsync();
-                if (!resultCommit.executed)
-                    throw resultCommit.exception ?? new Exception("Operação não realizada.");
+
+                await _repository.Remove(entity);
+                var (executed, exception) = await _repository.CommitAsync();
+                if (!executed)
+                    throw exception ?? new Exception("Operação não realizada.");
+                committed = true;
                 return true;
             }
-            catch(Exception err)
+            catch (Exception ex)
             {
-                _repository.Rollback();
+                _logger.LogError(ex, "Erro ao deletar regra de intercâmbio com ID {Id}", id);
                 throw;
+            }
+            finally
+            {
+                if (!committed)
+                    _repository.Rollback();
             }
         }
 

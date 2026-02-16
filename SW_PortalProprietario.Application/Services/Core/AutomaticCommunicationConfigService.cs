@@ -280,7 +280,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (config == null)
                     throw new ArgumentException($"Configuração com ID {id} não encontrada");
 
-                _repository.Remove(config);
+                await _repository.Remove(config);
                 await _repository.CommitAsync();
 
                 return true;

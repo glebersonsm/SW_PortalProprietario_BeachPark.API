@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 var city = await _repository.FindById<Cidade>(id) ?? throw new ArgumentException($"Não foi encontrado a cidade com Id: {id}!");
                 _repository.BeginTransaction();
-                _repository.Remove(city);
+                await _repository.Remove(city);
 
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
