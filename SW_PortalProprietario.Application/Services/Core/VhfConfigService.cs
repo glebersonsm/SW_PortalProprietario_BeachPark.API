@@ -32,18 +32,18 @@ namespace SW_PortalProprietario.Application.Services.Core
             
             var result = new VhfConfigOpcoesModel();
 
-            // 1. Tipo de utilização (fixo). "Não importa" = configuração vale para todos os tipos.
+            // 1. Tipo de utilização (fixo). "Todos os negócios" = configuração vale para todos os tipos.
             result.TipoNegocio = new List<VhfConfigOpcaoItem>
             {
-                new() { Value = "Não importa", Label = "Não importa" },
+                new() { Value = "Todos os negócios", Label = "Todos os negócios" },
                 new() { Value = "Timesharing", Label = "Timesharing" },
                 new() { Value = "Multipropriedade", Label = "Multipropriedade" }
             };
 
-            // 1. Tipo de utilização (fixo). "Não importa" = configuração vale para todos os tipos.
+            // 1. Tipo de utilização (fixo). "Todas" = configuração vale para todos os tipos.
             result.TipoUtilizacao = new List<VhfConfigOpcaoItem>
             {
-                new() { Value = "Não importa", Label = "Não importa" },
+                new() { Value = "Todos", Label = "Todos" },
                 new() { Value = "Uso próprio", Label = "Uso próprio" },
                 new() { Value = "Uso convidado", Label = "Uso convidado" }
             };

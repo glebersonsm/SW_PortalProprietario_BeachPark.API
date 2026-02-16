@@ -10,7 +10,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
     {
 
         /// <summary>
-        /// Tipo de negócio: Não importa | Timesharing | Multipropriedade.
+        /// Tipo de negócio: Todos os negócios | Timesharing | Multipropriedade.
         /// Validação: valor deve estar na lista de opções.
         /// </summary>
         public List<VhfConfigOpcaoItem> TipoNegocio { get; set; } = new();
