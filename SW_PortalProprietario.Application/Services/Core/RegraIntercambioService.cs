@@ -5,6 +5,7 @@ using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 using SW_Utils.Auxiliar;
+using ZXing;
 
 namespace SW_PortalProprietario.Application.Services.Core
 {
@@ -68,18 +69,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             // 3. Tipos de contrato eSolution (Portal)
             try
             {
-                var tiposContrato = (await _repositoryPortal.FindBySql<dynamic>(
-                    "SELECT tc.Id, tc.Nome FROM TipoContrato tc WHERE (tc.UsuarioExclusao IS NULL OR tc.UsuarioExclusao = 0) AND (tc.DataHoraExclusao IS NULL)",
-                    session: null)).AsList();
-                result.TiposContrato = tiposContrato?
-                    .Select(x => new RegraIntercambioOpcaoItem
-                    {
-                        Value = x.Id?.ToString() ?? "",
-                        Label = x.Nome?.ToString() ?? x.Id?.ToString() ?? "",
-                        Id = x.Id != null ? (int?)Convert.ToInt32(x.Id) : null
-                    })
-                    .Where(x => !string.IsNullOrEmpty(x.Value))
-                    .ToList() ?? new List<RegraIntercambioOpcaoItem>();
+                result.TiposContrato = await GetTiposContratoAsync();
             }
             catch
             {
@@ -190,10 +180,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (entity == null)
                     throw new ArgumentException($"Regra de intercâmbio com ID {id} não encontrada");
                 _repository.Remove(entity);
-                await _repository.CommitAsync();
+                var resultCommit = await _repository.CommitAsync();
+                if (!resultCommit.executed)
+                    throw resultCommit.exception ?? new Exception("Operação não realizada.");
                 return true;
             }
-            catch
+            catch(Exception err)
             {
                 _repository.Rollback();
                 throw;
@@ -202,20 +194,45 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         private async Task<Dictionary<int, string>> GetTipoContratoLookupAsync()
         {
-            return new Dictionary<int, string>();
-            //try
-            //{
-            //    var list = (await _repositoryPortal.FindBySql<dynamic>(
-            //        "SELECT Id, Nome FROM TipoContrato WHERE (UsuarioExclusao IS NULL OR UsuarioExclusao = 0) AND (DataHoraExclusao IS NULL)",
-            //        session: null)).AsList();
-            //    return list?
-            //        .Where(x => x.Id != null)
-            //        .ToDictionary(x => Convert.ToInt32(x.Id), x => x.Nome?.ToString() ?? "") ?? new Dictionary<int, string>();
-            //}
-            //catch
-            //{
-            //    return new Dictionary<int, string>();
-            //}
+            try
+            {
+                var tiposContrato = await GetTiposContratoAsync();
+                
+                if (tiposContrato == null || !tiposContrato.Any())
+                    return new Dictionary<int, string>();
+
+                return tiposContrato
+                    .Where(x => x.Id.HasValue)
+                    .ToDictionary(x => x.Id!.Value, x => x.Label ?? "");
+            }
+            catch
+            {
+                return new Dictionary<int, string>();
+            }
+        }
+
+        private async Task<List<RegraIntercambioOpcaoItem>> GetTiposContratoAsync()
+        {
+            try
+            {
+                var tiposContrato = (await _repositoryPortal.FindBySql<dynamic>(
+                    "SELECT tc.Id, tc.Nome FROM TipoContrato tc WHERE (tc.UsuarioExclusao IS NULL OR tc.UsuarioExclusao = 0) AND (tc.DataHoraExclusao IS NULL)",
+                    session: null)).AsList();
+
+                return tiposContrato?
+                    .Select(x => new RegraIntercambioOpcaoItem
+                    {
+                        Value = x.Id?.ToString() ?? "",
+                        Label = x.Nome?.ToString() ?? x.Id?.ToString() ?? "",
+                        Id = x.Id != null ? (int?)Convert.ToInt32(x.Id) : null
+                    })
+                    .Where(x => !string.IsNullOrEmpty(x.Value))
+                    .ToList() ?? new List<RegraIntercambioOpcaoItem>();
+            }
+            catch
+            {
+                return new List<RegraIntercambioOpcaoItem>();
+            }
         }
 
         private static void ValidateInput(RegraIntercambioInputModel model)
