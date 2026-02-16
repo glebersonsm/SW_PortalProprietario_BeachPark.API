@@ -6,8 +6,8 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
     /// </summary>
     public class RegraIntercambioOpcoesModel
     {
-        public List<RegraIntercambioOpcaoItem> TiposSemanaESolution { get; set; } = new();
-        public List<RegraIntercambioOpcaoItem> TiposSemanaCM { get; set; } = new();
+        public List<TipoSemanaModel> TiposSemanaESolution { get; set; } = new();
+        public List<TipoSemanaModel> TiposSemanaCM { get; set; } = new();
         public List<RegraIntercambioOpcaoItem> TiposContrato { get; set; } = new();
     }
 

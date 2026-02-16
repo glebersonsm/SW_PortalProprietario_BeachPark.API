@@ -1,9 +1,10 @@
-using SW_Utils.Auxiliar;
+using Dapper;
 using SW_PortalProprietario.Application.Interfaces;
+using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
-using Dapper;
+using SW_Utils.Auxiliar;
 
 namespace SW_PortalProprietario.Application.Services.Core
 {
@@ -11,16 +12,19 @@ namespace SW_PortalProprietario.Application.Services.Core
     {
         private readonly IRepositoryNH _repository;
         private readonly IRepositoryNHEsolPortal _repositoryPortal;
+        private readonly IRepositoryNHCm _repositoryCM;
         private readonly ICacheStore _cacheStore;
 
         public RegraIntercambioService(
             IRepositoryNH repository,
+            IRepositoryNHCm repositoryCM,
             IRepositoryNHEsolPortal repositoryPortal,
             ICacheStore cacheStore)
         {
             _repository = repository;
             _repositoryPortal = repositoryPortal;
             _cacheStore = cacheStore;
+            _repositoryCM = repositoryCM;
         }
 
         public async Task<RegraIntercambioOpcoesModel> GetOpcoesAsync()
@@ -33,22 +37,33 @@ namespace SW_PortalProprietario.Application.Services.Core
             var result = new RegraIntercambioOpcoesModel();
 
             // 1. Tipos de semana eSolution: Média, Alta, Super Alta (e Baixa para compatibilidade)
-            result.TiposSemanaESolution = new List<RegraIntercambioOpcaoItem>
+            try
             {
-                new() { Value = "Média", Label = "Média" },
-                new() { Value = "Alta", Label = "Alta" },
-                new() { Value = "Super Alta", Label = "Super Alta" },
-                new() { Value = "Baixa", Label = "Baixa" }
-            };
+                result.TiposSemanaESolution = (await _repositoryPortal.FindBySql<TipoSemanaModel>(
+                    "SELECT ts.Id, ts.Empresa, ts.Nome FROM TipoSemana ts WHERE ts.UsuarioExclusao is null and ts.DataHoraExclusao is null",
+                    session: null)).AsList();
+            }
+            catch
+            {
+                result.TiposContrato = new List<RegraIntercambioOpcaoItem>();
+            }
 
             // 2. Tipos de semana CM: Super alta, Alta, Média, Baixa (FLGTIPO: S, A, M, B)
-            result.TiposSemanaCM = new List<RegraIntercambioOpcaoItem>
+            try
             {
-                new() { Value = "Super alta", Label = "Super alta" },
-                new() { Value = "Alta", Label = "Alta" },
-                new() { Value = "Média", Label = "Média" },
-                new() { Value = "Baixa", Label = "Baixa" }
-            };
+                result.TiposSemanaCM = (await _repositoryCM.FindBySql<TipoSemanaModel>(
+                    @"SELECT 
+                        ts.IdTemporadaTs AS Id,
+                        ts.Descricao AS Nome,
+                        Decode(ts.FlgTipo,'B','BAIXA','S','SUPER ALTA','M','MÉDIA','A','ALTA') AS Complemento
+                        FROM TEMPORADATS ts
+                        WHERE 1 = 1",
+                    session: null)).AsList();
+            }
+            catch
+            {
+                result.TiposContrato = new List<RegraIntercambioOpcaoItem>();
+            }
 
             // 3. Tipos de contrato eSolution (Portal)
             try
