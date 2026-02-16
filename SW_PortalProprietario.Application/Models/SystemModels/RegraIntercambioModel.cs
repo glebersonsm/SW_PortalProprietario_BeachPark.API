@@ -4,7 +4,10 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
 {
     public class RegraIntercambioModel : ModelBase
     {
-        public int? TipoContratoId { get; set; }
+        /// <summary>
+        /// IDs dos tipos de contrato (separados por vírgula). Null/vazio = todos.
+        /// </summary>
+        public string? TipoContratoIds { get; set; }
         public string? TipoContratoNome { get; set; }
         public string TipoSemanaCedida { get; set; } = string.Empty;
         public string TiposSemanaPermitidosUso { get; set; } = string.Empty;

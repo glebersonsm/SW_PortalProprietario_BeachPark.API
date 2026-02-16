@@ -144,7 +144,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     ? (int?)uid : null;
                 var entity = new RegraIntercambio
                 {
-                    TipoContratoId = model.TipoContratoId,
+                    TipoContratoIds = string.IsNullOrWhiteSpace(model.TipoContratoIds) ? null : model.TipoContratoIds.Trim(),
                     TipoSemanaCedida = model.TipoSemanaCedida ?? string.Empty,
                     TiposSemanaPermitidosUso = model.TiposSemanaPermitidosUso ?? string.Empty,
                     DataInicioVigenciaCriacao = model.DataInicioVigenciaCriacao,
@@ -188,7 +188,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var userId = (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId) && int.TryParse(loggedUser.Value.userId, out var uid))
                     ? (int?)uid : null;
 
-                entity.TipoContratoId = model.TipoContratoId;
+                entity.TipoContratoIds = string.IsNullOrWhiteSpace(model.TipoContratoIds) ? null : model.TipoContratoIds.Trim();
                 entity.TipoSemanaCedida = model.TipoSemanaCedida ?? string.Empty;
                 entity.TiposSemanaPermitidosUso = model.TiposSemanaPermitidosUso ?? string.Empty;
                 entity.DataInicioVigenciaCriacao = model.DataInicioVigenciaCriacao;
@@ -440,12 +440,18 @@ namespace SW_PortalProprietario.Application.Services.Core
                     })
                     .Where(x => !string.IsNullOrEmpty(x)));
 
+            var tipoContratoNomes = string.IsNullOrWhiteSpace(e.TipoContratoIds)
+                ? "Todos"
+                : string.Join(", ", e.TipoContratoIds
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => int.TryParse(s.Trim(), out var id) && tipoContratoLookup.TryGetValue(id, out var n) ? n : s.Trim())
+                    .Where(x => !string.IsNullOrEmpty(x)));
+
             return new RegraIntercambioModel
             {
                 Id = e.Id,
-                TipoContratoId = e.TipoContratoId,
-                TipoContratoNome = e.TipoContratoId.HasValue && tipoContratoLookup.TryGetValue(e.TipoContratoId.Value, out var nome)
-                    ? nome : (e.TipoContratoId == null ? "Todos" : null),
+                TipoContratoIds = e.TipoContratoIds,
+                TipoContratoNome = string.IsNullOrEmpty(tipoContratoNomes) ? "Todos" : tipoContratoNomes,
                 TipoSemanaCedida = e.TipoSemanaCedida,
                 TiposSemanaPermitidosUso = e.TiposSemanaPermitidosUso,
                 DataInicioVigenciaCriacao = e.DataInicioVigenciaCriacao,

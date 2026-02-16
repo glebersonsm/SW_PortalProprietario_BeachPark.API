@@ -6,7 +6,10 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
     /// </summary>
     public class RegraIntercambio : EntityBaseCore
     {
-        public virtual int? TipoContratoId { get; set; }
+        /// <summary>
+        /// IDs dos tipos de contrato (eSolution), separados por vírgula. Null/vazio = todos.
+        /// </summary>
+        public virtual string? TipoContratoIds { get; set; }
         public virtual string TipoSemanaCedida { get; set; } = string.Empty;
         public virtual string TiposSemanaPermitidosUso { get; set; } = string.Empty;
         public virtual DateTime DataInicioVigenciaCriacao { get; set; }
