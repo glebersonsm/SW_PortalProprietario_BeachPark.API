@@ -874,6 +874,18 @@ namespace SW_PortalProprietario.Application.Services.Core
                             (!string.IsNullOrEmpty(pessoa.EmailPreferencial) && userInputModel?.Pessoa?.EmailPreferencial is null)))
                             throw new ArgumentException("O usuário não pode alterar o seu email preferencial");
                     }
+                    else if (companyConfiguration?.PermitirUsuarioAlterarSeuEmail.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                    {
+                        var emailPreferencialMudou = !string.IsNullOrEmpty(userInputModel?.Pessoa?.EmailPreferencial) &&
+                            !string.Equals(pessoa.EmailPreferencial?.Trim(), userInputModel.Pessoa.EmailPreferencial?.Trim(), StringComparison.OrdinalIgnoreCase);
+                        if (emailPreferencialMudou)
+                        {
+                            if (string.IsNullOrEmpty(userInputModel.EmailVerificationCode))
+                                throw new ArgumentException("Para alterar o e-mail, é necessário solicitar e informar o código de verificação enviado ao novo e-mail.");
+                            if (!ValidateEmailVerificationCode(user.Id, userInputModel.Pessoa.EmailPreferencial, userInputModel.EmailVerificationCode))
+                                throw new ArgumentException("Código de verificação de e-mail inválido ou expirado. Solicite um novo código.");
+                        }
+                    }
                 }
 
 
@@ -887,6 +899,43 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             var pessoaSincronizacaoAuxiliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
 
+            if (!isAdm && userInputModel?.Pessoa?.Telefones != null && userInputModel.Pessoa.Telefones.Any()
+                && userInputModel.PhoneVerificationIndex.HasValue && userInputModel.PhoneVerificationIndex >= 0
+                && userInputModel.PhoneVerificationIndex < userInputModel.Pessoa.Telefones.Count)
+            {
+                var parametroSistema = await _repository.GetParametroSistemaViewModel();
+                var smsEnabled = !string.IsNullOrEmpty(parametroSistema?.EndpointEnvioSms2FA) && !parametroSistema.EndpointEnvioSms2FA.Equals("string", StringComparison.InvariantCultureIgnoreCase);
+                if (smsEnabled)
+                {
+                    var idx = userInputModel.PhoneVerificationIndex.Value;
+                    var telefoneAlterado = userInputModel.Pessoa.Telefones[idx];
+                    var tipoTelefoneIds = userInputModel.Pessoa.Telefones.Where(t => t.TipoTelefoneId.HasValue).Select(t => t.TipoTelefoneId!.Value).Distinct().ToList();
+                    Dictionary<int, string> tiposTelefone;
+                    if (tipoTelefoneIds.Any())
+                    {
+                        var tipos = await _repository.FindBySql<(int Id, string Nome)>($"Select Id, Nome From TipoTelefone Where Id in ({string.Join(",", tipoTelefoneIds)})");
+                        tiposTelefone = tipos.ToDictionary(x => x.Id, x => x.Nome ?? "");
+                    }
+                    else
+                        tiposTelefone = new Dictionary<int, string>();
+                    var isCelular = telefoneAlterado.TipoTelefoneId.HasValue && tiposTelefone.TryGetValue(telefoneAlterado.TipoTelefoneId.Value, out var nomeTipo) && nomeTipo.Contains("celular", StringComparison.InvariantCultureIgnoreCase);
+                    if (isCelular && !string.IsNullOrEmpty(telefoneAlterado.Numero))
+                    {
+                        var telefonesPessoa = (await _repository.FindBySql<(int TipoTelefoneId, string Numero)>($@"
+                        Select pt.TipoTelefone as TipoTelefoneId, Coalesce(pt.Numero,'') as Numero From PessoaTelefone pt Where pt.Pessoa = {pessoa.Id}")).ToList();
+                        var telOriginal = telefonesPessoa.FirstOrDefault(t => t.TipoTelefoneId == telefoneAlterado.TipoTelefoneId.GetValueOrDefault());
+                        var numeroOriginal = !string.IsNullOrEmpty(telOriginal.Numero) ? new string(telOriginal.Numero.Where(char.IsDigit).ToArray()) : "";
+                        var numeroNovo = new string(telefoneAlterado.Numero.Where(char.IsDigit).ToArray());
+                        if (numeroOriginal != numeroNovo)
+                        {
+                            if (string.IsNullOrEmpty(userInputModel.PhoneVerificationCode))
+                                throw new ArgumentException("Para alterar o telefone celular, é necessário solicitar e informar o código de verificação enviado por SMS.");
+                            if (!ValidatePhoneVerificationCode(user.Id, telefoneAlterado.Numero, userInputModel.PhoneVerificationCode))
+                                throw new ArgumentException("Código de verificação de celular inválido ou expirado. Solicite um novo código.");
+                        }
+                    }
+                }
+            }
 
             if (userInputModel?.Pessoa != null && userInputModel.Pessoa.Enderecos != null && userInputModel.Pessoa.Enderecos.Any())
                 await pessoaSincronizacaoAuxiliar.SincronizarEnderecos(pessoa, userInputModel.Pessoa.Enderecos.ToArray());
@@ -1524,7 +1573,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             var parametroSistema = await _repository.GetParametroSistemaViewModel();
             var emailHabilitado = parametroSistema?.Habilitar2FAPorEmail.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim
-                || (!string.IsNullOrEmpty(parametroSistema?.SmtpHost) && parametroSistema.SmtpHost != "string");
+                || (!string.IsNullOrEmpty(parametroSistema?.SmtpHost) && !parametroSistema.SmtpHost.Equals("string", StringComparison.InvariantCultureIgnoreCase));
 
             if (!emailHabilitado)
                 throw new ArgumentException("O envio de e-mail não está configurado no sistema.");
