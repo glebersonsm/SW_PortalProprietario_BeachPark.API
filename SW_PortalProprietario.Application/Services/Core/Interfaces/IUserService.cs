@@ -13,5 +13,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         Task<Login2FAOptionsResultModel> GetResetPasswordChannelsAsync(string login);
         Task SendEmailVerificationCodeAsync(SendEmailVerificationCodeInputModel model);
         Task SendPhoneVerificationCodeAsync(SendPhoneVerificationCodeInputModel model);
+        Task<bool> ValidateEmailVerificationCodeAsync(ValidateEmailVerificationCodeInputModel model);
+        Task<bool> ValidatePhoneVerificationCodeAsync(ValidatePhoneVerificationCodeInputModel model);
     }
 }

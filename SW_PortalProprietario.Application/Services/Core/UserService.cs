@@ -1,6 +1,5 @@
 using CMDomain.Models.Pessoa;
 using Dapper;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NHibernate.Linq.Functions;
@@ -34,8 +33,8 @@ namespace SW_PortalProprietario.Application.Services.Core
         private readonly ICommunicationProvider _communicationProvider;
         private readonly ISmsProvider _smsProvider;
         private readonly IEmailSenderHostedService _emailSenderHostedService;
-        private readonly IMemoryCache _memoryCache;
-
+        private readonly ICacheStore _cacheStore;
+        
         private const int VERIFICATION_CODE_EXPIRY_MINUTES = 10;
 
         public UserService(IRepositoryNH repository,
@@ -47,7 +46,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             ICommunicationProvider communicationProvider,
             ISmsProvider smsProvider,
             IEmailSenderHostedService emailSenderHostedService,
-            IMemoryCache memoryCache)
+            ICacheStore cacheStore)
         {
             _repository = repository;
             _logger = logger;
@@ -58,7 +57,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             _communicationProvider = communicationProvider;
             _smsProvider = smsProvider;
             _emailSenderHostedService = emailSenderHostedService;
-            _memoryCache = memoryCache;
+            _cacheStore = cacheStore;
         }
 
         public async Task<ChangePasswordResultModel> ChangePassword(ChangePasswordInputModel changePasswordInputModel)
@@ -882,7 +881,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         {
                             if (string.IsNullOrEmpty(userInputModel.EmailVerificationCode))
                                 throw new ArgumentException("Para alterar o e-mail, é necessário solicitar e informar o código de verificação enviado ao novo e-mail.");
-                            if (!ValidateEmailVerificationCode(user.Id, userInputModel.Pessoa.EmailPreferencial, userInputModel.EmailVerificationCode))
+                            if (!await ValidateEmailCodeInternalAsync(user.Id, userInputModel.Pessoa.EmailPreferencial, userInputModel.EmailVerificationCode))
                                 throw new ArgumentException("Código de verificação de e-mail inválido ou expirado. Solicite um novo código.");
                         }
                     }
@@ -930,7 +929,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         {
                             if (string.IsNullOrEmpty(userInputModel.PhoneVerificationCode))
                                 throw new ArgumentException("Para alterar o telefone celular, é necessário solicitar e informar o código de verificação enviado por SMS.");
-                            if (!ValidatePhoneVerificationCode(user.Id, telefoneAlterado.Numero, userInputModel.PhoneVerificationCode))
+                            if (!await ValidatePhoneCodeInternalAsync(user.Id, telefoneAlterado.Numero, userInputModel.PhoneVerificationCode))
                                 throw new ArgumentException("Código de verificação de celular inválido ou expirado. Solicite um novo código.");
                         }
                     }
@@ -1568,7 +1567,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw new ArgumentException("Usuário inválido.");
 
             var loggedUser = await _repository.GetLoggedUser() ?? throw new UnauthorizedAccessException("Usuário não autenticado");
-            if (!loggedUser.Value.isAdm && loggedUser.Value.userId != model.UserId.ToString())
+            if (!loggedUser.isAdm && loggedUser.userId != model.UserId.ToString())
                 throw new UnauthorizedAccessException("Usuário não autorizado a enviar código para outro usuário.");
 
             var parametroSistema = await _repository.GetParametroSistemaViewModel();
@@ -1586,7 +1585,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             var codToSend = rd.Next(100000, 999999).ToString();
 
             var cacheKey = $"email_verify_{model.UserId}_{model.Email.Trim().ToLowerInvariant()}";
-            _memoryCache.Set(cacheKey, codToSend, TimeSpan.FromMinutes(VERIFICATION_CODE_EXPIRY_MINUTES));
+            await _cacheStore.AddAsync(cacheKey, codToSend, DateTimeOffset.UtcNow.AddMinutes(VERIFICATION_CODE_EXPIRY_MINUTES));
 
             var usuarioSistemaId = _configuration.GetValue<int>("UsuarioSistemaId", 1);
             var assunto = "Código de verificação para alteração de e-mail - Portal do Proprietário";
@@ -1614,7 +1613,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 throw new ArgumentException("Usuário inválido.");
 
             var loggedUser = await _repository.GetLoggedUser() ?? throw new UnauthorizedAccessException("Usuário não autenticado");
-            if (!loggedUser.Value.isAdm && loggedUser.Value.userId != model.UserId.ToString())
+            if (!loggedUser.isAdm && loggedUser.userId != model.UserId.ToString())
                 throw new UnauthorizedAccessException("Usuário não autorizado a enviar código para outro usuário.");
 
             var parametroSistema = await _repository.GetParametroSistemaViewModel();
@@ -1630,7 +1629,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             var codToSend = rd.Next(100000, 999999).ToString();
 
             var cacheKey = $"phone_verify_{model.UserId}_{apenasNumeros}";
-            _memoryCache.Set(cacheKey, codToSend, TimeSpan.FromMinutes(VERIFICATION_CODE_EXPIRY_MINUTES));
+            await _cacheStore.AddAsync(cacheKey, codToSend, DateTimeOffset.UtcNow.AddMinutes(VERIFICATION_CODE_EXPIRY_MINUTES));
 
             var usuario = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {model.UserId} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
             var nomeUsuario = usuario?.Pessoa?.Nome ?? "Usuário";
@@ -1644,20 +1643,56 @@ namespace SW_PortalProprietario.Application.Services.Core
             return new string(phone.Where(char.IsDigit).ToArray());
         }
 
-        private bool ValidateEmailVerificationCode(int userId, string email, string? code)
+        private async Task<bool> ValidateEmailCodeInternalAsync(int userId, string email, string? code)
         {
             if (string.IsNullOrEmpty(code)) return false;
             var cacheKey = $"email_verify_{userId}_{email.Trim().ToLowerInvariant()}";
-            return _memoryCache.TryGetValue(cacheKey, out string? stored) && stored == code.Trim();
+            var stored = await _cacheStore.GetAsync<string>(cacheKey);
+            return stored != null && stored == code.Trim();
         }
 
-        private bool ValidatePhoneVerificationCode(int userId, string phone, string? code)
+        private async Task<bool> ValidatePhoneCodeInternalAsync(int userId, string phone, string? code)
         {
             if (string.IsNullOrEmpty(code)) return false;
             var normalized = NormalizePhoneForCache(phone);
             if (string.IsNullOrEmpty(normalized)) return false;
             var cacheKey = $"phone_verify_{userId}_{normalized}";
-            return _memoryCache.TryGetValue(cacheKey, out string? stored) && stored == code.Trim();
+            var stored = await _cacheStore.GetAsync<string>(cacheKey);
+            return stored != null && stored == code.Trim();
+        }
+
+        public async Task<bool> ValidateEmailVerificationCodeAsync(ValidateEmailVerificationCodeInputModel model)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+            if (model.UserId <= 0)
+                throw new ArgumentException("Usuário inválido.");
+            if (string.IsNullOrEmpty(model.Email))
+                throw new ArgumentException("E-mail inválido.");
+            if (string.IsNullOrEmpty(model.Code))
+                throw new ArgumentException("Código de verificação inválido.");
+
+            var loggedUser = await _repository.GetLoggedUser() ?? throw new UnauthorizedAccessException("Usuário não autenticado");
+            if (!loggedUser.isAdm && loggedUser.userId != model.UserId.ToString())
+                throw new UnauthorizedAccessException("Usuário não autorizado a validar código de outro usuário.");
+
+            return await ValidateEmailCodeInternalAsync(model.UserId, model.Email, model.Code);
+        }
+
+        public async Task<bool> ValidatePhoneVerificationCodeAsync(ValidatePhoneVerificationCodeInputModel model)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+            if (model.UserId <= 0)
+                throw new ArgumentException("Usuário inválido.");
+            if (string.IsNullOrEmpty(model.Phone))
+                throw new ArgumentException("Telefone inválido.");
+            if (string.IsNullOrEmpty(model.Code))
+                throw new ArgumentException("Código de verificação inválido.");
+
+            var loggedUser = await _repository.GetLoggedUser() ?? throw new UnauthorizedAccessException("Usuário não autenticado");
+            if (!loggedUser.isAdm && loggedUser.userId != model.UserId.ToString())
+                throw new UnauthorizedAccessException("Usuário não autorizado a validar código de outro usuário.");
+
+            return await ValidatePhoneCodeInternalAsync(model.UserId, model.Phone, model.Code);
         }
     }
 }

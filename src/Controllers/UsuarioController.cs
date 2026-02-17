@@ -305,6 +305,80 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
             }
         }
 
+        [HttpPost("validateEmailVerificationCode"), Authorize(Roles = "Administrador, user=W, Usuario")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Produces("application/json")]
+        public async Task<IActionResult> ValidateEmailVerificationCode([FromBody] ValidateEmailVerificationCodeInputModel model)
+        {
+            try
+            {
+                var isValid = await _userService.ValidateEmailVerificationCodeAsync(model);
+                return Ok(new ResultModel<object>(new { success = isValid })
+                {
+                    Errors = new List<string>(),
+                    Status = StatusCodes.Status200OK,
+                    Success = true
+                });
+            }
+            catch (ArgumentException err)
+            {
+                return BadRequest(new ResultModel<object>(new { success = false })
+                {
+                    Errors = new List<string> { err.Message },
+                    Status = StatusCodes.Status400BadRequest,
+                    Success = false
+                });
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<object>(new { success = false })
+                {
+                    Errors = new List<string> { err.Message },
+                    Status = StatusCodes.Status500InternalServerError,
+                    Success = false
+                });
+            }
+        }
+
+        [HttpPost("validatePhoneVerificationCode"), Authorize(Roles = "Administrador, user=W, Usuario")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Produces("application/json")]
+        public async Task<IActionResult> ValidatePhoneVerificationCode([FromBody] ValidatePhoneVerificationCodeInputModel model)
+        {
+            try
+            {
+                var isValid = await _userService.ValidatePhoneVerificationCodeAsync(model);
+                return Ok(new ResultModel<object>(new { success = isValid })
+                {
+                    Errors = new List<string>(),
+                    Status = StatusCodes.Status200OK,
+                    Success = true
+                });
+            }
+            catch (ArgumentException err)
+            {
+                return BadRequest(new ResultModel<object>(new { success = false })
+                {
+                    Errors = new List<string> { err.Message },
+                    Status = StatusCodes.Status400BadRequest,
+                    Success = false
+                });
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<object>(new { success = false })
+                {
+                    Errors = new List<string> { err.Message },
+                    Status = StatusCodes.Status500InternalServerError,
+                    Success = false
+                });
+            }
+        }
+
         [HttpGet("search"), Authorize(Roles = "Administrador, user=R, Usuario")]
         [ProducesResponseType(typeof(ResultWithPaginationModel<List<UsuarioModel>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
