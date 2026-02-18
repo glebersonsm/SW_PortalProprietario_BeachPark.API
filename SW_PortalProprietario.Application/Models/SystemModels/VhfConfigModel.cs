@@ -20,5 +20,9 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? Segmento { get; set; }
         public string CodigoPensao { get; set; } = string.Empty;
         public bool PermiteIntercambioMultipropriedade { get; set; }
+        /// <summary>Percentual máximo de ocupação para retorno de disponibilidade (Timesharing). Se atingido, não retorna disponibilidade.</summary>
+        public decimal? OcupacaoMaxRetDispTS { get; set; }
+        /// <summary>Percentual máximo de ocupação para retorno de disponibilidade (Multipropriedade). Se atingido, não retorna disponibilidade.</summary>
+        public decimal? OcupacaoMaxRetDispMP { get; set; }
     }
 }

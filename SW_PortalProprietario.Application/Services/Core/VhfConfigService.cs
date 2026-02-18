@@ -212,6 +212,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     Segmento = model.Segmento,
                     CodigoPensao = model.CodigoPensao ?? string.Empty,
                     PermiteIntercambioMultipropriedade = model.PermiteIntercambioMultipropriedade,
+                    OcupacaoMaxRetDispTS = model.OcupacaoMaxRetDispTS,
+                    OcupacaoMaxRetDispMP = model.OcupacaoMaxRetDispMP,
                     DataHoraCriacao = DateTime.Now,
                     UsuarioCriacao = userId
                 };
@@ -259,6 +261,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 config.Segmento = model.Segmento;
                 config.CodigoPensao = model.CodigoPensao ?? string.Empty;
                 config.PermiteIntercambioMultipropriedade = model.PermiteIntercambioMultipropriedade;
+                config.OcupacaoMaxRetDispTS = model.OcupacaoMaxRetDispTS;
+                config.OcupacaoMaxRetDispMP = model.OcupacaoMaxRetDispMP;
                 config.DataHoraAlteracao = DateTime.Now;
                 config.UsuarioAlteracao = alteracaoUserId;
 
@@ -334,6 +338,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 Segmento = c.Segmento,
                 CodigoPensao = c.CodigoPensao,
                 PermiteIntercambioMultipropriedade = c.PermiteIntercambioMultipropriedade,
+                OcupacaoMaxRetDispTS = c.OcupacaoMaxRetDispTS,
+                OcupacaoMaxRetDispMP = c.OcupacaoMaxRetDispMP,
                 DataHoraCriacao = c.DataHoraCriacao,
                 DataHoraAlteracao = c.DataHoraAlteracao,
                 UsuarioCriacao = c.UsuarioCriacao,

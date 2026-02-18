@@ -18,5 +18,9 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual string? Segmento { get; set; }
         public virtual string CodigoPensao { get; set; } = string.Empty;
         public virtual bool PermiteIntercambioMultipropriedade { get; set; }
+        /// <summary>Percentual máximo de ocupação para retorno de disponibilidade (Timesharing). Se atingido, não retorna disponibilidade.</summary>
+        public virtual decimal? OcupacaoMaxRetDispTS { get; set; }
+        /// <summary>Percentual máximo de ocupação para retorno de disponibilidade (Multipropriedade). Se atingido, não retorna disponibilidade.</summary>
+        public virtual decimal? OcupacaoMaxRetDispMP { get; set; }
     }
 }

@@ -26,6 +26,8 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral
             Map(b => b.Segmento).Length(4000).Nullable();
             Map(b => b.CodigoPensao).Length(2000).Not.Nullable();
             Map(b => b.PermiteIntercambioMultipropriedade).Not.Nullable();
+            Map(b => b.OcupacaoMaxRetDispTS).Nullable().Precision(5).Scale(2);
+            Map(b => b.OcupacaoMaxRetDispMP).Nullable().Precision(5).Scale(2);
 
             Schema("portalohana");
             Table("ConfigReservaVhf");
