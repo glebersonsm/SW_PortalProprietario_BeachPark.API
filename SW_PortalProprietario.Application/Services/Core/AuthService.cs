@@ -930,6 +930,23 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 userLoginInputModel.Login = userLoginInputModel.Login.TrimEnd().RemoveAccents().Replace(" ","");
             }
+
+            // Valida CPF ou CNPJ quando o login contiver 11 ou 14 caracteres numéricos
+            var loginNumerico = Helper.ApenasNumeros(userLoginInputModel?.Login);
+            if (!string.IsNullOrEmpty(loginNumerico))
+            {
+                if (loginNumerico.Length == 11)
+                {
+                    if (!Helper.IsCpf(loginNumerico))
+                        throw new ArgumentException("CPF inválido.");
+                }
+                else if (loginNumerico.Length == 14)
+                {
+                    if (!Helper.IsCnpj(loginNumerico))
+                        throw new ArgumentException("CNPJ inválido.");
+                }
+            }
+
             TokenResultModel? userReturn = null;
 
             IAccessValidateResultModel avr = null;
@@ -1338,12 +1355,34 @@ namespace SW_PortalProprietario.Application.Services.Core
         public async Task<Login2FAOptionsResultModel> GetLogin2FAOptionsAsync(string login)
         {
             var result = new Login2FAOptionsResultModel { RequiresTwoFactor = false, UserType = null, Channels = new List<Login2FAChannelModel>() };
-            if (string.IsNullOrWhiteSpace(login)) return result;
+            if (string.IsNullOrWhiteSpace(login))
+                throw new ArgumentException("O login deve ser informado.");
+
             login = login.Trim().RemoveAccents().Replace(" ", "");
+
+            // Valida CPF ou CNPJ quando o login contiver 11 ou 14 caracteres numéricos (antes de pedir a senha)
+            var loginNumerico = Helper.ApenasNumeros(login);
+            if (!string.IsNullOrEmpty(loginNumerico))
+            {
+                if (loginNumerico.Length == 11)
+                {
+                    if (!Helper.IsCpf(loginNumerico))
+                        throw new ArgumentException("CPF inválido.");
+                }
+                else if (loginNumerico.Length == 14)
+                {
+                    if (!Helper.IsCnpj(loginNumerico))
+                        throw new ArgumentException("CNPJ inválido.");
+                }
+            }
+
+            // Verifica se o usuário existe antes de pedir a senha
             var usuarios = await GetUsuario(new LoginInputModel { Login = login });
             Usuario? usuario = usuarios?.OrderByDescending(a => a.Id).FirstOrDefault();
-            if (usuario == null || usuario.Status != EnumStatus.Ativo)
-                return result;
+            if (usuario == null)
+                throw new FileNotFoundException("Usuário não encontrado.");
+            if (usuario.Status != EnumStatus.Ativo)
+                throw new ArgumentException("Usuário inativo.");
             bool isAdmin = usuario.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
             result.UserType = isAdmin ? "Administrador" : "Cliente";
             ParametroSistemaViewModel? param = null;

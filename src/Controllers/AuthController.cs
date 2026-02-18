@@ -67,6 +67,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
 
         [HttpGet("login2FAOptions")]
         [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> GetLogin2FAOptions([FromQuery] string? login)
@@ -79,6 +81,24 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                     Errors = new List<string>(),
                     Status = StatusCodes.Status200OK,
                     Success = true
+                });
+            }
+            catch (FileNotFoundException err)
+            {
+                return NotFound(new ResultModel<Login2FAOptionsResultModel>(new Login2FAOptionsResultModel())
+                {
+                    Errors = new List<string>() { err.Message },
+                    Status = StatusCodes.Status404NotFound,
+                    Success = false
+                });
+            }
+            catch (ArgumentException err)
+            {
+                return BadRequest(new ResultModel<Login2FAOptionsResultModel>(new Login2FAOptionsResultModel())
+                {
+                    Errors = new List<string>() { err.Message },
+                    Status = StatusCodes.Status400BadRequest,
+                    Success = false
                 });
             }
             catch (Exception err)
@@ -94,6 +114,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
 
         [HttpPost("login2FAOptions")]
         [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ResultModel<Login2FAOptionsResultModel>), StatusCodes.Status500InternalServerError)]
         [Produces("application/json")]
         public async Task<IActionResult> GetLogin2FAOptionsPost([FromBody] Login2FAOptionsRequestModel model)
@@ -106,6 +128,24 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                     Errors = new List<string>(),
                     Status = StatusCodes.Status200OK,
                     Success = true
+                });
+            }
+            catch (FileNotFoundException err)
+            {
+                return NotFound(new ResultModel<Login2FAOptionsResultModel>(new Login2FAOptionsResultModel())
+                {
+                    Errors = new List<string>() { err.Message },
+                    Status = StatusCodes.Status404NotFound,
+                    Success = false
+                });
+            }
+            catch (ArgumentException err)
+            {
+                return BadRequest(new ResultModel<Login2FAOptionsResultModel>(new Login2FAOptionsResultModel())
+                {
+                    Errors = new List<string>() { err.Message },
+                    Status = StatusCodes.Status400BadRequest,
+                    Success = false
                 });
             }
             catch (Exception err)
