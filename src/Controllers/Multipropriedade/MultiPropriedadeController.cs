@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using EsolutionPortalDomain.Portal;
 using EsolutionPortalDomain.ReservasApiModels.Hotel;
 using Microsoft.AspNetCore.Authorization;
@@ -62,8 +62,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<ImovelSimplificadoModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N�o foi poss�vel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N�o foi poss�vel retornar os dados", err.Message },
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     LastPageNumber = -1,
                     PageNumber = -1,
@@ -76,8 +76,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<ImovelSimplificadoModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N�o foi poss�vel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N�o foi poss�vel retornar os dados", err.Message },
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     LastPageNumber = -1,
                     PageNumber = -1,
@@ -122,8 +122,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<ProprietarioSimplificadoModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N�o foi poss�vel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N�o foi poss�vel retornar os dados", err.Message },
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     LastPageNumber = -1,
                     PageNumber = -1,
@@ -136,8 +136,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<ProprietarioSimplificadoModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N�o foi poss�vel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N�o foi poss�vel retornar os dados", err.Message },
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     LastPageNumber = -1,
                     PageNumber = -1,
@@ -277,7 +277,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                     });
                 else return Ok(new ResultModel<List<AgendamentoHistoryModel>>(new List<AgendamentoHistoryModel>())
                 {
-                    Errors = new List<string>() { "Nenhum hist�rico encontrado" },
+                    Errors = new List<string>() { "Nenhum histórico encontrado" },
                     Status = StatusCodes.Status404NotFound,
                     Success = true
                 });
@@ -388,7 +388,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
 
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<bool>(false)
                 {
-                    Errors = result.Message != null && !string.IsNullOrEmpty(result.Message) ? new List<string>() { result?.Message } : new List<string>() { "Opera��o n�o realizada" },
+                    Errors = result.Message != null && !string.IsNullOrEmpty(result.Message) ? new List<string>() { result?.Message } : new List<string>() { "Operação não realizada" },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -522,8 +522,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<InventarioModel>(),
                     Message = err.InnerException != null ?
-                        $"N�o foi poss�vel consultar os invent�rios {err.Message} {err.InnerException.Message}" :
-                        $"N�o foi poss�vel consultar os invent�rios" +
+                        $"Não foi possível consultar os inventários {err.Message} {err.InnerException.Message}" :
+                        $"Não foi possível consultar os inventários" +
                         $" {err.Message}",
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
@@ -535,8 +535,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<InventarioModel>(),
                     Message = err.InnerException != null ?
-                    $"N�o foi poss�vel consultar os invent�rios {err.Message} {err.InnerException.Message}" :
-                    $"N�o foi poss�vel consultar os invent�rios {err.Message}",
+                    $"Não foi possível consultar os inventários {err.Message} {err.InnerException.Message}" :
+                    $"Não foi possível consultar os inventários {err.Message}",
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -560,8 +560,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Status = StatusCodes.Status404NotFound,
                     Success = false,
-                    Message = "Ops! n�o foi encontrado nenhum registro.",
-                    Errors = new List<string>() { "Ops! n�o foi encontrado nenhum registro." }
+                    Message = "Ops! não foi encontrado nenhum registro.",
+                    Errors = new List<string>() { "Ops! não foi encontrado nenhum registro." }
                 });
             }
             catch (ArgumentException err)
@@ -570,8 +570,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<SemanaDisponibilidadeModel>(),
                     Message = err.InnerException != null ?
-                        $"N�o foi poss�vel consultar a disponibilidade: {err.Message} {err.InnerException.Message}" :
-                        $"N�o foi poss�vel consultar a disponibilidade: " +
+                        $"Não foi possível consultar a disponibilidade: {err.Message} {err.InnerException.Message}" :
+                        $"Não foi possível consultar a disponibilidade: " +
                         $" {err.Message}",
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
@@ -583,8 +583,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<SemanaDisponibilidadeModel>(),
                     Message = err.InnerException != null ?
-                    $"N�o foi poss�vel consultar a disponibilidade: {err.Message} {err.InnerException.Message}" :
-                    $"N�o foi poss�vel consultar a disponibilidade: {err.Message}",
+                    $"Não foi possível consultar a disponibilidade: {err.Message} {err.InnerException.Message}" :
+                    $"Não foi possível consultar a disponibilidade: {err.Message}",
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -613,8 +613,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = -1,
                     Message = err.InnerException != null ?
-                        $"N�o foi poss�vel trocar a semana: {err.Message} {err.InnerException.Message}" :
-                        $"N�o foi poss�vel trocar a semana: " +
+                        $"Não foi possível trocar a semana: {err.Message} {err.InnerException.Message}" :
+                        $"Não foi possível trocar a semana: " +
                         $" {err.Message}",
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
@@ -626,8 +626,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<SemanaDisponibilidadeModel>(),
                     Message = err.InnerException != null ?
-                    $"N�o foi poss�vel trocar a semana: {err.Message} {err.InnerException.Message}" :
-                    $"N�o foi poss�vel trocar a semana: {err.Message}",
+                    $"Não foi possível trocar a semana: {err.Message} {err.InnerException.Message}" :
+                    $"Não foi possível trocar a semana: {err.Message}",
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -655,8 +655,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = -1,
                     Message = err.InnerException != null ?
-                        $"N�o foi poss�vel incluir a semana: {err.Message} {err.InnerException.Message}" :
-                        $"N�o foi poss�vel incluir a semana: " +
+                        $"Não foi possível incluir a semana: {err.Message} {err.InnerException.Message}" :
+                        $"Não foi possível incluir a semana: " +
                         $" {err.Message}",
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
@@ -668,8 +668,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<SemanaDisponibilidadeModel>(),
                     Message = err.InnerException != null ?
-                    $"N�o foi poss�vel incluir a semana: {err.Message} {err.InnerException.Message}" :
-                    $"N�o foi poss�vel incluir a semana: {err.Message}",
+                    $"Não foi possível incluir a semana: {err.Message} {err.InnerException.Message}" :
+                    $"Não foi possível incluir a semana: {err.Message}",
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -690,7 +690,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     var ext = SW_PortalProprietario.Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
                     if (string.IsNullOrEmpty(ext))
-                        throw new Exception($"Tipo de arquivo: ({result.Path.Split("\\").Last().Split(".").Last()}) n�o suportado.");
+                        throw new Exception($"Tipo de arquivo: ({result.Path.Split("\\").Last().Split(".").Last()}) não suportado.");
 
                     var memory = new MemoryStream();
                     using var stream = new FileStream(result.Path, FileMode.Open);
@@ -703,8 +703,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     return NotFound(new DownloadResultModel()
                     {
-                        Result = "N�o baixado",
-                        Errors = new List<string>() { "Contrato n�o encontrado" },
+                        Result = "Não baixado",
+                        Errors = new List<string>() { "Contrato não encontrado" },
                         Status = StatusCodes.Status404NotFound,
                     });
 
@@ -715,7 +715,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
             {
                 return NotFound(new DownloadResultModel()
                 {
-                    Result = "N�o baixado",
+                    Result = "Não baixado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -726,7 +726,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
             {
                 return BadRequest(new DownloadResultModel()
                 {
-                    Result = "N�o baixado",
+                    Result = "Não baixado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -737,7 +737,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new DownloadResultModel()
                 {
-                    Result = "N�o baixado",
+                    Result = "Não baixado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -769,8 +769,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>(),
                     Message = err.InnerException != null ?
-                        $"N�o foi poss�vel consultar os status crc: {err.Message} {err.InnerException.Message}" :
-                        $"N�o foi poss�vel consultar os status crc: " +
+                        $"Não foi possível consultar os status crc: {err.Message} {err.InnerException.Message}" :
+                        $"Não foi possível consultar os status crc: " +
                         $" {err.Message}",
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
@@ -782,8 +782,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Multipropriedade
                 {
                     Data = new List<SW_PortalProprietario.Application.Models.Empreendimento.StatusCrcModel>(),
                     Message = err.InnerException != null ?
-                    $"N�o foi poss�vel consultar os status crc: {err.Message} {err.InnerException.Message}" :
-                    $"N�o foi poss�vel consultar os status crc: {err.Message}",
+                    $"Não foi possível consultar os status crc: {err.Message} {err.InnerException.Message}" :
+                    $"Não foi possível consultar os status crc: {err.Message}",
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });

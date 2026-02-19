@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Models.AuthModels;
+﻿using SW_PortalProprietario.Application.Models.AuthModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_Utils.Auxiliar;
 using SW_Utils.Enum;

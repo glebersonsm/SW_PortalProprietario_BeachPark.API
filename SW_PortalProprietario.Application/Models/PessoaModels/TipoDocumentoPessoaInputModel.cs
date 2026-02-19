@@ -7,9 +7,9 @@ namespace SW_PortalProprietario.Application.Models.PessoaModels
     {
         public string? Nome { get; set; }
         public string? Mascara { get; set; }
-        public EnumSimNao? ExigeOrgaoEmissor { get; set; } = EnumSimNao.Não;
-        public EnumSimNao? ExigeDataEmissao { get; set; } = EnumSimNao.Não;
-        public EnumSimNao? ExigeDataValidade { get; set; } = EnumSimNao.Não;
+        public EnumSimNao? ExigeOrgaoEmissor { get; set; } = EnumSimNao.Nao;
+        public EnumSimNao? ExigeDataEmissao { get; set; } = EnumSimNao.Nao;
+        public EnumSimNao? ExigeDataValidade { get; set; } = EnumSimNao.Nao;
         public EnumTiposPessoa? TipoPessoa { get; set; } = EnumTiposPessoa.PessoaFisicaEJuridica;
 
         public static explicit operator TipoDocumentoPessoa(TipoDocumentoPessoaInputModel model)

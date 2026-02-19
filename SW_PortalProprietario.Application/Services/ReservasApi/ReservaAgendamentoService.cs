@@ -1,4 +1,4 @@
-using EsolutionPortalDomain.Portal;
+﻿using EsolutionPortalDomain.Portal;
 using EsolutionPortalDomain.ReservasApiModels.Hotel;
 using SW_PortalProprietario.Application.Interfaces.ReservasApi;
 using SW_PortalProprietario.Application.Models;

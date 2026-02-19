@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -36,7 +36,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var tipoDocumentoPessoa = await _repository.FindById<TipoDocumentoPessoa>(id);
                 if (tipoDocumentoPessoa is null)
                 {
-                    throw new FileNotFoundException($"Não foi encontrado o tipo de documento com Id: {id}!");
+                    throw new FileNotFoundException($"NÃ£o foi encontrado o tipo de documento com Id: {id}!");
                 }
 
                 var pessoaDocumentoUsing = (await _repository.FindBySql<TipoDocumentoPessoaModel>("Select s.Id, s.Numero From PessoaDocumento s Where s.TipoDocumento =:tipodocumentoId", session: null, new Parameter("tipodocumentoId", id))).Take(5).ToList();
@@ -58,7 +58,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -67,7 +67,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o Tipo de documento: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o Tipo de documento: {id}");
                 throw;
             }
 
@@ -92,11 +92,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar o Tipo Documento: ({tipoDocumento.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o Tipo Documento: ({tipoDocumento.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o Tipo Documento: ({tipoDocumento.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o Tipo Documento: ({tipoDocumento.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -152,7 +152,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             try
             {
                 var tipodocumento = (await _repository.FindByHql<TipoDocumentoPessoa>("From TipoDocumentoPessoa ge Where ge.Id = :id", session: null, new Parameter[]
-                { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o Tipo Documento: {model.Id}");
+                { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"NÃ£o foi encontrado o Tipo Documento: {model.Id}");
 
                 tipodocumento.Nome = model.Nome ?? tipodocumento.Nome;
                 tipodocumento.Mascara = model.Mascara ?? tipodocumento.Mascara;
@@ -164,7 +164,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                     return (TipoDocumentoPessoaModel)tipodocumento;
-                else throw exception ?? new Exception("Erro na operação");
+                else throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception)
             {

@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Domain.Enumns
+﻿namespace SW_PortalProprietario.Domain.Enumns
 {
     public enum EnumAuditAction
     {

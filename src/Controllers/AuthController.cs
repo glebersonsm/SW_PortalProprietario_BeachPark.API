@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.AuthModels;
@@ -46,8 +46,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return BadRequest(new ResultModel<UserRegisterResultModel>(new UserRegisterResultModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.FullName})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.FullName})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.FullName})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.FullName})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -57,8 +57,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<UserRegisterResultModel>(new UserRegisterResultModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.FullName})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.FullName})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.FullName})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.FullName})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -229,7 +229,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 if (result == null)
                     return BadRequest(new ResultModel<TokenResultModel>(new TokenResultModel())
                     {
-                        Errors = new List<string>() { "Não foi possível enviar o código." },
+                        Errors = new List<string>() { "NÃ£o foi possÃ­vel enviar o cÃ³digo." },
                         Status = StatusCodes.Status400BadRequest,
                         Success = false
                     });
@@ -244,7 +244,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
             {
                 return NotFound(new ResultModel<TokenResultModel>(new TokenResultModel())
                 {
-                    Errors = new List<string>() { "Usuário não encontrado." },
+                    Errors = new List<string>() { "UsuÃ¡rio nÃ£o encontrado." },
                     Status = StatusCodes.Status404NotFound,
                     Success = false
                 });
@@ -283,7 +283,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 if (result == null)
                     return Unauthorized(new ResultModel<TokenResultModel>(new TokenResultModel())
                     {
-                        Errors = new List<string>() { "Código inválido ou expirado." },
+                        Errors = new List<string>() { "CÃ³digo invÃ¡lido ou expirado." },
                         Status = StatusCodes.Status401Unauthorized,
                         Success = false
                     });

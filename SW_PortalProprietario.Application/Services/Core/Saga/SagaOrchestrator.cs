@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces.Saga;
 using System.Diagnostics;
 using System.Text.Json;
@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace SW_PortalProprietario.Application.Services.Core.Saga
 {
     /// <summary>
-    /// Orquestrador de Sagas - gerencia transações distribuídas com compensação automática
+    /// Orquestrador de Sagas - gerencia transaÃ§Ãµes distribuÃ­das com compensaÃ§Ã£o automÃ¡tica
     /// </summary>
     public class SagaOrchestrator : ISagaOrchestrator
     {
@@ -49,10 +49,10 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                 _currentSagaId = saga.SagaId;
 
                 _logger.LogInformation(
-                    "🚀 Iniciando Saga {SagaId} - Tipo: {OperationType}",
+                    "ðŸš€ Iniciando Saga {SagaId} - Tipo: {OperationType}",
                     _currentSagaId, operationType);
 
-                // Executa a lógica da Saga
+                // Executa a lÃ³gica da Saga
                 result = await sagaLogic(input, cancellationToken);
 
                 // Saga completada com sucesso
@@ -66,7 +66,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
 
                 stopwatch.Stop();
                 _logger.LogInformation(
-                    "✅ Saga {SagaId} completada com sucesso em {Duration}ms - {StepCount} steps executados",
+                    "âœ… Saga {SagaId} completada com sucesso em {Duration}ms - {StepCount} steps executados",
                     _currentSagaId, stopwatch.ElapsedMilliseconds, _executedSteps.Count);
 
                 return result;
@@ -75,7 +75,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
             {
                 stopwatch.Stop();
                 _logger.LogError(ex,
-                    "❌ Erro na Saga {SagaId} após {Duration}ms - Iniciando compensação de {StepCount} steps",
+                    "âŒ Erro na Saga {SagaId} apÃ³s {Duration}ms - Iniciando compensaÃ§Ã£o de {StepCount} steps",
                     _currentSagaId, stopwatch.ElapsedMilliseconds, _executedSteps.Count);
 
                 // Compensa os steps executados (em ordem reversa)
@@ -131,7 +131,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                 await _sagaRepository.UpdateStepStatusAsync(stepEntity.Id!.Value, "Executing");
 
                 _logger.LogDebug(
-                    "⚙️ Executando step {StepName} (Ordem: {Order}) - Saga {SagaId}",
+                    "âš™ï¸ Executando step {StepName} (Ordem: {Order}) - Saga {SagaId}",
                     stepName, order, _currentSagaId);
 
                 // Executa o step
@@ -152,7 +152,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                     "Executed",
                     outputData: outputJson);
 
-                // Armazena para possível compensação
+                // Armazena para possÃ­vel compensaÃ§Ã£o
                 _executedSteps.Add(new ExecutedStep
                 {
                     StepId = stepEntity.Id.Value,
@@ -166,7 +166,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                 });
 
                 _logger.LogDebug(
-                    "✓ Step {StepName} executado com sucesso em {Duration}ms",
+                    "âœ“ Step {StepName} executado com sucesso em {Duration}ms",
                     stepName, stopwatch.ElapsedMilliseconds);
             }
             catch (Exception ex)
@@ -174,7 +174,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                 stopwatch.Stop();
 
                 _logger.LogError(ex,
-                    "✗ Falha no step {StepName} após {Duration}ms",
+                    "âœ— Falha no step {StepName} apÃ³s {Duration}ms",
                     stepName, stopwatch.ElapsedMilliseconds);
 
                 // Marca como falho
@@ -194,7 +194,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
         private async Task CompensateAsync(CancellationToken cancellationToken)
         {
             _logger.LogWarning(
-                "🔄 Iniciando compensação de {Count} steps executados",
+                "ðŸ”„ Iniciando compensaÃ§Ã£o de {Count} steps executados",
                 _executedSteps.Count);
 
             // Compensa em ordem reversa
@@ -205,7 +205,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                 if (step.CompensateFunc == null)
                 {
                     _logger.LogWarning(
-                        "⚠️ Step {StepName} não possui função de compensação - pulando",
+                        "âš ï¸ Step {StepName} nÃ£o possui funÃ§Ã£o de compensaÃ§Ã£o - pulando",
                         step.StepName);
                     continue;
                 }
@@ -218,10 +218,10 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                     await _sagaRepository.UpdateStepStatusAsync(step.StepId, "Compensating");
 
                     _logger.LogDebug(
-                        "↩️ Compensando step {StepName} (Ordem: {Order})",
+                        "â†©ï¸ Compensando step {StepName} (Ordem: {Order})",
                         step.StepName, step.Order);
 
-                    // Executa compensação
+                    // Executa compensaÃ§Ã£o
                     await step.CompensateFunc(cancellationToken);
 
                     stopwatch.Stop();
@@ -230,7 +230,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                     await _sagaRepository.UpdateStepStatusAsync(step.StepId, "Compensated");
 
                     _logger.LogDebug(
-                        "✓ Step {StepName} compensado com sucesso em {Duration}ms",
+                        "âœ“ Step {StepName} compensado com sucesso em {Duration}ms",
                         step.StepName, stopwatch.ElapsedMilliseconds);
                 }
                 catch (Exception ex)
@@ -238,10 +238,10 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                     stopwatch.Stop();
 
                     _logger.LogError(ex,
-                        "❌ Falha ao compensar step {StepName} após {Duration}ms - Continuando com próximo step",
+                        "âŒ Falha ao compensar step {StepName} apÃ³s {Duration}ms - Continuando com prÃ³ximo step",
                         step.StepName, stopwatch.ElapsedMilliseconds);
 
-                    // Marca falha na compensação mas continua
+                    // Marca falha na compensaÃ§Ã£o mas continua
                     await _sagaRepository.UpdateStepStatusAsync(
                         step.StepId,
                         "CompensationFailed",
@@ -251,7 +251,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
             }
 
             _logger.LogInformation(
-                "✅ Compensação concluída - {Count} steps processados",
+                "âœ… CompensaÃ§Ã£o concluÃ­da - {Count} steps processados",
                 _executedSteps.Count);
         }
 
@@ -267,7 +267,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
     }
 
     /// <summary>
-    /// Exceção específica para falhas em Sagas
+    /// ExceÃ§Ã£o especÃ­fica para falhas em Sagas
     /// </summary>
     public class SagaException : Exception
     {

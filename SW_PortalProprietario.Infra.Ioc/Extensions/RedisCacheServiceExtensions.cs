@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Newtonsoft;
@@ -14,7 +14,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             ArgumentNullException.ThrowIfNull(services, nameof(services));
             ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
-            // Lê as configurações do Redis a partir das variáveis de ambiente ou appsettings.json
+            // LÃª as configuraÃ§Ãµes do Redis a partir das variÃ¡veis de ambiente ou appsettings.json
             var redisPassword = Environment.GetEnvironmentVariable("REDIS_PASSWORD") 
                 ?? configuration.GetValue<string>("Redis:Password");
             
@@ -34,7 +34,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
                 ?? configuration.GetValue<string>("ProgramId") 
                 ?? "PORTALCLIENTE_BP";
 
-            // Monta a configuração do Redis manualmente
+            // Monta a configuraÃ§Ã£o do Redis manualmente
             var redisConfiguration = new RedisConfiguration
             {
                 Name = programId,

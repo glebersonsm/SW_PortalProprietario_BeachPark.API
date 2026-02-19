@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -39,7 +39,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var pessoaEndereco = await _repository.FindById<PessoaEndereco>(id);
                 if (pessoaEndereco is null)
                 {
-                    throw new FileNotFoundException($"Não foi encontrado o endereço com Id: {id}!");
+                    throw new FileNotFoundException($"NÃ£o foi encontrado o endereÃ§o com Id: {id}!");
                 }
 
 
@@ -53,7 +53,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -62,7 +62,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o Tipo de endereco: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o Tipo de endereco: {id}");
                 throw;
             }
 
@@ -73,7 +73,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             try
             {
                 _repository.BeginTransaction();
-                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {pessoaEndereco.PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"Não foi encontrado a Pessoa: {pessoaEndereco.PessoaId.GetValueOrDefault()}");
+                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {pessoaEndereco.PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"NÃ£o foi encontrado a Pessoa: {pessoaEndereco.PessoaId.GetValueOrDefault()}");
                 var pessoaSincronizacaoListasAuxiliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
                 var resultSave = await pessoaSincronizacaoListasAuxiliar.SincronizarEnderecos(pessoa, pessoaEndereco);
 
@@ -86,11 +86,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                         return resultSearch.First();
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar o Tipo Endereco: ({pessoaEndereco.PessoaId})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o Tipo Endereco: ({pessoaEndereco.PessoaId})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o Tipo Endereco: ({pessoaEndereco.PessoaId})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o Tipo Endereco: ({pessoaEndereco.PessoaId})");
                 _repository.Rollback();
                 throw;
             }
@@ -102,7 +102,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             {
                 List<int> enderecosIds = new List<int>();
                 _repository.BeginTransaction();
-                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {pessoaEnderecos.First().PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"Não foi encontrado a Pessoa: {pessoaEnderecos.First().PessoaId.GetValueOrDefault()}");
+                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {pessoaEnderecos.First().PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"NÃ£o foi encontrado a Pessoa: {pessoaEnderecos.First().PessoaId.GetValueOrDefault()}");
                 var pessoaSincronizacaoListasAuxiliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
                 var resultSave = await pessoaSincronizacaoListasAuxiliar.SincronizarEnderecos(pessoa, pessoaEnderecos.ToArray());
                 enderecosIds = resultSave ?? new List<int>();
@@ -115,11 +115,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                         return resultSearch.AsList();
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar os Endereco(s)");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar os Endereco(s)");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar os Endereco(s)");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar os Endereco(s)");
                 _repository.Rollback();
                 throw;
             }
@@ -173,7 +173,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             try
             {
 
-                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {model.PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"Não foi encontrado a Pessoa: {model.PessoaId.GetValueOrDefault()}");
+                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {model.PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"NÃ£o foi encontrado a Pessoa: {model.PessoaId.GetValueOrDefault()}");
                 var pessoaSincronizacaoListasAuxiliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
                 var resultSave = await pessoaSincronizacaoListasAuxiliar.SincronizarEnderecos(pessoa, model);
 
@@ -186,7 +186,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                         return resultSearch.First();
                 }
 
-                throw exception ?? new Exception("Erro na operação");
+                throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception)
             {

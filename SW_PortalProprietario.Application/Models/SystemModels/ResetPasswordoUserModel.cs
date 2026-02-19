@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Application.Models.SystemModels
+﻿namespace SW_PortalProprietario.Application.Models.SystemModels
 {
     public class ResetPasswordoUserModel
     {

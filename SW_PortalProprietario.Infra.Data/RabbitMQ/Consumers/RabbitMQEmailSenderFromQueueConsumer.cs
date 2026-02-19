@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -50,7 +50,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                     {
                         if (!_alreadyLoggedRunning)
                         {
-                            _logger.LogDebug("Consumer de email já está em execução");
+                            _logger.LogDebug("Consumer de email jÃ¡ estÃ¡ em execuÃ§Ã£o");
                             _alreadyLoggedRunning = true;
                         }
                         return;
@@ -120,14 +120,14 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                         }
                         else
                         {
-                            _logger.LogWarning($"Não foi possível deserializar o email. DeliveryTag: {tag}");
+                            _logger.LogWarning($"NÃ£o foi possÃ­vel deserializar o email. DeliveryTag: {tag}");
                             await _channel.BasicNackAsync(deliveryTag: tag, multiple: false, requeue: false);
                         }
                     }
                     catch (Exception err)
                     {
-                        _logger.LogError(err, "Erro ao processar email da fila. DeliveryTag: {Tag}. Mensagem será reenfileirada para nova tentativa.", tag);
-                        // Reenfileirar para nova tentativa (requeue: true) para não descartar o email sem envio
+                        _logger.LogError(err, "Erro ao processar email da fila. DeliveryTag: {Tag}. Mensagem serÃ¡ reenfileirada para nova tentativa.", tag);
+                        // Reenfileirar para nova tentativa (requeue: true) para nÃ£o descartar o email sem envio
                         await _channel.BasicNackAsync(deliveryTag: tag, multiple: false, requeue: true);
                     }
                 };
@@ -168,18 +168,18 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                         Email email = await repository.FindById<Email>(id, session);
                         if (email == null)
                         {
-                            _logger.LogWarning($"Email com id: {id} não encontrado no banco de dados");
+                            _logger.LogWarning($"Email com id: {id} nÃ£o encontrado no banco de dados");
                             return;
                         }
 
                         if (email.Enviado == EnumSimNao.Sim)
                         {
-                            _logger.LogInformation($"O email id: {id} já foi enviado anteriormente em: {email.DataHoraEnvio.GetValueOrDefault():dd/MM/yyyy HH:mm:ss}");
+                            _logger.LogInformation($"O email id: {id} jÃ¡ foi enviado anteriormente em: {email.DataHoraEnvio.GetValueOrDefault():dd/MM/yyyy HH:mm:ss}");
                             return;
                         }
 
                         email.Enviado = EnumSimNao.Sim;
-                        email.NaFila = EnumSimNao.Não;
+                        email.NaFila = EnumSimNao.Nao;
                         email.DataHoraEnvio = DateTime.Now;
                         email.UsuarioAlteracao = email.UsuarioCriacao.GetValueOrDefault(usuarioDefault);
 
@@ -230,7 +230,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                     catch (Exception err)
                     {
                         _logger.LogError(err, $"Erro ao carregar anexos do email {emailModel.Id}");
-                        // Não lançar exceção para não impedir o envio do email
+                        // NÃ£o lanÃ§ar exceÃ§Ã£o para nÃ£o impedir o envio do email
                     }
                 }
             }

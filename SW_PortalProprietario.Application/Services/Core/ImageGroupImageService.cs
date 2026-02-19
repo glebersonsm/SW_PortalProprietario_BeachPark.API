@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -63,7 +63,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var imageGroup = (await _repository.FindByHql<GrupoImagem>($"From GrupoImagem gi Inner Join Fetch gi.Empresa e Where gi.Id = {model.ImageGroupId}")).FirstOrDefault();
                 if (imageGroup == null)
-                    throw new ArgumentException($"Não foi encontrado o Grupo de Imagem com o Id: {model.ImageGroupId}.");
+                    throw new ArgumentException($"NÃ£o foi encontrado o Grupo de Imagem com o Id: {model.ImageGroupId}.");
 
                 if (imageGroupImage == null)
                 {
@@ -77,7 +77,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 imageGroupImage.DataInicioVigencia = model.DataInicioVigencia;
                 imageGroupImage.DataFimVigencia = model.DataFimVigencia;
 
-                // Definir Ordem padrão se for uma nova imagem e Ordem não foi informada
+                // Definir Ordem padrÃ£o se for uma nova imagem e Ordem nÃ£o foi informada
                 if (model.Id.GetValueOrDefault(0) == 0 && (model.Ordem == null || model.Ordem == 0))
                 {
                     var maxOrdem = await _repository.CountTotalEntry($"Select Max(i.Ordem) as Ordem From ImagemGrupoImagem i Where i.GrupoImagem = {model.ImageGroupId}", session: null);
@@ -87,11 +87,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                 // Converter IFormFile para byte[] apenas se uma nova imagem foi enviada
                 if (model.Imagem != null && model.Imagem.Length > 0)
                 {
-                    // Validar tamanho máximo de 2MB
+                    // Validar tamanho mÃ¡ximo de 2MB
                     long maxSizeBytes = 2 * 1024 * 1024; // 2MB
                     if (model.Imagem.Length > maxSizeBytes)
                     {
-                        throw new ArgumentException("A imagem deve ter no máximo 2MB.");
+                        throw new ArgumentException("A imagem deve ter no mÃ¡ximo 2MB.");
                     }
 
                     using (var memoryStream = new MemoryStream())
@@ -103,9 +103,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                     // Validar tipo de arquivo
                     var ext = Functions.FileUtils.ObterTipoMIMEImagePorExtensao(Path.GetExtension(model.Imagem.FileName));
                     if (string.IsNullOrEmpty(ext))
-                        throw new Exception($"Tipo de arquivo: ({Path.GetExtension(model.Imagem.FileName)}) não suportado.");
+                        throw new Exception($"Tipo de arquivo: ({Path.GetExtension(model.Imagem.FileName)}) nÃ£o suportado.");
                 }
-                // Se for edição e não houver nova imagem, mantém a imagem existente
+                // Se for ediÃ§Ã£o e nÃ£o houver nova imagem, mantÃ©m a imagem existente
 
                 var result = await _repository.Save(imageGroupImage);
                 await SincronizarTagsRequeridas(imageGroupImage, model.TagsRequeridas, model.RemoverTagsNaoEnviadas ?? false);
@@ -123,11 +123,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     }
 
                 }
-                throw exception ?? new Exception($"Não foi possível salvar a Imagem: ({imageGroupImage.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar a Imagem: ({imageGroupImage.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a Imagem: ({model.Name})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a Imagem: ({model.Name})");
                 _repository.Rollback();
                 throw;
             }
@@ -156,7 +156,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    // Remover apenas tags que não estão na lista - usar Inner Join Fetch para carregar Tags e ImagemGrupoImagem com nomes
+                    // Remover apenas tags que nÃ£o estÃ£o na lista - usar Inner Join Fetch para carregar Tags e ImagemGrupoImagem com nomes
                     tagsParaRemover = (await _repository.FindByHql<ImagemGrupoImagemTags>(
                         @$"From ImagemGrupoImagemTags igita 
                                 Inner Join Fetch igita.Tags t 
@@ -173,8 +173,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var usuario = await _repository.GetLoggedUser();
                 foreach (var tagParaRemover in tagsParaRemover)
                 {
-                    // Log detalhado da remoção da tag
-                    _logger.LogInformation($"[REMOÇÃO TAG] Removendo vínculo de tag da imagem da galeria | " +
+                    // Log detalhado da remoÃ§Ã£o da tag
+                    _logger.LogInformation($"[REMOÃ‡ÃƒO TAG] Removendo vÃ­nculo de tag da imagem da galeria | " +
                                           $"ImagemID: {tagParaRemover.ImagemGrupoImagem?.Id} | " +
                                           $"ImagemNome: {tagParaRemover.ImagemGrupoImagem?.Nome} | " +
                                           $"TagID: {tagParaRemover.Tags?.Id} | " +
@@ -184,7 +184,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"GrupoImagemID: {tagParaRemover.ImagemGrupoImagem?.GrupoImagem?.Id} | " +
                                           $"GrupoImagemNome: {tagParaRemover.ImagemGrupoImagem?.GrupoImagem?.Nome} | " +
                                           $"EmpresaID: {tagParaRemover.ImagemGrupoImagem?.GrupoImagem?.Empresa?.Id} | " +
-                                          $"TipoRemocao: Sincronização");
+                                          $"TipoRemocao: SincronizaÃ§Ã£o");
 
                     await _repository.Remove(tagParaRemover);
                 }
@@ -196,7 +196,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var tagsInexistentes = listTags.Where(c => !allTags.Any(b => b.Id == c)).AsList();
                 if (tagsInexistentes.Count > 0)
                 {
-                    throw new ArgumentException($"Tags não encontradas: {string.Join(",", tagsInexistentes)}");
+                    throw new ArgumentException($"Tags nÃ£o encontradas: {string.Join(",", tagsInexistentes)}");
                 }
 
                 // Buscar tags com seus nomes para garantir que estejam carregadas no log
@@ -204,7 +204,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     @$"From Tags t Where t.Id in ({string.Join(",", listTags)}) and 
                     Not Exists(Select dc.Tags From ImagemGrupoImagemTags dc Where dc.ImagemGrupoImagem = {imagemGrupoImagem.Id} and dc.Tags = t.Id and dc.UsuarioRemocao is null and dc.DataHoraRemocao is null)")).ToList();
 
-                // Buscar imagem com nome carregado usando HQL para garantir que o nome esteja disponível
+                // Buscar imagem com nome carregado usando HQL para garantir que o nome esteja disponÃ­vel
                 var imagemComNome = (await _repository.FindByHql<ImagemGrupoImagem>(
                     $"From ImagemGrupoImagem igi Where igi.Id = {imagemGrupoImagem.Id}")).FirstOrDefault() ?? imagemGrupoImagem;
 
@@ -245,7 +245,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 var pathConfigAtual = listItensPathTranslate.FirstOrDefault(b => b.key.Equals($"{item}", StringComparison.CurrentCultureIgnoreCase));
                 if (string.IsNullOrEmpty(pathConfigAtual.path))
-                    throw new ArgumentException($"Não foi encontrada a configuração de direcionamento de path com a key: '{item}'");
+                    throw new ArgumentException($"NÃ£o foi encontrada a configuraÃ§Ã£o de direcionamento de path com a key: '{item}'");
 
                 paths.Add(pathConfigAtual.path);
             }
@@ -267,7 +267,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var image = await _repository.FindById<ImagemGrupoImagem>(id);
                 if (image is null)
                 {
-                    throw new FileNotFoundException($"Não foi encontrada a imagem com Id: {id}!");
+                    throw new FileNotFoundException($"NÃ£o foi encontrada a imagem com Id: {id}!");
                 }
 
                 _repository.BeginTransaction();
@@ -287,8 +287,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var usuario = await _repository.GetLoggedUser();
                 foreach (var tagRelacionada in tagsRelacionadas)
                 {
-                    // Log detalhado da remoção da tag durante exclusão da imagem
-                    _logger.LogInformation($"[REMOÇÃO TAG - EXCLUSÃO IMAGEM] Removendo vínculo de tag por exclusão da imagem da galeria | " +
+                    // Log detalhado da remoÃ§Ã£o da tag durante exclusÃ£o da imagem
+                    _logger.LogInformation($"[REMOÃ‡ÃƒO TAG - EXCLUSÃƒO IMAGEM] Removendo vÃ­nculo de tag por exclusÃ£o da imagem da galeria | " +
                                           $"ImagemID: {tagRelacionada.ImagemGrupoImagem?.Id} | " +
                                           $"ImagemNome: {tagRelacionada.ImagemGrupoImagem?.Nome} | " +
                                           $"TagID: {tagRelacionada.Tags?.Id} | " +
@@ -298,7 +298,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"GrupoImagemID: {tagRelacionada.ImagemGrupoImagem?.GrupoImagem?.Id} | " +
                                           $"GrupoImagemNome: {tagRelacionada.ImagemGrupoImagem?.GrupoImagem?.Nome} | " +
                                           $"EmpresaID: {tagRelacionada.ImagemGrupoImagem?.GrupoImagem?.Empresa?.Id} | " +
-                                          $"TipoRemocao: Exclusão da imagem");
+                                          $"TipoRemocao: ExclusÃ£o da imagem");
 
                     tagRelacionada.DataHoraRemocao = DateTime.Now;
                     tagRelacionada.UsuarioRemocao = !string.IsNullOrEmpty(usuario?.userId) ? Convert.ToInt32(usuario.Value.userId) : null;
@@ -311,11 +311,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (resultCommit.executed)
                 {
                     result.Result = "Removido com sucesso!";
-                    // Não precisa mais deletar arquivo físico, pois a imagem está no banco
+                    // NÃ£o precisa mais deletar arquivo fÃ­sico, pois a imagem estÃ¡ no banco
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -324,7 +324,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar a imagem: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar a imagem: {id}");
                 throw;
             }
         }
@@ -332,20 +332,20 @@ namespace SW_PortalProprietario.Application.Services.Core
         public async Task<IEnumerable<ImageGroupImageModel>?> Search(SearchImageGroupImageModel searchModel)
         {
             var loggedUser = await _repository.GetLoggedUser();
-            if (!loggedUser.HasValue) throw new ArgumentException("Não foi possível filtrar os grupos de imagens e imagens para a galeria");
+            if (!loggedUser.HasValue) throw new ArgumentException("NÃ£o foi possÃ­vel filtrar os grupos de imagens e imagens para a galeria");
 
 
             if (!loggedUser.Value.isAdm)
             {
                 if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o usuÃ¡rio para comunicaÃ§Ã£o com o eSolution!");
 
                 if (string.IsNullOrEmpty(loggedUser.Value.userId) || !Helper.IsNumeric(loggedUser.Value.userId))
-                    throw new ArgumentNullException("Não foi possível identificar o id do usuário logado.");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o id do usuÃ¡rio logado.");
 
                 var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
                 if (pessoaProvider == null || !pessoaProvider.Any() || pessoaProvider.Any(a=> string.IsNullOrEmpty(a.PessoaProvider)))
-                    throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
+                    throw new ArgumentNullException($"NÃ£o foi possÃ­vel encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
 
             }
 
@@ -386,7 +386,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     
                     or
                     
-                    -- Caso 2: Grupo com tags compatíveis com o usuário (independente das tags da imagem)
+                    -- Caso 2: Grupo com tags compatÃ­veis com o usuÃ¡rio (independente das tags da imagem)
                     Exists(Select git.GrupoImagem 
                            From GrupoImagemTags git 
                            Inner Join UsuarioTags ut on git.Tags = ut.Tags 
@@ -394,7 +394,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     
                     or
                     
-                    -- Caso 3: Imagem com tags compatíveis com o usuário (independente das tags do grupo)
+                    -- Caso 3: Imagem com tags compatÃ­veis com o usuÃ¡rio (independente das tags do grupo)
                     Exists(Select igt.ImagemGrupoImagem 
                            From ImagemGrupoImagemTags igt 
                            Inner Join UsuarioTags ut on igt.Tags = ut.Tags 
@@ -402,7 +402,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     
                     or
                     
-                    -- Caso 4: Grupo sem tags, mas imagem com tags compatíveis 
+                    -- Caso 4: Grupo sem tags, mas imagem com tags compatÃ­veis 
                     (not exists(Select gdt.GrupoImagem From GrupoImagemTags gdt Where gdt.GrupoImagem = g.Id and gdt.UsuarioRemocao is null and gdt.DataHoraRemocao is null)
                      and Exists(Select igt.ImagemGrupoImagem 
                                 From ImagemGrupoImagemTags igt 

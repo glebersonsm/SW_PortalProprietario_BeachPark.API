@@ -1,12 +1,12 @@
-using Microsoft.Extensions.Configuration;
+Ôªøusing Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace SW_PortalProprietario.Infra.Data.RabbitMQ
 {
     /// <summary>
-    /// Gerenciador de conexıes RabbitMQ compartilhadas.
-    /// MantÈm uma conex„o singleton por tipo (Producer/Consumer) para evitar leak de conexıes.
+    /// Gerenciador de conex√µes RabbitMQ compartilhadas.
+    /// Mant√©m uma conex√£o singleton por tipo (Producer/Consumer) para evitar leak de conex√µes.
     /// </summary>
     public interface IRabbitMQConnectionManager : IDisposable
     {
@@ -48,7 +48,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ
                 var factory = CreateConnectionFactory("ProducerConnection");
                 _producerConnection = await factory.CreateConnectionAsync();
                 
-                _logger.LogInformation("Conex„o RabbitMQ Producer criada e compartilhada");
+                _logger.LogInformation("Conex√£o RabbitMQ Producer criada e compartilhada");
                 
                 return _producerConnection;
             }
@@ -79,7 +79,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ
                 var connection = await factory.CreateConnectionAsync();
                 
                 _consumerConnections[consumerName] = connection;
-                _logger.LogInformation($"Conex„o RabbitMQ Consumer '{consumerName}' criada e compartilhada");
+                _logger.LogInformation($"Conex√£o RabbitMQ Consumer '{consumerName}' criada e compartilhada");
                 
                 return connection;
             }
@@ -92,7 +92,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ
         public async Task<IChannel> CreateChannelAsync(IConnection connection)
         {
             if (!connection.IsOpen)
-                throw new InvalidOperationException("A conex„o RabbitMQ n„o est· aberta");
+                throw new InvalidOperationException("A conex√£o RabbitMQ n√£o est√° aberta");
 
             return await connection.CreateChannelAsync();
         }
@@ -142,7 +142,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ
                 {
                     _producerConnection.CloseAsync().GetAwaiter().GetResult();
                     _producerConnection.Dispose();
-                    _logger.LogInformation("Conex„o Producer fechada");
+                    _logger.LogInformation("Conex√£o Producer fechada");
                 }
 
                 foreach (var kvp in _consumerConnections)
@@ -151,7 +151,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ
                     {
                         kvp.Value.CloseAsync().GetAwaiter().GetResult();
                         kvp.Value.Dispose();
-                        _logger.LogInformation($"Conex„o Consumer '{kvp.Key}' fechada");
+                        _logger.LogInformation($"Conex√£o Consumer '{kvp.Key}' fechada");
                     }
                 }
 
@@ -161,7 +161,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao encerrar conexıes RabbitMQ");
+                _logger.LogError(ex, "Erro ao encerrar conex√µes RabbitMQ");
             }
 
             _disposed = true;

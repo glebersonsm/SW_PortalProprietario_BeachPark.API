@@ -1,4 +1,4 @@
-using FluentNHibernate.Mapping;
+ï»¿using FluentNHibernate.Mapping;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 
 namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
@@ -9,7 +9,7 @@ namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Sistema
         {
             Id(x => x.Id).GeneratedBy.Native("SagaExecution_");
 
-            // SagaId é string (GUID como string), não System.Guid
+            // SagaId Ã© string (GUID como string), nÃ£o System.Guid
             Map(b => b.SagaId).Length(100).Not.Nullable().Index("IX_SagaExecution_SagaId");
             Map(b => b.DataHoraCriacao).Nullable();
             Map(b => b.DataHoraAlteracao).Nullable();

@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using SW_PortalProprietario.Application.Interfaces;
@@ -20,8 +20,8 @@ namespace SW_PortalProprietario.Test.Audit
             _configurationMock = new Mock<IConfiguration>();
             _cacheMock = new Mock<ICacheStore>();
             
-            // Configuração padrão para testes (sem RabbitMQ real)
-            // Usar SetupGet para métodos de extensão GetValue
+            // ConfiguraÃ§Ã£o padrÃ£o para testes (sem RabbitMQ real)
+            // Usar SetupGet para mÃ©todos de extensÃ£o GetValue
             _configurationMock.Setup(x => x[It.Is<string>(s => s == "RabbitMqConnectionHost")]).Returns("localhost");
             _configurationMock.Setup(x => x[It.Is<string>(s => s == "RabbitMqConnectionUser")]).Returns("guest");
             _configurationMock.Setup(x => x[It.Is<string>(s => s == "RabbitMqConnectionPass")]).Returns("guest");
@@ -46,12 +46,12 @@ namespace SW_PortalProprietario.Test.Audit
             };
 
             // Act & Assert
-            // Como não temos RabbitMQ configurado nos testes, esperamos que a exceção seja tratada silenciosamente
-            // ou que o método complete sem lançar exceção
+            // Como nÃ£o temos RabbitMQ configurado nos testes, esperamos que a exceÃ§Ã£o seja tratada silenciosamente
+            // ou que o mÃ©todo complete sem lanÃ§ar exceÃ§Ã£o
             var exception = await Record.ExceptionAsync(async () => await _producer.EnqueueAuditLogAsync(message));
             
-            // O método não deve lançar exceção mesmo sem RabbitMQ (tratamento interno)
-            // Isso é esperado pois o método tem try-catch interno
+            // O mÃ©todo nÃ£o deve lanÃ§ar exceÃ§Ã£o mesmo sem RabbitMQ (tratamento interno)
+            // Isso Ã© esperado pois o mÃ©todo tem try-catch interno
         }
 
         [Fact(DisplayName = "EnqueueAuditLogAsync - Deve serializar mensagem corretamente")]
@@ -76,11 +76,11 @@ namespace SW_PortalProprietario.Test.Audit
             // Act & Assert
             var exception = await Record.ExceptionAsync(async () => await _producer.EnqueueAuditLogAsync(message));
             
-            // Não deve lançar exceção mesmo sem RabbitMQ
+            // NÃ£o deve lanÃ§ar exceÃ§Ã£o mesmo sem RabbitMQ
             exception.Should().BeNull();
         }
 
-        [Fact(DisplayName = "EnqueueAuditLogAsync - Deve remover espaços do nome da fila")]
+        [Fact(DisplayName = "EnqueueAuditLogAsync - Deve remover espaÃ§os do nome da fila")]
         public async Task EnqueueAuditLogAsync_DeveRemoverEspacos_DoNomeDaFila()
         {
             // Arrange
@@ -97,15 +97,15 @@ namespace SW_PortalProprietario.Test.Audit
             // Act & Assert
             var exception = await Record.ExceptionAsync(async () => await _producer.EnqueueAuditLogAsync(message));
             
-            // Não deve lançar exceção
+            // NÃ£o deve lanÃ§ar exceÃ§Ã£o
             exception.Should().BeNull();
         }
 
-        [Fact(DisplayName = "EnqueueAuditLogAsync - Deve tratar erro de conexão sem lançar exceção")]
+        [Fact(DisplayName = "EnqueueAuditLogAsync - Deve tratar erro de conexÃ£o sem lanÃ§ar exceÃ§Ã£o")]
         public async Task EnqueueAuditLogAsync_DeveTratarErroDeConexao_SemLancarExcecao()
         {
             // Arrange
-            // Configurar para um host inválido
+            // Configurar para um host invÃ¡lido
             _configurationMock.Setup(x => x[It.Is<string>(s => s == "RabbitMqConnectionHost")]).Returns("invalid-host-that-does-not-exist");
             
             var message = new AuditLogMessageEvent
@@ -117,10 +117,10 @@ namespace SW_PortalProprietario.Test.Audit
             };
 
             // Act & Assert
-            // O método deve tratar o erro internamente e não lançar exceção
+            // O mÃ©todo deve tratar o erro internamente e nÃ£o lanÃ§ar exceÃ§Ã£o
             var exception = await Record.ExceptionAsync(async () => await _producer.EnqueueAuditLogAsync(message));
             
-            // Não deve lançar exceção (tratamento interno)
+            // NÃ£o deve lanÃ§ar exceÃ§Ã£o (tratamento interno)
             exception.Should().BeNull();
         }
     }

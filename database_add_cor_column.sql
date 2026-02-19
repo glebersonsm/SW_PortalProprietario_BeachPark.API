@@ -1,5 +1,5 @@
--- Script para adicionar as colunas Cor e CorTexto nas tabelas GrupoDocumento e Documento
--- Execute este script no banco de dados antes de executar a aplicação
+﻿-- Script para adicionar as colunas Cor e CorTexto nas tabelas GrupoDocumento e Documento
+-- Execute este script no banco de dados antes de executar a aplicaÃ§Ã£o
 
 -- Adicionar coluna Cor na tabela GrupoDocumento
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('GrupoDocumento') AND name = 'Cor')
@@ -9,7 +9,7 @@ BEGIN
 END
 ELSE
 BEGIN
-    PRINT 'Coluna Cor já existe na tabela GrupoDocumento';
+    PRINT 'Coluna Cor jÃ¡ existe na tabela GrupoDocumento';
 END
 GO
 
@@ -21,7 +21,7 @@ BEGIN
 END
 ELSE
 BEGIN
-    PRINT 'Coluna CorTexto já existe na tabela GrupoDocumento';
+    PRINT 'Coluna CorTexto jÃ¡ existe na tabela GrupoDocumento';
 END
 GO
 
@@ -33,7 +33,7 @@ BEGIN
 END
 ELSE
 BEGIN
-    PRINT 'Coluna Cor já existe na tabela Documento';
+    PRINT 'Coluna Cor jÃ¡ existe na tabela Documento';
 END
 GO
 
@@ -45,6 +45,6 @@ BEGIN
 END
 ELSE
 BEGIN
-    PRINT 'Coluna CorTexto já existe na tabela Documento';
+    PRINT 'Coluna CorTexto jÃ¡ existe na tabela Documento';
 END
 GO

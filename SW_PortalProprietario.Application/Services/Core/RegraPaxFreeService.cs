@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -75,11 +75,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                             return searchResult.First();
                     }
                 }
-                throw exception ?? new Exception($"Não foi possível salvar a RegraPaxFree: ({regra.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({regra.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a RegraPaxFree: ({model.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -96,7 +96,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 RegraPaxFree regra = (await _repository.FindByHql<RegraPaxFree>($"From RegraPaxFree r Where r.UsuarioRemocao is null and r.DataHoraRemocao is null and r.Id = {model.Id}")).FirstOrDefault();
                 if (regra == null)
-                    throw new ArgumentException($"Não foi encontrada a regra com Id: {model.Id}");
+                    throw new ArgumentException($"NÃ£o foi encontrada a regra com Id: {model.Id}");
 
                 regra.Nome = model.Nome;
                 regra.DataInicioVigencia = model.DataInicioVigencia;
@@ -124,14 +124,14 @@ namespace SW_PortalProprietario.Application.Services.Core
                     }
                     else 
                     {
-                        throw new Exception($"Não foi possível salvar a RegraPaxFree: ({regra.Nome})");
+                        throw new Exception($"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({regra.Nome})");
                     }
                 }
-                throw exception ?? new Exception($"Não foi possível salvar a RegraPaxFree: ({regra.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({regra.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a RegraPaxFree: ({model.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -149,12 +149,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var regra = (await _repository.FindByHql<RegraPaxFree>($"From RegraPaxFree r Where r.DataHoraRemocao is null and r.UsuarioRemocao is null and r.Id = {id}")).FirstOrDefault();
                 if (regra is null)
                 {
-                    throw new ArgumentException($"Não foi encontrada a regra com Id: {id}!");
+                    throw new ArgumentException($"NÃ£o foi encontrada a regra com Id: {id}!");
                 }
 
                 _repository.BeginTransaction();
 
-                // Remover configurações
+                // Remover configuraÃ§Ãµes
                 var configuracoes = (await _repository.FindByHql<RegraPaxFreeConfiguracao>($"From RegraPaxFreeConfiguracao rpc Where rpc.RegraPaxFree.Id = {regra.Id}")).AsList();
                 foreach (var config in configuracoes)
                 {
@@ -175,7 +175,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -184,7 +184,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar a regra: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar a regra: {id}");
                 throw;
             }
         }
@@ -232,12 +232,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                             QuantidadeAdultos = b.QuantidadeAdultos,
                             QuantidadePessoasFree = b.QuantidadePessoasFree,
                             IdadeMaximaAnos = b.IdadeMaximaAnos,
-                            TipoOperadorIdade = b.TipoOperadorIdade ?? "<=", // Valor padrão para compatibilidade
-                            TipoDataReferencia = b.TipoDataReferencia ?? "RESERVA" // Valor padrão para compatibilidade
+                            TipoOperadorIdade = b.TipoOperadorIdade ?? "<=", // Valor padrÃ£o para compatibilidade
+                            TipoDataReferencia = b.TipoDataReferencia ?? "RESERVA" // Valor padrÃ£o para compatibilidade
                         }).AsList();
                     }
 
-                    // Buscar hotéis vinculados
+                    // Buscar hotÃ©is vinculados
                     var hoteis = (await _repository.FindByHql<RegraPaxFreeHotel>($"From RegraPaxFreeHotel rph Inner Join Fetch rph.RegraPaxFree r Where rph.UsuarioRemocao is null and rph.DataHoraRemocao is null and r.Id = {item.Id}")).AsList();
                     if (hoteis != null && hoteis.Any())
                     {
@@ -269,8 +269,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                                         (r.DataFimVigencia is null or r.DataFimVigencia >= :dataAtual)");
             
             // Se hotelId foi informado, filtrar regras que:
-            // - Não têm hotéis vinculados (se aplicam a todos) OU
-            // - Têm o hotelId específico vinculado
+            // - NÃ£o tÃªm hotÃ©is vinculados (se aplicam a todos) OU
+            // - TÃªm o hotelId especÃ­fico vinculado
             if (hotelId.HasValue && hotelId.Value > 0)
             {
                 sb.Append(@" and (
@@ -313,12 +313,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                             QuantidadeAdultos = b.QuantidadeAdultos,
                             QuantidadePessoasFree = b.QuantidadePessoasFree,
                             IdadeMaximaAnos = b.IdadeMaximaAnos,
-                            TipoOperadorIdade = b.TipoOperadorIdade ?? "<=", // Valor padrão para compatibilidade
-                            TipoDataReferencia = b.TipoDataReferencia ?? "RESERVA" // Valor padrão para compatibilidade
+                            TipoOperadorIdade = b.TipoOperadorIdade ?? "<=", // Valor padrÃ£o para compatibilidade
+                            TipoDataReferencia = b.TipoDataReferencia ?? "RESERVA" // Valor padrÃ£o para compatibilidade
                         }).AsList();
                     }
 
-                    // Buscar hotéis vinculados
+                    // Buscar hotÃ©is vinculados
                     var hoteis = (await _repository.FindByHql<RegraPaxFreeHotel>($"From RegraPaxFreeHotel rph Inner Join Fetch rph.RegraPaxFree r Where rph.UsuarioRemocao is null and rph.DataHoraRemocao is null and r.Id = {regraResult.Id}")).AsList();
                     if (hoteis != null && hoteis.Any())
                     {
@@ -377,8 +377,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                     config.QuantidadeAdultos = configInput.QuantidadeAdultos;
                     config.QuantidadePessoasFree = configInput.QuantidadePessoasFree;
                     config.IdadeMaximaAnos = configInput.IdadeMaximaAnos;
-                    config.TipoOperadorIdade = string.IsNullOrEmpty(configInput.TipoOperadorIdade) ? "<=" : configInput.TipoOperadorIdade; // Valor padrão "<=" para compatibilidade
-                    config.TipoDataReferencia = string.IsNullOrEmpty(configInput.TipoDataReferencia) ? "RESERVA" : configInput.TipoDataReferencia; // Valor padrão "RESERVA" para compatibilidade
+                    config.TipoOperadorIdade = string.IsNullOrEmpty(configInput.TipoOperadorIdade) ? "<=" : configInput.TipoOperadorIdade; // Valor padrÃ£o "<=" para compatibilidade
+                    config.TipoDataReferencia = string.IsNullOrEmpty(configInput.TipoDataReferencia) ? "RESERVA" : configInput.TipoDataReferencia; // Valor padrÃ£o "RESERVA" para compatibilidade
 
                     await _repository.Save(config);
                 }
@@ -441,7 +441,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         hotel = (await _repository.FindByHql<RegraPaxFreeHotel>($"From RegraPaxFreeHotel rph Where rph.UsuarioRemocao is null and rph.DataHoraRemocao is null and rph.Id = {hotelInput.Id.Value} and rph.RegraPaxFree.Id = {regra.Id}")).FirstOrDefault();
                     }
 
-                    // Verificar se já existe hotel com mesmo HotelId para esta regra
+                    // Verificar se jÃ¡ existe hotel com mesmo HotelId para esta regra
                     if (hotel == null)
                     {
                         hotel = (await _repository.FindByHql<RegraPaxFreeHotel>($"From RegraPaxFreeHotel rph Where rph.UsuarioRemocao is null and rph.DataHoraRemocao is null and rph.HotelId = {hotelInput.HotelId} and rph.RegraPaxFree.Id = {regra.Id}")).FirstOrDefault();

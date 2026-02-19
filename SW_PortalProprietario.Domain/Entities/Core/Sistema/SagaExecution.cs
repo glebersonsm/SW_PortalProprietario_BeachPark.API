@@ -1,17 +1,17 @@
-namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
+﻿namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
 {
     /// <summary>
-    /// Representa uma execução completa de uma Saga (transação distribuída)
+    /// Representa uma execuÃ§Ã£o completa de uma Saga (transaÃ§Ã£o distribuÃ­da)
     /// </summary>
     public class SagaExecution : EntityBaseCore
     {
         /// <summary>
-        /// ID único da Saga (GUID)
+        /// ID Ãºnico da Saga (GUID)
         /// </summary>
         public virtual string SagaId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Tipo da operação (Ex: "ReservaTimeSharing", "PagamentoCartao")
+        /// Tipo da operaÃ§Ã£o (Ex: "ReservaTimeSharing", "PagamentoCartao")
         /// </summary>
         public virtual string OperationType { get; set; } = string.Empty;
 
@@ -21,12 +21,12 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string Status { get; set; } = "Running";
 
         /// <summary>
-        /// Dados de entrada da operação (JSON)
+        /// Dados de entrada da operaÃ§Ã£o (JSON)
         /// </summary>
         public virtual string? InputData { get; set; }
 
         /// <summary>
-        /// Resultado final da operação (JSON)
+        /// Resultado final da operaÃ§Ã£o (JSON)
         /// </summary>
         public virtual string? OutputData { get; set; }
 
@@ -36,22 +36,22 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? ErrorMessage { get; set; }
 
         /// <summary>
-        /// Data/hora de início
+        /// Data/hora de inÃ­cio
         /// </summary>
         public virtual DateTime DataHoraInicio { get; set; }
 
         /// <summary>
-        /// Data/hora de conclusão
+        /// Data/hora de conclusÃ£o
         /// </summary>
         public virtual DateTime? DataHoraConclusao { get; set; }
 
         /// <summary>
-        /// Duração total em milissegundos
+        /// DuraÃ§Ã£o total em milissegundos
         /// </summary>
         public virtual long? DuracaoMs { get; set; }
 
         /// <summary>
-        /// Usuário que iniciou a operação
+        /// UsuÃ¡rio que iniciou a operaÃ§Ã£o
         /// </summary>
         public virtual int? UsuarioId { get; set; }
 

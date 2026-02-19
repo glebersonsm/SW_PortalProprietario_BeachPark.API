@@ -1,50 +1,50 @@
-# ConfiguraÁ„o do Schema PostgreSQL
+Ôªø# Configura√ß√£o do Schema PostgreSQL
 
-## Vis„o Geral
+## Vis√£o Geral
 
 Este documento descreve como o schema "portalohana" foi configurado no NHibernate para o PostgreSQL.
 
-## AlteraÁıes Realizadas
+## Altera√ß√µes Realizadas
 
-Foram adicionadas configuraÁıes de `default_schema` em todos os arquivos de extens„o do NHibernate que suportam PostgreSQL:
+Foram adicionadas configura√ß√µes de `default_schema` em todos os arquivos de extens√£o do NHibernate que suportam PostgreSQL:
 
 ### 1. NHibernateExtensions.cs
-ConfiguraÁ„o para a conex„o principal (`DEFAULT_CONNECTION`):
+Configura√ß√£o para a conex√£o principal (`DEFAULT_CONNECTION`):
 ```csharp
 .Raw("default_schema", "portalohana")
 ```
 
 ### 2. NHibernateExtensionsCM.cs
-ConfiguraÁ„o para a conex„o CM (`CM_CONNECTION`):
+Configura√ß√£o para a conex√£o CM (`CM_CONNECTION`):
 ```csharp
 .Raw("default_schema", "portalohana")
 ```
 
 ### 3. NHibernateExtensionsPortalEsol.cs
-ConfiguraÁ„o para a conex„o Portal eSolution (`ESOL_PORTAL_CONNECTION`):
+Configura√ß√£o para a conex√£o Portal eSolution (`ESOL_PORTAL_CONNECTION`):
 ```csharp
 .Raw("default_schema", "portalohana")
 ```
 
 ### 4. NHibernateExtensionsAccessCenter.cs
-ConfiguraÁ„o para a conex„o Access Center (`ESOL_ACCESS_CENTER_CONNECTION`):
+Configura√ß√£o para a conex√£o Access Center (`ESOL_ACCESS_CENTER_CONNECTION`):
 ```csharp
 .Raw("default_schema", "portalohana")
 ```
 
 ### 5. NHibernateHostedServiceExtensions.cs
-ConfiguraÁ„o para os serviÁos hospedados (Hosted Services):
+Configura√ß√£o para os servi√ßos hospedados (Hosted Services):
 ```csharp
 .Raw("default_schema", "portalohana")
 ```
 
 ## Como Funciona
 
-Quando vocÍ configura o `default_schema` no NHibernate:
+Quando voc√™ configura o `default_schema` no NHibernate:
 
-1. **Todas as consultas SQL** geradas pelo NHibernate usar„o automaticamente o schema configurado
-2. **N„o È necess·rio** adicionar `Schema()` em cada mapeamento individual
-3. **Todas as tabelas** ser„o acessadas dentro do schema "portalohana"
+1. **Todas as consultas SQL** geradas pelo NHibernate usar√£o automaticamente o schema configurado
+2. **N√£o √© necess√°rio** adicionar `Schema()` em cada mapeamento individual
+3. **Todas as tabelas** ser√£o acessadas dentro do schema "portalohana"
 
 Exemplo de query gerada:
 ```sql
@@ -63,15 +63,15 @@ A connection string no arquivo `.env` deve estar configurada assim:
 DEFAULT_CONNECTION=Host=dbpg-moreia.bpark.net.br;Port=5440;Database=bdbp;Username=sw;Password=svtQY7q10xVi
 ```
 
-**Nota:** O schema n„o precisa ser especificado na connection string, pois È configurado no NHibernate.
+**Nota:** O schema n√£o precisa ser especificado na connection string, pois √© configurado no NHibernate.
 
-## VerificaÁ„o
+## Verifica√ß√£o
 
-Para verificar se o schema est· sendo usado corretamente:
+Para verificar se o schema est√° sendo usado corretamente:
 
-1. **Habilitar logs SQL do NHibernate** (j· est· com `.ShowSql()` em alguns ambientes)
-2. **Verificar os logs** e confirmar que as queries est„o usando `portalohana.tabela`
-3. **Testar consultas** e verificar se os dados est„o sendo retornados corretamente
+1. **Habilitar logs SQL do NHibernate** (j√° est√° com `.ShowSql()` em alguns ambientes)
+2. **Verificar os logs** e confirmar que as queries est√£o usando `portalohana.tabela`
+3. **Testar consultas** e verificar se os dados est√£o sendo retornados corretamente
 
 ## Mapeamentos
 
@@ -87,24 +87,24 @@ public class UsuarioMap : ClassMap<Usuario>
         Map(x => x.Nome);
         Map(x => x.Email);
         
-        Table("Usuario"); // N„o È necess·rio adicionar Schema("portalohana")
+        Table("Usuario"); // N√£o √© necess√°rio adicionar Schema("portalohana")
     }
 }
 ```
 
-O NHibernate automaticamente usar· `portalohana.Usuario` por causa da configuraÁ„o `default_schema`.
+O NHibernate automaticamente usar√° `portalohana.Usuario` por causa da configura√ß√£o `default_schema`.
 
 ## Ambientes Suportados
 
-Esta configuraÁ„o funciona **apenas para PostgreSQL**. Para outros bancos de dados (SQL Server, Oracle, MySQL), o comportamento continua o mesmo de antes:
+Esta configura√ß√£o funciona **apenas para PostgreSQL**. Para outros bancos de dados (SQL Server, Oracle, MySQL), o comportamento continua o mesmo de antes:
 
-- **SQL Server**: Usa o schema padr„o `dbo`
-- **Oracle**: Usa o schema do usu·rio conectado
-- **SQLite**: N„o suporta schemas
+- **SQL Server**: Usa o schema padr√£o `dbo`
+- **Oracle**: Usa o schema do usu√°rio conectado
+- **SQLite**: N√£o suporta schemas
 
-## MigraÁ„o de Dados
+## Migra√ß√£o de Dados
 
-Se vocÍ est· migrando de um schema diferente para "portalohana":
+Se voc√™ est√° migrando de um schema diferente para "portalohana":
 
 1. **Criar o schema** no PostgreSQL:
    ```sql
@@ -127,8 +127,8 @@ Se vocÍ est· migrando de um schema diferente para "portalohana":
 
 ### Erro: "relation does not exist"
 - Verifique se o schema "portalohana" existe no banco
-- Verifique se o usu·rio tem permissıes no schema
-- Confirme que as tabelas est„o no schema correto
+- Verifique se o usu√°rio tem permiss√µes no schema
+- Confirme que as tabelas est√£o no schema correto
 
 ### Erro: "schema does not exist"
 ```sql
@@ -136,15 +136,15 @@ CREATE SCHEMA portalohana;
 GRANT ALL ON SCHEMA portalohana TO sw;
 ```
 
-### Permissıes
+### Permiss√µes
 ```sql
--- Conceder permissıes ao usu·rio
+-- Conceder permiss√µes ao usu√°rio
 GRANT USAGE ON SCHEMA portalohana TO sw;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA portalohana TO sw;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA portalohana TO sw;
 ```
 
-## ReferÍncias
+## Refer√™ncias
 
 - [NHibernate Configuration](https://nhibernate.info/doc/nhibernate-reference/session-configuration.html)
 - [FluentNHibernate Wiki](https://github.com/FluentNHibernate/fluent-nhibernate/wiki)
@@ -152,9 +152,9 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA portalohana TO sw;
 
 ## Suporte
 
-Para d˙vidas ou problemas, contate a equipe de desenvolvimento.
+Para d√∫vidas ou problemas, contate a equipe de desenvolvimento.
 
 ---
 
-**⁄ltima atualizaÁ„o:** $(Get-Date -Format "yyyy-MM-dd")
-**Respons·vel:** Equipe de Desenvolvimento SW SoluÁıes
+**√öltima atualiza√ß√£o:** $(Get-Date -Format "yyyy-MM-dd")
+**Respons√°vel:** Equipe de Desenvolvimento SW Solu√ß√µes

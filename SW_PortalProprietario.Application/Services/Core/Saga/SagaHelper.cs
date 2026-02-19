@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Interfaces.Saga;
+﻿using SW_PortalProprietario.Application.Interfaces.Saga;
 
 namespace SW_PortalProprietario.Application.Services.Core.Saga
 {
@@ -83,7 +83,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
         }
 
         /// <summary>
-        /// Adiciona um step à Saga
+        /// Adiciona um step Ã  Saga
         /// </summary>
         public SagaBuilder<TInput> AddStep<TOutput>(
             string stepName,
@@ -108,7 +108,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
         }
 
         /// <summary>
-        /// Adiciona um step sem retorno à Saga
+        /// Adiciona um step sem retorno Ã  Saga
         /// </summary>
         public SagaBuilder<TInput> AddStep(
             string stepName,
@@ -157,7 +157,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
                             ct);
                     }
 
-                    // Executa função final
+                    // Executa funÃ§Ã£o final
                     return await finalFunc(input);
                 },
                 cancellationToken);
@@ -173,7 +173,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Saga
     }
 
     /// <summary>
-    /// Extensões para criar SagaBuilder
+    /// ExtensÃµes para criar SagaBuilder
     /// </summary>
     public static class SagaBuilderExtensions
     {

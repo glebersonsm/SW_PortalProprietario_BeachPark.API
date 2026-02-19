@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+ï»¿using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.TimeSharing;
@@ -10,8 +10,8 @@ using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 namespace SW_PortalProprietario.Application.Services.TimeSharing
 {
     /// <summary>
-    /// Serviço de aplicação para reservas TimeSharing com suporte a transações distribuídas
-    /// Encapsula o padrão Saga, mantendo os controllers limpos
+    /// ServiÃ§o de aplicaÃ§Ã£o para reservas TimeSharing com suporte a transaÃ§Ãµes distribuÃ­das
+    /// Encapsula o padrÃ£o Saga, mantendo os controllers limpos
     /// </summary>
     public class TimeSharingReservaService : ITimeSharingReservaService
     {
@@ -48,10 +48,10 @@ namespace SW_PortalProprietario.Application.Services.TimeSharing
         }
 
         /// <summary>
-        /// Cria uma reserva usando transação distribuída (Saga Pattern)
+        /// Cria uma reserva usando transaÃ§Ã£o distribuÃ­da (Saga Pattern)
         /// </summary>
         /// <param name="model">Dados da reserva</param>
-        /// <param name="usarSaga">Se true, usa Saga; se false, usa método tradicional</param>
+        /// <param name="usarSaga">Se true, usa Saga; se false, usa mÃ©todo tradicional</param>
         /// <returns>Resultado com ID da reserva ou erro</returns>
         public async Task<ResultModel<long>> CriarReservaAsync(
             InclusaoReservaInputModel model, 
@@ -59,18 +59,18 @@ namespace SW_PortalProprietario.Application.Services.TimeSharing
         {
             if (!usarSaga)
             {
-                // Fallback: usar método tradicional sem Saga
+                // Fallback: usar mÃ©todo tradicional sem Saga
                 return await CriarReservaTradicionalAsync(model);
             }
 
             var operationId = Guid.NewGuid().ToString();
             
-            _logger.LogInformation("?? [RESERVA-SERVICE] Iniciando criação com Saga - OperationId: {OperationId}", 
+            _logger.LogInformation("?? [RESERVA-SERVICE] Iniciando criaÃ§Ã£o com Saga - OperationId: {OperationId}", 
                 operationId);
 
             try
             {
-                // Definir steps da transação distribuída
+                // Definir steps da transaÃ§Ã£o distribuÃ­da
                 var steps = new List<IDistributedTransactionStep>
                 {
                     new ValidacaoCmStep(_repositoryCm, _validacaoCmLogger, model),
@@ -85,7 +85,7 @@ namespace SW_PortalProprietario.Application.Services.TimeSharing
 
                 if (success)
                 {
-                    _logger.LogInformation("? [RESERVA-SERVICE] Criação concluída - OperationId: {OperationId}", 
+                    _logger.LogInformation("? [RESERVA-SERVICE] CriaÃ§Ã£o concluÃ­da - OperationId: {OperationId}", 
                         operationId);
 
                     return new ResultModel<long>(0) // TODO: Retornar ID real da reserva
@@ -100,7 +100,7 @@ namespace SW_PortalProprietario.Application.Services.TimeSharing
                     };
                 }
 
-                _logger.LogWarning("?? [RESERVA-SERVICE] Falha na criação - OperationId: {OperationId} - Erro: {Error}", 
+                _logger.LogWarning("?? [RESERVA-SERVICE] Falha na criaÃ§Ã£o - OperationId: {OperationId} - Erro: {Error}", 
                     operationId, errorMessage);
 
                 return new ResultModel<long>(-1)
@@ -133,7 +133,7 @@ namespace SW_PortalProprietario.Application.Services.TimeSharing
         }
 
         /// <summary>
-        /// Cancela uma reserva usando transação distribuída
+        /// Cancela uma reserva usando transaÃ§Ã£o distribuÃ­da
         /// </summary>
         public async Task<ResultModel<bool>> CancelarReservaAsync(
             CancelarReservaTsModel model,
@@ -141,7 +141,7 @@ namespace SW_PortalProprietario.Application.Services.TimeSharing
         {
             if (!usarSaga)
             {
-                // Fallback: usar método tradicional
+                // Fallback: usar mÃ©todo tradicional
                 var resultado = await _timeSharingProvider.CancelarReserva(model);
                 return new ResultModel<bool>(resultado.GetValueOrDefault(false))
                 {
@@ -195,7 +195,7 @@ namespace SW_PortalProprietario.Application.Services.TimeSharing
 
         private async Task<ResultModel<long>> CriarReservaTradicionalAsync(InclusaoReservaInputModel model)
         {
-            _logger.LogInformation("?? [RESERVA-SERVICE] Usando método tradicional (sem Saga)");
+            _logger.LogInformation("?? [RESERVA-SERVICE] Usando mÃ©todo tradicional (sem Saga)");
 
             try
             {
@@ -209,7 +209,7 @@ namespace SW_PortalProprietario.Application.Services.TimeSharing
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro no método tradicional");
+                _logger.LogError(ex, "Erro no mÃ©todo tradicional");
                 return new ResultModel<long>(-1)
                 {
                     Success = false,

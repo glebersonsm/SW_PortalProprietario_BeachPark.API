@@ -1,11 +1,11 @@
-# ?? Guia de ContribuiÁ„o
+Ôªø# ?? Guia de Contribui√ß√£o
 
-Obrigado por considerar contribuir com o projeto SW Portal Propriet·rio!
+Obrigado por considerar contribuir com o projeto SW Portal Propriet√°rio!
 
-## ?? Õndice
+## ?? √çndice
 
 - [Como Contribuir](#-como-contribuir)
-- [Padrıes de CÛdigo](#-padrıes-de-cÛdigo)
+- [Padr√µes de C√≥digo](#-padr√µes-de-c√≥digo)
 - [Processo de Pull Request](#-processo-de-pull-request)
 - [Reportar Bugs](#-reportar-bugs)
 - [Sugerir Melhorias](#-sugerir-melhorias)
@@ -14,7 +14,7 @@ Obrigado por considerar contribuir com o projeto SW Portal Propriet·rio!
 
 ## ?? Como Contribuir
 
-### 1. Fork o RepositÛrio
+### 1. Fork o Reposit√≥rio
 
 ```bash
 # Fazer fork no GitHub e clonar localmente
@@ -31,12 +31,12 @@ git checkout -b feature/minha-feature
 git checkout -b fix/meu-bug-fix
 ```
 
-### 3. Fazer AlteraÁıes
+### 3. Fazer Altera√ß√µes
 
-- Escreva cÛdigo limpo e bem documentado
-- Siga os padrıes de cÛdigo do projeto
-- Adicione testes quando aplic·vel
-- Atualize a documentaÁ„o se necess·rio
+- Escreva c√≥digo limpo e bem documentado
+- Siga os padr√µes de c√≥digo do projeto
+- Adicione testes quando aplic√°vel
+- Atualize a documenta√ß√£o se necess√°rio
 
 ### 4. Commit
 
@@ -61,9 +61,9 @@ git push origin feature/minha-feature
 
 ---
 
-## ?? Padrıes de CÛdigo
+## ?? Padr√µes de C√≥digo
 
-### ConvenÁıes de Nomenclatura
+### Conven√ß√µes de Nomenclatura
 
 #### Classes e Interfaces
 ```csharp
@@ -74,19 +74,19 @@ public class UserService { }
 public interface IUserService { }
 ```
 
-#### MÈtodos
+#### M√©todos
 ```csharp
-// PascalCase para mÈtodos p˙blicos
+// PascalCase para m√©todos p√∫blicos
 public async Task<User> GetUserById(int id) { }
 
-// camelCase para mÈtodos privados
+// camelCase para m√©todos privados
 private async Task validateUser(User user) { }
 ```
 
-#### Vari·veis
+#### Vari√°veis
 ```csharp
-// camelCase para vari·veis locais
-var userName = "Jo„o";
+// camelCase para vari√°veis locais
+var userName = "Jo√£o";
 
 // _camelCase para campos privados
 private readonly ILogger _logger;
@@ -95,7 +95,7 @@ private readonly ILogger _logger;
 public string UserName { get; set; }
 ```
 
-### Padrıes de CÛdigo
+### Padr√µes de C√≥digo
 
 #### Async/Await
 ```csharp
@@ -114,7 +114,7 @@ public User GetUser(int id)
 }
 ```
 
-#### Tratamento de ExceÁıes
+#### Tratamento de Exce√ß√µes
 ```csharp
 // ? Correto
 try
@@ -130,14 +130,14 @@ catch (Exception ex)
     throw;
 }
 
-// ? Incorreto - nunca engolir exceÁıes
+// ? Incorreto - nunca engolir exce√ß√µes
 catch (Exception ex)
 {
     // Fazer nada
 }
 ```
 
-#### InjeÁ„o de DependÍncia
+#### Inje√ß√£o de Depend√™ncia
 ```csharp
 // ? Correto - injetar interfaces
 public class UserService : IUserService
@@ -183,60 +183,60 @@ SW_PortalProprietario.Application/
 
 Antes de submeter seu PR, verifique:
 
-- [ ] O cÛdigo compila sem erros
+- [ ] O c√≥digo compila sem erros
 - [ ] Todos os testes passam
-- [ ] Novos testes foram adicionados (se aplic·vel)
-- [ ] A documentaÁ„o foi atualizada (se aplic·vel)
-- [ ] O cÛdigo segue os padrıes do projeto
-- [ ] Commit messages s„o descritivas
-- [ ] N„o h· conflitos com a branch master
+- [ ] Novos testes foram adicionados (se aplic√°vel)
+- [ ] A documenta√ß√£o foi atualizada (se aplic√°vel)
+- [ ] O c√≥digo segue os padr√µes do projeto
+- [ ] Commit messages s√£o descritivas
+- [ ] N√£o h√° conflitos com a branch master
 
 ### Template de PR
 
 ```markdown
-## DescriÁ„o
-Breve descriÁ„o das alteraÁıes
+## Descri√ß√£o
+Breve descri√ß√£o das altera√ß√µes
 
-## Tipo de MudanÁa
+## Tipo de Mudan√ßa
 - [ ] Bug fix
 - [ ] Nova feature
 - [ ] Breaking change
-- [ ] DocumentaÁ„o
+- [ ] Documenta√ß√£o
 
 ## Como Testar
-Passos para testar as alteraÁıes
+Passos para testar as altera√ß√µes
 
 ## Checklist
-- [ ] CÛdigo compila
+- [ ] C√≥digo compila
 - [ ] Testes passam
-- [ ] DocumentaÁ„o atualizada
+- [ ] Documenta√ß√£o atualizada
 ```
 
-### ConvenÁıes de Commit
+### Conven√ß√µes de Commit
 
-Seguimos o padr„o [Conventional Commits](https://www.conventionalcommits.org/):
+Seguimos o padr√£o [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
-<tipo>(<escopo>): <descriÁ„o>
+<tipo>(<escopo>): <descri√ß√£o>
 
 [corpo opcional]
 
-[rodapÈ opcional]
+[rodap√© opcional]
 ```
 
 **Tipos:**
 - `feat`: Nova funcionalidade
-- `fix`: CorreÁ„o de bug
-- `docs`: AlteraÁ„o de documentaÁ„o
-- `style`: FormataÁ„o, ponto e vÌrgula faltando, etc
-- `refactor`: RefatoraÁ„o de cÛdigo
-- `test`: AdiÁ„o ou modificaÁ„o de testes
-- `chore`: ManutenÁ„o, configuraÁ„o, etc
+- `fix`: Corre√ß√£o de bug
+- `docs`: Altera√ß√£o de documenta√ß√£o
+- `style`: Formata√ß√£o, ponto e v√≠rgula faltando, etc
+- `refactor`: Refatora√ß√£o de c√≥digo
+- `test`: Adi√ß√£o ou modifica√ß√£o de testes
+- `chore`: Manuten√ß√£o, configura√ß√£o, etc
 
 **Exemplos:**
 ```
-feat(auth): adiciona autenticaÁ„o 2FA
-fix(user): corrige validaÁ„o de email
+feat(auth): adiciona autentica√ß√£o 2FA
+fix(user): corrige valida√ß√£o de email
 docs(deploy): atualiza guia de deploy Linux
 refactor(repository): melhora performance de consultas
 ```
@@ -247,15 +247,15 @@ refactor(repository): melhora performance de consultas
 
 ### Antes de Reportar
 
-1. Verifique se o bug j· foi reportado nas [Issues](https://github.com/glebersonsm/SW_PortalProprietario_BeachPark.API/issues)
-2. Certifique-se de que est· usando a vers„o mais recente
+1. Verifique se o bug j√° foi reportado nas [Issues](https://github.com/glebersonsm/SW_PortalProprietario_BeachPark.API/issues)
+2. Certifique-se de que est√° usando a vers√£o mais recente
 3. Tente reproduzir o bug em ambiente limpo
 
 ### Template de Bug Report
 
 ```markdown
-## DescriÁ„o do Bug
-DescriÁ„o clara e concisa do bug
+## Descri√ß√£o do Bug
+Descri√ß√£o clara e concisa do bug
 
 ## Passos para Reproduzir
 1. Ir para '...'
@@ -266,10 +266,10 @@ DescriÁ„o clara e concisa do bug
 O que deveria acontecer
 
 ## Comportamento Atual
-O que est· acontecendo
+O que est√° acontecendo
 
 ## Screenshots
-Se aplic·vel
+Se aplic√°vel
 
 ## Ambiente
 - OS: [ex: Ubuntu 22.04]
@@ -281,8 +281,8 @@ Se aplic·vel
 Cole logs relevantes aqui
 ```
 
-## InformaÁıes Adicionais
-Qualquer outra informaÁ„o relevante
+## Informa√ß√µes Adicionais
+Qualquer outra informa√ß√£o relevante
 ```
 
 ---
@@ -295,14 +295,14 @@ Qualquer outra informaÁ„o relevante
 ## Problema
 Descreva o problema que esta feature resolveria
 
-## SoluÁ„o Proposta
-DescriÁ„o clara da soluÁ„o proposta
+## Solu√ß√£o Proposta
+Descri√ß√£o clara da solu√ß√£o proposta
 
 ## Alternativas Consideradas
-Outras soluÁıes que vocÍ considerou
+Outras solu√ß√µes que voc√™ considerou
 
-## InformaÁıes Adicionais
-Mockups, exemplos de cÛdigo, etc
+## Informa√ß√µes Adicionais
+Mockups, exemplos de c√≥digo, etc
 ```
 
 ---
@@ -315,7 +315,7 @@ Mockups, exemplos de cÛdigo, etc
 # Executar todos os testes
 dotnet test
 
-# Executar testes especÌficos
+# Executar testes espec√≠ficos
 dotnet test --filter "FullyQualifiedName~UserServiceTest"
 
 # Executar com cobertura
@@ -325,7 +325,7 @@ dotnet test /p:CollectCoverage=true
 ### Escrever Testes
 
 ```csharp
-[Fact(DisplayName = "GetUser - Deve retornar usu·rio quando existe")]
+[Fact(DisplayName = "GetUser - Deve retornar usu√°rio quando existe")]
 public async Task GetUser_DeveRetornarUsuario_QuandoExiste()
 {
     // Arrange
@@ -345,26 +345,26 @@ public async Task GetUser_DeveRetornarUsuario_QuandoExiste()
 
 ---
 
-## ?? DocumentaÁ„o
+## ?? Documenta√ß√£o
 
-### Atualizar DocumentaÁ„o
+### Atualizar Documenta√ß√£o
 
-Ao fazer alteraÁıes, atualize:
+Ao fazer altera√ß√µes, atualize:
 
-1. **README.md** - Se a mudanÁa afeta o uso geral
+1. **README.md** - Se a mudan√ßa afeta o uso geral
 2. **docs/DEPLOY_LINUX.md** - Se afeta o deploy
-3. **XML Comments** - Para mÈtodos p˙blicos
+3. **XML Comments** - Para m√©todos p√∫blicos
 4. **CHANGELOG.md** - Adicionar entrada
 
-### Exemplo de Coment·rio XML
+### Exemplo de Coment√°rio XML
 
 ```csharp
 /// <summary>
-/// ObtÈm um usu·rio pelo ID.
+/// Obt√©m um usu√°rio pelo ID.
 /// </summary>
-/// <param name="id">ID do usu·rio</param>
-/// <returns>Usu·rio encontrado ou null</returns>
-/// <exception cref="ArgumentException">Se o ID for inv·lido</exception>
+/// <param name="id">ID do usu√°rio</param>
+/// <returns>Usu√°rio encontrado ou null</returns>
+/// <exception cref="ArgumentException">Se o ID for inv√°lido</exception>
 public async Task<User?> GetUserAsync(int id)
 {
     if (id <= 0)
@@ -376,25 +376,25 @@ public async Task<User?> GetUserAsync(int id)
 
 ---
 
-## ?? Boas Pr·ticas
+## ?? Boas Pr√°ticas
 
 ### DOs
 
-? Escreva cÛdigo limpo e legÌvel  
-? Adicione coment·rios explicativos quando necess·rio  
-? Siga os padrıes do projeto  
+? Escreva c√≥digo limpo e leg√≠vel  
+? Adicione coment√°rios explicativos quando necess√°rio  
+? Siga os padr√µes do projeto  
 ? Escreva testes para novas funcionalidades  
 ? Mantenha os commits pequenos e focados  
-? Atualize a documentaÁ„o  
-? PeÁa ajuda quando necess·rio  
+? Atualize a documenta√ß√£o  
+? Pe√ßa ajuda quando necess√°rio  
 
 ### DON'Ts
 
-? Commitar cÛdigo que n„o compila  
-? Fazer commit de arquivos de configuraÁ„o com senhas  
-? Fazer PRs gigantes com muitas mudanÁas  
+? Commitar c√≥digo que n√£o compila  
+? Fazer commit de arquivos de configura√ß√£o com senhas  
+? Fazer PRs gigantes com muitas mudan√ßas  
 ? Ignorar warnings do compilador  
-? Deixar cÛdigo comentado  
+? Deixar c√≥digo comentado  
 ? Usar valores hardcoded  
 ? Fazer merge direto na master  
 
@@ -402,7 +402,7 @@ public async Task<User?> GetUserAsync(int id)
 
 ## ?? Suporte
 
-Se tiver d˙vidas sobre como contribuir:
+Se tiver d√∫vidas sobre como contribuir:
 
 - **Email:** contato@swsolucoes.inf.br
 - **Issues:** https://github.com/glebersonsm/SW_PortalProprietario_BeachPark.API/issues
@@ -410,9 +410,9 @@ Se tiver d˙vidas sobre como contribuir:
 
 ---
 
-## ?? LicenÁa
+## ?? Licen√ßa
 
-Ao contribuir, vocÍ concorda que suas contribuiÁıes ser„o licenciadas sob a mesma licenÁa do projeto.
+Ao contribuir, voc√™ concorda que suas contribui√ß√µes ser√£o licenciadas sob a mesma licen√ßa do projeto.
 
 ---
 
@@ -420,4 +420,4 @@ Ao contribuir, vocÍ concorda que suas contribuiÁıes ser„o licenciadas sob a mesm
 
 ---
 
-⁄ltima atualizaÁ„o: Janeiro 2024
+√öltima atualiza√ß√£o: Janeiro 2024

@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Enumns;
+﻿using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.AuditModels
 {

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+Ôªøusing Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -225,7 +225,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Consumers
                     _isRunning = false;
                     _alreadyLoggedRunning = false;
                 }
-                _logger.LogInformation("Consumer de auditoria parado; fila n„o ser· processada atÈ reativaÁ„o no painel.");
+                _logger.LogInformation("Consumer de auditoria parado; fila n√£o ser√° processada at√© reativa√ß√£o no painel.");
             }
             catch (Exception err)
             {

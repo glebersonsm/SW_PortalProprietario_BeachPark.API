@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.GeralModels

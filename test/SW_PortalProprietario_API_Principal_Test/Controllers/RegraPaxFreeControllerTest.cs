@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Moq;
 using SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree;
 using SW_PortalProprietario.Application.Models;
@@ -22,7 +22,7 @@ namespace SW_PortalProprietario.Test.Controllers
 
         #region SaveRegraPaxFree
 
-        [Fact(DisplayName = "SaveRegraPaxFree - Deve salvar regra com hotéis e retornar 200")]
+        [Fact(DisplayName = "SaveRegraPaxFree - Deve salvar regra com hotÃ©is e retornar 200")]
         public async Task SaveRegraPaxFree_DeveSalvarRegraComHoteisERetornar200()
         {
             // Arrange
@@ -70,7 +70,7 @@ namespace SW_PortalProprietario.Test.Controllers
                 m.Hoteis.Count == 2)), Times.Once);
         }
 
-        [Fact(DisplayName = "SaveRegraPaxFree - Deve retornar 400 quando validação falhar")]
+        [Fact(DisplayName = "SaveRegraPaxFree - Deve retornar 400 quando validaÃ§Ã£o falhar")]
         public async Task SaveRegraPaxFree_DeveRetornar400QuandoValidacaoFalhar()
         {
             // Arrange
@@ -103,7 +103,7 @@ namespace SW_PortalProprietario.Test.Controllers
 
         #region AlterarRegraPaxFree
 
-        [Fact(DisplayName = "AlterarRegraPaxFree - Deve atualizar regra com hotéis e retornar 200")]
+        [Fact(DisplayName = "AlterarRegraPaxFree - Deve atualizar regra com hotÃ©is e retornar 200")]
         public async Task AlterarRegraPaxFree_DeveAtualizarRegraComHoteisERetornar200()
         {
             // Arrange
@@ -152,14 +152,14 @@ namespace SW_PortalProprietario.Test.Controllers
                 m.Hoteis.Count == 2 && m.RemoverHoteisNaoEnviados == true)), Times.Once);
         }
 
-        [Fact(DisplayName = "AlterarRegraPaxFree - Deve remover todos os hotéis quando lista vazia")]
+        [Fact(DisplayName = "AlterarRegraPaxFree - Deve remover todos os hotÃ©is quando lista vazia")]
         public async Task AlterarRegraPaxFree_DeveRemoverTodosOsHoteisQuandoListaVazia()
         {
             // Arrange
             var inputModel = new AlteracaoRegraPaxFreeInputModel
             {
                 Id = 1,
-                Nome = "Regra sem Hotéis",
+                Nome = "Regra sem HotÃ©is",
                 Hoteis = new List<RegraPaxFreeHotelInputModel>(),
                 RemoverHoteisNaoEnviados = true
             };
@@ -167,7 +167,7 @@ namespace SW_PortalProprietario.Test.Controllers
             var resultado = new RegraPaxFreeModel
             {
                 Id = 1,
-                Nome = "Regra sem Hotéis",
+                Nome = "Regra sem HotÃ©is",
                 Hoteis = new List<RegraPaxFreeHotelModel>()
             };
 
@@ -194,7 +194,7 @@ namespace SW_PortalProprietario.Test.Controllers
 
         #region Search
 
-        [Fact(DisplayName = "Search - Deve retornar regras com hotéis")]
+        [Fact(DisplayName = "Search - Deve retornar regras com hotÃ©is")]
         public async Task Search_DeveRetornarRegrasComHoteis()
         {
             // Arrange

@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Application.Models.GeralModels
+﻿namespace SW_PortalProprietario.Application.Models.GeralModels
 {
     public class ReorderFaqGroupModel
     {

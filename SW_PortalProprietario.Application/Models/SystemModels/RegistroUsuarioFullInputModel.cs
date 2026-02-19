@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Models.PessoaModels;
+﻿using SW_PortalProprietario.Application.Models.PessoaModels;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.SystemModels
@@ -23,15 +23,15 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? AvatarBase64 { get; set; }
         public List<string>? MenuPermissions { get; set; }
         /// <summary>
-        /// Código de verificação enviado por e-mail quando o usuário altera o e-mail (apenas para não-administradores).
+        /// CÃ³digo de verificaÃ§Ã£o enviado por e-mail quando o usuÃ¡rio altera o e-mail (apenas para nÃ£o-administradores).
         /// </summary>
         public string? EmailVerificationCode { get; set; }
         /// <summary>
-        /// Código de verificação enviado por SMS quando o usuário altera o telefone celular (apenas para não-administradores).
+        /// CÃ³digo de verificaÃ§Ã£o enviado por SMS quando o usuÃ¡rio altera o telefone celular (apenas para nÃ£o-administradores).
         /// </summary>
         public string? PhoneVerificationCode { get; set; }
         /// <summary>
-        /// Índice do telefone (no array de telefones) que foi alterado e requer verificação por SMS.
+        /// Ãndice do telefone (no array de telefones) que foi alterado e requer verificaÃ§Ã£o por SMS.
         /// </summary>
         public int? PhoneVerificationIndex { get; set; }
     }

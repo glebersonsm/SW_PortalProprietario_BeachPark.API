@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.SystemModels
@@ -48,17 +48,17 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? EnderecoAdministradoraCondominio { get; set; }
         public int? PontosRci { get; set; }
         
-        #region Configurações de Reserva - Campos Obrigatórios para Hóspedes Convidados
+        #region ConfiguraÃ§Ãµes de Reserva - Campos ObrigatÃ³rios para HÃ³spedes Convidados
         public EnumSimNao? ExigeEnderecoHospedeConvidado { get; set; }
         public EnumSimNao? ExigeTelefoneHospedeConvidado { get; set; }
         public EnumSimNao? ExigeDocumentoHospedeConvidado { get; set; }
         #endregion
 
-        #region Configurações de Reserva RCI
+        #region ConfiguraÃ§Ãµes de Reserva RCI
         public EnumSimNao? PermiteReservaRciApenasClientesComContratoRci { get; set; }
         #endregion
 
-        #region Autenticação em duas etapas (2FA)
+        #region AutenticaÃ§Ã£o em duas etapas (2FA)
         public EnumSimNao? Habilitar2FAPorEmail { get; set; }
         public EnumSimNao? Habilitar2FAPorSms { get; set; }
         public EnumSimNao? Habilitar2FAParaCliente { get; set; }
@@ -67,11 +67,11 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? EndpointEnvioSms2FA { get; set; }
         #endregion
 
-        #region Configurações de envio de e-mail (SMTP)
+        #region ConfiguraÃ§Ãµes de envio de e-mail (SMTP)
         public string? SmtpHost { get; set; }
         public int? SmtpPort { get; set; }
         public EnumSimNao? SmtpUseSsl { get; set; }
-        /// <summary> Nome do usuário IAM (identificador/label), usado quando TipoEnvioEmail = AwsSes. </summary>
+        /// <summary> Nome do usuÃ¡rio IAM (identificador/label), usado quando TipoEnvioEmail = AwsSes. </summary>
         public string? SmtpIamUser { get; set; }
         public string? SmtpUser { get; set; }
         public string? SmtpPass { get; set; }
@@ -80,7 +80,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? EmailTrackingBaseUrl { get; set; }
         #endregion
 
-        #region Configurações de Importação de Usuários/Clientes do Legado
+        #region ConfiguraÃ§Ãµes de ImportaÃ§Ã£o de UsuÃ¡rios/Clientes do Legado
         public EnumSimNao? CriarUsuariosLegado { get; set; }
         public EnumSimNao? CriarUsuariosClientesLegado { get; set; }
         #endregion

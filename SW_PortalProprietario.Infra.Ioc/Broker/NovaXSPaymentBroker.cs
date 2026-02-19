@@ -1,4 +1,4 @@
-using AccessCenterDomain.AccessCenter;
+Ôªøusing AccessCenterDomain.AccessCenter;
 using CMDomain.Models.Financeiro;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -84,7 +84,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
                 if (_brokerModel == null || string.IsNullOrEmpty(_brokerModel.CardCompanyId) || 
                     string.IsNullOrEmpty(_brokerModel.CardCompanyToken) || 
                     string.IsNullOrEmpty(_brokerModel.ApiCardTokenizeUrl))
-                    throw new ArgumentException("Broker para pagamento n„o configurado corretamente.");
+                    throw new ArgumentException("Broker para pagamento n√£o configurado corretamente.");
 
                 var strJson = System.Text.Json.JsonSerializer.Serialize(cardModel);
 
@@ -122,7 +122,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
                     else
                     {
                         string jsonString = resp.Content.ReadAsStringAsync().Result;
-                        _logger.LogError($"Erro ao criar token de cart„o do cliente: {cardModel.card?.card_holder} retorno: {resp.StatusCode.ToString()} mensagem: {jsonString} request body: {resp?.RequestMessage?.Content?.ReadAsStringAsync().Result}");
+                        _logger.LogError($"Erro ao criar token de cart√£o do cliente: {cardModel.card?.card_holder} retorno: {resp.StatusCode.ToString()} mensagem: {jsonString} request body: {resp?.RequestMessage?.Content?.ReadAsStringAsync().Result}");
                         result = new CardTokenizedModel()
                         {
                             errors = new List<string>()
@@ -136,7 +136,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
             }
             catch (Exception err)
             {
-                _logger.LogError($"Erro ao tokeninzar o cart„o do cliente: {cardModel.card?.card_holder} retorno: {err.Message}");
+                _logger.LogError($"Erro ao tokeninzar o cart√£o do cliente: {cardModel.card?.card_holder} retorno: {err.Message}");
             }
 
             return result;
@@ -155,7 +155,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
                 if (_brokerModel == null || string.IsNullOrEmpty(_brokerModel.CardCompanyId) ||
                     string.IsNullOrEmpty(_brokerModel.CardCompanyToken) ||
                     string.IsNullOrEmpty(_brokerModel.ApiPaymentUrl))
-                    throw new ArgumentException("Broker para pagamento n„o configurado corretamente.");
+                    throw new ArgumentException("Broker para pagamento n√£o configurado corretamente.");
 
 
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -192,7 +192,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
                     else
                     {
                         string jsonString = resp.Content.ReadAsStringAsync().Result;
-                        _logger.LogError($"Erro ao transacionar cart„o do cliente: {transactionCardModel.customer?.name} retorno: {resp.StatusCode.ToString()} mensagem: {jsonString} request body: {resp?.RequestMessage?.Content?.ReadAsStringAsync().Result}");
+                        _logger.LogError($"Erro ao transacionar cart√£o do cliente: {transactionCardModel.customer?.name} retorno: {resp.StatusCode.ToString()} mensagem: {jsonString} request body: {resp?.RequestMessage?.Content?.ReadAsStringAsync().Result}");
                         result = new TransactionCardResultModel()
                         {
                             errors = new List<string>()
@@ -206,7 +206,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
             }
             catch (Exception err)
             {
-                _logger.LogError($"Erro ao transacionar cart„o do cliente: {transactionCardModel.customer?.name} retorno: {err.Message} -  body: {jsonContent}");
+                _logger.LogError($"Erro ao transacionar cart√£o do cliente: {transactionCardModel.customer?.name} retorno: {err.Message} -  body: {jsonContent}");
             }
 
             return result;
@@ -219,7 +219,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
             if (_brokerModel == null || string.IsNullOrEmpty(_brokerModel.CardCompanyId) ||
              string.IsNullOrEmpty(_brokerModel.CardCompanyToken) ||
              string.IsNullOrEmpty(_brokerModel.ApiPaymentUrl))
-                throw new ArgumentException("Broker para pagamento n„o configurado corretamente.");
+                throw new ArgumentException("Broker para pagamento n√£o configurado corretamente.");
 
             TransactionCancelResultModel? result = null;
             try
@@ -277,7 +277,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
             }
             catch (Exception err)
             {
-                _logger.LogError($"Erro ao transacionar cart„o do cliente: {transactionCancelCardModel.payment_id} retorno: {err.Message}");
+                _logger.LogError($"Erro ao transacionar cart√£o do cliente: {transactionCancelCardModel.payment_id} retorno: {err.Message}");
             }
 
             return result;
@@ -298,7 +298,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
                 if (_brokerModel == null || string.IsNullOrEmpty(_brokerModel.PixCompanyId) ||
                    string.IsNullOrEmpty(_brokerModel.PixCompanyToken) ||
                    string.IsNullOrEmpty(_brokerModel.ApiPaymentUrl))
-                    throw new ArgumentException("Broker para pagamento n„o configurado corretamente.");
+                    throw new ArgumentException("Broker para pagamento n√£o configurado corretamente.");
 
 
                 var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(transactionPixModel), Encoding.UTF8, "application/json");
@@ -370,7 +370,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
                 if (_brokerModel == null || string.IsNullOrEmpty(_brokerModel.PixCompanyId) ||
                    string.IsNullOrEmpty(_brokerModel.PixCompanyToken) ||
                    string.IsNullOrEmpty(_brokerModel.ApiPaymentUrl))
-                    throw new ArgumentException("Broker para pagamento n„o configurado corretamente.");
+                    throw new ArgumentException("Broker para pagamento n√£o configurado corretamente.");
 
             
                 var companyId = _brokerModel.GetPixCompanyId(empresaLegadoId);
@@ -439,7 +439,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Broker
                 if (_brokerModel == null || string.IsNullOrEmpty(_brokerModel.CardCompanyId) ||
                    string.IsNullOrEmpty(_brokerModel.CardCompanyToken) ||
                    string.IsNullOrEmpty(_brokerModel.ApiPaymentUrl))
-                    throw new ArgumentException("Broker para pagamento n„o configurado corretamente.");
+                    throw new ArgumentException("Broker para pagamento n√£o configurado corretamente.");
 
 
                 var companyId = _brokerModel.GetCardCompanyId(empresaLegadoId);

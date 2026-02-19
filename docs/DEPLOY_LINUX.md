@@ -1,10 +1,10 @@
-# ?? Guia Completo: Deploy da API .NET 8 em Servidor Linux
+Ôªø# ?? Guia Completo: Deploy da API .NET 8 em Servidor Linux
 
-## ?? Õndice
+## ?? √çndice
 
-- [PrÈ-requisitos](#-prÈ-requisitos)
-- [1. Preparar o Projeto](#-1-preparar-o-projeto-para-produÁ„o)
-- [2. Build e PublicaÁ„o](#-2-build-e-publicaÁ„o)
+- [Pr√©-requisitos](#-pr√©-requisitos)
+- [1. Preparar o Projeto](#-1-preparar-o-projeto-para-produ√ß√£o)
+- [2. Build e Publica√ß√£o](#-2-build-e-publica√ß√£o)
 - [3. Configurar Systemd Service](#-3-configurar-systemd-service)
 - [4. Configurar Nginx](#-4-configurar-nginx-como-reverse-proxy)
 - [5. Configurar SSL](#-5-configurar-ssl-com-lets-encrypt)
@@ -18,9 +18,9 @@
 
 ---
 
-## ?? PrÈ-requisitos
+## ?? Pr√©-requisitos
 
-### 1. InstalaÁ„o no Servidor Linux (Ubuntu/Debian)
+### 1. Instala√ß√£o no Servidor Linux (Ubuntu/Debian)
 
 ```bash
 # Atualizar sistema
@@ -32,7 +32,7 @@ sudo chmod +x dotnet-install.sh
 sudo ./dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet
 sudo ln -s /usr/share/dotnet/dotnet /usr/local/bin
 
-# Verificar instalaÁ„o
+# Verificar instala√ß√£o
 dotnet --version
 
 # Instalar Nginx
@@ -51,10 +51,10 @@ sudo systemctl enable rabbitmq-server
 sudo systemctl start rabbitmq-server
 ```
 
-### 2. Verificar ServiÁos
+### 2. Verificar Servi√ßos
 
 ```bash
-# Verificar status dos serviÁos
+# Verificar status dos servi√ßos
 sudo systemctl status nginx
 sudo systemctl status postgresql
 sudo systemctl status redis-server
@@ -63,7 +63,7 @@ sudo systemctl status rabbitmq-server
 
 ---
 
-## ?? 1. Preparar o Projeto para ProduÁ„o
+## ?? 1. Preparar o Projeto para Produ√ß√£o
 
 ### Criar arquivo `.env.production`
 
@@ -109,9 +109,9 @@ RABBITMQ_PASS=guest
 # ============================================
 # SMTP (Gerenciado pelo ParametroSistema)
 # ============================================
-# Nota: As configuraÁıes de SMTP agora s„o gerenciadas 
+# Nota: As configura√ß√µes de SMTP agora s√£o gerenciadas 
 # pelo ParametroSistema no banco de dados.
-# As vari·veis abaixo s„o mantidas apenas para referÍncia.
+# As vari√°veis abaixo s√£o mantidas apenas para refer√™ncia.
 
 # ============================================
 # CORS
@@ -132,7 +132,7 @@ CERTIDOES_GERACAO_PDF_PATH=/var/www/swportal/certidoes/pdf
 CERTIDOES_GERACAO_PDF_CONTRATO_PATH=/var/www/swportal/certidoes/contratos
 
 # ============================================
-# OUTRAS CONFIGURA«’ES
+# OUTRAS CONFIGURA√á√ïES
 # ============================================
 USUARIO_SISTEMA_ID=1
 EMPRESA_SW_PORTAL_ID=1
@@ -141,15 +141,15 @@ UPDATE_FRAMEWORK=false
 BLOQUEAR_CRIACAO_ADM_FORA_DEBUG=true
 PROGRAM_ID=PORTALPROPMVC_
 
-# ConfiguraÁıes de E-mail (ProduÁ„o)
+# Configura√ß√µes de E-mail (Produ√ß√£o)
 ENVIAR_EMAIL_APENAS_PARA_DESTINATARIOS_PERMITIDOS=false
 DESTINATARIO_EMAIL_PERMITIDO=
 
-# ConfiguraÁıes de SMS (ProduÁ„o)
+# Configura√ß√µes de SMS (Produ√ß√£o)
 ENVIAR_SMS_APENAS_PARA_NUMERO_PERMITIDO=false
 NUMERO_SMS_PERMITIDO=
 
-# ConfiguraÁıes de Fila
+# Configura√ß√µes de Fila
 SEND_OPERATIONS_TO_LOG_QUEUE=true
 SAVE_LOG_FROM_QUEUE=true
 SEND_EMAIL_FROM_QUEUE=true
@@ -167,7 +167,7 @@ AUDIT_LOG_CONSUMER_CONCURRENCY=5
 AUDIT_LOG_RETRY_ATTEMPTS=3
 AUDIT_LOG_RETRY_DELAY_SECONDS=5
 
-# IntegraÁ„o
+# Integra√ß√£o
 INTEGRADO_COM=eSolution
 CONTROLE_USUARIO_SFE=false
 CONTROLE_USUARIO_ACCESS_CENTER=true
@@ -186,7 +186,7 @@ MULTIPROPRIEDADE_ATIVADA=true
 
 ### Atualizar `.csproj`
 
-Certifique-se de que o arquivo `.csproj` est· configurado para copiar o `.env`:
+Certifique-se de que o arquivo `.csproj` est√° configurado para copiar o `.env`:
 
 ```xml
 <!-- SW_PortalCliente_BeachPark.API.csproj -->
@@ -208,7 +208,7 @@ Certifique-se de que o arquivo `.csproj` est· configurado para copiar o `.env`:
 
 ---
 
-## ??? 2. Build e PublicaÁ„o
+## ??? 2. Build e Publica√ß√£o
 
 ### Script de Build (`scripts/build-and-publish.sh`)
 
@@ -222,7 +222,7 @@ set -e
 
 echo "?? Iniciando build do projeto..."
 
-# Definir vari·veis
+# Definir vari√°veis
 PROJECT_PATH="./SW_PortalCliente_BeachPark.API.csproj"
 OUTPUT_PATH="./publish"
 CONFIGURATION="Release"
@@ -232,8 +232,8 @@ echo "?? Limpando build anterior..."
 rm -rf $OUTPUT_PATH
 dotnet clean
 
-# Restaurar dependÍncias
-echo "?? Restaurando dependÍncias..."
+# Restaurar depend√™ncias
+echo "?? Restaurando depend√™ncias..."
 dotnet restore
 
 # Build do projeto
@@ -241,7 +241,7 @@ echo "?? Compilando projeto..."
 dotnet build $PROJECT_PATH -c $CONFIGURATION --no-restore
 
 # Publicar
-echo "?? Publicando aplicaÁ„o..."
+echo "?? Publicando aplica√ß√£o..."
 dotnet publish $PROJECT_PATH \
   -c $CONFIGURATION \
   -o $OUTPUT_PATH \
@@ -250,11 +250,11 @@ dotnet publish $PROJECT_PATH \
   /p:PublishSingleFile=false \
   /p:PublishTrimmed=false
 
-# Copiar arquivo .env de produÁ„o
-echo "?? Copiando arquivo de configuraÁ„o..."
+# Copiar arquivo .env de produ√ß√£o
+echo "?? Copiando arquivo de configura√ß√£o..."
 cp .env.production $OUTPUT_PATH/.env
 
-echo "? Build e publicaÁ„o concluÌdos com sucesso!"
+echo "? Build e publica√ß√£o conclu√≠dos com sucesso!"
 echo "?? Arquivos publicados em: $OUTPUT_PATH"
 ```
 
@@ -269,20 +269,20 @@ chmod +x scripts/build-and-publish.sh
 
 ## ?? 3. Configurar Systemd Service
 
-### Criar diretÛrio de instalaÁ„o
+### Criar diret√≥rio de instala√ß√£o
 
 ```bash
 sudo mkdir -p /var/www/swportal
 sudo chown -R www-data:www-data /var/www/swportal
 ```
 
-### Criar arquivo de serviÁo
+### Criar arquivo de servi√ßo
 
 ```bash
 sudo nano /etc/systemd/system/swportal-api.service
 ```
 
-Conte˙do do arquivo:
+Conte√∫do do arquivo:
 
 ```ini
 [Unit]
@@ -306,7 +306,7 @@ Environment=ASPNETCORE_URLS=http://localhost:5000
 LimitNOFILE=65536
 LimitNPROC=4096
 
-# SeguranÁa
+# Seguran√ßa
 NoNewPrivileges=true
 PrivateTmp=true
 
@@ -314,16 +314,16 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-### Habilitar e iniciar o serviÁo
+### Habilitar e iniciar o servi√ßo
 
 ```bash
-# Recarregar configuraÁıes do systemd
+# Recarregar configura√ß√µes do systemd
 sudo systemctl daemon-reload
 
 # Habilitar para iniciar com o sistema
 sudo systemctl enable swportal-api.service
 
-# Iniciar o serviÁo
+# Iniciar o servi√ßo
 sudo systemctl start swportal-api.service
 
 # Verificar status
@@ -337,13 +337,13 @@ sudo journalctl -u swportal-api.service -f
 
 ## ?? 4. Configurar Nginx como Reverse Proxy
 
-### Criar configuraÁ„o do Nginx
+### Criar configura√ß√£o do Nginx
 
 ```bash
 sudo nano /etc/nginx/sites-available/swportal-api
 ```
 
-Conte˙do do arquivo:
+Conte√∫do do arquivo:
 
 ```nginx
 # /etc/nginx/sites-available/swportal-api
@@ -388,7 +388,7 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "no-referrer-when-downgrade" always;
 
-    # Client body size (ajustar conforme necess·rio)
+    # Client body size (ajustar conforme necess√°rio)
     client_max_body_size 100M;
     client_body_timeout 300s;
 
@@ -416,7 +416,7 @@ server {
         proxy_connect_timeout 75s;
     }
 
-    # Arquivos est·ticos
+    # Arquivos est√°ticos
     location ~ ^/(images|documents|pdfs|certidoes)/ {
         root /var/www/swportal/wwwroot;
         expires 30d;
@@ -434,13 +434,13 @@ server {
 ### Habilitar site e testar
 
 ```bash
-# Criar link simbÛlico
+# Criar link simb√≥lico
 sudo ln -s /etc/nginx/sites-available/swportal-api /etc/nginx/sites-enabled/
 
-# Remover configuraÁ„o padr„o (opcional)
+# Remover configura√ß√£o padr√£o (opcional)
 sudo rm /etc/nginx/sites-enabled/default
 
-# Testar configuraÁ„o
+# Testar configura√ß√£o
 sudo nginx -t
 
 # Recarregar Nginx
@@ -455,13 +455,13 @@ sudo systemctl reload nginx
 # Instalar Certbot
 sudo apt install certbot python3-certbot-nginx -y
 
-# Obter certificado (certifique-se de que o DNS est· apontando para o servidor)
+# Obter certificado (certifique-se de que o DNS est√° apontando para o servidor)
 sudo certbot --nginx -d api.seudominio.com
 
-# RenovaÁ„o autom·tica (j· configurado pelo certbot)
+# Renova√ß√£o autom√°tica (j√° configurado pelo certbot)
 sudo systemctl status certbot.timer
 
-# Testar renovaÁ„o
+# Testar renova√ß√£o
 sudo certbot renew --dry-run
 ```
 
@@ -473,12 +473,12 @@ sudo certbot renew --dry-run
 # Acessar PostgreSQL
 sudo -u postgres psql
 
-# Criar banco e usu·rio
+# Criar banco e usu√°rio
 CREATE DATABASE swportal_prod;
 CREATE USER swportal_user WITH ENCRYPTED PASSWORD 'SenhaSegura123!';
 GRANT ALL PRIVILEGES ON DATABASE swportal_prod TO swportal_user;
 
-# Instalar extens„o unaccent (necess·ria)
+# Instalar extens√£o unaccent (necess√°ria)
 \c swportal_prod
 CREATE EXTENSION IF NOT EXISTS unaccent;
 \q
@@ -525,7 +525,7 @@ sudo nano /etc/redis/redis.conf
 # Reiniciar Redis
 sudo systemctl restart redis-server
 
-# Testar conex„o
+# Testar conex√£o
 redis-cli
 # No prompt do Redis:
 # AUTH SenhaRedis123!
@@ -541,13 +541,13 @@ redis-cli
 # Habilitar painel de gerenciamento
 sudo rabbitmq-plugins enable rabbitmq_management
 
-# Criar usu·rio admin
+# Criar usu√°rio admin
 sudo rabbitmqctl add_user admin SenhaRabbitMQ123!
 sudo rabbitmqctl set_user_tags admin administrator
 sudo rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
 
 # Acessar painel: http://seu-servidor:15672
-# Usu·rio: admin / Senha: SenhaRabbitMQ123!
+# Usu√°rio: admin / Senha: SenhaRabbitMQ123!
 
 # Listar filas
 sudo rabbitmqctl list_queues
@@ -570,7 +570,7 @@ set -e
 
 echo "?? Iniciando deploy da API..."
 
-# Vari·veis
+# Vari√°veis
 REMOTE_USER="seu_usuario"
 REMOTE_HOST="seu_servidor.com"
 REMOTE_PATH="/var/www/swportal"
@@ -589,32 +589,32 @@ rsync -avz --delete \
   $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH/
 
 # Comandos remotos
-echo "?? Reiniciando serviÁo no servidor..."
+echo "?? Reiniciando servi√ßo no servidor..."
 ssh $REMOTE_USER@$REMOTE_HOST << 'EOF'
-  # Parar o serviÁo
+  # Parar o servi√ßo
   sudo systemctl stop swportal-api.service
   
-  # Criar diretÛrios necess·rios
+  # Criar diret√≥rios necess√°rios
   sudo mkdir -p /var/www/swportal/wwwroot/{images/grupos,documents,pdfs/{comunicacoes,boletos},certidoes/{modelos,pdf,contratos}}
   
-  # Ajustar permissıes
+  # Ajustar permiss√µes
   sudo chown -R www-data:www-data /var/www/swportal
   sudo chmod -R 755 /var/www/swportal
   
-  # Iniciar o serviÁo
+  # Iniciar o servi√ßo
   sudo systemctl start swportal-api.service
   
   # Verificar status
   sudo systemctl status swportal-api.service --no-pager
   
-  echo "? ServiÁo reiniciado com sucesso!"
+  echo "? Servi√ßo reiniciado com sucesso!"
 EOF
 
-echo "? Deploy concluÌdo com sucesso!"
-echo "?? API disponÌvel em: https://api.seudominio.com"
+echo "? Deploy conclu√≠do com sucesso!"
+echo "?? API dispon√≠vel em: https://api.seudominio.com"
 ```
 
-### Tornar execut·vel
+### Tornar execut√°vel
 
 ```bash
 chmod +x scripts/deploy.sh
@@ -630,13 +630,13 @@ chmod +x scripts/deploy.sh
 
 ## ?? 10. Monitoramento e Logs
 
-### Visualizar logs da aplicaÁ„o
+### Visualizar logs da aplica√ß√£o
 
 ```bash
 # Logs em tempo real
 sudo journalctl -u swportal-api.service -f
 
-# Logs das ˙ltimas 100 linhas
+# Logs das √∫ltimas 100 linhas
 sudo journalctl -u swportal-api.service -n 100
 
 # Logs de hoje
@@ -661,7 +661,7 @@ sudo tail -f /var/log/nginx/swportal-api-access.log
 # Error logs
 sudo tail -f /var/log/nginx/swportal-api-error.log
 
-# ⁄ltimas 100 linhas de erro
+# √öltimas 100 linhas de erro
 sudo tail -n 100 /var/log/nginx/swportal-api-error.log
 ```
 
@@ -671,7 +671,7 @@ sudo tail -n 100 /var/log/nginx/swportal-api-error.log
 #!/bin/bash
 # monitor.sh
 
-echo "?? Status dos ServiÁos"
+echo "?? Status dos Servi√ßos"
 echo "===================="
 echo ""
 
@@ -697,7 +697,7 @@ sudo systemctl status rabbitmq-server --no-pager | head -n 5
 echo ""
 echo "?? Uso de Recursos:"
 echo "===================="
-echo "MemÛria:"
+echo "Mem√≥ria:"
 free -h
 
 echo ""
@@ -714,7 +714,7 @@ echo "===================="
 curl -s -o /dev/null -w "Status API: %{http_code}\n" https://api.seudominio.com/health
 ```
 
-### Tornar execut·vel e executar
+### Tornar execut√°vel e executar
 
 ```bash
 chmod +x scripts/monitor.sh
@@ -736,7 +736,7 @@ set -e
 BACKUP_DIR="/backup/swportal"
 DATE=$(date +%Y%m%d_%H%M%S)
 
-# Criar diretÛrio de backup
+# Criar diret√≥rio de backup
 mkdir -p $BACKUP_DIR
 
 echo "?? Iniciando backup..."
@@ -753,8 +753,8 @@ tar -czf $BACKUP_DIR/files_$DATE.tar.gz \
   /var/www/swportal/pdfs \
   /var/www/swportal/certidoes
 
-# Backup das configuraÁıes
-echo "?? Backup das configuraÁıes..."
+# Backup das configura√ß√µes
+echo "?? Backup das configura√ß√µes..."
 tar -czf $BACKUP_DIR/config_$DATE.tar.gz \
   /var/www/swportal/.env \
   /var/www/swportal/appsettings.json \
@@ -762,11 +762,11 @@ tar -czf $BACKUP_DIR/config_$DATE.tar.gz \
   /etc/nginx/sites-available/swportal-api \
   /etc/systemd/system/swportal-api.service
 
-# Manter apenas ˙ltimos 7 dias
+# Manter apenas √∫ltimos 7 dias
 echo "?? Limpando backups antigos..."
 find $BACKUP_DIR -name "*.gz" -mtime +7 -delete
 
-echo "? Backup concluÌdo: $BACKUP_DIR"
+echo "? Backup conclu√≠do: $BACKUP_DIR"
 echo "?? Tamanho total:"
 du -sh $BACKUP_DIR
 ```
@@ -790,8 +790,8 @@ BACKUP_DATE=$1
 
 echo "?? Iniciando restore do backup: $BACKUP_DATE"
 
-# Parar serviÁo
-echo "??  Parando serviÁo..."
+# Parar servi√ßo
+echo "??  Parando servi√ßo..."
 sudo systemctl stop swportal-api.service
 
 # Restore do banco de dados
@@ -802,26 +802,26 @@ gunzip -c $BACKUP_DIR/db_$BACKUP_DATE.sql.gz | psql -U swportal_user -h localhos
 echo "?? Restore dos arquivos..."
 tar -xzf $BACKUP_DIR/files_$BACKUP_DATE.tar.gz -C /
 
-# Ajustar permissıes
-echo "?? Ajustando permissıes..."
+# Ajustar permiss√µes
+echo "?? Ajustando permiss√µes..."
 sudo chown -R www-data:www-data /var/www/swportal
 sudo chmod -R 755 /var/www/swportal
 
-# Iniciar serviÁo
-echo "??  Iniciando serviÁo..."
+# Iniciar servi√ßo
+echo "??  Iniciando servi√ßo..."
 sudo systemctl start swportal-api.service
 
-echo "? Restore concluÌdo com sucesso!"
+echo "? Restore conclu√≠do com sucesso!"
 sudo systemctl status swportal-api.service --no-pager
 ```
 
-### Agendar backup autom·tico
+### Agendar backup autom√°tico
 
 ```bash
 # Editar crontab
 sudo crontab -e
 
-# Adicionar linha para backup di·rio ‡s 2h da manh„
+# Adicionar linha para backup di√°rio √†s 2h da manh√£
 0 2 * * * /path/to/scripts/backup.sh >> /var/log/swportal-backup.log 2>&1
 ```
 
@@ -831,21 +831,21 @@ sudo crontab -e
 
 ### Problemas Comuns
 
-#### 1. Permissıes de arquivo
+#### 1. Permiss√µes de arquivo
 
 ```bash
-# Corrigir permissıes
+# Corrigir permiss√µes
 sudo chown -R www-data:www-data /var/www/swportal
 sudo chmod -R 755 /var/www/swportal
 
-# Verificar permissıes
+# Verificar permiss√µes
 ls -la /var/www/swportal
 ```
 
-#### 2. Porta j· em uso
+#### 2. Porta j√° em uso
 
 ```bash
-# Verificar o que est· usando a porta
+# Verificar o que est√° usando a porta
 sudo lsof -i :5000
 
 # Matar processo
@@ -855,10 +855,10 @@ sudo kill -9 <PID>
 #### 3. Problemas de conectividade do banco
 
 ```bash
-# Testar conex„o
+# Testar conex√£o
 psql -h localhost -U swportal_user -d swportal_prod
 
-# Ver conexıes ativas
+# Ver conex√µes ativas
 sudo -u postgres psql -c "SELECT * FROM pg_stat_activity WHERE datname='swportal_prod';"
 
 # Reiniciar PostgreSQL
@@ -871,14 +871,14 @@ sudo systemctl restart postgresql
 # Conectar ao Redis
 redis-cli
 
-# Testar autenticaÁ„o e conex„o
+# Testar autentica√ß√£o e conex√£o
 AUTH SenhaRedis123!
 PING
 
 # Ver chaves
 KEYS *
 
-# Ver informaÁıes
+# Ver informa√ß√µes
 INFO
 ```
 
@@ -891,23 +891,23 @@ sudo rabbitmqctl status
 # Listar filas
 sudo rabbitmqctl list_queues
 
-# Listar conexıes
+# Listar conex√µes
 sudo rabbitmqctl list_connections
 
-# Limpar fila (se necess·rio)
+# Limpar fila (se necess√°rio)
 sudo rabbitmqctl purge_queue nome_da_fila
 ```
 
-#### 6. API n„o responde
+#### 6. API n√£o responde
 
 ```bash
-# Verificar se a aplicaÁ„o est· rodando
+# Verificar se a aplica√ß√£o est√° rodando
 sudo systemctl status swportal-api.service
 
 # Ver logs
 sudo journalctl -u swportal-api.service -n 100
 
-# Reiniciar serviÁo
+# Reiniciar servi√ßo
 sudo systemctl restart swportal-api.service
 
 # Testar endpoint
@@ -920,10 +920,10 @@ curl -I http://localhost:5000/health
 # Verificar logs do Nginx
 sudo tail -f /var/log/nginx/swportal-api-error.log
 
-# Verificar se a API est· rodando
+# Verificar se a API est√° rodando
 sudo systemctl status swportal-api.service
 
-# Testar conex„o direta
+# Testar conex√£o direta
 curl -I http://localhost:5000
 
 # Reiniciar Nginx
@@ -943,7 +943,7 @@ sudo systemctl reload nginx
 sudo certbot certificates
 ```
 
-### Comandos ⁄teis
+### Comandos √öteis
 
 ```bash
 # Ver uso de recursos
@@ -955,7 +955,7 @@ ps aux | grep dotnet
 # Ver portas em uso
 sudo netstat -tulpn | grep LISTEN
 
-# Reiniciar todos os serviÁos
+# Reiniciar todos os servi√ßos
 sudo systemctl restart swportal-api.service nginx postgresql redis-server rabbitmq-server
 
 # Limpar logs antigos
@@ -974,21 +974,21 @@ sudo journalctl --vacuum-time=7d
 - [ ] RabbitMQ instalado, configurado e rodando
 - [ ] Certificado SSL configurado (Let's Encrypt)
 - [ ] Arquivo `.env.production` criado e configurado
-- [ ] Build e publicaÁ„o realizados com sucesso
-- [ ] ServiÁo systemd criado e habilitado
-- [ ] DiretÛrios de arquivos criados com permissıes corretas
+- [ ] Build e publica√ß√£o realizados com sucesso
+- [ ] Servi√ßo systemd criado e habilitado
+- [ ] Diret√≥rios de arquivos criados com permiss√µes corretas
 - [ ] Nginx configurado como reverse proxy
 - [ ] Testes de conectividade realizados
-- [ ] Backup autom·tico configurado
+- [ ] Backup autom√°tico configurado
 - [ ] Monitoramento em funcionamento
-- [ ] DocumentaÁ„o atualizada
+- [ ] Documenta√ß√£o atualizada
 - [ ] Equipe treinada
 
 ---
 
 ## ?? Suporte
 
-**Desenvolvido por:** SW SoluÁıes Integradas Ltda  
+**Desenvolvido por:** SW Solu√ß√µes Integradas Ltda  
 **Email:** contato@swsolucoes.inf.br  
 **Website:** https://www.swsolucoes.inf.br
 
@@ -996,7 +996,7 @@ sudo journalctl --vacuum-time=7d
 
 ---
 
-## ?? ReferÍncias
+## ?? Refer√™ncias
 
 - [ASP.NET Core Deployment](https://learn.microsoft.com/pt-br/aspnet/core/host-and-deploy/)
 - [Nginx Documentation](https://nginx.org/en/docs/)
@@ -1008,5 +1008,5 @@ sudo journalctl --vacuum-time=7d
 
 ---
 
-**⁄ltima atualizaÁ„o:** Janeiro 2024  
-**Vers„o do documento:** 1.0
+**√öltima atualiza√ß√£o:** Janeiro 2024  
+**Vers√£o do documento:** 1.0

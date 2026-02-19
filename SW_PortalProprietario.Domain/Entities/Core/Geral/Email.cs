@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Entities.Core.Framework;
+﻿using SW_PortalProprietario.Domain.Entities.Core.Framework;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Geral
@@ -21,16 +21,16 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
             List<string> mensagens = new();
 
             if (Enviado == EnumSimNao.Sim)
-                NaFila = EnumSimNao.Não;
+                NaFila = EnumSimNao.Nao;
 
             if (string.IsNullOrEmpty(Assunto))
                 mensagens.Add("O Assunto deve ser informado no email.");
 
             if (string.IsNullOrEmpty(Destinatario))
-                mensagens.Add($"O Destinatário deve ser informado no email");
+                mensagens.Add($"O DestinatÃ¡rio deve ser informado no email");
 
             if (string.IsNullOrEmpty(ConteudoEmail))
-                mensagens.Add($"O Conteúdo do email deve ser informado");
+                mensagens.Add($"O ConteÃºdo do email deve ser informado");
 
             if (mensagens.Any())
                 await Task.FromException(new ArgumentException(string.Join($"{Environment.NewLine}", mensagens.Select(a => a).ToList())));

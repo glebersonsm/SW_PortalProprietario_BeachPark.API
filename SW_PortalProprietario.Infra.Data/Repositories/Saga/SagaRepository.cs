@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NHibernate;
 using NHibernate.Linq;
@@ -10,7 +10,7 @@ using System.Text.Json;
 namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
 {
     /// <summary>
-    /// Repositório para persistir logs de Saga
+    /// RepositÃ³rio para persistir logs de Saga
     /// </summary>
     public class SagaRepository : ISagaRepository
     {
@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
 
             using (var session = _repository.CreateSession())
             {
-                if (session == null) throw new InvalidOperationException("Não foi possível criar uma sessão de banco de dados.");
+                if (session == null) throw new InvalidOperationException("NÃ£o foi possÃ­vel criar uma sessÃ£o de banco de dados.");
                 using (var transaction = session.BeginTransaction())
                 {
                     try
@@ -72,7 +72,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
         {
             using (var session = _repository.CreateSession())
             {
-                if (session == null) throw new InvalidOperationException("Não foi possível criar uma sessão de banco de dados.");
+                if (session == null) throw new InvalidOperationException("NÃ£o foi possÃ­vel criar uma sessÃ£o de banco de dados.");
                 using (var transaction = session.BeginTransaction())
                 {
                     try
@@ -82,7 +82,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
                             .FirstOrDefaultAsync();
 
                         if (saga == null)
-                            throw new InvalidOperationException($"Saga não encontrada: {sagaId}");
+                            throw new InvalidOperationException($"Saga nÃ£o encontrada: {sagaId}");
 
                         var step = new SagaStep
                         {
@@ -97,7 +97,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
                         await transaction.CommitAsync();
 
                         _logger.LogDebug(
-                            "Step adicionado: {StepName} (Ordem: {Order}) à Saga {SagaId}",
+                            "Step adicionado: {StepName} (Ordem: {Order}) Ã  Saga {SagaId}",
                             stepName, order, sagaId);
 
                         return step;
@@ -105,7 +105,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
                     catch (Exception ex)
                     {
                         await transaction.RollbackAsync();
-                        _logger.LogError(ex, "Erro ao adicionar step {StepName} à Saga {SagaId}", stepName, sagaId);
+                        _logger.LogError(ex, "Erro ao adicionar step {StepName} Ã  Saga {SagaId}", stepName, sagaId);
                         throw;
                     }
                 }
@@ -116,14 +116,14 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
         {
             using (var session = _repository.CreateSession())
             {
-                if (session == null) throw new InvalidOperationException("Não foi possível criar uma sessão de banco de dados.");
+                if (session == null) throw new InvalidOperationException("NÃ£o foi possÃ­vel criar uma sessÃ£o de banco de dados.");
                 using (var transaction = session.BeginTransaction())
                 {
                     try
                     {
                         var step = await session.GetAsync<SagaStep>(stepId);
                         if (step == null)
-                            throw new InvalidOperationException($"Step não encontrado: {stepId}");
+                            throw new InvalidOperationException($"Step nÃ£o encontrado: {stepId}");
 
                         var now = DateTime.Now;
 
@@ -178,7 +178,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
         {
             using (var session = _repository.CreateSession())
             {
-                if (session == null) throw new InvalidOperationException("Não foi possível criar uma sessão de banco de dados.");
+                if (session == null) throw new InvalidOperationException("NÃ£o foi possÃ­vel criar uma sessÃ£o de banco de dados.");
                 using (var transaction = session.BeginTransaction())
                 {
                     try
@@ -188,7 +188,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
                             .FirstOrDefaultAsync();
 
                         if (saga == null)
-                            throw new InvalidOperationException($"Saga não encontrada: {sagaId}");
+                            throw new InvalidOperationException($"Saga nÃ£o encontrada: {sagaId}");
 
                         var now = DateTime.Now;
                         saga.Status = status;
@@ -201,7 +201,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Saga
                         await transaction.CommitAsync();
 
                         _logger.LogInformation(
-                            "Saga atualizada: {SagaId}, Status: {Status}, Duração: {Duration}ms",
+                            "Saga atualizada: {SagaId}, Status: {Status}, DuraÃ§Ã£o: {Duration}ms",
                             sagaId, status, saga.DuracaoMs);
                     }
                     catch (Exception ex)

@@ -1,10 +1,10 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 
 namespace SW_PortalProprietario.Application.Models.TimeSharing
 {
     /// <summary>
-    /// Modelo de request para cálculo simplificado de pontos necessários
+    /// Modelo de request para cÃ¡lculo simplificado de pontos necessÃ¡rios
     /// </summary>
     public class CalcularPontosRequestModel
     {
@@ -24,12 +24,12 @@ namespace SW_PortalProprietario.Application.Models.TimeSharing
         public int QuantidadeAdultos { get; set; }
 
         /// <summary>
-        /// Quantidade de crianças de 6 a 11 anos
+        /// Quantidade de crianÃ§as de 6 a 11 anos
         /// </summary>
         public int QuantidadeCriancas1 { get; set; }
 
         /// <summary>
-        /// Quantidade de crianças de 0 a 5 anos
+        /// Quantidade de crianÃ§as de 0 a 5 anos
         /// </summary>
         public int QuantidadeCriancas2 { get; set; }
 
@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Application.Models.TimeSharing
         public int IdVendaXContrato { get; set; }
 
         /// <summary>
-        /// Número do contrato
+        /// NÃºmero do contrato
         /// </summary>
         public string NumeroContrato { get; set; } = string.Empty;
         public int? NumReserva { get; set; }

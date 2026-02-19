@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.AuditModels;
@@ -87,8 +87,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Audit
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<List<AuditLogModel>>(new List<AuditLogModel>())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Erro ao buscar histórico de auditoria: {entityType}/{entityId}", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Erro ao buscar histórico de auditoria: {entityType}/{entityId}", err.Message },
+                    new List<string>() { $"Erro ao buscar histÃ³rico de auditoria: {entityType}/{entityId}", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"Erro ao buscar histÃ³rico de auditoria: {entityType}/{entityId}", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -110,7 +110,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Audit
                 {
                     return NotFound(new ResultModel<AuditLogModel>(new AuditLogModel())
                     {
-                        Errors = new List<string> { $"Log de auditoria com ID {id} não encontrado" },
+                        Errors = new List<string> { $"Log de auditoria com ID {id} nÃ£o encontrado" },
                         Status = StatusCodes.Status404NotFound,
                         Success = false
                     });

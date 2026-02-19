@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Entities.Core.Sistema;
+﻿using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 
 namespace SW_PortalProprietario.Application.Interfaces.Saga
 {
@@ -8,12 +8,12 @@ namespace SW_PortalProprietario.Application.Interfaces.Saga
     public interface ISagaStep<TInput, TOutput>
     {
         /// <summary>
-        /// Nome do step para identificação
+        /// Nome do step para identificaÃ§Ã£o
         /// </summary>
         string StepName { get; }
 
         /// <summary>
-        /// Ordem de execução
+        /// Ordem de execuÃ§Ã£o
         /// </summary>
         int Order { get; }
 
@@ -28,23 +28,23 @@ namespace SW_PortalProprietario.Application.Interfaces.Saga
         Task<TOutput> ExecuteAsync(TInput input, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Compensa o step (desfaz a operação)
+        /// Compensa o step (desfaz a operaÃ§Ã£o)
         /// </summary>
         Task CompensateAsync(TInput input, TOutput output, CancellationToken cancellationToken = default);
     }
 
     /// <summary>
-    /// Interface para repositório de Saga
+    /// Interface para repositÃ³rio de Saga
     /// </summary>
     public interface ISagaRepository
     {
         /// <summary>
-        /// Cria uma nova execução de Saga
+        /// Cria uma nova execuÃ§Ã£o de Saga
         /// </summary>
         Task<SagaExecution> CreateSagaAsync(string operationType, string? inputData, string? metadata = null);
 
         /// <summary>
-        /// Adiciona um step à Saga
+        /// Adiciona um step Ã  Saga
         /// </summary>
         Task<SagaStep> AddStepAsync(string sagaId, string stepName, int order, bool canCompensate = true);
 
@@ -59,22 +59,22 @@ namespace SW_PortalProprietario.Application.Interfaces.Saga
         Task UpdateSagaStatusAsync(string sagaId, string status, string? outputData = null, string? errorMessage = null);
 
         /// <summary>
-        /// Obtém uma Saga pelo ID
+        /// ObtÃ©m uma Saga pelo ID
         /// </summary>
         Task<SagaExecution?> GetSagaAsync(string sagaId);
 
         /// <summary>
-        /// Obtém todos os steps de uma Saga
+        /// ObtÃ©m todos os steps de uma Saga
         /// </summary>
         Task<IList<SagaStep>> GetStepsAsync(string sagaId);
 
         /// <summary>
-        /// Obtém Sagas por status
+        /// ObtÃ©m Sagas por status
         /// </summary>
         Task<IList<SagaExecution>> GetSagasByStatusAsync(string status, int limit = 100);
 
         /// <summary>
-        /// Obtém Sagas por tipo de operação
+        /// ObtÃ©m Sagas por tipo de operaÃ§Ã£o
         /// </summary>
         Task<IList<SagaExecution>> GetSagasByOperationTypeAsync(string operationType, DateTime? dataInicio = null, DateTime? dataFim = null);
     }
@@ -95,7 +95,7 @@ namespace SW_PortalProprietario.Application.Interfaces.Saga
             where TSagaResult : class;
 
         /// <summary>
-        /// Obtém o ID da Saga atual
+        /// ObtÃ©m o ID da Saga atual
         /// </summary>
         string? CurrentSagaId { get; }
 

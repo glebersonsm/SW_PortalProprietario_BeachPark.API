@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NLog.Extensions.Logging;
@@ -15,11 +15,11 @@ using SW_PortalCliente_BeachPark.API.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Carrega as variáveis de ambiente do arquivo .env
-// Tenta primeiro no diretório base da aplicação (bin/Debug ou bin/Release)
+// Carrega as variÃ¡veis de ambiente do arquivo .env
+// Tenta primeiro no diretÃ³rio base da aplicaÃ§Ã£o (bin/Debug ou bin/Release)
 var envPath = Path.Combine(AppContext.BaseDirectory, ".env");
 
-// Se não encontrar, tenta na raiz do projeto (útil durante desenvolvimento)
+// Se nÃ£o encontrar, tenta na raiz do projeto (Ãºtil durante desenvolvimento)
 if (!File.Exists(envPath))
 {
     var projectRoot = Directory.GetCurrentDirectory();
@@ -33,25 +33,25 @@ if (File.Exists(envPath))
 }
 else
 {
-    Console.WriteLine($"AVISO: Arquivo .env não encontrado.");
+    Console.WriteLine($"AVISO: Arquivo .env nÃ£o encontrado.");
     Console.WriteLine($"  - Tentado em: {Path.Combine(AppContext.BaseDirectory, ".env")}");
     Console.WriteLine($"  - Tentado em: {Path.Combine(Directory.GetCurrentDirectory(), ".env")}");
-    Console.WriteLine($"  - Certifique-se de que o arquivo .env existe e está configurado para ser copiado no build.");
+    Console.WriteLine($"  - Certifique-se de que o arquivo .env existe e estÃ¡ configurado para ser copiado no build.");
 }
 
-// Carrega as configurações dos arquivos JSON
+// Carrega as configuraÃ§Ãµes dos arquivos JSON
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-// Carrega o arquivo de configuração específico (BeachParkConfigurations.json ou outro)
+// Carrega o arquivo de configuraÃ§Ã£o especÃ­fico (BeachParkConfigurations.json ou outro)
 var includeFile = builder.Configuration["IncludeFile"];
 if (!string.IsNullOrEmpty(includeFile))
 {
     builder.Configuration.AddJsonFile(includeFile, optional: true, reloadOnChange: true);
 }
 
-// Sobrescreve as configurações com as variáveis de ambiente do .env
+// Sobrescreve as configuraÃ§Ãµes com as variÃ¡veis de ambiente do .env
 EnvironmentConfigurationHelper.OverrideConfigurationWithEnvironmentVariables(builder.Configuration);
 
 builder.Services.AddMemoryCache();
@@ -69,7 +69,7 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Contact = new OpenApiContact
         {
-            Name = "SW Soluções Integradas Ltda",
+            Name = "SW SoluÃ§Ãµes Integradas Ltda",
             Email = "contato@swsolucoes.inf.br",
             Url = new Uri("https://www.swsolucoes.inf.br")
         }
@@ -161,7 +161,7 @@ builder.Services.AddScoped<SW_PortalProprietario.Infra.Data.Audit.AuditHelper>()
 var app = builder.Build();
 app.UseCors("AllowAll");
 
-// Garante charset UTF-8 em respostas JSON para acentuação correta
+// Garante charset UTF-8 em respostas JSON para acentuaÃ§Ã£o correta
 app.Use(async (context, next) =>
 {
     context.Response.OnStarting(() =>
@@ -199,7 +199,7 @@ app.MapControllers();
 
 app.Run();
 
-// Torna a classe Program acessível para testes de integração
+// Torna a classe Program acessÃ­vel para testes de integraÃ§Ã£o
 namespace SW_PortalCliente_BeachPark.API
 {
     public partial class Program { }

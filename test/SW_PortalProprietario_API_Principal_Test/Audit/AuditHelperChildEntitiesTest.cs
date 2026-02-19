@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.LogsBackGround;
@@ -15,7 +15,7 @@ using Xunit;
 namespace SW_PortalProprietario.Test.Audit
 {
     /// <summary>
-    /// Testes específicos para validar que a lógica de auditoria capture todas as alterações
+    /// Testes especÃ­ficos para validar que a lÃ³gica de auditoria capture todas as alteraÃ§Ãµes
     /// em objetos filhos (entidades relacionadas e suas propriedades)
     /// </summary>
     public class AuditHelperChildEntitiesTest
@@ -31,14 +31,14 @@ namespace SW_PortalProprietario.Test.Audit
             _auditHelper = new AuditHelper(_auditQueueProducerMock.Object, _httpContextAccessorMock.Object);
         }
 
-        [Fact(DisplayName = "Deve capturar alteração de EmailPreferencial em Pessoa")]
+        [Fact(DisplayName = "Deve capturar alteraÃ§Ã£o de EmailPreferencial em Pessoa")]
         public async Task DeveCapturarAlteracao_DeEmailPreferencialEmPessoa()
         {
             // Arrange
             var pessoaOld = new Pessoa
             {
                 Id = 1,
-                Nome = "João Silva",
+                Nome = "JoÃ£o Silva",
                 EmailPreferencial = "joao.antigo@email.com",
                 EmailAlternativo = null,
                 TipoPessoa = EnumTipoPessoa.Fisica
@@ -47,7 +47,7 @@ namespace SW_PortalProprietario.Test.Audit
             var pessoaNew = new Pessoa
             {
                 Id = 1,
-                Nome = "João Silva",
+                Nome = "JoÃ£o Silva",
                 EmailPreferencial = "joao.novo@email.com", // ALTERADO
                 EmailAlternativo = null,
                 TipoPessoa = EnumTipoPessoa.Fisica
@@ -75,13 +75,13 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage.ChangesJson);
             changes.Should().NotBeNull();
             
-            // CRÍTICO: Deve capturar a alteração no EmailPreferencial
-            changes!.Should().ContainKey("EmailPreferencial", "A alteração no EmailPreferencial deve ser capturada");
+            // CRÃTICO: Deve capturar a alteraÃ§Ã£o no EmailPreferencial
+            changes!.Should().ContainKey("EmailPreferencial", "A alteraÃ§Ã£o no EmailPreferencial deve ser capturada");
             changes["EmailPreferencial"]["oldValue"]?.ToString().Should().Be("joao.antigo@email.com");
             changes["EmailPreferencial"]["newValue"]?.ToString().Should().Be("joao.novo@email.com");
         }
 
-        [Fact(DisplayName = "Deve capturar alteração de EmailAlternativo de null para valor em Pessoa")]
+        [Fact(DisplayName = "Deve capturar alteraÃ§Ã£o de EmailAlternativo de null para valor em Pessoa")]
         public async Task DeveCapturarAlteracao_DeEmailAlternativoDeNullParaValor()
         {
             // Arrange
@@ -119,13 +119,13 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // CRÍTICO: Deve capturar a alteração no EmailAlternativo (de null para valor)
-            changes!.Should().ContainKey("EmailAlternativo", "A alteração no EmailAlternativo (de null para valor) deve ser capturada");
+            // CRÃTICO: Deve capturar a alteraÃ§Ã£o no EmailAlternativo (de null para valor)
+            changes!.Should().ContainKey("EmailAlternativo", "A alteraÃ§Ã£o no EmailAlternativo (de null para valor) deve ser capturada");
             changes["EmailAlternativo"]["oldValue"].Should().BeNull();
             changes["EmailAlternativo"]["newValue"]?.ToString().Should().Be("maria.alternativo@email.com");
         }
 
-        [Fact(DisplayName = "Deve capturar alteração de EmailAlternativo de valor para null em Pessoa")]
+        [Fact(DisplayName = "Deve capturar alteraÃ§Ã£o de EmailAlternativo de valor para null em Pessoa")]
         public async Task DeveCapturarAlteracao_DeEmailAlternativoDeValorParaNull()
         {
             // Arrange
@@ -163,13 +163,13 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // CRÍTICO: Deve capturar a alteração no EmailAlternativo (de valor para null)
-            changes!.Should().ContainKey("EmailAlternativo", "A alteração no EmailAlternativo (de valor para null) deve ser capturada");
+            // CRÃTICO: Deve capturar a alteraÃ§Ã£o no EmailAlternativo (de valor para null)
+            changes!.Should().ContainKey("EmailAlternativo", "A alteraÃ§Ã£o no EmailAlternativo (de valor para null) deve ser capturada");
             changes["EmailAlternativo"]["oldValue"]?.ToString().Should().Be("pedro.alternativo@email.com");
             changes["EmailAlternativo"]["newValue"].Should().BeNull();
         }
 
-        [Fact(DisplayName = "Deve capturar múltiplas alterações simultâneas em Pessoa")]
+        [Fact(DisplayName = "Deve capturar mÃºltiplas alteraÃ§Ãµes simultÃ¢neas em Pessoa")]
         public async Task DeveCapturarMultiplasAlteracoes_SimultaneasEmPessoa()
         {
             // Arrange
@@ -209,12 +209,12 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // CRÍTICO: Deve capturar TODAS as alterações
-            changes!.Should().ContainKey("Nome", "A alteração no Nome deve ser capturada");
-            changes.Should().ContainKey("EmailPreferencial", "A alteração no EmailPreferencial deve ser capturada");
-            changes.Should().ContainKey("EmailAlternativo", "A alteração no EmailAlternativo deve ser capturada");
-            changes.Should().ContainKey("NomeFantasia", "A alteração no NomeFantasia deve ser capturada");
-            changes.Should().ContainKey("DataNascimento", "A alteração no DataNascimento deve ser capturada");
+            // CRÃTICO: Deve capturar TODAS as alteraÃ§Ãµes
+            changes!.Should().ContainKey("Nome", "A alteraÃ§Ã£o no Nome deve ser capturada");
+            changes.Should().ContainKey("EmailPreferencial", "A alteraÃ§Ã£o no EmailPreferencial deve ser capturada");
+            changes.Should().ContainKey("EmailAlternativo", "A alteraÃ§Ã£o no EmailAlternativo deve ser capturada");
+            changes.Should().ContainKey("NomeFantasia", "A alteraÃ§Ã£o no NomeFantasia deve ser capturada");
+            changes.Should().ContainKey("DataNascimento", "A alteraÃ§Ã£o no DataNascimento deve ser capturada");
             
             // Validar valores
             changes["Nome"]["oldValue"]?.ToString().Should().Be("Ana Paula");
@@ -230,13 +230,13 @@ namespace SW_PortalProprietario.Test.Audit
             changes["NomeFantasia"]["newValue"]?.ToString().Should().Be("Ana P.");
         }
 
-        [Fact(DisplayName = "Deve capturar alteração quando Pessoa vinculada ao Usuario é modificada")]
+        [Fact(DisplayName = "Deve capturar alteraÃ§Ã£o quando Pessoa vinculada ao Usuario Ã© modificada")]
         public async Task DeveCapturarAlteracao_QuandoPessoaVinculadaAoUsuarioEModificada()
         {
             // Arrange
-            // IMPORTANTE: A lógica atual compara entidades relacionadas apenas por ID
-            // Se o ID for o mesmo, não detecta mudança na referência
-            // Para testar mudança na referência, precisamos de IDs diferentes
+            // IMPORTANTE: A lÃ³gica atual compara entidades relacionadas apenas por ID
+            // Se o ID for o mesmo, nÃ£o detecta mudanÃ§a na referÃªncia
+            // Para testar mudanÃ§a na referÃªncia, precisamos de IDs diferentes
             var pessoaOld = new Pessoa
             {
                 Id = 1,
@@ -246,7 +246,7 @@ namespace SW_PortalProprietario.Test.Audit
 
             var pessoaNew = new Pessoa
             {
-                Id = 2, // ID DIFERENTE para que a mudança seja detectada
+                Id = 2, // ID DIFERENTE para que a mudanÃ§a seja detectada
                 Nome = "Carlos Mendes Novo",
                 EmailPreferencial = "carlos.novo@email.com"
             };
@@ -287,8 +287,8 @@ namespace SW_PortalProprietario.Test.Audit
             changes.Should().NotBeNull();
             
             // Deve detectar que a Pessoa foi alterada (ID diferente)
-            // Como a Pessoa é uma entidade relacionada (ManyToOne), deve capturar a mudança na referência
-            changes!.Should().ContainKey("Pessoa", "A alteração na Pessoa relacionada deve ser capturada");
+            // Como a Pessoa Ã© uma entidade relacionada (ManyToOne), deve capturar a mudanÃ§a na referÃªncia
+            changes!.Should().ContainKey("Pessoa", "A alteraÃ§Ã£o na Pessoa relacionada deve ser capturada");
             
             var pessoaChange = changes["Pessoa"];
             pessoaChange.Should().ContainKey("oldEntityId");
@@ -296,29 +296,29 @@ namespace SW_PortalProprietario.Test.Audit
             pessoaChange["oldEntityId"]?.ToString().Should().Be("1");
             pessoaChange["newEntityId"]?.ToString().Should().Be("2");
             
-            // NOTA: Mudanças internas em entidades relacionadas (como EmailPreferencial dentro da Pessoa)
-            // não são capturadas quando o ID da referência é o mesmo. Isso é comportamento esperado.
-            // Para capturar mudanças na Pessoa, é necessário salvar a Pessoa diretamente.
+            // NOTA: MudanÃ§as internas em entidades relacionadas (como EmailPreferencial dentro da Pessoa)
+            // nÃ£o sÃ£o capturadas quando o ID da referÃªncia Ã© o mesmo. Isso Ã© comportamento esperado.
+            // Para capturar mudanÃ§as na Pessoa, Ã© necessÃ¡rio salvar a Pessoa diretamente.
         }
 
-        [Fact(DisplayName = "Deve capturar alterações em strings com espaços (normalização com trim)")]
+        [Fact(DisplayName = "Deve capturar alteraÃ§Ãµes em strings com espaÃ§os (normalizaÃ§Ã£o com trim)")]
         public async Task DeveCapturarAlteracoes_EmStringsComEspacos()
         {
             // Arrange
-            // IMPORTANTE: A comparação usa trim, então valores iguais após trim não geram log
-            // Para testar, vamos usar valores que são diferentes mesmo após trim
+            // IMPORTANTE: A comparaÃ§Ã£o usa trim, entÃ£o valores iguais apÃ³s trim nÃ£o geram log
+            // Para testar, vamos usar valores que sÃ£o diferentes mesmo apÃ³s trim
             var pessoaOld = new Pessoa
             {
                 Id = 1,
-                Nome = "  João Silva  ", // COM ESPAÇOS
-                EmailPreferencial = "joao.antigo@email.com" // Valor diferente para garantir que haja mudança
+                Nome = "  JoÃ£o Silva  ", // COM ESPAÃ‡OS
+                EmailPreferencial = "joao.antigo@email.com" // Valor diferente para garantir que haja mudanÃ§a
             };
 
             var pessoaNew = new Pessoa
             {
                 Id = 1,
-                Nome = "João Silva", // SEM ESPAÇOS (igual após trim, mas valor original diferente)
-                EmailPreferencial = "joao.novo@email.com" // Valor diferente para garantir que haja mudança
+                Nome = "JoÃ£o Silva", // SEM ESPAÃ‡OS (igual apÃ³s trim, mas valor original diferente)
+                EmailPreferencial = "joao.novo@email.com" // Valor diferente para garantir que haja mudanÃ§a
             };
 
             SetupHttpContext("192.168.1.1", "Mozilla/5.0", 1);
@@ -333,22 +333,22 @@ namespace SW_PortalProprietario.Test.Audit
             await _auditHelper.LogUpdateAsync(pessoaOld, pessoaNew);
 
             // Assert
-            // Como a comparação usa trim, "  João Silva  " e "João Silva" são considerados iguais
-            // Então apenas o EmailPreferencial deve gerar log
+            // Como a comparaÃ§Ã£o usa trim, "  JoÃ£o Silva  " e "JoÃ£o Silva" sÃ£o considerados iguais
+            // EntÃ£o apenas o EmailPreferencial deve gerar log
             capturedMessage.Should().NotBeNull();
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
             // O EmailPreferencial deve ser capturado (valores diferentes)
-            changes!.Should().ContainKey("EmailPreferencial", "A alteração no EmailPreferencial deve ser capturada");
+            changes!.Should().ContainKey("EmailPreferencial", "A alteraÃ§Ã£o no EmailPreferencial deve ser capturada");
             changes["EmailPreferencial"]["oldValue"]?.ToString().Should().Be("joao.antigo@email.com");
             changes["EmailPreferencial"]["newValue"]?.ToString().Should().Be("joao.novo@email.com");
             
-            // NOTA: O Nome não será capturado porque após trim são iguais
-            // Isso é o comportamento esperado - a comparação normaliza com trim
+            // NOTA: O Nome nÃ£o serÃ¡ capturado porque apÃ³s trim sÃ£o iguais
+            // Isso Ã© o comportamento esperado - a comparaÃ§Ã£o normaliza com trim
         }
 
-        [Fact(DisplayName = "Deve capturar alteração de null para string vazia e vice-versa")]
+        [Fact(DisplayName = "Deve capturar alteraÃ§Ã£o de null para string vazia e vice-versa")]
         public async Task DeveCapturarAlteracao_DeNullParaStringVaziaEViceVersa()
         {
             // Arrange
@@ -384,7 +384,7 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // Deve capturar alterações entre null e string vazia
+            // Deve capturar alteraÃ§Ãµes entre null e string vazia
             if (changes!.ContainsKey("EmailPreferencial"))
             {
                 changes["EmailPreferencial"]["oldValue"].Should().BeNull();
@@ -398,14 +398,14 @@ namespace SW_PortalProprietario.Test.Audit
             }
         }
 
-        [Fact(DisplayName = "Deve capturar alteração quando apenas EmailPreferencial é modificado (cenário real)")]
+        [Fact(DisplayName = "Deve capturar alteraÃ§Ã£o quando apenas EmailPreferencial Ã© modificado (cenÃ¡rio real)")]
         public async Task DeveCapturarAlteracao_QuandoApenasEmailPreferencialEModificado()
         {
-            // Arrange - Simula o cenário real onde apenas o email é alterado
+            // Arrange - Simula o cenÃ¡rio real onde apenas o email Ã© alterado
             var pessoaOld = new Pessoa
             {
                 Id = 1,
-                Nome = "Usuário Teste",
+                Nome = "UsuÃ¡rio Teste",
                 EmailPreferencial = "usuario.antigo@email.com",
                 EmailAlternativo = "usuario.alternativo@email.com",
                 TipoPessoa = EnumTipoPessoa.Fisica,
@@ -415,7 +415,7 @@ namespace SW_PortalProprietario.Test.Audit
             var pessoaNew = new Pessoa
             {
                 Id = 1,
-                Nome = "Usuário Teste", // MESMO
+                Nome = "UsuÃ¡rio Teste", // MESMO
                 EmailPreferencial = "usuario.novo@email.com", // APENAS ISSO ALTERADO
                 EmailAlternativo = "usuario.alternativo@email.com", // MESMO
                 TipoPessoa = EnumTipoPessoa.Fisica, // MESMO
@@ -440,19 +440,19 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // CRÍTICO: Deve capturar APENAS a alteração no EmailPreferencial
-            changes!.Should().ContainKey("EmailPreferencial", "A alteração no EmailPreferencial deve ser capturada");
+            // CRÃTICO: Deve capturar APENAS a alteraÃ§Ã£o no EmailPreferencial
+            changes!.Should().ContainKey("EmailPreferencial", "A alteraÃ§Ã£o no EmailPreferencial deve ser capturada");
             changes["EmailPreferencial"]["oldValue"]?.ToString().Should().Be("usuario.antigo@email.com");
             changes["EmailPreferencial"]["newValue"]?.ToString().Should().Be("usuario.novo@email.com");
             
-            // Não deve ter outras alterações
+            // NÃ£o deve ter outras alteraÃ§Ãµes
             changes.Should().NotContainKey("Nome");
             changes.Should().NotContainKey("EmailAlternativo");
             changes.Should().NotContainKey("TipoPessoa");
             changes.Should().NotContainKey("DataNascimento");
         }
 
-        [Fact(DisplayName = "Deve capturar alteração quando EmailAlternativo é adicionado a Pessoa existente")]
+        [Fact(DisplayName = "Deve capturar alteraÃ§Ã£o quando EmailAlternativo Ã© adicionado a Pessoa existente")]
         public async Task DeveCapturarAlteracao_QuandoEmailAlternativoEAdicionado()
         {
             // Arrange
@@ -488,8 +488,8 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // CRÍTICO: Deve capturar a adição do EmailAlternativo
-            changes!.Should().ContainKey("EmailAlternativo", "A adição do EmailAlternativo deve ser capturada");
+            // CRÃTICO: Deve capturar a adiÃ§Ã£o do EmailAlternativo
+            changes!.Should().ContainKey("EmailAlternativo", "A adiÃ§Ã£o do EmailAlternativo deve ser capturada");
             changes["EmailAlternativo"]["oldValue"].Should().BeNull();
             changes["EmailAlternativo"]["newValue"]?.ToString().Should().Be("teste.alternativo@email.com");
         }
@@ -507,7 +507,7 @@ namespace SW_PortalProprietario.Test.Audit
                 DataNascimento = new DateTime(1980, 6, 15)
             };
 
-            // Simular clone usando JSON (como no método CloneEntityForAudit)
+            // Simular clone usando JSON (como no mÃ©todo CloneEntityForAudit)
             var options = new JsonSerializerOptions
             {
                 ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,

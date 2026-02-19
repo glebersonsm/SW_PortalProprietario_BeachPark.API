@@ -1,4 +1,4 @@
-using NHibernate.Mapping;
+﻿using NHibernate.Mapping;
 
 namespace SW_PortalProprietario.Application.Models.TimeSharing
 {

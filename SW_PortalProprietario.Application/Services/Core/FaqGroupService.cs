@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NHibernate;
@@ -48,7 +48,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var grupoFaq = await _repository.FindById<GrupoFaq>(id);
                 if (grupoFaq is null)
                 {
-                    throw new ArgumentException($"Não foi encontrado o Grupo de FAQ com Id: {id}!");
+                    throw new ArgumentException($"NÃ£o foi encontrado o Grupo de FAQ com Id: {id}!");
                 }
 
 
@@ -67,7 +67,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -76,7 +76,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o grupo de documento: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o grupo de documento: {id}");
                 throw;
             }
 
@@ -95,7 +95,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var emp = (await _repository.FindBySql<EmpresaModel>($"Select e.Id From Empresa e Order by e.Id")).FirstOrDefault();
                 if (emp == null)
-                    throw new ArgumentException($"Não foi possível identificar a empresa proprietária");
+                    throw new ArgumentException($"NÃ£o foi possÃ­vel identificar a empresa proprietÃ¡ria");
 
                 var grupoFaq = grupoFaqOriginal != null ? _mapper.Map(model, grupoFaqOriginal) : _mapper.Map(model, new GrupoFaq());
                 grupoFaq.Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = emp.Id.GetValueOrDefault() };
@@ -110,7 +110,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     grupoFaq.GrupoFaqPai = null;
                 }
 
-                // Se for uma inclusão e não tiver ordem definida, definir ordem padrão
+                // Se for uma inclusÃ£o e nÃ£o tiver ordem definida, definir ordem padrÃ£o
                 if (grupoFaqOriginal == null && (model.Ordem == null || model.Ordem == 0))
                 {
                     var maxOrdem = (await _repository.FindBySql<int?>("Select Max(Ordem) From GrupoFaq")).FirstOrDefault();
@@ -126,11 +126,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     _logger.LogInformation($"Grupo de FAQ: ({result.Id} - {grupoFaq.Nome}) salvo com sucesso!");
                     return new GrupoFaqModel() { Id = result.Id };
                 }
-                throw exception ?? new Exception($"Não foi possível salvar o Grupo de FAQ: ({grupoFaq.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o Grupo de FAQ: ({grupoFaq.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o Grupo de FAQ: ({model.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o Grupo de FAQ: ({model.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -157,7 +157,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var tagsInexistentes = listTags.Where(c => !allTags.Any(b => b.Id == c)).AsList();
                 if (tagsInexistentes.Count > 0)
                 {
-                    throw new ArgumentException($"Tags não encontradas: {string.Join(",", tagsInexistentes)}");
+                    throw new ArgumentException($"Tags nÃ£o encontradas: {string.Join(",", tagsInexistentes)}");
                 }
 
                 var tags = (await _repository.FindBySql<TagsModel>(@$"Select t.Id From Tags t Where t.Id in ({string.Join(",", listTags)}) and 
@@ -185,15 +185,15 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 var loggedUser = await _repository.GetLoggedUser();
                 if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o usuÃ¡rio para comunicaÃ§Ã£o com o eSolution!");
 
                 var userId = loggedUser.Value.userId;
                 if (string.IsNullOrEmpty(userId) || !Helper.IsNumeric(userId))
-                    throw new ArgumentNullException("Não foi possível identificar o id do usuário logado.");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o id do usuÃ¡rio logado.");
 
                 var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(userId), _communicationProvider.CommunicationProviderName);
                 if (pessoaProvider == null || !pessoaProvider.Any() || pessoaProvider.Any(a => string.IsNullOrEmpty(a.PessoaProvider)))
-                    throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
+                    throw new ArgumentNullException($"NÃ£o foi possÃ­vel encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
 
             }
 
@@ -333,7 +333,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     _logger.LogInformation($"Ordem dos grupos de FAQ atualizada com sucesso!");
                     return true;
                 }
-                throw exception ?? new Exception("Não foi possível atualizar a ordem dos grupos de FAQ");
+                throw exception ?? new Exception("NÃ£o foi possÃ­vel atualizar a ordem dos grupos de FAQ");
             }
             catch (Exception err)
             {

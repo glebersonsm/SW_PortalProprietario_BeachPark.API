@@ -8,7 +8,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual Empresa? Empresa { get; set; }
         public virtual EnumSimNao? LiberacaoDiretaPeloCliente { get; set; } = EnumSimNao.Sim;
         public virtual string? CodigoEnviadoAoCliente { get; set; }
-        public virtual EnumSimNao? LiberacaoConfirmada { get; set; } = EnumSimNao.Não;
+        public virtual EnumSimNao? LiberacaoConfirmada { get; set; } = EnumSimNao.Nao;
         public virtual DateTime? DataConfirmacao { get; set; }
         public virtual Email? Email { get; set; }
         public virtual string? Tentativas { get; set; }

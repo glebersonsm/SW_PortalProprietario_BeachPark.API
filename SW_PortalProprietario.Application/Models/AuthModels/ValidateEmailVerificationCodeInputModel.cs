@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Application.Models.AuthModels
+﻿namespace SW_PortalProprietario.Application.Models.AuthModels
 {
     /// <summary>
-    /// Modelo para validação do código de verificação por e-mail ao alterar o e-mail do usuário.
+    /// Modelo para validaÃ§Ã£o do cÃ³digo de verificaÃ§Ã£o por e-mail ao alterar o e-mail do usuÃ¡rio.
     /// </summary>
     public class ValidateEmailVerificationCodeInputModel
     {

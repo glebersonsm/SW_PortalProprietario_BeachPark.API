@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,10 +39,10 @@ public class DocumentTemplateService : IDocumentTemplateService
             throw new ArgumentNullException(nameof(model));
 
         if (string.IsNullOrWhiteSpace(model.ContentHtml))
-            throw new ArgumentException("O conteúdo HTML do template deve ser informado.", nameof(model.ContentHtml));
+            throw new ArgumentException("O conteÃºdo HTML do template deve ser informado.", nameof(model.ContentHtml));
 
         if (model.TemplateId.HasValue && model.TemplateId.Value > 0)
-            throw new ArgumentException("TemplateId não deve ser informado ao criar um novo template.", nameof(model.TemplateId));
+            throw new ArgumentException("TemplateId nÃ£o deve ser informado ao criar um novo template.", nameof(model.TemplateId));
 
         try
         {
@@ -97,10 +97,10 @@ public class DocumentTemplateService : IDocumentTemplateService
             throw new ArgumentNullException(nameof(model));
 
         if (string.IsNullOrWhiteSpace(model.ContentHtml))
-            throw new ArgumentException("O conteúdo HTML do template deve ser informado.", nameof(model.ContentHtml));
+            throw new ArgumentException("O conteÃºdo HTML do template deve ser informado.", nameof(model.ContentHtml));
 
         if (!model.TemplateId.HasValue || model.TemplateId.Value <= 0)
-            throw new ArgumentException("TemplateId é obrigatório para atualizar um template.", nameof(model.TemplateId));
+            throw new ArgumentException("TemplateId Ã© obrigatÃ³rio para atualizar um template.", nameof(model.TemplateId));
 
         try
         {
@@ -119,7 +119,7 @@ public class DocumentTemplateService : IDocumentTemplateService
                 session: null, parameters)).FirstOrDefault();
 
             if (itemToUpdate == null)
-                throw new ArgumentException($"Não foi encontrado o template de Id: {model.TemplateId}");
+                throw new ArgumentException($"NÃ£o foi encontrado o template de Id: {model.TemplateId}");
 
             itemToUpdate.TemplateType = model.TemplateType;
             itemToUpdate.Name = string.IsNullOrWhiteSpace(model.Name)
@@ -164,7 +164,7 @@ public class DocumentTemplateService : IDocumentTemplateService
     [Obsolete("Use CreateAsync ou UpdateAsync")]
     public async Task<DocumentTemplateModel> UploadAsync(DocumentTemplateUploadInputModel model, int usuarioId)
     {
-        // Se tem templateId, usar Update, senão usar Create
+        // Se tem templateId, usar Update, senÃ£o usar Create
         if (model.TemplateId.HasValue && model.TemplateId.Value > 0)
         {
             return await UpdateAsync(model, usuarioId);
@@ -212,7 +212,7 @@ public class DocumentTemplateService : IDocumentTemplateService
             }
         }
 
-        // Buscar template ativo por tipo (sem templateId ou se não encontrou pelo ID)
+        // Buscar template ativo por tipo (sem templateId ou se nÃ£o encontrou pelo ID)
         var resultado = await _repository.FindByHql<DocumentTemplate>(
             "from DocumentTemplate dt where dt.TemplateType = :templateType and dt.Active = :active order by dt.Version desc",
             session: null, parameters.ToArray());
@@ -278,7 +278,7 @@ public class DocumentTemplateService : IDocumentTemplateService
             }
         }
 
-        // Buscar template ativo por tipo (sem templateId ou se não encontrou pelo ID)
+        // Buscar template ativo por tipo (sem templateId ou se nÃ£o encontrou pelo ID)
         var resultado = await _repository.FindByHql<DocumentTemplate>(
             "from DocumentTemplate dt where dt.TemplateType = :templateType and dt.Active = :active order by dt.Version desc",
             session: null, parameters.ToArray());
@@ -290,7 +290,7 @@ public class DocumentTemplateService : IDocumentTemplateService
     {
         if (listTags == null || !listTags.Any())
         {
-            // Se não há tags na lista, remover todas as tags existentes
+            // Se nÃ£o hÃ¡ tags na lista, remover todas as tags existentes
             var tagsVinculadas = (await _repository.FindByHql<DocumentTemplateTags>(
                 $"From DocumentTemplateTags dtt Inner Join Fetch dtt.DocumentTemplate dt Where dt.Id = {documentTemplate.Id} and dtt.UsuarioRemocao is null and dtt.DataHoraRemocao is null")).AsList();
 
@@ -308,14 +308,14 @@ public class DocumentTemplateService : IDocumentTemplateService
         var tagsInexistentes = listTags.Where(c => !allTags.Any(b => b.Id == c)).AsList();
         if (tagsInexistentes.Count > 0)
         {
-            throw new ArgumentException($"Tags não encontradas: {string.Join(",", tagsInexistentes)}");
+            throw new ArgumentException($"Tags nÃ£o encontradas: {string.Join(",", tagsInexistentes)}");
         }
 
         // Buscar tags existentes do template
         var tagsExistentes = (await _repository.FindByHql<DocumentTemplateTags>(
             $"From DocumentTemplateTags dtt Inner Join Fetch dtt.DocumentTemplate dt Inner Join Fetch dtt.Tags t Where dt.Id = {documentTemplate.Id} and dtt.UsuarioRemocao is null and dtt.DataHoraRemocao is null")).AsList();
 
-        // Remover tags existentes que não estão na lista
+        // Remover tags existentes que nÃ£o estÃ£o na lista
         var tagsParaRemover = tagsExistentes.Where(t => !listTags.Contains(t.Tags.Id)).AsList();
         foreach (var tagParaRemover in tagsParaRemover)
         {
@@ -324,7 +324,7 @@ public class DocumentTemplateService : IDocumentTemplateService
             await _repository.Save(tagParaRemover);
         }
 
-        // Adicionar novas tags que não existem
+        // Adicionar novas tags que nÃ£o existem
         var tagsParaAdicionar = listTags.Where(tagId => !tagsExistentes.Any(te => te.Tags.Id == tagId)).AsList();
         foreach (var tagId in tagsParaAdicionar)
         {
@@ -369,14 +369,14 @@ public class DocumentTemplateService : IDocumentTemplateService
                 session: null, new[] { new Parameter("templateId", templateId) })).FirstOrDefault();
 
             if (template == null)
-                throw new ArgumentException($"Template com ID {templateId} não encontrado.");
+                throw new ArgumentException($"Template com ID {templateId} nÃ£o encontrado.");
 
             // Soft delete: desativar o template
             template.Active = false;
             template.UsuarioAlteracao = usuarioId;
             template.DataHoraAlteracao = DateTime.Now;
 
-            _logger.LogInformation("Desativando template {TemplateId} pelo usuário {UsuarioId}", templateId, usuarioId);
+            _logger.LogInformation("Desativando template {TemplateId} pelo usuÃ¡rio {UsuarioId}", templateId, usuarioId);
 
             await _repository.Save(template);
 

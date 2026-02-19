@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Application.Models.AuthModels
+﻿namespace SW_PortalProprietario.Application.Models.AuthModels
 {
     /// <summary>
-    /// Modelo para envio do código de verificação por SMS ao alterar o telefone celular do usuário.
+    /// Modelo para envio do cÃ³digo de verificaÃ§Ã£o por SMS ao alterar o telefone celular do usuÃ¡rio.
     /// </summary>
     public class SendPhoneVerificationCodeInputModel
     {

@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NHibernate;
@@ -36,15 +36,15 @@ namespace SW_PortalProprietario.Test.Services
             );
         }
 
-        #region SaveRegraPaxFree com Hotéis
+        #region SaveRegraPaxFree com HotÃ©is
 
-        [Fact(DisplayName = "SaveRegraPaxFree - Deve salvar regra com hotéis vinculados")]
+        [Fact(DisplayName = "SaveRegraPaxFree - Deve salvar regra com hotÃ©is vinculados")]
         public async Task SaveRegraPaxFree_DeveSalvarRegraComHoteisVinculados()
         {
             // Arrange
             var inputModel = new RegraPaxFreeInputModel
             {
-                Nome = "Regra Teste com Hotéis",
+                Nome = "Regra Teste com HotÃ©is",
                 DataInicioVigencia = DateTime.Now,
                 DataFimVigencia = DateTime.Now.AddYears(1),
                 Hoteis = new List<RegraPaxFreeHotelInputModel>
@@ -132,13 +132,13 @@ namespace SW_PortalProprietario.Test.Services
             _repositoryMock.Verify(x => x.CommitAsync(), Times.Once);
         }
 
-        [Fact(DisplayName = "SaveRegraPaxFree - Deve salvar regra sem hotéis")]
+        [Fact(DisplayName = "SaveRegraPaxFree - Deve salvar regra sem hotÃ©is")]
         public async Task SaveRegraPaxFree_DeveSalvarRegraSemHoteis()
         {
             // Arrange
             var inputModel = new RegraPaxFreeInputModel
             {
-                Nome = "Regra Teste sem Hotéis",
+                Nome = "Regra Teste sem HotÃ©is",
                 Hoteis = new List<RegraPaxFreeHotelInputModel>()
             };
 
@@ -182,9 +182,9 @@ namespace SW_PortalProprietario.Test.Services
 
         #endregion
 
-        #region UpdateRegraPaxFree com Hotéis
+        #region UpdateRegraPaxFree com HotÃ©is
 
-        [Fact(DisplayName = "UpdateRegraPaxFree - Deve atualizar regra adicionando novos hotéis")]
+        [Fact(DisplayName = "UpdateRegraPaxFree - Deve atualizar regra adicionando novos hotÃ©is")]
         public async Task UpdateRegraPaxFree_DeveAtualizarRegraAdicionandoNovosHoteis()
         {
             // Arrange
@@ -267,7 +267,7 @@ namespace SW_PortalProprietario.Test.Services
             _repositoryMock.Verify(x => x.CommitAsync(), Times.Once);
         }
 
-        [Fact(DisplayName = "UpdateRegraPaxFree - Deve remover todos os hotéis quando lista vazia")]
+        [Fact(DisplayName = "UpdateRegraPaxFree - Deve remover todos os hotÃ©is quando lista vazia")]
         public async Task UpdateRegraPaxFree_DeveRemoverTodosOsHoteisQuandoListaVazia()
         {
             // Arrange
@@ -275,7 +275,7 @@ namespace SW_PortalProprietario.Test.Services
             var regraExistente = new RegraPaxFree
             {
                 Id = regraId,
-                Nome = "Regra com Hotéis",
+                Nome = "Regra com HotÃ©is",
                 DataHoraRemocao = null,
                 UsuarioRemocao = null
             };
@@ -292,7 +292,7 @@ namespace SW_PortalProprietario.Test.Services
             var inputModel = new AlteracaoRegraPaxFreeInputModel
             {
                 Id = regraId,
-                Nome = "Regra sem Hotéis",
+                Nome = "Regra sem HotÃ©is",
                 Hoteis = new List<RegraPaxFreeHotelInputModel>(),
                 RemoverHoteisNaoEnviados = true
             };
@@ -348,16 +348,16 @@ namespace SW_PortalProprietario.Test.Services
             result.Hoteis.Should().NotBeNull();
             result.Hoteis.Should().BeEmpty();
 
-            // Verificar se o hotel foi marcado para remoção (soft delete)
+            // Verificar se o hotel foi marcado para remoÃ§Ã£o (soft delete)
             _repositoryMock.Verify(x => x.Save(It.Is<RegraPaxFreeHotel>(h => h.UsuarioRemocao != null && h.DataHoraRemocao != null)), Times.Once);
         }
 
 
         #endregion
 
-        #region Search com Hotéis
+        #region Search com HotÃ©is
 
-        [Fact(DisplayName = "Search - Deve retornar regras com hotéis vinculados")]
+        [Fact(DisplayName = "Search - Deve retornar regras com hotÃ©is vinculados")]
         public async Task Search_DeveRetornarRegrasComHoteisVinculados()
         {
             // Arrange
@@ -427,9 +427,9 @@ namespace SW_PortalProprietario.Test.Services
 
         #endregion
 
-        #region GetRegraVigente com Hotéis
+        #region GetRegraVigente com HotÃ©is
 
-        [Fact(DisplayName = "GetRegraVigente - Deve retornar regra vigente com hotéis vinculados")]
+        [Fact(DisplayName = "GetRegraVigente - Deve retornar regra vigente com hotÃ©is vinculados")]
         public async Task GetRegraVigente_DeveRetornarRegraVigenteComHoteisVinculados()
         {
             // Arrange
@@ -491,9 +491,9 @@ namespace SW_PortalProprietario.Test.Services
 
         #endregion
 
-        #region Validações
+        #region ValidaÃ§Ãµes
 
-        [Fact(DisplayName = "SaveRegraPaxFree - Deve ignorar hotéis com HotelId inválido")]
+        [Fact(DisplayName = "SaveRegraPaxFree - Deve ignorar hotÃ©is com HotelId invÃ¡lido")]
         public async Task SaveRegraPaxFree_DeveIgnorarHoteisComHotelIdInvalido()
         {
             // Arrange
@@ -502,10 +502,10 @@ namespace SW_PortalProprietario.Test.Services
                 Nome = "Regra Teste",
                 Hoteis = new List<RegraPaxFreeHotelInputModel>
                 {
-                    new RegraPaxFreeHotelInputModel { HotelId = 1 }, // Válido
-                    new RegraPaxFreeHotelInputModel { HotelId = null }, // Inválido - deve ser ignorado
-                    new RegraPaxFreeHotelInputModel { HotelId = 0 }, // Inválido - deve ser ignorado
-                    new RegraPaxFreeHotelInputModel { HotelId = -1 } // Inválido - deve ser ignorado
+                    new RegraPaxFreeHotelInputModel { HotelId = 1 }, // VÃ¡lido
+                    new RegraPaxFreeHotelInputModel { HotelId = null }, // InvÃ¡lido - deve ser ignorado
+                    new RegraPaxFreeHotelInputModel { HotelId = 0 }, // InvÃ¡lido - deve ser ignorado
+                    new RegraPaxFreeHotelInputModel { HotelId = -1 } // InvÃ¡lido - deve ser ignorado
                 }
             };
 
@@ -549,7 +549,7 @@ namespace SW_PortalProprietario.Test.Services
 
             // Assert
             result.Should().NotBeNull();
-            // Apenas 1 hotel válido deve ser salvo
+            // Apenas 1 hotel vÃ¡lido deve ser salvo
             _repositoryMock.Verify(x => x.Save(It.Is<RegraPaxFreeHotel>(h => h.HotelId == 1), It.IsAny<NHibernate.IStatelessSession>()), Times.Once);
             _repositoryMock.Verify(x => x.Save(It.Is<RegraPaxFreeHotel>(h => h.HotelId == null || h.HotelId <= 0), It.IsAny<NHibernate.IStatelessSession>()), Times.Never);
         }

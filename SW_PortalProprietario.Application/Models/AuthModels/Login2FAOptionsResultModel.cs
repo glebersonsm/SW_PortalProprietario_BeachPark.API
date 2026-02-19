@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Application.Models.AuthModels
+﻿namespace SW_PortalProprietario.Application.Models.AuthModels
 {
     /// <summary>
-    /// Resposta do endpoint de opções 2FA por login (sem senha).
+    /// Resposta do endpoint de opÃ§Ãµes 2FA por login (sem senha).
     /// </summary>
     public class Login2FAOptionsResultModel
     {
@@ -15,7 +15,7 @@ namespace SW_PortalProprietario.Application.Models.AuthModels
     {
         /// <summary> "email" | "sms" </summary>
         public string Type { get; set; } = "";
-        /// <summary> Exibição pseudoanonimizada (ex.: j***@gm***.com ou (85) *****7890) </summary>
+        /// <summary> ExibiÃ§Ã£o pseudoanonimizada (ex.: j***@gm***.com ou (85) *****7890) </summary>
         public string Display { get; set; } = "";
     }
 }

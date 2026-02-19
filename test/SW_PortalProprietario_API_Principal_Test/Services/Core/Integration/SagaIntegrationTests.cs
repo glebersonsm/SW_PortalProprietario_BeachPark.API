@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Moq;
 using NHibernate;
 using SW_PortalProprietario.Application.Interfaces;
@@ -16,8 +16,8 @@ using AppConfirmacaoCmStep = SW_PortalProprietario.Application.Services.Core.Dis
 namespace SW_PortalProprietario.Test.Services.Core.Integration
 {
     /// <summary>
-    /// Testes de integração para validar comportamento de Two-Phase Commit
-    /// Simula cenários reais com múltiplos bancos de dados e APIs
+    /// Testes de integraÃ§Ã£o para validar comportamento de Two-Phase Commit
+    /// Simula cenÃ¡rios reais com mÃºltiplos bancos de dados e APIs
     /// </summary>
     public class SagaIntegrationTests
     {
@@ -42,7 +42,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             _confirmacaoLoggerMock = new Mock<ILogger<AppConfirmacaoCmStep>>();
         }
 
-        #region Cenários de Sucesso Total
+        #region CenÃ¡rios de Sucesso Total
 
         [Fact]
         public async Task CenarioReal_TodosOsBancosComSucesso_DeveCommitarTudo()
@@ -95,7 +95,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
                 new ValidacaoCmStep(_repositoryCmMock.Object, _validacaoLoggerMock.Object, model),
                 new GravacaoLogPortalStep(_repositoryHostedPortalMock.Object, _gravacaoLoggerMock.Object,
                     operationId, "Test", model),
-                // CriacaoReservaApiStep removido pois tem dependência IServiceBase não configurada
+                // CriacaoReservaApiStep removido pois tem dependÃªncia IServiceBase nÃ£o configurada
                 new AppConfirmacaoCmStep(_repositoryCmMock.Object, _confirmacaoLoggerMock.Object, model)
             };
 
@@ -111,7 +111,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
         #endregion
 
-        #region Cenários de Falha no Oracle (CM)
+        #region CenÃ¡rios de Falha no Oracle (CM)
 
         [Fact]
         public async Task CenarioReal_FalhaNoOracleDepoisDePostgreSQL_DeveRollbackPostgreSQL()
@@ -141,7 +141,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             _repositoryCmMock.Setup(r => r.BeginTransaction(It.IsAny<IStatelessSession>()));
             _repositoryCmMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
                 .Callback(() => transactionStates["CM_Commit"] = "FAILED")
-                .Returns(Task.FromResult<(bool, Exception?)>((false, new Exception("Erro de conexão Oracle"))));
+                .Returns(Task.FromResult<(bool, Exception?)>((false, new Exception("Erro de conexÃ£o Oracle"))));
 
             var model = new InclusaoReservaInputModel();
             var operationId = Guid.NewGuid().ToString();
@@ -161,7 +161,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             // Assert
             Assert.False(success);
 
-            // PostgreSQL deve ter feito rollback (compensação)
+            // PostgreSQL deve ter feito rollback (compensaÃ§Ã£o)
             Assert.Equal("SUCCESS", transactionStates["Portal_Commit"]);
             Assert.Equal("EXECUTED", transactionStates["Portal_Rollback"]);
             Assert.Equal("FAILED", transactionStates["CM_Commit"]);
@@ -169,7 +169,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
         #endregion
 
-        #region Cenários de Falha na API Externa
+        #region CenÃ¡rios de Falha na API Externa
 
         [Fact]
         public async Task CenarioReal_FalhaAPIExterna_DeveRollbackTudoQueJaFoi()
@@ -238,16 +238,16 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             // Deve ter rollback do Portal
             Assert.Contains("PORTAL-ROLLBACK", executionLog);
 
-            // API falhou, então Portal tentou compensar
+            // API falhou, entÃ£o Portal tentou compensar
             var portalRollbackIndex = executionLog.IndexOf("PORTAL-ROLLBACK");
             var apiFailedIndex = executionLog.IndexOf("API-FAILED");
             Assert.True(apiFailedIndex < portalRollbackIndex,
-                "Rollback deve ocorrer APÓS a falha da API");
+                "Rollback deve ocorrer APÃ“S a falha da API");
         }
 
         #endregion
 
-        #region Cenários de Inconsistência de Dados
+        #region CenÃ¡rios de InconsistÃªncia de Dados
 
         [Fact]
         public async Task CenarioReal_DadosInconsistentesEntreOracleEPostgreSQL_DeveDetectarEreverter()
@@ -258,25 +258,25 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
             var inconsistencyDetected = false;
 
-            // Simular validação que detecta inconsistência
+            // Simular validaÃ§Ã£o que detecta inconsistÃªncia
             _repositoryCmMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<SW_Utils.Auxiliar.Parameter[]>()))
                 .ReturnsAsync(new[] { oracleData });
 
             _repositoryHostedPortalMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<NHibernate.IStatelessSession>(), It.IsAny<SW_Utils.Auxiliar.Parameter[]>()))
                 .ReturnsAsync(new[] { postgresData });
 
-            // Step que valida consistência
+            // Step que valida consistÃªncia
             var validationStep = new Mock<IDistributedTransactionStep>();
             validationStep.Setup(s => s.StepName).Returns("ConsistencyValidation");
             validationStep.Setup(s => s.Order).Returns(1);
             validationStep.Setup(s => s.ExecuteAsync())
                 .ReturnsAsync(() =>
                 {
-                    // Simular detecção de inconsistência
+                    // Simular detecÃ§Ã£o de inconsistÃªncia
                     if (oracleData.ContratoId != postgresData.ContratoId)
                     {
                         inconsistencyDetected = true;
-                        return (false, "Inconsistência de dados detectada!", null);
+                        return (false, "InconsistÃªncia de dados detectada!", null);
                     }
                     return (true, string.Empty, null);
                 });
@@ -292,12 +292,12 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             // Assert
             Assert.False(success);
             Assert.True(inconsistencyDetected);
-            Assert.Contains("Inconsistência", errorMessage);
+            Assert.Contains("InconsistÃªncia", errorMessage);
         }
 
         #endregion
 
-        #region Cenários de Timeout
+        #region CenÃ¡rios de Timeout
 
         [Fact]
         public async Task CenarioReal_TimeoutNoOracle_DeveAbortarECompensarOutros()
@@ -324,7 +324,7 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
                 .Callback(() =>
                 {
                     executionLog.Add("CM-BEGIN");
-                    Thread.Sleep(100); // Simular operação lenta
+                    Thread.Sleep(100); // Simular operaÃ§Ã£o lenta
                 });
 
             _repositoryCmMock.Setup(r => r.CommitAsync(It.IsAny<IStatelessSession>()))
@@ -354,16 +354,16 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
             Assert.False(success);
             Assert.Contains("PORTAL-ROLLBACK", executionLog);
 
-            // Compensação deve ocorrer
+            // CompensaÃ§Ã£o deve ocorrer
             _repositoryHostedPortalMock.Verify(r => r.Rollback(It.IsAny<IStatelessSession>()), Times.AtLeastOnce);
 
-            // Compensação deve ocorrer
+            // CompensaÃ§Ã£o deve ocorrer
             _repositoryHostedPortalMock.Verify(r => r.Rollback(It.IsAny<IStatelessSession>()), Times.AtLeastOnce);
         }
 
         #endregion
 
-        #region Cenários de Compensação Parcial
+        #region CenÃ¡rios de CompensaÃ§Ã£o Parcial
 
         [Fact]
         public async Task CenarioReal_CompensacaoFalhaEmUmBanco_DeveContinuarCompensandoOutros()
@@ -440,12 +440,12 @@ namespace SW_PortalProprietario.Test.Services.Core.Integration
 
         #endregion
 
-        #region Cenários de Race Condition
+        #region CenÃ¡rios de Race Condition
 
         [Fact]
         public async Task CenarioReal_ExecutacaoSimultanea_DeveIniciarECompensarAtomicamente()
         {
-            // Arrange - Simular 2 operações simultâneas
+            // Arrange - Simular 2 operaÃ§Ãµes simultÃ¢neas
             var operation1Log = new List<string>();
             var operation2Log = new List<string>();
 

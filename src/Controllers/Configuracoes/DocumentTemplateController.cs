@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models.DocumentTemplates;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
@@ -36,7 +36,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 {
                     enumTemplateType = parsedType;
                 }
-                // Se não conseguir parsear como string, tentar como número
+                // Se nÃ£o conseguir parsear como string, tentar como nÃºmero
                 else if (int.TryParse(templateType, out var templateTypeInt))
                 {
                     if (Enum.IsDefined(typeof(EnumDocumentTemplateType), templateTypeInt))
@@ -56,11 +56,11 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         public async Task<IActionResult> GetById(int templateId)
         {
             if (templateId <= 0)
-                return BadRequest(new { message = "ID do template inválido." });
+                return BadRequest(new { message = "ID do template invÃ¡lido." });
 
             var result = await _documentTemplateService.GetActiveTemplateAsync(null, templateId);
             if (result == null)
-                return NotFound(new { message = $"Template com ID {templateId} não encontrado." });
+                return NotFound(new { message = $"Template com ID {templateId} nÃ£o encontrado." });
 
             // Garantir que sempre retornamos contentHtml, mesmo que seja string vazia
             if (result.ContentHtml == null)
@@ -75,7 +75,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         public async Task<IActionResult> GetActiveTemplate(string templateType, [FromQuery] int? templateId = null)
         {
             if (!TryParseTemplateType(templateType, out var enumTemplateType))
-                return BadRequest(new { message = $"Tipo de template inválido: {templateType}" });
+                return BadRequest(new { message = $"Tipo de template invÃ¡lido: {templateType}" });
 
             var result = await _documentTemplateService.GetActiveTemplateAsync(enumTemplateType, templateId);
             if (result == null)
@@ -94,11 +94,11 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         public async Task<IActionResult> GetActiveTemplateContent(string templateType, [FromQuery] int? templateId = null)
         {
             if (!TryParseTemplateType(templateType, out var enumTemplateType))
-                return BadRequest(new { message = $"Tipo de template inválido: {templateType}" });
+                return BadRequest(new { message = $"Tipo de template invÃ¡lido: {templateType}" });
 
             var contentHtml = await _documentTemplateService.GetTemplateContentHtmlAsync(enumTemplateType, templateId);
             if (string.IsNullOrWhiteSpace(contentHtml))
-                return NotFound(new { message = "Template ativo não encontrado." });
+                return NotFound(new { message = "Template ativo nÃ£o encontrado." });
 
             return Ok(new { contentHtml });
         }
@@ -108,7 +108,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         public IActionResult GetPlaceholders(string templateType)
         {
             if (!TryParseTemplateType(templateType, out var enumTemplateType))
-                return BadRequest(new { message = $"Tipo de template inválido: {templateType}" });
+                return BadRequest(new { message = $"Tipo de template invÃ¡lido: {templateType}" });
 
             return Ok(GetPlaceholdersByType(enumTemplateType));
         }
@@ -120,14 +120,14 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         public async Task<IActionResult> Salvar([FromBody] DocumentTemplateUploadInputModel model)
         {
             if (model == null)
-                return BadRequest(new { message = "Dados do template não informados." });
+                return BadRequest(new { message = "Dados do template nÃ£o informados." });
 
-            // Validar que não está tentando criar com TemplateId
+            // Validar que nÃ£o estÃ¡ tentando criar com TemplateId
             if (model.TemplateId.HasValue && model.TemplateId.Value > 0)
-                return BadRequest(new { message = "TemplateId não deve ser informado ao criar um novo template." });
+                return BadRequest(new { message = "TemplateId nÃ£o deve ser informado ao criar um novo template." });
 
             var usuarioId = ObterUsuarioId();
-            _logger.LogInformation("Criando novo template {TemplateType} pelo usuário {UsuarioId}", model.TemplateType, usuarioId);
+            _logger.LogInformation("Criando novo template {TemplateType} pelo usuÃ¡rio {UsuarioId}", model.TemplateType, usuarioId);
 
             var template = await _documentTemplateService.CreateAsync(model, usuarioId);
             return Ok(template);
@@ -141,14 +141,14 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         public async Task<IActionResult> Alterar([FromBody] DocumentTemplateUploadInputModel model)
         {
             if (model == null)
-                return BadRequest(new { message = "Dados do template não informados." });
+                return BadRequest(new { message = "Dados do template nÃ£o informados." });
 
             if (model.TemplateId <= 0)
-                return BadRequest(new { message = "ID do template inválido." });
+                return BadRequest(new { message = "ID do template invÃ¡lido." });
 
 
             var usuarioId = ObterUsuarioId();
-            _logger.LogInformation("Atualizando template {TemplateType} id {TemplateId} pelo usuário {UsuarioId}", model.TemplateType, model.TemplateId, usuarioId);
+            _logger.LogInformation("Atualizando template {TemplateType} id {TemplateId} pelo usuÃ¡rio {UsuarioId}", model.TemplateType, model.TemplateId, usuarioId);
 
             try
             {
@@ -175,10 +175,10 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         //public async Task<IActionResult> Upload([FromBody] DocumentTemplateUploadInputModel model)
         //{
         //    if (model == null)
-        //        return BadRequest(new { message = "Dados do template não informados." });
+        //        return BadRequest(new { message = "Dados do template nÃ£o informados." });
 
         //    var usuarioId = ObterUsuarioId();
-        //    _logger.LogInformation("Recebendo atualização de template {TemplateType} id {TemplateId} pelo usuário {UsuarioId}", model.TemplateType, model.TemplateId, usuarioId);
+        //    _logger.LogInformation("Recebendo atualizaÃ§Ã£o de template {TemplateType} id {TemplateId} pelo usuÃ¡rio {UsuarioId}", model.TemplateType, model.TemplateId, usuarioId);
 
         //    var template = await _documentTemplateService.UploadAsync(model, usuarioId);
         //    return Ok(template);
@@ -191,12 +191,12 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         public async Task<IActionResult> Delete(int templateId)
         {
             if (templateId <= 0)
-                return BadRequest(new { message = "ID do template inválido." });
+                return BadRequest(new { message = "ID do template invÃ¡lido." });
 
             try
             {
                 var usuarioId = ObterUsuarioId();
-                _logger.LogInformation("Recebendo solicitação de exclusão de template {TemplateId} pelo usuário {UsuarioId}", templateId, usuarioId);
+                _logger.LogInformation("Recebendo solicitaÃ§Ã£o de exclusÃ£o de template {TemplateId} pelo usuÃ¡rio {UsuarioId}", templateId, usuarioId);
 
                 var result = await _documentTemplateService.DeleteAsync(templateId, usuarioId);
                 if (result)
@@ -204,7 +204,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                     return Ok(new { message = "Template desativado com sucesso." });
                 }
 
-                return BadRequest(new { message = "Não foi possível desativar o template." });
+                return BadRequest(new { message = "NÃ£o foi possÃ­vel desativar o template." });
             }
             catch (ArgumentException ex)
             {

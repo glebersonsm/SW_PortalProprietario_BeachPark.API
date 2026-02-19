@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Attributes;
 using SW_PortalProprietario.Application.Interfaces.Saga;
 using SW_PortalProprietario.Application.Services.Core.Saga;
@@ -24,7 +24,7 @@ namespace SW_PortalProprietario.API.Examples
         }
 
         /// <summary>
-        /// Exemplo 1: Uso básico com ExecuteAsync
+        /// Exemplo 1: Uso bÃ¡sico com ExecuteAsync
         /// </summary>
         [HttpPost("exemplo-basico")]
         [UseSaga("ExemploBasico")]
@@ -44,11 +44,11 @@ namespace SW_PortalProprietario.API.Examples
                         {
                             _logger.LogInformation("Validando dados...");
                             await Task.Delay(100, ct);
-                            // Validação aqui
+                            // ValidaÃ§Ã£o aqui
                         },
                         compensateFunc: async (inp, ct) =>
                         {
-                            _logger.LogInformation("Compensando validação...");
+                            _logger.LogInformation("Compensando validaÃ§Ã£o...");
                             // Nada a fazer neste caso
                         },
                         ct);
@@ -91,18 +91,18 @@ namespace SW_PortalProprietario.API.Examples
                         },
                         ct);
 
-                    // Step 4: Enviar confirmação
+                    // Step 4: Enviar confirmaÃ§Ã£o
                     await _sagaOrchestrator.ExecuteStepAsync(
                         "EnviarConfirmacao",
                         4,
                         new { reservaId, email = input.Email },
                         async (inp, ct) =>
                         {
-                            _logger.LogInformation("Enviando email de confirmação...");
+                            _logger.LogInformation("Enviando email de confirmaÃ§Ã£o...");
                             await Task.Delay(100, ct);
                             // Enviar email aqui
                         },
-                        compensateFunc: null, // Email não precisa ser compensado
+                        compensateFunc: null, // Email nÃ£o precisa ser compensado
                         ct);
 
                     return new ExemploResponse
@@ -110,7 +110,7 @@ namespace SW_PortalProprietario.API.Examples
                         Success = true,
                         ReservaId = reservaId,
                         PagamentoId = pagamentoId,
-                        Message = "Operação concluída com sucesso!"
+                        Message = "OperaÃ§Ã£o concluÃ­da com sucesso!"
                     };
                 });
 
@@ -163,14 +163,14 @@ namespace SW_PortalProprietario.API.Examples
                     async input => new ExemploResponse
                     {
                         Success = true,
-                        Message = "Operação concluída com sucesso!"
+                        Message = "OperaÃ§Ã£o concluÃ­da com sucesso!"
                     });
 
             return Ok(result);
         }
 
         /// <summary>
-        /// Exemplo 3: Simulando falha para testar compensação
+        /// Exemplo 3: Simulando falha para testar compensaÃ§Ã£o
         /// </summary>
         [HttpPost("exemplo-falha")]
         [UseSaga("ExemploFalha")]
@@ -228,7 +228,7 @@ namespace SW_PortalProprietario.API.Examples
                             },
                             compensateFunc: async (inp, ct) =>
                             {
-                                _logger.LogWarning("Compensando Step 3 (não será executado)");
+                                _logger.LogWarning("Compensando Step 3 (nÃ£o serÃ¡ executado)");
                             },
                             ct);
 
@@ -242,7 +242,7 @@ namespace SW_PortalProprietario.API.Examples
                 return BadRequest(new
                 {
                     Success = false,
-                    Message = "Operação falhou e foi compensada",
+                    Message = "OperaÃ§Ã£o falhou e foi compensada",
                     SagaId = ex.SagaId,
                     Error = ex.Message
                 });

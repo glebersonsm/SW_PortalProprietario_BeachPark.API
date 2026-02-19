@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Domain.Entities.Core.Geral
+﻿namespace SW_PortalProprietario.Domain.Entities.Core.Geral
 {
     public class RegraPaxFreeHotel : EntityBaseCore, IEntityValidateCore
     {

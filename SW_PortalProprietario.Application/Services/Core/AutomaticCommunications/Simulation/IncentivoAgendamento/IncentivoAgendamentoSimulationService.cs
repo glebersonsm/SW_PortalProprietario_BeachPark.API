@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+Ôªøusing Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.Empreendimento;
@@ -11,8 +11,8 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Simulation.IncentivoAgendamento;
 
 /// <summary>
-/// ServiÁo auxiliar para simulaÁ„o de emails de incentivo para agendamento
-/// ? USA O MESMO C”DIGO DO PROCESSAMENTO AUTOM¡TICO via IncentivoAgendamentoGenerationService
+/// Servi√ßo auxiliar para simula√ß√£o de emails de incentivo para agendamento
+/// ? USA O MESMO C√ìDIGO DO PROCESSAMENTO AUTOM√ÅTICO via IncentivoAgendamentoGenerationService
 /// </summary>
 public class IncentivoAgendamentoSimulationService
 {
@@ -40,15 +40,15 @@ public class IncentivoAgendamentoSimulationService
     {
         var listResult = new List<EmailInputInternalModel>();
 
-        _logger.LogInformation("=== INÕCIO SIMULA«√O INCENTIVO PARA AGENDAMENTO ===");
+        _logger.LogInformation("=== IN√çCIO SIMULA√á√ÉO INCENTIVO PARA AGENDAMENTO ===");
 
         if (!config.DaysBeforeCheckIn.Any())
-            throw new ArgumentException("ConfiguraÁ„o inv·lida: Dias disparo envio est· vazio.");
+            throw new ArgumentException("Configura√ß√£o inv√°lida: Dias disparo envio est√° vazio.");
 
         var contratos = await _serviceBase.GetContratos(new List<int>());
         var inadimplentes = await _empreendimentoProviderService.Inadimplentes();
 
-        _logger.LogInformation("Buscando contratos elegÌveis para incentivo de agendamento");
+        _logger.LogInformation("Buscando contratos eleg√≠veis para incentivo de agendamento");
 
         var ano = DateTime.Now.Month >= 6 ? DateTime.Now.Year + 1 : DateTime.Now.Year;
         var contratosElegiveis = await _generationService.GetContratosElegiveisAsync(
@@ -59,9 +59,9 @@ public class IncentivoAgendamentoSimulationService
             simulacao: true);
 
         if (contratosElegiveis == null || !contratosElegiveis.Any())
-            throw new ArgumentException("Nenhum contrato elegÌvel encontrado para simulaÁ„o de incentivo para agendamento");
+            throw new ArgumentException("Nenhum contrato eleg√≠vel encontrado para simula√ß√£o de incentivo para agendamento");
 
-        _logger.LogInformation("Encontrados {Count} contratos elegÌveis para an·lise", contratosElegiveis.Count);
+        _logger.LogInformation("Encontrados {Count} contratos eleg√≠veis para an√°lise", contratosElegiveis.Count);
 
         foreach (var item in contratosElegiveis)
         {
@@ -78,7 +78,7 @@ public class IncentivoAgendamentoSimulationService
             _logger.LogInformation("Contrato selecionado: NumeroContrato={NumeroContrato}, Titular={Titular}",
                 contratoCompativel.Value.contrato.NumeroContrato, contratoCompativel.Value.contrato.PessoaTitular1Nome);
 
-            // ? GERAR CONTE⁄DO DO EMAIL - MESMA L”GICA DO PROCESSAMENTO AUTOM¡TICO
+            // ? GERAR CONTE√öDO DO EMAIL - MESMA L√ìGICA DO PROCESSAMENTO AUTOM√ÅTICO
             var emailData = await _generationService.GerarAvisoCompletoAsync(
                 config,
                 contratoCompativel.Value.contrato,
@@ -86,13 +86,13 @@ public class IncentivoAgendamentoSimulationService
                 item.intervalo);
 
             if (emailData == null)
-                throw new ArgumentException("Erro ao gerar conte˙do do email para simulaÁ„o de incentivo para agendamento");
+                throw new ArgumentException("Erro ao gerar conte√∫do do email para simula√ß√£o de incentivo para agendamento");
 
-            _logger.LogInformation("Conte˙do do email gerado com sucesso");
+            _logger.LogInformation("Conte√∫do do email gerado com sucesso");
 
             var result = new EmailInputInternalModel
             {
-                Assunto = $"[SIMULA«√O] {emailData.Subject ?? "Incentivo ao Agendamento"}",
+                Assunto = $"[SIMULA√á√ÉO] {emailData.Subject ?? "Incentivo ao Agendamento"}",
                 Destinatario = userEmail,
                 ConteudoEmail = emailData.HtmlContent ?? "Incentivo ao Agendamento",
                 EmpresaId = 1,
@@ -122,12 +122,12 @@ public class IncentivoAgendamentoSimulationService
             listResult.Add(result);
         }
 
-        _logger.LogInformation("=== FIM SIMULA«√O INCENTIVO PARA AGENDAMENTO ===");
+        _logger.LogInformation("=== FIM SIMULA√á√ÉO INCENTIVO PARA AGENDAMENTO ===");
 
         return listResult;
     }
 
-    #region MÈtodos Auxiliares
+    #region M√©todos Auxiliares
 
     private async Task<(DadosContratoModel contrato, PosicaoAgendamentoViewModel statusAgendamento, int intervalo)?> FindCompatibleContratoAsync(
         List<(DadosContratoModel contrato, PosicaoAgendamentoViewModel statusAgendamento, int intervalo)> contratos,

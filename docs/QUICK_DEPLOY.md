@@ -1,8 +1,8 @@
-# ?? Guia R·pido de Deploy - SW Portal Propriet·rio
+Ôªø# ?? Guia R√°pido de Deploy - SW Portal Propriet√°rio
 
-## ? InÌcio R·pido
+## ? In√≠cio R√°pido
 
-### 1?? PrÈ-requisitos no Servidor Linux
+### 1?? Pr√©-requisitos no Servidor Linux
 
 ```bash
 # Instalar tudo de uma vez
@@ -18,7 +18,7 @@ sudo chmod +x dotnet-install.sh
 sudo ./dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet
 sudo ln -s /usr/share/dotnet/dotnet /usr/local/bin
 
-# ServiÁos
+# Servi√ßos
 sudo apt update && sudo apt install -y nginx postgresql postgresql-contrib redis-server
 curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | sudo bash
 sudo apt install -y rabbitmq-server
@@ -30,26 +30,26 @@ sudo apt install -y rabbitmq-server
 # Copiar template
 cp .env .env.production
 
-# Editar valores para produÁ„o
+# Editar valores para produ√ß√£o
 nano .env.production
 ```
 
-**Vari·veis crÌticas:**
-- `DEFAULT_CONNECTION` - String de conex„o do PostgreSQL
-- `JWT_KEY` - Chave segura com mÌnimo 32 caracteres
-- `ORIGENS_PERMITIDAS` - DomÌnios permitidos para CORS
+**Vari√°veis cr√≠ticas:**
+- `DEFAULT_CONNECTION` - String de conex√£o do PostgreSQL
+- `JWT_KEY` - Chave segura com m√≠nimo 32 caracteres
+- `ORIGENS_PERMITIDAS` - Dom√≠nios permitidos para CORS
 - `REDIS_PASSWORD` - Senha do Redis
 
 ### 3?? Build e Deploy
 
 ```bash
-# Dar permiss„o aos scripts
+# Dar permiss√£o aos scripts
 chmod +x scripts/*.sh
 
 # Build local
 ./scripts/build-and-publish.sh
 
-# Configurar vari·veis do deploy
+# Configurar vari√°veis do deploy
 nano scripts/deploy.sh
 # REMOTE_USER="seu_usuario"
 # REMOTE_HOST="seu_servidor.com"
@@ -62,7 +62,7 @@ nano scripts/deploy.sh
 
 ## ?? Checklist de Deploy
 
-### No Servidor (uma ˙nica vez)
+### No Servidor (uma √∫nica vez)
 
 - [ ] Servidor Ubuntu/Debian atualizado
 - [ ] .NET 8 Runtime instalado
@@ -70,7 +70,7 @@ nano scripts/deploy.sh
 - [ ] PostgreSQL instalado e rodando
 - [ ] Redis instalado e rodando
 - [ ] RabbitMQ instalado e rodando
-- [ ] Usu·rio n„o-root com sudo configurado
+- [ ] Usu√°rio n√£o-root com sudo configurado
 - [ ] SSH configurado com chaves (sem senha)
 - [ ] Firewall configurado (portas 80, 443, 22)
 - [ ] DNS apontando para o servidor
@@ -81,7 +81,7 @@ nano scripts/deploy.sh
 -- Conectar ao PostgreSQL
 sudo -u postgres psql
 
--- Criar banco e usu·rio
+-- Criar banco e usu√°rio
 CREATE DATABASE swportal_prod;
 CREATE USER swportal_user WITH ENCRYPTED PASSWORD 'SenhaSegura123!';
 GRANT ALL PRIVILEGES ON DATABASE swportal_prod TO swportal_user;
@@ -89,16 +89,16 @@ GRANT ALL PRIVILEGES ON DATABASE swportal_prod TO swportal_user;
 -- Conectar ao banco
 \c swportal_prod
 
--- Criar extens„o necess·ria
+-- Criar extens√£o necess√°ria
 CREATE EXTENSION IF NOT EXISTS unaccent;
 ```
 
 ### Nginx
 
 ```bash
-# Criar configuraÁ„o
+# Criar configura√ß√£o
 sudo nano /etc/nginx/sites-available/swportal-api
-# (copiar configuraÁ„o do docs/DEPLOY_LINUX.md)
+# (copiar configura√ß√£o do docs/DEPLOY_LINUX.md)
 
 # Habilitar site
 sudo ln -s /etc/nginx/sites-available/swportal-api /etc/nginx/sites-enabled/
@@ -116,9 +116,9 @@ sudo certbot --nginx -d api.seudominio.com
 ### Systemd Service
 
 ```bash
-# Criar serviÁo
+# Criar servi√ßo
 sudo nano /etc/systemd/system/swportal-api.service
-# (copiar configuraÁ„o do docs/DEPLOY_LINUX.md)
+# (copiar configura√ß√£o do docs/DEPLOY_LINUX.md)
 
 # Habilitar e iniciar
 sudo systemctl daemon-reload
@@ -135,12 +135,12 @@ sudo systemctl status swportal-api.service
 # 1. Desenvolvimento local
 git pull origin master
 
-# 2. Fazer alteraÁıes e testar
+# 2. Fazer altera√ß√µes e testar
 dotnet test
 
 # 3. Commit
 git add .
-git commit -m "DescriÁ„o das alteraÁıes"
+git commit -m "Descri√ß√£o das altera√ß√µes"
 git push origin master
 
 # 4. Deploy
@@ -153,7 +153,7 @@ sudo journalctl -u swportal-api.service -f
 
 ---
 
-## ??? Comandos ⁄teis
+## ??? Comandos √öteis
 
 ### Ver Logs
 
@@ -171,7 +171,7 @@ sudo tail -f /var/log/postgresql/postgresql-*-main.log
 sudo tail -f /var/log/redis/redis-server.log
 ```
 
-### Reiniciar ServiÁos
+### Reiniciar Servi√ßos
 
 ```bash
 # API
@@ -196,7 +196,7 @@ sudo systemctl restart swportal-api nginx postgresql redis-server rabbitmq-serve
 ### Monitoramento
 
 ```bash
-# Status de todos os serviÁos
+# Status de todos os servi√ßos
 ./scripts/monitor.sh
 
 # Uso de recursos
@@ -208,10 +208,10 @@ ps aux | grep dotnet
 # Portas em uso
 sudo netstat -tulpn | grep LISTEN
 
-# EspaÁo em disco
+# Espa√ßo em disco
 df -h
 
-# MemÛria
+# Mem√≥ria
 free -h
 ```
 
@@ -225,13 +225,13 @@ free -h
 ./scripts/backup.sh
 ```
 
-### Backup Autom·tico
+### Backup Autom√°tico
 
 ```bash
 # Editar crontab
 sudo crontab -e
 
-# Adicionar (di·rio ‡s 2h)
+# Adicionar (di√°rio √†s 2h)
 0 2 * * * /var/www/swportal/scripts/backup.sh >> /var/log/swportal-backup.log 2>&1
 ```
 
@@ -241,15 +241,15 @@ sudo crontab -e
 # Listar backups
 ./scripts/restore.sh
 
-# Restaurar backup especÌfico
+# Restaurar backup espec√≠fico
 ./scripts/restore.sh 20240101_120000
 ```
 
 ---
 
-## ?? Troubleshooting R·pido
+## ?? Troubleshooting R√°pido
 
-### API n„o inicia
+### API n√£o inicia
 
 ```bash
 # Ver logs
@@ -266,7 +266,7 @@ cat /var/www/swportal/.env | grep -v "PASSWORD\|KEY"
 ### Erro 502 Bad Gateway
 
 ```bash
-# Verificar se API est· rodando
+# Verificar se API est√° rodando
 curl http://localhost:5000/health
 
 # Reiniciar API
@@ -276,28 +276,28 @@ sudo systemctl restart swportal-api.service
 sudo tail -f /var/log/nginx/swportal-api-error.log
 ```
 
-### Banco de dados n„o conecta
+### Banco de dados n√£o conecta
 
 ```bash
-# Testar conex„o
+# Testar conex√£o
 psql -h localhost -U swportal_user -d swportal_prod
 
-# Verificar se est· rodando
+# Verificar se est√° rodando
 sudo systemctl status postgresql
 
 # Ver logs
 sudo tail -f /var/log/postgresql/postgresql-*-main.log
 ```
 
-### Redis n„o conecta
+### Redis n√£o conecta
 
 ```bash
-# Testar conex„o
+# Testar conex√£o
 redis-cli
 AUTH SenhaRedis123!
 PING
 
-# Verificar se est· rodando
+# Verificar se est√° rodando
 sudo systemctl status redis-server
 
 # Ver logs
@@ -308,14 +308,14 @@ sudo tail -f /var/log/redis/redis-server.log
 
 ## ?? Suporte
 
-**DocumentaÁ„o Completa:** [docs/DEPLOY_LINUX.md](./DEPLOY_LINUX.md)  
+**Documenta√ß√£o Completa:** [docs/DEPLOY_LINUX.md](./DEPLOY_LINUX.md)  
 **Scripts:** [scripts/README.md](../scripts/README.md)  
 **Email:** contato@swsolucoes.inf.br  
 **GitHub:** https://github.com/glebersonsm/SW_PortalProprietario_BeachPark.API
 
 ---
 
-## ?? PrÛximos Passos ApÛs Deploy
+## ?? Pr√≥ximos Passos Ap√≥s Deploy
 
 1. **Configurar monitoramento:**
    - [ ] Adicionar Prometheus/Grafana (opcional)
@@ -323,22 +323,22 @@ sudo tail -f /var/log/redis/redis-server.log
    - [ ] Configurar healthchecks
 
 2. **Configurar backups:**
-   - [ ] Backup autom·tico di·rio
+   - [ ] Backup autom√°tico di√°rio
    - [ ] Backup remoto (S3, Azure, etc.)
    - [ ] Testar restore
 
-3. **SeguranÁa:**
+3. **Seguran√ßa:**
    - [ ] Configurar firewall
-   - [ ] Atualizar senhas padr„o
+   - [ ] Atualizar senhas padr√£o
    - [ ] Configurar fail2ban
    - [ ] Atualizar certificado SSL regularmente
 
-4. **DocumentaÁ„o:**
-   - [ ] Documentar configuraÁıes especÌficas
-   - [ ] Criar runbook de operaÁıes
+4. **Documenta√ß√£o:**
+   - [ ] Documentar configura√ß√µes espec√≠ficas
+   - [ ] Criar runbook de opera√ß√µes
    - [ ] Treinar equipe
 
 ---
 
-**⁄ltima atualizaÁ„o:** Janeiro 2024  
-**Vers„o:** 1.0
+**√öltima atualiza√ß√£o:** Janeiro 2024  
+**Vers√£o:** 1.0

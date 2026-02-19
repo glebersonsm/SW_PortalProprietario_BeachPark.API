@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Application.Models.TimeSharing
+﻿namespace SW_PortalProprietario.Application.Models.TimeSharing
 {
     public class TrocaTipoUsoResponseModel
     {

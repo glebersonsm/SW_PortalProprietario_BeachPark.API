@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Models;
+﻿using SW_PortalProprietario.Application.Models;
 
 namespace SW_PortalProprietario.Application.Models.TimeSharing
 {
@@ -30,7 +30,7 @@ namespace SW_PortalProprietario.Application.Models.TimeSharing
         public string? CidadeNome { get; set; }
         public string? CidadeUf { get; set; }
         public string? SiglaEstado { get; set; }
-        public int? Estrangeiro { get; set; } //0 = não, 1 = Sim
+        public int? Estrangeiro { get; set; } //0 = nÃ£o, 1 = Sim
         public DateTime? DataCheckin { get; set; }
         public DateTime? DataCheckout { get; set; }
 

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
 using SW_PortalProprietario.Application.Models.DocumentTemplates;
@@ -52,12 +52,12 @@ public class VoucherReservaService : IVoucherReservaService
         var dadosReserva = await ObterDadosReservaAsync(agendamentoId, isTimeSharing);
         if (dadosReserva == null)
         {
-            throw new InvalidOperationException("Não foi possível localizar os dados da reserva para geração do voucher.");
+            throw new InvalidOperationException("NÃ£o foi possÃ­vel localizar os dados da reserva para geraÃ§Ã£o do voucher.");
         }
 
         var placeholders = BuildPlaceholderDictionary(dadosReserva);
 
-        _logger.LogInformation("Iniciando geração do voucher para agendamento {AgendamentoId}", agendamentoId);
+        _logger.LogInformation("Iniciando geraÃ§Ã£o do voucher para agendamento {AgendamentoId}", agendamentoId);
 
         var populatedHtml = PopulateHtmlTemplate(templateHtml, placeholders);
         var renderedHtml = ApplyQuillLayout(populatedHtml);
@@ -97,7 +97,7 @@ public class VoucherReservaService : IVoucherReservaService
         var dadosReserva = await ObterDadosReservaAsync(reservaCmIdOuAgendamentIdMultipropriedade, isTimeSharing);
         if (dadosReserva == null)
         {
-            throw new InvalidOperationException("Não foi possível localizar os dados da reserva para geração do voucher.");
+            throw new InvalidOperationException("NÃ£o foi possÃ­vel localizar os dados da reserva para geraÃ§Ã£o do voucher.");
         }
 
         if (contratos != null && contratos.Count > 0 && dadosReserva != null)
@@ -109,7 +109,7 @@ public class VoucherReservaService : IVoucherReservaService
 
         var placeholders = BuildPlaceholderDictionary(dadosReserva);
 
-        _logger.LogInformation("Iniciando geração do voucher para agendamento {AgendamentoId}", reservaCmIdOuAgendamentIdMultipropriedade);
+        _logger.LogInformation("Iniciando geraÃ§Ã£o do voucher para agendamento {AgendamentoId}", reservaCmIdOuAgendamentIdMultipropriedade);
 
         var populatedHtml = PopulateHtmlTemplate(templateHtml, placeholders);
         var renderedHtml = ApplyQuillLayout(populatedHtml);
@@ -119,11 +119,11 @@ public class VoucherReservaService : IVoucherReservaService
             ? dadosReserva.NumeroReserva
             : dadosReserva.Contrato ?? reservaCmIdOuAgendamentIdMultipropriedade.ToString();
 
-        // Gera PDF apenas se a configuração exigir
+        // Gera PDF apenas se a configuraÃ§Ã£o exigir
         if (config.TemplateSendMode == EnumTemplateSendMode.BodyHtmlAndAttachment || 
             config.TemplateSendMode == EnumTemplateSendMode.AttachmentOnly)
         {
-            _logger.LogInformation("Convertendo voucher para PDF conforme configuração");
+            _logger.LogInformation("Convertendo voucher para PDF conforme configuraÃ§Ã£o");
             pdfBytes = await ConvertHtmlToPdfAsync(renderedHtml);
         }
 
@@ -149,7 +149,7 @@ public class VoucherReservaService : IVoucherReservaService
         
         if (result == null)
         {
-            throw new InvalidOperationException("Não foi possível localizar os dados da reserva para geração do voucher.");
+            throw new InvalidOperationException("NÃ£o foi possÃ­vel localizar os dados da reserva para geraÃ§Ã£o do voucher.");
         }
 
         var dados = result;

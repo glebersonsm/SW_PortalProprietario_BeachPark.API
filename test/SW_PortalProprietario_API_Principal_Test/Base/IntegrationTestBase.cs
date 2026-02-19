@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace SW_PortalProprietario.Test.Base
 {
     /// <summary>
-    /// Base class para testes de integração com banco de dados em memória
+    /// Base class para testes de integraÃ§Ã£o com banco de dados em memÃ³ria
     /// </summary>
     public class IntegrationTestBase : TestBase, IDisposable
     {
@@ -20,7 +20,7 @@ namespace SW_PortalProprietario.Test.Base
         {
             builder.ConfigureAppConfiguration((context, config) =>
             {
-                // Configuração para testes
+                // ConfiguraÃ§Ã£o para testes
                 config.AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     { "Jwt:Key", "TestKeyForJwtTokenGenerationInUnitTests123456789012345678901234567890" },
@@ -39,14 +39,14 @@ namespace SW_PortalProprietario.Test.Base
 
             builder.ConfigureServices(services =>
             {
-                // Remove serviços HostedService que causam problemas de injeção de dependência nos testes
+                // Remove serviÃ§os HostedService que causam problemas de injeÃ§Ã£o de dependÃªncia nos testes
                 var hostedServices = services.Where(s => s.ServiceType == typeof(Microsoft.Extensions.Hosting.IHostedService)).ToList();
                 foreach (var service in hostedServices)
                 {
                     services.Remove(service);
                 }
                 
-                // Remove serviços problemáticos de email queue que tentam consumir serviços Scoped
+                // Remove serviÃ§os problemÃ¡ticos de email queue que tentam consumir serviÃ§os Scoped
                 var emailQueueServices = services.Where(s => 
                     s.ServiceType.FullName?.Contains("IEmailSenderFromQueueConsumer") == true ||
                     s.ServiceType.FullName?.Contains("IBackGroundSenderEmailFromProcessingQueue") == true ||
@@ -59,7 +59,7 @@ namespace SW_PortalProprietario.Test.Base
         }
 
         /// <summary>
-        /// Cria um token JWT para autenticação nos testes
+        /// Cria um token JWT para autenticaÃ§Ã£o nos testes
         /// </summary>
         protected string GenerateJwtToken(string userId = "1", string? role = null, string? companyId = null, bool isAdm = false)
         {
@@ -117,7 +117,7 @@ namespace SW_PortalProprietario.Test.Base
             {
                 if (disposing)
                 {
-                    // Cleanup se necessário
+                    // Cleanup se necessÃ¡rio
                 }
                 _disposed = true;
             }

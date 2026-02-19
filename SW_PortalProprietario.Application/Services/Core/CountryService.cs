@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -38,7 +38,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var country = await _repository.FindById<Pais>(id);
                 if (country is null)
                 {
-                    throw new Exception($"Não foi encontrado o país com Id: {id}!");
+                    throw new Exception($"NÃ£o foi encontrado o paÃ­s com Id: {id}!");
                 }
 
 
@@ -52,7 +52,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -61,7 +61,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o País: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o PaÃ­s: {id}");
                 throw;
 
             }
@@ -86,18 +86,18 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                 {
-                    _logger.LogInformation($"País: ({result.Id} - {country.CodigoIbge} - {country.Nome}) salvo com sucesso!");
+                    _logger.LogInformation($"PaÃ­s: ({result.Id} - {country.CodigoIbge} - {country.Nome}) salvo com sucesso!");
 
                     if (result != null)
                         return _mapper.Map(result, new PaisModel());
 
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar o País: ({country.CodigoIbge} - {country.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o PaÃ­s: ({country.CodigoIbge} - {country.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o País: ({country.CodigoIbge} - {country.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o PaÃ­s: ({country.CodigoIbge} - {country.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -130,14 +130,14 @@ namespace SW_PortalProprietario.Application.Services.Core
             _repository.BeginTransaction();
             try
             {
-                var country = (await _repository.FindByHql<Pais>("From Pais ge Where ge.Id = :id", session: null, new Parameter[] { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o país: {model.Id}");
+                var country = (await _repository.FindByHql<Pais>("From Pais ge Where ge.Id = :id", session: null, new Parameter[] { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"NÃ£o foi encontrado o paÃ­s: {model.Id}");
                 country = _mapper.Map(model, country);
                 await _repository.Save(country);
 
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                     return _mapper.Map(country, new PaisModel());
-                else throw exception ?? new Exception("Erro na operação");
+                else throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception)
             {

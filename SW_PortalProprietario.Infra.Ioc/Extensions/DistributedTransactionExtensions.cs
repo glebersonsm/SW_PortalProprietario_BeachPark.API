@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SW_PortalProprietario.Application.Interfaces.Saga;
 using SW_PortalProprietario.Application.Services.Core.Saga;
 using SW_PortalProprietario.Infra.Data.Repositories.Saga;

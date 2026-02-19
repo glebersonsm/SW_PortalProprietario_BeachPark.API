@@ -1,4 +1,4 @@
-namespace SW_Utils.Models
+﻿namespace SW_Utils.Models
 {
     public class AuditLogMessageEvent
     {

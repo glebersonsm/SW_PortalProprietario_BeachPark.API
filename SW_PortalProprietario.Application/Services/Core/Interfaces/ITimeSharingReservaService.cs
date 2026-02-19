@@ -1,10 +1,10 @@
-using SW_PortalProprietario.Application.Models;
+ï»¿using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.TimeSharing;
 
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces
 {
     /// <summary>
-    /// Interface para serviço de reservas TimeSharing com suporte a transações distribuídas
+    /// Interface para serviÃ§o de reservas TimeSharing com suporte a transaÃ§Ãµes distribuÃ­das
     /// </summary>
     public interface ITimeSharingReservaService
     {
@@ -12,7 +12,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         /// Cria uma nova reserva
         /// </summary>
         /// <param name="model">Dados da reserva</param>
-        /// <param name="usarSaga">Se true, usa Saga Pattern; se false, usa método tradicional</param>
+        /// <param name="usarSaga">Se true, usa Saga Pattern; se false, usa mÃ©todo tradicional</param>
         /// <returns>Resultado com ID da reserva criada</returns>
         Task<ResultModel<long>> CriarReservaAsync(InclusaoReservaInputModel model, bool usarSaga = true);
 

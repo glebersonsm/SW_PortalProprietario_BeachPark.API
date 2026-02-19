@@ -1,13 +1,13 @@
-# Prioridade de ConfiguraÁ„o - .env vs appsettings.json
+Ôªø# Prioridade de Configura√ß√£o - .env vs appsettings.json
 
-## Ordem de PrecedÍncia
+## Ordem de Preced√™ncia
 
-A aplicaÁ„o segue a seguinte ordem de prioridade ao buscar valores de configuraÁ„o:
+A aplica√ß√£o segue a seguinte ordem de prioridade ao buscar valores de configura√ß√£o:
 
-1. **`.env` (Vari·veis de Ambiente)** - PRIORIDADE M¡XIMA
+1. **`.env` (Vari√°veis de Ambiente)** - PRIORIDADE M√ÅXIMA
 2. **`appsettings.{Environment}.json`** - Fallback
 3. **`appsettings.json`** - Fallback final
-4. **Valor padr„o no cÛdigo** - Se nenhum dos anteriores existir
+4. **Valor padr√£o no c√≥digo** - Se nenhum dos anteriores existir
 
 ## Como Funciona
 
@@ -21,11 +21,11 @@ builder.Configuration
     .AddJsonFile("appsettings.json", optional: false)
     .AddJsonFile($"appsettings.{Environment}.json", optional: true);
 
-// 3. Sobrescreve com vari·veis de ambiente
+// 3. Sobrescreve com vari√°veis de ambiente
 EnvironmentConfigurationHelper.OverrideConfigurationWithEnvironmentVariables(builder.Configuration);
 ```
 
-### 2. Como Usar no CÛdigo
+### 2. Como Usar no C√≥digo
 
 **? FORMA CORRETA - Usar o helper (prioriza .env automaticamente):**
 ```csharp
@@ -35,8 +35,8 @@ using SW_PortalCliente_BeachPark.API.Helpers;
 var host = EnvironmentConfigurationHelper.GetConfigValue(
     _configuration, 
     "RabbitMqConnectionHost",  // chave no appsettings.json
-    "RABBITMQ_HOST",            // vari·vel no .env
-    "localhost"                 // valor padr„o
+    "RABBITMQ_HOST",            // vari√°vel no .env
+    "localhost"                 // valor padr√£o
 );
 
 // Tipado (int, bool, etc)
@@ -53,15 +53,15 @@ var port = EnvironmentConfigurationHelper.GetConfigValue<int>(
 // Isso busca APENAS no appsettings.json!
 var host = _configuration.GetValue<string>("RabbitMqConnectionHost");
 
-// Mesmo isso n„o garante precedÍncia:
+// Mesmo isso n√£o garante preced√™ncia:
 var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") 
     ?? _configuration.GetValue<string>("RabbitMqConnectionHost");
 ```
 
-## Mapeamento de Vari·veis
+## Mapeamento de Vari√°veis
 
 ### RabbitMQ
-| Chave no appsettings.json | Vari·vel no .env | Padr„o |
+| Chave no appsettings.json | Vari√°vel no .env | Padr√£o |
 |---------------------------|------------------|--------|
 | `RabbitMqConnectionHost` | `RABBITMQ_HOST` | - |
 | `RabbitMqConnectionPort` | `RABBITMQ_PORT` | `5672` |
@@ -72,8 +72,8 @@ var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST")
 | `RabbitMqFilaDeEmailNome` | `RABBITMQ_FILA_EMAIL` | `emails_mvc` |
 | `ProgramId` | `PROGRAM_ID` | `PORTALPROP_` |
 
-### Conexıes
-| Chave | Vari·vel | Padr„o |
+### Conex√µes
+| Chave | Vari√°vel | Padr√£o |
 |-------|----------|--------|
 | `ConnectionStrings:DefaultConnection` | `DEFAULT_CONNECTION` | - |
 | `ConnectionStrings:CmConnection` | `CM_CONNECTION` | - |
@@ -82,7 +82,7 @@ var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST")
 | `ConnectionStrings:RedisConnection` | `REDIS_CONNECTION` | - |
 
 ### Redis
-| Chave | Vari·vel | Padr„o |
+| Chave | Vari√°vel | Padr√£o |
 |-------|----------|--------|
 | `Redis:Password` | `REDIS_PASSWORD` | - |
 | `Redis:Hosts:0:Host` | `REDIS_HOST` | `localhost` |
@@ -90,13 +90,13 @@ var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST")
 | `Redis:Database` | `REDIS_DATABASE` | `0` |
 
 ### JWT
-| Chave | Vari·vel | Padr„o |
+| Chave | Vari√°vel | Padr√£o |
 |-------|----------|--------|
 | `Jwt:Key` | `JWT_KEY` | - |
 | `Jwt:Issuer` | `JWT_ISSUER` | - |
 | `Jwt:Audience` | `JWT_AUDIENCE` | - |
 
-## Exemplos Pr·ticos
+## Exemplos Pr√°ticos
 
 ### Exemplo 1: Ambiente de Desenvolvimento
 ```env
@@ -117,9 +117,9 @@ PROGRAM_ID=PortalClienteBP_Dev_
 
 **Resultado:** Usa `localhost` e `PortalClienteBP_Dev_` do `.env`
 
-### Exemplo 2: Ambiente de ProduÁ„o
+### Exemplo 2: Ambiente de Produ√ß√£o
 ```env
-# .env (produÁ„o - vazio ou sem RabbitMQ)
+# .env (produ√ß√£o - vazio ou sem RabbitMQ)
 DEFAULT_CONNECTION=Host=prod-db;Database=portal;...
 ```
 
@@ -132,43 +132,43 @@ DEFAULT_CONNECTION=Host=prod-db;Database=portal;...
 }
 ```
 
-**Resultado:** Usa valores do `appsettings.Production.json` pois n„o existem no `.env`
+**Resultado:** Usa valores do `appsettings.Production.json` pois n√£o existem no `.env`
 
-## BenefÌcios
+## Benef√≠cios
 
-1. **Desenvolvimento Local:** Cada desenvolvedor pode ter seu prÛprio `.env` sem commitar no Git
-2. **CI/CD:** Injetar vari·veis de ambiente no pipeline sem alterar cÛdigo
-3. **SeguranÁa:** Senhas e secrets no `.env` (que est· no `.gitignore`)
-4. **Flexibilidade:** ConfiguraÁıes diferentes por ambiente sem m˙ltiplos arquivos JSON
+1. **Desenvolvimento Local:** Cada desenvolvedor pode ter seu pr√≥prio `.env` sem commitar no Git
+2. **CI/CD:** Injetar vari√°veis de ambiente no pipeline sem alterar c√≥digo
+3. **Seguran√ßa:** Senhas e secrets no `.env` (que est√° no `.gitignore`)
+4. **Flexibilidade:** Configura√ß√µes diferentes por ambiente sem m√∫ltiplos arquivos JSON
 5. **Prioridade Clara:** Sempre sabemos onde alterar (`.env` primeiro, JSON depois)
 
-## Checklist para Novos Valores de ConfiguraÁ„o
+## Checklist para Novos Valores de Configura√ß√£o
 
-Ao adicionar uma nova configuraÁ„o:
+Ao adicionar uma nova configura√ß√£o:
 
-- [ ] Adicionar vari·vel no `.env.example` com coment·rio
-- [ ] Adicionar chave no `appsettings.json` com valor padr„o
+- [ ] Adicionar vari√°vel no `.env.example` com coment√°rio
+- [ ] Adicionar chave no `appsettings.json` com valor padr√£o
 - [ ] Adicionar mapeamento em `EnvironmentConfigurationHelper.OverrideConfigurationWithEnvironmentVariables`
-- [ ] Documentar neste arquivo a correspondÍncia
-- [ ] Usar o helper `GetConfigValue` no cÛdigo ao invÈs de `IConfiguration` diretamente
+- [ ] Documentar neste arquivo a correspond√™ncia
+- [ ] Usar o helper `GetConfigValue` no c√≥digo ao inv√©s de `IConfiguration` diretamente
 
 ## Troubleshooting
 
-**Problema:** Minha alteraÁ„o no `.env` n„o est· sendo lida
+**Problema:** Minha altera√ß√£o no `.env` n√£o est√° sendo lida
 
-**SoluÁıes:**
-1. Reinicie a aplicaÁ„o (o `.env` È carregado no startup)
-2. Verifique se o arquivo `.env` est· na raiz do projeto
-3. Verifique se a vari·vel est· sendo sobrescrita em `OverrideConfigurationWithEnvironmentVariables`
-4. Use logs para confirmar qual valor est· sendo usado:
+**Solu√ß√µes:**
+1. Reinicie a aplica√ß√£o (o `.env` √© carregado no startup)
+2. Verifique se o arquivo `.env` est√° na raiz do projeto
+3. Verifique se a vari√°vel est√° sendo sobrescrita em `OverrideConfigurationWithEnvironmentVariables`
+4. Use logs para confirmar qual valor est√° sendo usado:
    ```csharp
    _logger.LogInformation($"RabbitMQ Host: {host}");
    ```
 
-**Problema:** N„o sei se est· usando `.env` ou `appsettings.json`
+**Problema:** N√£o sei se est√° usando `.env` ou `appsettings.json`
 
-**SoluÁ„o:**
-Use o mÈtodo helper que j· implementa a lÛgica de precedÍncia:
+**Solu√ß√£o:**
+Use o m√©todo helper que j√° implementa a l√≥gica de preced√™ncia:
 ```csharp
 var value = EnvironmentConfigurationHelper.GetConfigValue(
     _configuration, 
@@ -177,8 +177,8 @@ var value = EnvironmentConfigurationHelper.GetConfigValue(
 );
 ```
 
-## Ver TambÈm
+## Ver Tamb√©m
 
-- `.env.example` - Template de vari·veis disponÌveis
-- `src/Helpers/EnvironmentConfigurationHelper.cs` - ImplementaÁ„o da lÛgica
-- `Program.cs` - Carregamento inicial das configuraÁıes
+- `.env.example` - Template de vari√°veis dispon√≠veis
+- `src/Helpers/EnvironmentConfigurationHelper.cs` - Implementa√ß√£o da l√≥gica
+- `Program.cs` - Carregamento inicial das configura√ß√µes

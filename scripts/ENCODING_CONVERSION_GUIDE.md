@@ -1,6 +1,6 @@
-# Guia de Uso - Convers„o de Arquivos para UTF-8 with BOM
+Ôªø# Guia de Uso - Convers√£o de Arquivos para UTF-8 with BOM
 
-## ?? Vis„o Geral
+## ?? Vis√£o Geral
 
 Este conjunto de scripts converte todos os arquivos do projeto para **UTF-8 with BOM** (Byte Order Mark).
 
@@ -8,42 +8,42 @@ Este conjunto de scripts converte todos os arquivos do projeto para **UTF-8 with
 
 ### Vantagens
 - ? **Compatibilidade:** Reconhecido por todos os editores e IDEs modernos
-- ? **AcentuaÁ„o:** Garante exibiÁ„o correta de caracteres especiais (portuguÍs, etc.)
+- ? **Acentua√ß√£o:** Garante exibi√ß√£o correta de caracteres especiais (portugu√™s, etc.)
 - ? **Visual Studio:** Detecta automaticamente o encoding
 - ? **Git:** Evita problemas de diff com caracteres especiais
 - ? **Cross-platform:** Funciona em Windows, Linux e macOS
 
-### O que È BOM?
-BOM (Byte Order Mark) s„o 3 bytes no inÌcio do arquivo (`EF BB BF`) que indicam explicitamente que o arquivo È UTF-8.
+### O que √© BOM?
+BOM (Byte Order Mark) s√£o 3 bytes no in√≠cio do arquivo (`EF BB BF`) que indicam explicitamente que o arquivo √© UTF-8.
 
 ## ?? Arquivos do Script
 
 ```
 scripts/
 ??? Convert-ToUtf8WithBOM.ps1      # Script principal (completo)
-??? Convert-All-Files.ps1          # Atalho para convers„o r·pida
+??? Convert-All-Files.ps1          # Atalho para convers√£o r√°pida
 ??? Test-Conversion.ps1            # Teste (modo WhatIf)
 ??? ENCODING_CONVERSION_GUIDE.md   # Este arquivo
 ```
 
 ## ?? Como Usar
 
-### OpÁ„o 1: Teste Primeiro (Recomendado)
+### Op√ß√£o 1: Teste Primeiro (Recomendado)
 
-**N„o altera nenhum arquivo**, apenas mostra o que seria convertido:
+**N√£o altera nenhum arquivo**, apenas mostra o que seria convertido:
 
 ```powershell
 cd C:\SW_Solucoes\Projetos\SW_PortalProprietario_BeachPark.API
 .\scripts\Test-Conversion.ps1
 ```
 
-**SaÌda esperada:**
+**Sa√≠da esperada:**
 ```
-MODO DE TESTE - Nenhum arquivo ser· alterado
+MODO DE TESTE - Nenhum arquivo ser√° alterado
 Este script mostra o que SERIA convertido
 
 Pasta raiz: C:\SW_Solucoes\Projetos\SW_PortalProprietario_BeachPark.API
-Modo: SIMULA«√O (WhatIf)
+Modo: SIMULA√á√ÉO (WhatIf)
 
 Buscando arquivos...
 Arquivos encontrados: 523
@@ -53,15 +53,15 @@ Arquivos encontrados: 523
 ...
 
 ========================================
-Resumo da Convers„o
+Resumo da Convers√£o
 ========================================
 Total de arquivos encontrados: 523
-J· estavam em UTF-8 BOM:       45
+J√° estavam em UTF-8 BOM:       45
 Arquivos convertidos:          478
 Erros:                         0
 ```
 
-### OpÁ„o 2: Convers„o Completa
+### Op√ß√£o 2: Convers√£o Completa
 
 **Converte todos os arquivos** do projeto:
 
@@ -71,18 +71,18 @@ cd C:\SW_Solucoes\Projetos\SW_PortalProprietario_BeachPark.API
 ```
 
 O script vai:
-1. Pedir confirmaÁ„o
-2. Criar backup autom·tico de cada arquivo antes de converter
+1. Pedir confirma√ß√£o
+2. Criar backup autom√°tico de cada arquivo antes de converter
 3. Restaurar backup em caso de erro
 4. Mostrar progresso com barra de status
 5. Exibir resumo ao final
 
-### OpÁ„o 3: Uso AvanÁado (Script Principal)
+### Op√ß√£o 3: Uso Avan√ßado (Script Principal)
 
-Para uso avanÁado com par‚metros customizados:
+Para uso avan√ßado com par√¢metros customizados:
 
 ```powershell
-# Converter pasta especÌfica
+# Converter pasta espec√≠fica
 .\scripts\Convert-ToUtf8WithBOM.ps1 -Path "C:\Caminho\Especifico"
 
 # Modo teste (WhatIf)
@@ -91,7 +91,7 @@ Para uso avanÁado com par‚metros customizados:
 # Com logs detalhados
 .\scripts\Convert-ToUtf8WithBOM.ps1 -Verbose
 
-# Combinando par‚metros
+# Combinando par√¢metros
 .\scripts\Convert-ToUtf8WithBOM.ps1 -Path "C:\Projeto" -WhatIf -Verbose
 ```
 
@@ -99,49 +99,49 @@ Para uso avanÁado com par‚metros customizados:
 
 O script converte automaticamente:
 
-| Tipo | Extensıes |
+| Tipo | Extens√µes |
 |------|-----------|
 | **C# e .NET** | `.cs`, `.csproj`, `.sln`, `.config`, `.resx` |
-| **ConfiguraÁ„o** | `.json`, `.xml`, `.txt` |
+| **Configura√ß√£o** | `.json`, `.xml`, `.txt` |
 | **Web** | `.cshtml`, `.razor`, `.css`, `.js`, `.ts` |
-| **DocumentaÁ„o** | `.md` |
+| **Documenta√ß√£o** | `.md` |
 | **Banco de Dados** | `.sql` |
 
-## ?? Pastas ExcluÌdas
+## ?? Pastas Exclu√≠das
 
 O script **ignora automaticamente** estas pastas:
-- `bin/` - Bin·rios compilados
-- `obj/` - Objetos intermedi·rios
+- `bin/` - Bin√°rios compilados
+- `obj/` - Objetos intermedi√°rios
 - `packages/` - Pacotes NuGet
-- `.vs/` - ConfiguraÁıes do Visual Studio
-- `.git/` - RepositÛrio Git
-- `node_modules/` - DependÍncias Node.js
+- `.vs/` - Configura√ß√µes do Visual Studio
+- `.git/` - Reposit√≥rio Git
+- `node_modules/` - Depend√™ncias Node.js
 - `TestResults/` - Resultados de testes
 
-## ?? DetecÁ„o de Encoding
+## ?? Detec√ß√£o de Encoding
 
 O script detecta automaticamente o encoding atual:
 
-| Encoding Detectado | BOM | AÁ„o |
+| Encoding Detectado | BOM | A√ß√£o |
 |--------------------|-----|------|
-| **UTF-8 with BOM** | `EF BB BF` | ? J· correto, pula |
+| **UTF-8 with BOM** | `EF BB BF` | ? J√° correto, pula |
 | **UTF-8 without BOM** | Nenhum | ?? Converte |
 | **ASCII** | Nenhum | ?? Converte |
 | **UTF-16 LE** | `FF FE` | ?? Converte |
 | **UTF-16 BE** | `FE FF` | ?? Converte |
 
-## ??? SeguranÁa e Backup
+## ??? Seguran√ßa e Backup
 
-### Backup Autom·tico
-- Cada arquivo recebe um backup tempor·rio (`.backup`)
-- Se a convers„o falhar, o backup È restaurado automaticamente
-- Se a convers„o for bem-sucedida, o backup È removido
+### Backup Autom√°tico
+- Cada arquivo recebe um backup tempor√°rio (`.backup`)
+- Se a convers√£o falhar, o backup √© restaurado automaticamente
+- Se a convers√£o for bem-sucedida, o backup √© removido
 
-### VerificaÁ„o PÛs-Convers„o
-ApÛs cada convers„o, o script:
-1. LÍ o arquivo novamente
-2. Verifica se o BOM UTF-8 est· presente
-3. Se n„o estiver correto, restaura o backup
+### Verifica√ß√£o P√≥s-Convers√£o
+Ap√≥s cada convers√£o, o script:
+1. L√™ o arquivo novamente
+2. Verifica se o BOM UTF-8 est√° presente
+3. Se n√£o estiver correto, restaura o backup
 
 ### Rollback Manual
 Se precisar desfazer tudo:
@@ -150,18 +150,18 @@ Se precisar desfazer tudo:
 # Usar o Git para reverter
 git checkout .
 
-# Ou reverter arquivos especÌficos
+# Ou reverter arquivos espec√≠ficos
 git checkout -- "caminho/do/arquivo.cs"
 ```
 
-## ?? Exemplo de SaÌda Completa
+## ?? Exemplo de Sa√≠da Completa
 
 ```
 ========================================
-Convers„o de arquivos para UTF-8 with BOM
+Convers√£o de arquivos para UTF-8 with BOM
 ========================================
 Pasta raiz: C:\SW_Solucoes\Projetos\SW_PortalProprietario_BeachPark.API
-Modo: EXECU«√O REAL
+Modo: EXECU√á√ÉO REAL
 
 Buscando arquivos...
 Arquivos encontrados: 523
@@ -170,7 +170,7 @@ Processando: AuthController.cs (1/523)
   [OK] Convertido: AuthController.cs (de UTF8-NoBOM-or-ASCII para UTF-8 BOM)
   
 Processando: Program.cs (2/523)
-  [SKIP] J· est· em UTF-8 with BOM: Program.cs
+  [SKIP] J√° est√° em UTF-8 with BOM: Program.cs
   
 Processando: appsettings.json (3/523)
   [OK] Convertido: appsettings.json (de UTF8-NoBOM-or-ASCII para UTF-8 BOM)
@@ -178,24 +178,24 @@ Processando: appsettings.json (3/523)
 ... (processando todos os arquivos)
 
 ========================================
-Resumo da Convers„o
+Resumo da Convers√£o
 ========================================
 Total de arquivos encontrados: 523
-J· estavam em UTF-8 BOM:       45
+J√° estavam em UTF-8 BOM:       45
 Arquivos convertidos:          478
 Erros:                         0
 
-Convers„o concluÌda!
+Convers√£o conclu√≠da!
 ```
 
 ## ?? Avisos Importantes
 
 ### Antes de Executar
 
-1. **FaÁa commit** das alteraÁıes pendentes no Git:
+1. **Fa√ßa commit** das altera√ß√µes pendentes no Git:
    ```bash
    git add .
-   git commit -m "Checkpoint antes da convers„o de encoding"
+   git commit -m "Checkpoint antes da convers√£o de encoding"
    ```
 
 2. **Feche o Visual Studio** e outros editores:
@@ -207,9 +207,9 @@ Convers„o concluÌda!
    .\scripts\Test-Conversion.ps1
    ```
 
-### ApÛs Executar
+### Ap√≥s Executar
 
-1. **Verifique no Git** as mudanÁas:
+1. **Verifique no Git** as mudan√ßas:
    ```bash
    git status
    git diff
@@ -225,7 +225,7 @@ Convers„o concluÌda!
    dotnet test
    ```
 
-4. **Commit das mudanÁas**:
+4. **Commit das mudan√ßas**:
    ```bash
    git add .
    git commit -m "feat: Converter todos os arquivos para UTF-8 with BOM"
@@ -235,28 +235,28 @@ Convers„o concluÌda!
 
 ### Erro: "Acesso negado"
 **Causa:** Arquivo aberto em outro programa  
-**SoluÁ„o:** Feche Visual Studio, IIS, e outros processos que podem ter arquivos abertos
+**Solu√ß√£o:** Feche Visual Studio, IIS, e outros processos que podem ter arquivos abertos
 
 ### Erro: "Path not found"
-**Causa:** Script executado do diretÛrio errado  
-**SoluÁ„o:** 
+**Causa:** Script executado do diret√≥rio errado  
+**Solu√ß√£o:** 
 ```powershell
 cd C:\SW_Solucoes\Projetos\SW_PortalProprietario_BeachPark.API
 .\scripts\Convert-All-Files.ps1
 ```
 
-### Muitos erros na convers„o
-**Causa:** Arquivos bin·rios ou corrompidos  
-**SoluÁ„o:** Verifique os arquivos com erro manualmente, podem ser arquivos que n„o deveriam ser texto
+### Muitos erros na convers√£o
+**Causa:** Arquivos bin√°rios ou corrompidos  
+**Solu√ß√£o:** Verifique os arquivos com erro manualmente, podem ser arquivos que n√£o deveriam ser texto
 
-### Git mostra alteraÁıes em todos os arquivos
-**Causa:** MudanÁa de encoding (esperado!)  
-**SoluÁ„o:** Isso È normal. O Git detecta mudanÁa no BOM. Verifique com:
+### Git mostra altera√ß√µes em todos os arquivos
+**Causa:** Mudan√ßa de encoding (esperado!)  
+**Solu√ß√£o:** Isso √© normal. O Git detecta mudan√ßa no BOM. Verifique com:
 ```bash
 git diff --word-diff
 ```
 
-## ?? ReferÍncias
+## ?? Refer√™ncias
 
 - [UTF-8 BOM - Wikipedia](https://en.wikipedia.org/wiki/Byte_order_mark#UTF-8)
 - [.NET Encoding Class](https://docs.microsoft.com/en-us/dotnet/api/system.text.encoding)
@@ -265,16 +265,16 @@ git diff --word-diff
 ## ? FAQ
 
 **P: Preciso converter novamente no futuro?**  
-R: N„o. O Visual Studio manter· UTF-8 BOM em arquivos novos se estiver configurado.
+R: N√£o. O Visual Studio manter√° UTF-8 BOM em arquivos novos se estiver configurado.
 
 **P: Afeta o tamanho dos arquivos?**  
-R: Sim, mas mÌnimo. Cada arquivo ganha apenas 3 bytes (BOM).
+R: Sim, mas m√≠nimo. Cada arquivo ganha apenas 3 bytes (BOM).
 
-**P: Funcionar· no Linux/macOS?**  
-R: Sim! UTF-8 BOM È multiplataforma.
+**P: Funcionar√° no Linux/macOS?**  
+R: Sim! UTF-8 BOM √© multiplataforma.
 
 **P: Posso executar em CI/CD?**  
-R: Sim, o script aceita par‚metros n„o-interativos:
+R: Sim, o script aceita par√¢metros n√£o-interativos:
 ```powershell
 .\Convert-ToUtf8WithBOM.ps1 -Path $env:BUILD_SOURCESDIRECTORY -Confirm:$false
 ```

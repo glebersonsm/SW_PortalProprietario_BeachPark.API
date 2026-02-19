@@ -1,4 +1,4 @@
-using EsolutionPortalDomain.Portal;
+ï»¿using EsolutionPortalDomain.Portal;
 using EsolutionPortalDomain.ReservasApiModels.Hotel;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -11,7 +11,7 @@ using SW_PortalProprietario.Application.Services.Providers.Interfaces;
 namespace SW_PortalProprietario.Application.Services.Empreendimento
 {
     /// <summary>
-    /// Serviço de aplicação para operações de Multipropriedade com suporte a transações distribuídas
+    /// ServiÃ§o de aplicaÃ§Ã£o para operaÃ§Ãµes de Multipropriedade com suporte a transaÃ§Ãµes distribuÃ­das
     /// </summary>
     public class MultipropriedadeService : IMultipropriedadeService
     {
@@ -47,7 +47,7 @@ namespace SW_PortalProprietario.Application.Services.Empreendimento
         {
             if (!usarSaga)
             {
-                // Fallback: método tradicional
+                // Fallback: mÃ©todo tradicional
                 return await _empreendimentoProvider.SalvarReservaEmAgendamento(model);
             }
 
@@ -58,7 +58,7 @@ namespace SW_PortalProprietario.Application.Services.Empreendimento
 
             try
             {
-                // TODO: Implementar steps específicos para Multipropriedade
+                // TODO: Implementar steps especÃ­ficos para Multipropriedade
                 var steps = new List<IDistributedTransactionStep>
                 {
                     // Step 1: Validar no AccessCenter
@@ -111,7 +111,7 @@ namespace SW_PortalProprietario.Application.Services.Empreendimento
         {
             if (!usarSaga)
             {
-                // Fallback: método tradicional
+                // Fallback: mÃ©todo tradicional
                 return await _empreendimentoProvider.LiberarMinhaSemanaPool(model);
             }
 
@@ -125,7 +125,7 @@ namespace SW_PortalProprietario.Application.Services.Empreendimento
                 // TODO: Implementar steps
                 var steps = new List<IDistributedTransactionStep>
                 {
-                    // Steps específicos para liberação de pool
+                    // Steps especÃ­ficos para liberaÃ§Ã£o de pool
                 };
 
                 var orchestrator = new SagaOrchestrator(_sagaLogger);

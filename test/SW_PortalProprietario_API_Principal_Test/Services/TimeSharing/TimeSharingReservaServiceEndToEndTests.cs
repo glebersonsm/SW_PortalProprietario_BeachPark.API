@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Moq;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -16,8 +16,8 @@ using AppConfirmacaoCmStep = SW_PortalProprietario.Application.Services.Core.Dis
 namespace SW_PortalProprietario.Test.Services.TimeSharing
 {
     /// <summary>
-    /// Testes End-to-End do servi�o de reservas TimeSharing com Saga
-    /// Simula fluxo completo desde o controller at� os reposit�rios
+    /// Testes End-to-End do serviï¿½o de reservas TimeSharing com Saga
+    /// Simula fluxo completo desde o controller atï¿½ os repositï¿½rios
     /// </summary>
     public class TimeSharingReservaServiceEndToEndTests
     {
@@ -66,7 +66,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
             // Arrange
             var executionLog = new List<string>();
 
-            // Mock valida��o CM
+            // Mock validaï¿½ï¿½o CM
             _repositoryCmMock.Setup(r => r.FindByHql<object>(It.IsAny<string>(), It.IsAny<Parameter[]>()))
                 .Callback(() => executionLog.Add("1-VALIDACAO-CM"))
                 .ReturnsAsync(Array.Empty<object>());
@@ -87,7 +87,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
                 .Callback(() => executionLog.Add("3-API-CHAMADA"))
                 .ReturnsAsync(12345);
 
-            // Mock confirma��o CM
+            // Mock confirmaï¿½ï¿½o CM
             _repositoryCmMock.Setup(r => r.BeginTransaction())
                 .Callback(() => executionLog.Add("4-CM-BEGIN"));
             _repositoryCmMock.Setup(r => r.CommitAsync())
@@ -106,12 +106,12 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
             // Assert
             Assert.True(resultado.Success);
             
-            // Verificar ordem de execu��o
+            // Verificar ordem de execuï¿½ï¿½o
             Assert.Equal(6, executionLog.Count);
-            Assert.StartsWith("1-", executionLog[0]); // Valida��o primeiro
+            Assert.StartsWith("1-", executionLog[0]); // Validaï¿½ï¿½o primeiro
             Assert.StartsWith("2-", executionLog[1]); // Portal segundo
             Assert.StartsWith("3-", executionLog[3]); // API terceiro
-            Assert.StartsWith("4-", executionLog[4]); // CM �ltimo
+            Assert.StartsWith("4-", executionLog[4]); // CM ï¿½ltimo
         }
 
         [Fact]
@@ -133,7 +133,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
             // Deve chamar apenas o provider, sem Saga
             _timeSharingProviderMock.Verify(s => s.Save(It.IsAny<InclusaoReservaInputModel>()), Times.Once);
             
-            // N�o deve chamar os steps de Saga
+            // Nï¿½o deve chamar os steps de Saga
             _repositoryCmMock.Verify(r => r.BeginTransaction(), Times.Never);
             _repositorySystemMock.Verify(r => r.BeginTransaction(), Times.Never);
         }
@@ -167,7 +167,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
 
             // Mock API - FALHA
             _timeSharingProviderMock.Setup(s => s.Save(It.IsAny<InclusaoReservaInputModel>()))
-                .ThrowsAsync(new HttpRequestException("API indispon�vel"));
+                .ThrowsAsync(new HttpRequestException("API indisponï¿½vel"));
 
             var model = new InclusaoReservaInputModel();
 
@@ -176,11 +176,11 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
 
             // Assert
             Assert.False(resultado.Success);
-            Assert.Contains("API indispon�vel", resultado.Message);
+            Assert.Contains("API indisponï¿½vel", resultado.Message);
             
             // Ambos os bancos devem ter rollback
             Assert.True(transactionStates["Portal_RolledBack"], "Portal deveria ter rollback");
-            // CM n�o deve ter rollback pois falhou antes de commitar
+            // CM nï¿½o deve ter rollback pois falhou antes de commitar
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
         [Fact]
         public async Task E2E_AtomicidadeGarantida_TodosOuNenhum()
         {
-            // Cen�rio: Simular m�ltiplas tentativas, onde ora sucede, ora falha
+            // Cenï¿½rio: Simular mï¿½ltiplas tentativas, onde ora sucede, ora falha
             
             var tentativas = new List<Dictionary<string, bool>>();
 
@@ -303,7 +303,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
                 else
                 {
                     // Nenhum deve estar commitado (rollback)
-                    Assert.False(execucaoAtual["CM_Committed"], $"Tentativa {i}: CM N�O deveria commitar");
+                    Assert.False(execucaoAtual["CM_Committed"], $"Tentativa {i}: CM Nï¿½O deveria commitar");
                 }
 
                 tentativas.Add(execucaoAtual);
@@ -336,7 +336,7 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
 
             var model = new InclusaoReservaInputModel();
 
-            // Act - 10 chamadas simult�neas
+            // Act - 10 chamadas simultï¿½neas
             var tasks = Enumerable.Range(1, 10).Select(async i =>
             {
                 var resultado = await _service.CriarReservaAsync(model, usarSaga: true);
@@ -392,14 +392,14 @@ namespace SW_PortalProprietario.Test.Services.TimeSharing
 
             var model = new InclusaoReservaInputModel();
 
-            // Act - 5 opera��es
+            // Act - 5 operaï¿½ï¿½es
             for (int i = 0; i < 5; i++)
             {
                 await _service.CriarReservaAsync(model, usarSaga: true);
             }
 
             // Assert
-            Assert.Equal(5, operationIds.Count); // Todos �nicos
+            Assert.Equal(5, operationIds.Count); // Todos ï¿½nicos
         }
 
         #endregion

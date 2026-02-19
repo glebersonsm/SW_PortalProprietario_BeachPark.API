@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -39,7 +39,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var pessoaTelefone = await _repository.FindById<PessoaTelefone>(id);
                 if (pessoaTelefone is null)
                 {
-                    throw new FileNotFoundException($"Não foi encontrado o telefone com Id: {id}!");
+                    throw new FileNotFoundException($"NÃ£o foi encontrado o telefone com Id: {id}!");
                 }
 
 
@@ -53,7 +53,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -62,7 +62,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o telefone: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o telefone: {id}");
                 throw;
             }
         }
@@ -73,7 +73,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             {
                 _repository.BeginTransaction();
 
-                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select * From Pessoa Where Id = {pessoaTelefone.PessoaId}")).FirstOrDefault() ?? throw new ArgumentException($"Não foi encontrada a pessoa: {pessoaTelefone.PessoaId}");
+                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select * From Pessoa Where Id = {pessoaTelefone.PessoaId}")).FirstOrDefault() ?? throw new ArgumentException($"NÃ£o foi encontrada a pessoa: {pessoaTelefone.PessoaId}");
 
                 var pessoaSincronizacaoListaAuxliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
                 var resultSave = await pessoaSincronizacaoListaAuxliar.SincronizarTelefones(pessoa, pessoaTelefone);
@@ -87,11 +87,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar o Tipo Telefone: ({pessoaTelefone.PessoaId})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o Tipo Telefone: ({pessoaTelefone.PessoaId})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o Tipo Telefone: ({pessoaTelefone.PessoaId})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o Tipo Telefone: ({pessoaTelefone.PessoaId})");
                 _repository.Rollback();
                 throw;
             }
@@ -109,7 +109,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                     throw new ArgumentException($"Deve ser informada a Pessoa no Telefone!");
 
                 var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select * From Pessoa Where Id = {pessoaTelefones.First().PessoaId}")).FirstOrDefault() ??
-                    throw new ArgumentException($"Não foi encontrada a pessoa: {pessoaTelefones.First().PessoaId}");
+                    throw new ArgumentException($"NÃ£o foi encontrada a pessoa: {pessoaTelefones.First().PessoaId}");
 
                 var resultSave = await pessoaSincronizacaoListaAuxliar.SincronizarTelefones(pessoa, pessoaTelefones.ToArray());
                 telefonesIds = resultSave ?? new List<int>();
@@ -124,11 +124,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar o(s) telefone(s)");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o(s) telefone(s)");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o(s) Telefone(s)");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o(s) Telefone(s)");
                 _repository.Rollback();
                 throw;
             }
@@ -179,7 +179,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             _repository.BeginTransaction();
             try
             {
-                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select * From Pessoa Where Id = {model.PessoaId}")).FirstOrDefault() ?? throw new ArgumentException($"Não foi encontrada a pessoa: {model.PessoaId}");
+                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select * From Pessoa Where Id = {model.PessoaId}")).FirstOrDefault() ?? throw new ArgumentException($"NÃ£o foi encontrada a pessoa: {model.PessoaId}");
 
                 var pessoaSincronizacaoListaAuxliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
                 var resultSave = await pessoaSincronizacaoListaAuxliar.SincronizarTelefones(pessoa, model);
@@ -193,7 +193,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
                 }
 
-                throw exception ?? new Exception("Erro na operação");
+                throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception)
             {

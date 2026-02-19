@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
@@ -20,7 +20,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
         public async Task SincronizarEmpresas(List<int> empresasIdsList, Domain.Entities.Core.Sistema.Usuario? usuario, bool removerOutras = false)
         {
             if (usuario == null)
-                throw new ArgumentNullException("Deve ser informado o usuário para sincronização de empresas que ele acessa");
+                throw new ArgumentNullException("Deve ser informado o usuÃ¡rio para sincronizaÃ§Ã£o de empresas que ele acessa");
 
             List<EmpresaUsuario> listaSalvar = new List<EmpresaUsuario>();
             var empresasVinculadas = (await _repository.FindByHql<EmpresaUsuario>($"From EmpresaUsuario eu Inner Join Fetch eu.Usuario u Inner Join Fetch eu.Empresa emp Where eu.Usuario = {usuario.Id}")).AsList();
@@ -54,7 +54,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
         public async Task SincronizarGruposUsuarios(List<int> grupoUsuariosIdsList, Domain.Entities.Core.Sistema.Usuario? usuario, bool removerOutros = false)
         {
             if (usuario == null)
-                throw new ArgumentNullException("Deve ser informado o usuário para sincronização dos grupos de usuários dele");
+                throw new ArgumentNullException("Deve ser informado o usuÃ¡rio para sincronizaÃ§Ã£o dos grupos de usuÃ¡rios dele");
 
             List<UsuarioGrupoUsuario> listaSalvar = new List<UsuarioGrupoUsuario>();
             var grupoUsuarioVinculados = (await _repository.FindByHql<UsuarioGrupoUsuario>($"From UsuarioGrupoUsuario ugu Inner Join Fetch ugu.Usuario u Inner Join Fetch ugu.GrupoUsuario gu Where ugu.Usuario = {usuario.Id} and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0 ")).AsList();

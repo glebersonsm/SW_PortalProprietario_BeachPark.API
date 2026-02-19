@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -42,7 +42,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             var result = new RegraIntercambioOpcoesModel();
 
-            // 1. Tipos de semana eSolution: Média, Alta, Super Alta (e Baixa para compatibilidade)
+            // 1. Tipos de semana eSolution: MÃ©dia, Alta, Super Alta (e Baixa para compatibilidade)
             try
             {
                 result.TiposSemanaESolution = (await _repositoryPortal.FindBySql<TipoSemanaModel>(
@@ -61,14 +61,14 @@ namespace SW_PortalProprietario.Application.Services.Core
                 result.TiposSemanaESolution = new List<TipoSemanaModel>();
             }
 
-            // 2. Tipos de semana CM: Super alta, Alta, Média, Baixa (FLGTIPO: S, A, M, B)
+            // 2. Tipos de semana CM: Super alta, Alta, MÃ©dia, Baixa (FLGTIPO: S, A, M, B)
             try
             {
                 result.TiposSemanaCM = (await _repositoryCM.FindBySql<TipoSemanaModel>(
                     @"SELECT 
                         ts.IdTemporadaTs AS Id,
                         ts.Descricao AS Nome,
-                        Decode(ts.FlgTipo,'B','BAIXA','S','SUPER ALTA','M','MÉDIA','A','ALTA') AS Complemento
+                        Decode(ts.FlgTipo,'B','BAIXA','S','SUPER ALTA','M','MÃ‰DIA','A','ALTA') AS Complemento
                         FROM TEMPORADATS ts
                         WHERE 1 = 1",
                     session: null)).AsList();
@@ -165,7 +165,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 await _repository.Save(entity);
                 var (executed, exception) = await _repository.CommitAsync();
                 if (!executed)
-                    throw exception ?? new Exception("Operação não realizada.");
+                    throw exception ?? new Exception("OperaÃ§Ã£o nÃ£o realizada.");
                 committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
                 var tipoUhEsolLookup = await GetTipoUhEsolLookupAsync();
@@ -192,7 +192,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     "From RegraIntercambio r Where r.Id = :id", session: null, new Parameter("id", model.Id))).ToList();
                 var entity = configs.FirstOrDefault();
                 if (entity == null)
-                    throw new ArgumentException($"Regra de intercâmbio com ID {model.Id} não encontrada");
+                    throw new ArgumentException($"Regra de intercÃ¢mbio com ID {model.Id} nÃ£o encontrada");
 
                 var loggedUser = await _repository.GetLoggedUser();
                 var userId = (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId) && int.TryParse(loggedUser.Value.userId, out var uid))
@@ -213,7 +213,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 await _repository.Save(entity);
                 var (executed, exception) = await _repository.CommitAsync();
                 if (!executed)
-                    throw exception ?? new Exception("Operação não realizada.");
+                    throw exception ?? new Exception("OperaÃ§Ã£o nÃ£o realizada.");
                 committed = true;
                 var lookup = await GetTipoContratoLookupAsync();
                 var tipoUhEsolLookup = await GetTipoUhEsolLookupAsync();
@@ -239,18 +239,18 @@ namespace SW_PortalProprietario.Application.Services.Core
                     "From RegraIntercambio r Where r.Id = :id", session: null, new Parameter("id", id))).ToList();
                 var entity = configs.FirstOrDefault();
                 if (entity == null)
-                    throw new ArgumentException($"Regra de intercâmbio com ID {id} não encontrada");
+                    throw new ArgumentException($"Regra de intercÃ¢mbio com ID {id} nÃ£o encontrada");
 
                 await _repository.Remove(entity);
                 var (executed, exception) = await _repository.CommitAsync();
                 if (!executed)
-                    throw exception ?? new Exception("Operação não realizada.");
+                    throw exception ?? new Exception("OperaÃ§Ã£o nÃ£o realizada.");
                 committed = true;
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao deletar regra de intercâmbio com ID {Id}", id);
+                _logger.LogError(ex, "Erro ao deletar regra de intercÃ¢mbio com ID {Id}", id);
                 throw;
             }
             finally
@@ -460,9 +460,9 @@ namespace SW_PortalProprietario.Application.Services.Core
         private static void ValidateInput(RegraIntercambioInputModel model)
         {
             if (model.DataFimVigenciaCriacao.HasValue && model.DataFimVigenciaCriacao.Value < model.DataInicioVigenciaCriacao)
-                throw new ArgumentException("Data fim da vigência de criação deve ser maior ou igual à data início");
+                throw new ArgumentException("Data fim da vigÃªncia de criaÃ§Ã£o deve ser maior ou igual Ã  data inÃ­cio");
             if (model.DataFimVigenciaUso.HasValue && model.DataFimVigenciaUso.Value < model.DataInicioVigenciaUso)
-                throw new ArgumentException("Data fim da vigência de uso deve ser maior ou igual à data início");
+                throw new ArgumentException("Data fim da vigÃªncia de uso deve ser maior ou igual Ã  data inÃ­cio");
         }
 
         private static RegraIntercambioModel MapToModel(RegraIntercambio e, Dictionary<int, string> tipoContratoLookup, Dictionary<string, string> tipoUhEsolLookup, Dictionary<string, string> tipoUhCmLookup, Dictionary<string, string> tipoSemanaEsolLookup, Dictionary<string, string> tipoSemanaCMLookup)

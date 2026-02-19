@@ -1,10 +1,10 @@
-using SW_PortalProprietario.Domain.Entities.Core.Framework;
+﻿using SW_PortalProprietario.Domain.Entities.Core.Framework;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
 {
     /// <summary>
-    /// Entidade para gerenciar configurações de filas RabbitMQ
+    /// Entidade para gerenciar configuraÃ§Ãµes de filas RabbitMQ
     /// </summary>
     public class RabbitMQQueue : EntityBaseCore, IEntityValidateCore
     {

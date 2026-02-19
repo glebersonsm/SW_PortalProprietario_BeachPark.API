@@ -1,15 +1,15 @@
-# ?? Problema: 100+ Conexıes RabbitMQ ao Subir a API
+Ôªø# ?? Problema: 100+ Conex√µes RabbitMQ ao Subir a API
 
 ## ? Problema Identificado
 
-Ao subir a API, foram criadas mais de **100 conexıes simult‚neas** no RabbitMQ, causando:
+Ao subir a API, foram criadas mais de **100 conex√µes simult√¢neas** no RabbitMQ, causando:
 - Esgotamento de recursos do broker
-- Lentid„o na aplicaÁ„o
-- PossÌveis timeouts e falhas
+- Lentid√£o na aplica√ß√£o
+- Poss√≠veis timeouts e falhas
 
 ## ?? Causa Raiz
 
-### 1. **Producers criando conexıes a cada mensagem**
+### 1. **Producers criando conex√µes a cada mensagem**
 
 **Antes (INCORRETO):**
 ```csharp
@@ -17,7 +17,7 @@ public class RabbitMQAuditLogProducer : IAuditLogQueueProducer
 {
     public async Task EnqueueAuditLogAsync(AuditLogMessageEvent message)
     {
-        // ? Cria uma NOVA conex„o A CADA mensagem publicada!
+        // ? Cria uma NOVA conex√£o A CADA mensagem publicada!
         var factory = new ConnectionFactory { ... };
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();
@@ -25,15 +25,15 @@ public class RabbitMQAuditLogProducer : IAuditLogQueueProducer
         // ... publica mensagem ...
         
         channel.Dispose();
-        connection.Dispose(); // ? Fecha, mas n„o libera imediatamente
+        connection.Dispose(); // ? Fecha, mas n√£o libera imediatamente
     }
 }
 ```
 
 **Problema:** 
-- Cada requisiÁ„o HTTP que gera log/auditoria cria uma nova conex„o
-- 100 requisiÁıes simult‚neas = 100 conexıes
-- Conexıes TCP n„o s„o liberadas instantaneamente (TIME_WAIT, handshake, etc.)
+- Cada requisi√ß√£o HTTP que gera log/auditoria cria uma nova conex√£o
+- 100 requisi√ß√µes simult√¢neas = 100 conex√µes
+- Conex√µes TCP n√£o s√£o liberadas instantaneamente (TIME_WAIT, handshake, etc.)
 
 ### 2. **Todos os 3 Producers com o mesmo problema**
 
@@ -41,15 +41,15 @@ public class RabbitMQAuditLogProducer : IAuditLogQueueProducer
 - `RabbitMQRegisterLogMessageToQueueProducer` - Logs de acesso
 - `RabbitMQEmailToQueueProducer` - Emails
 
-Cada um criava conexıes independentes a cada chamada.
+Cada um criava conex√µes independentes a cada chamada.
 
 ### 3. **Registro como Singleton mas comportamento era Transient**
 
 ```csharp
-// IoC: Singleton (1 inst‚ncia do producer)
+// IoC: Singleton (1 inst√¢ncia do producer)
 services.TryAddSingleton<IAuditLogQueueProducer, RabbitMQAuditLogProducer>();
 
-// Mas dentro: Criava novas conexıes (comportamento Transient)
+// Mas dentro: Criava novas conex√µes (comportamento Transient)
 public async Task EnqueueAuditLogAsync(...)
 {
     var factory = new ConnectionFactory { ... }; // ? Nova cada vez
@@ -57,16 +57,16 @@ public async Task EnqueueAuditLogAsync(...)
 }
 ```
 
-## ? SoluÁ„o Implementada
+## ? Solu√ß√£o Implementada
 
-### **RabbitMQ Connection Manager** - Pool de Conexıes Compartilhadas
+### **RabbitMQ Connection Manager** - Pool de Conex√µes Compartilhadas
 
-Criado um gerenciador central que mantÈm:
-- **1 conex„o compartilhada para Producers**
-- **1 conex„o por Consumer** (long-running)
-- ReutilizaÁ„o de conexıes ao invÈs de criar novas
+Criado um gerenciador central que mant√©m:
+- **1 conex√£o compartilhada para Producers**
+- **1 conex√£o por Consumer** (long-running)
+- Reutiliza√ß√£o de conex√µes ao inv√©s de criar novas
 
-#### Arquitetura da SoluÁ„o
+#### Arquitetura da Solu√ß√£o
 
 ```
 ????????????????????????????????????????????????????????????
@@ -88,18 +88,18 @@ Criado um gerenciador central que mantÈm:
 ????????????????????????????????????????????????????????????
 ```
 
-#### ImplementaÁ„o
+#### Implementa√ß√£o
 
 **`RabbitMQConnectionManager.cs`:**
 ```csharp
 public class RabbitMQConnectionManager : IRabbitMQConnectionManager
 {
-    private IConnection? _producerConnection; // ? Conex„o compartilhada
+    private IConnection? _producerConnection; // ? Conex√£o compartilhada
     private readonly SemaphoreSlim _producerLock = new(1, 1);
 
     public async Task<IConnection> GetProducerConnectionAsync()
     {
-        // ? Retorna conex„o existente se ainda estiver aberta
+        // ? Retorna conex√£o existente se ainda estiver aberta
         if (_producerConnection != null && _producerConnection.IsOpen)
             return _producerConnection;
 
@@ -109,7 +109,7 @@ public class RabbitMQConnectionManager : IRabbitMQConnectionManager
             if (_producerConnection != null && _producerConnection.IsOpen)
                 return _producerConnection;
 
-            // ? Cria apenas 1 vez quando necess·rio
+            // ? Cria apenas 1 vez quando necess√°rio
             var factory = CreateConnectionFactory("ProducerConnection");
             _producerConnection = await factory.CreateConnectionAsync();
             
@@ -123,7 +123,7 @@ public class RabbitMQConnectionManager : IRabbitMQConnectionManager
 
     public async Task<IChannel> CreateChannelAsync(IConnection connection)
     {
-        // ? Channels s„o leves e podem ser criados/descartados
+        // ? Channels s√£o leves e podem ser criados/descartados
         return await connection.CreateChannelAsync();
     }
 }
@@ -140,7 +140,7 @@ public class RabbitMQAuditLogProducer : IAuditLogQueueProducer
         IChannel? channel = null;
         try
         {
-            // ? Reutiliza conex„o compartilhada
+            // ? Reutiliza conex√£o compartilhada
             var connection = await _connectionManager.GetProducerConnectionAsync();
             
             // ? Cria channel (leve) apenas para esta mensagem
@@ -150,7 +150,7 @@ public class RabbitMQAuditLogProducer : IAuditLogQueueProducer
         }
         finally
         {
-            // ? Fecha APENAS o channel, n„o a conex„o
+            // ? Fecha APENAS o channel, n√£o a conex√£o
             if (channel != null)
             {
                 await channel.CloseAsync();
@@ -161,40 +161,40 @@ public class RabbitMQAuditLogProducer : IAuditLogQueueProducer
 }
 ```
 
-### BenefÌcios da SoluÁ„o
+### Benef√≠cios da Solu√ß√£o
 
 | Antes | Depois |
 |-------|--------|
-| ? 1 conex„o por mensagem | ? 1 conex„o compartilhada |
-| ? 100 requisiÁıes = 100 conexıes | ? 100 requisiÁıes = 1 conex„o + 100 channels |
-| ? Conexıes TCP n„o reutilizadas | ? Conex„o TCP mantida aberta |
+| ? 1 conex√£o por mensagem | ? 1 conex√£o compartilhada |
+| ? 100 requisi√ß√µes = 100 conex√µes | ? 100 requisi√ß√µes = 1 conex√£o + 100 channels |
+| ? Conex√µes TCP n√£o reutilizadas | ? Conex√£o TCP mantida aberta |
 | ? Overhead de handshake a cada mensagem | ? Handshake apenas 1 vez |
 | ? Esgotamento de recursos do broker | ? Uso eficiente de recursos |
-| ? PossÌveis timeouts | ? Performance est·vel |
+| ? Poss√≠veis timeouts | ? Performance est√°vel |
 
 ## ?? Impacto Esperado
 
 ### Antes
 ```
 API Startup:
-?? Producer Auditoria: Cria 1 conex„o por mensagem
-?? Producer Log: Cria 1 conex„o por mensagem  
-?? Producer Email: Cria 1 conex„o por mensagem
-?? 100 requisiÁıes simult‚neas = ~300 conexıes!
+?? Producer Auditoria: Cria 1 conex√£o por mensagem
+?? Producer Log: Cria 1 conex√£o por mensagem  
+?? Producer Email: Cria 1 conex√£o por mensagem
+?? 100 requisi√ß√µes simult√¢neas = ~300 conex√µes!
 ```
 
 ### Depois
 ```
 API Startup:
 ?? RabbitMQConnectionManager:
-?   ?? Producer Connection (shared) ? 1 conex„o
-?   ?? Consumer_AuditLog ? 1 conex„o
-?   ?? Consumer_Log ? 1 conex„o
-?   ?? Consumer_Email ? 1 conex„o
-?? Total: 4 conexıes (m·ximo)
+?   ?? Producer Connection (shared) ? 1 conex√£o
+?   ?? Consumer_AuditLog ? 1 conex√£o
+?   ?? Consumer_Log ? 1 conex√£o
+?   ?? Consumer_Email ? 1 conex√£o
+?? Total: 4 conex√µes (m√°ximo)
 ```
 
-## ?? MudanÁas Realizadas
+## ?? Mudan√ßas Realizadas
 
 ### Arquivos Criados
 - ? `SW_PortalProprietario.Infra.Data\RabbitMQ\RabbitMQConnectionManager.cs`
@@ -207,10 +207,10 @@ API Startup:
 
 ### Registro no IoC
 ```csharp
-// Connection Manager - Singleton para gerenciar pool de conexıes
+// Connection Manager - Singleton para gerenciar pool de conex√µes
 services.TryAddSingleton<IRabbitMQConnectionManager, RabbitMQConnectionManager>();
 
-// Producers - Singleton com injeÁ„o do ConnectionManager
+// Producers - Singleton com inje√ß√£o do ConnectionManager
 services.TryAddSingleton<IAuditLogQueueProducer, RabbitMQAuditLogProducer>();
 services.TryAddSingleton<ILogMessageToQueueProducer, RabbitMQRegisterLogMessageToQueueProducer>();
 services.TryAddSingleton<ISenderEmailToQueueProducer, RabbitMQEmailToQueueProducer>();
@@ -223,79 +223,79 @@ services.TryAddSingleton<ISenderEmailToQueueProducer, RabbitMQEmailToQueueProduc
    dotnet run
    ```
 
-2. **Verificar conexıes no RabbitMQ Management:**
+2. **Verificar conex√µes no RabbitMQ Management:**
    - Acesse: `http://localhost:15672`
    - Navegue para: **Connections**
-   - **Antes:** ~100+ conexıes
-   - **Depois:** ~4 conexıes (1 producer + 3 consumers)
+   - **Antes:** ~100+ conex√µes
+   - **Depois:** ~4 conex√µes (1 producer + 3 consumers)
 
 3. **Testar carga:**
    ```bash
-   # Simular 100 requisiÁıes simult‚neas
+   # Simular 100 requisi√ß√µes simult√¢neas
    for i in {1..100}; do
        curl -X POST https://localhost:46395/api/auth/login &
    done
    ```
-   - Verificar que o n˙mero de conexıes permanece baixo (~4)
+   - Verificar que o n√∫mero de conex√µes permanece baixo (~4)
 
-4. **Logs da aplicaÁ„o:**
+4. **Logs da aplica√ß√£o:**
    ```
-   [INF] Conex„o RabbitMQ Producer criada e compartilhada
-   [INF] Conex„o RabbitMQ Consumer 'AuditLog' criada e compartilhada
-   [INF] Conex„o RabbitMQ Consumer 'Log' criada e compartilhada
-   [INF] Conex„o RabbitMQ Consumer 'Email' criada e compartilhada
+   [INF] Conex√£o RabbitMQ Producer criada e compartilhada
+   [INF] Conex√£o RabbitMQ Consumer 'AuditLog' criada e compartilhada
+   [INF] Conex√£o RabbitMQ Consumer 'Log' criada e compartilhada
+   [INF] Conex√£o RabbitMQ Consumer 'Email' criada e compartilhada
    ```
 
-## ?? ConsideraÁıes Importantes
+## ?? Considera√ß√µes Importantes
 
 ### Connection Lifetime
-- A conex„o Producer È mantida aberta durante toda a vida da aplicaÁ„o
-- … automaticamente recuperada se cair (AutomaticRecoveryEnabled)
-- Fechada apenas no Dispose da aplicaÁ„o
+- A conex√£o Producer √© mantida aberta durante toda a vida da aplica√ß√£o
+- √â automaticamente recuperada se cair (AutomaticRecoveryEnabled)
+- Fechada apenas no Dispose da aplica√ß√£o
 
 ### Thread Safety
-- `SemaphoreSlim` garante que apenas 1 thread cria a conex„o por vez
+- `SemaphoreSlim` garante que apenas 1 thread cria a conex√£o por vez
 - Double-check locking para performance
 
 ### Heartbeat
 ```csharp
 RequestedHeartbeat = TimeSpan.FromSeconds(60)
 ```
-MantÈm a conex„o viva mesmo sem tr·fego
+Mant√©m a conex√£o viva mesmo sem tr√°fego
 
 ### Channel Pooling
-- Channels s„o leves e podem ser criados/descartados
-- N„o h· pool de channels (overhead mÌnimo)
-- RabbitMQ Client j· otimiza internamente
+- Channels s√£o leves e podem ser criados/descartados
+- N√£o h√° pool de channels (overhead m√≠nimo)
+- RabbitMQ Client j√° otimiza internamente
 
-## ?? ReferÍncias
+## ?? Refer√™ncias
 
 - [RabbitMQ Best Practices - Connections](https://www.rabbitmq.com/connections.html)
 - [RabbitMQ .NET Client API Guide](https://www.rabbitmq.com/dotnet-api-guide.html)
 - [Connection Pooling in RabbitMQ](https://www.rabbitmq.com/api-guide.html#connection-pooling)
 
-## ? Checklist de ValidaÁ„o
+## ? Checklist de Valida√ß√£o
 
-ApÛs deploy, verificar:
+Ap√≥s deploy, verificar:
 
-- [ ] N˙mero de conexıes no RabbitMQ Management (~4)
-- [ ] Logs n„o mostram erros de conex„o
+- [ ] N√∫mero de conex√µes no RabbitMQ Management (~4)
+- [ ] Logs n√£o mostram erros de conex√£o
 - [ ] Performance de envio de mensagens mantida
 - [ ] Mensagens sendo consumidas corretamente
 - [ ] Sem memory leaks (monitorar por algumas horas)
 - [ ] AutomaticRecovery funcionando em caso de falha
 
-## ?? PrÛximos Passos (Opcional)
+## ?? Pr√≥ximos Passos (Opcional)
 
 ### Melhorias Futuras
-1. **Channel Pooling:** Se necess·rio, implementar pool de channels reutiliz·veis
-2. **MÈtricas:** Adicionar contadores de mensagens publicadas/consumidas
+1. **Channel Pooling:** Se necess√°rio, implementar pool de channels reutiliz√°veis
+2. **M√©tricas:** Adicionar contadores de mensagens publicadas/consumidas
 3. **Circuit Breaker:** Implementar pattern para falhas do broker
-4. **Health Checks:** Adicionar endpoint para verificar status da conex„o
+4. **Health Checks:** Adicionar endpoint para verificar status da conex√£o
 
 ### Monitoramento Recomendado
 ```csharp
-// TODO: Adicionar mÈtricas
+// TODO: Adicionar m√©tricas
 public class RabbitMQMetrics
 {
     public int ActiveConnections { get; set; }
@@ -307,4 +307,4 @@ public class RabbitMQMetrics
 
 ---
 
-**Resumo:** O problema de 100+ conexıes foi resolvido implementando um **Connection Manager** que mantÈm uma **conex„o compartilhada** para todos os producers, reduzindo de ~300 conexıes para apenas ~4.
+**Resumo:** O problema de 100+ conex√µes foi resolvido implementando um **Connection Manager** que mant√©m uma **conex√£o compartilhada** para todos os producers, reduzindo de ~300 conex√µes para apenas ~4.

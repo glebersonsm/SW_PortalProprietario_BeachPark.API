@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Application.Models.AuthModels
+﻿namespace SW_PortalProprietario.Application.Models.AuthModels
 {
     public class ValidateTwoFactorInputModel
     {

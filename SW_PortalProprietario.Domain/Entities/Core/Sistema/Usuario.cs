@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Entities.Core.DadosPessoa;
+﻿using SW_PortalProprietario.Domain.Entities.Core.DadosPessoa;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
@@ -27,16 +27,16 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
             List<string> mensagens = new();
 
             if (Pessoa == null)
-                mensagens.Add("A Pessoa do Usuário deve ser informada");
+                mensagens.Add("A Pessoa do UsuÃ¡rio deve ser informada");
 
             if (string.IsNullOrEmpty(Login))
-                mensagens.Add("O Login do Usuário deve ser informado");
+                mensagens.Add("O Login do UsuÃ¡rio deve ser informado");
 
             if (string.IsNullOrEmpty(PasswordHash))
                 mensagens.Add($"A PasswordHash deve ser informada");
 
             if (!Status.HasValue)
-                mensagens.Add($"O Status do Usuário deve ser informado");
+                mensagens.Add($"O Status do UsuÃ¡rio deve ser informado");
 
 
             if (mensagens.Any())

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.SystemModels;
@@ -44,8 +44,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 return BadRequest(new ResultModel<RabbitMQQueueViewModel>(new RabbitMQQueueViewModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar a fila RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar a fila RabbitMQ", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a fila RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a fila RabbitMQ", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -55,8 +55,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RabbitMQQueueViewModel>(new RabbitMQQueueViewModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar a fila RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar a fila RabbitMQ", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a fila RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a fila RabbitMQ", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -84,8 +84,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 return BadRequest(new ResultModel<List<RabbitMQQueueViewModel>>(new List<RabbitMQQueueViewModel>())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível buscar as filas RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível buscar as filas RabbitMQ", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel buscar as filas RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel buscar as filas RabbitMQ", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -95,8 +95,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<List<RabbitMQQueueViewModel>>(new List<RabbitMQQueueViewModel>())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível buscar as filas RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível buscar as filas RabbitMQ", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel buscar as filas RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel buscar as filas RabbitMQ", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -115,7 +115,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 if (result == null)
                     return Ok(new ResultModel<RabbitMQQueueViewModel>(new RabbitMQQueueViewModel())
                     {
-                        Errors = new List<string>() { "Fila não encontrada" },
+                        Errors = new List<string>() { "Fila nÃ£o encontrada" },
                         Status = StatusCodes.Status404NotFound,
                         Success = false
                     });
@@ -132,8 +132,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 return BadRequest(new ResultModel<RabbitMQQueueViewModel>(new RabbitMQQueueViewModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível buscar a fila RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível buscar a fila RabbitMQ", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel buscar a fila RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel buscar a fila RabbitMQ", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -143,8 +143,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RabbitMQQueueViewModel>(new RabbitMQQueueViewModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível buscar a fila RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível buscar a fila RabbitMQ", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel buscar a fila RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel buscar a fila RabbitMQ", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -172,8 +172,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 {
                     Status = StatusCodes.Status400BadRequest,
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível excluir a fila RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível excluir a fila RabbitMQ", err.Message }
+                    new List<string>() { $"NÃ£o foi possÃ­vel excluir a fila RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel excluir a fila RabbitMQ", err.Message }
                 });
             }
             catch (Exception err)
@@ -182,8 +182,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível excluir a fila RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível excluir a fila RabbitMQ", err.Message }
+                    new List<string>() { $"NÃ£o foi possÃ­vel excluir a fila RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel excluir a fila RabbitMQ", err.Message }
                 });
             }
         }
@@ -209,8 +209,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 return BadRequest(new ResultModel<RabbitMQQueueViewModel>(new RabbitMQQueueViewModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível alterar o status da fila RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível alterar o status da fila RabbitMQ", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel alterar o status da fila RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel alterar o status da fila RabbitMQ", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -220,8 +220,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RabbitMQ
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RabbitMQQueueViewModel>(new RabbitMQQueueViewModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível alterar o status da fila RabbitMQ", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível alterar o status da fila RabbitMQ", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel alterar o status da fila RabbitMQ", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel alterar o status da fila RabbitMQ", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });

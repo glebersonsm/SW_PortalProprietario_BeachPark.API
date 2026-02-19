@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.FrameworkModels;
@@ -46,12 +46,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var company = (await _repository.FindBySql<EmpresaModel>("Select e.Id From Empresa e Order by e.Id")).FirstOrDefault();
                 if (company == null)
                 {
-                    throw new ArgumentException("Não foi possível identificar a empresa padrão do sistema");
+                    throw new ArgumentException("NÃ£o foi possÃ­vel identificar a empresa padrÃ£o do sistema");
                 }
 
                 grupoImagemHome.Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = company!.Id.GetValueOrDefault() };
 
-                // Se for novo grupo e não tiver ordem definida, definir ordem padrão
+                // Se for novo grupo e nÃ£o tiver ordem definida, definir ordem padrÃ£o
                 if (grupoImagemHomeOriginal == null && (model.Ordem == null || model.Ordem == 0))
                 {
                     var maxOrdem = (await _repository.FindBySql<int?>("Select Max(Ordem) From GrupoImagemHome")).FirstOrDefault();
@@ -73,11 +73,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                             return itemRetornar.First();
                     }
                 }
-                throw exception ?? new Exception($"Não foi possível salvar o Grupo de imagem home: ({grupoImagemHome.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o Grupo de imagem home: ({grupoImagemHome.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o Grupo de imagem home: ({model.Name})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o Grupo de imagem home: ({model.Name})");
                 _repository.Rollback();
                 throw;
             }
@@ -93,12 +93,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var grupoImagemHome = await _repository.FindById<GrupoImagemHome>(id);
                 if (grupoImagemHome is null)
                 {
-                    throw new ArgumentException($"Não foi encontrado o grupo de imagem home com Id: {id}!");
+                    throw new ArgumentException($"NÃ£o foi encontrado o grupo de imagem home com Id: {id}!");
                 }
 
                 _repository.BeginTransaction();
 
-                // Fazer logging detalhado das tags relacionadas antes da remoção
+                // Fazer logging detalhado das tags relacionadas antes da remoÃ§Ã£o
                 var tagsRelacionadas = await _repository.FindByHql<GrupoImagemHomeTags>(
                     @$"From GrupoImagemHomeTags gita 
                             Inner Join Fetch gita.Tags t 
@@ -112,8 +112,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var usuario = await _repository.GetLoggedUser();
                 foreach (var tagRelacionada in tagsRelacionadas)
                 {
-                    // Log detalhado da remoção da tag durante exclusão do grupo
-                    _logger.LogInformation($"[REMOÇÃO TAG - EXCLUSÃO GRUPO HOME] Removendo vínculo de tag por exclusão do grupo da home | " +
+                    // Log detalhado da remoÃ§Ã£o da tag durante exclusÃ£o do grupo
+                    _logger.LogInformation($"[REMOÃ‡ÃƒO TAG - EXCLUSÃƒO GRUPO HOME] Removendo vÃ­nculo de tag por exclusÃ£o do grupo da home | " +
                                           $"GrupoImagemHomeID: {tagRelacionada.GrupoImagemHome?.Id} | " +
                                           $"GrupoImagemHomeNome: {tagRelacionada.GrupoImagemHome?.Nome} | " +
                                           $"TagID: {tagRelacionada.Tags?.Id} | " +
@@ -121,7 +121,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"UsuarioID: {usuario?.userId ?? "Sistema"} | " +
                                           $"DataHora: {DateTime.Now:yyyy-MM-dd HH:mm:ss} | " +
                                           $"EmpresaID: {tagRelacionada.GrupoImagemHome?.Empresa?.Id} | " +
-                                          $"TipoRemocao: Exclusão do grupo");
+                                          $"TipoRemocao: ExclusÃ£o do grupo");
 
                     await _repository.Remove(tagRelacionada);
                 }
@@ -136,7 +136,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -144,7 +144,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o grupo de imagem home: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o grupo de imagem home: {id}");
                 throw;
             }
         }
@@ -249,7 +249,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    // Remover apenas tags que não estão na lista - usar Inner Join Fetch para carregar Tags e GrupoImagemHome com nomes
+                    // Remover apenas tags que nÃ£o estÃ£o na lista - usar Inner Join Fetch para carregar Tags e GrupoImagemHome com nomes
                     tagsParaRemover = (await _repository.FindByHql<GrupoImagemHomeTags>(
                         @$"From GrupoImagemHomeTags gita 
                                 Inner Join Fetch gita.Tags t 
@@ -265,8 +265,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var usuario = await _repository.GetLoggedUser();
                 foreach (var tagParaRemover in tagsParaRemover)
                 {
-                    // Log detalhado da remoção da tag
-                    _logger.LogInformation($"[REMOÇÃO TAG] Removendo vínculo de tag do grupo da home | " +
+                    // Log detalhado da remoÃ§Ã£o da tag
+                    _logger.LogInformation($"[REMOÃ‡ÃƒO TAG] Removendo vÃ­nculo de tag do grupo da home | " +
                                           $"GrupoImagemHomeID: {tagParaRemover.GrupoImagemHome?.Id} | " +
                                           $"GrupoImagemHomeNome: {tagParaRemover.GrupoImagemHome?.Nome} | " +
                                           $"TagID: {tagParaRemover.Tags?.Id} | " +
@@ -274,7 +274,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"UsuarioID: {usuario?.userId ?? "Sistema"} | " +
                                           $"DataHora: {DateTime.Now:yyyy-MM-dd HH:mm:ss} | " +
                                           $"EmpresaID: {tagParaRemover.GrupoImagemHome?.Empresa?.Id} | " +
-                                          $"TipoRemocao: Sincronização");
+                                          $"TipoRemocao: SincronizaÃ§Ã£o");
 
                      await _repository.Remove(tagParaRemover);
                 }
@@ -286,7 +286,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var tagsInexistentes = listTags.Where(c => !allTags.Any(b => b.Id == c)).AsList();
                 if (tagsInexistentes.Count > 0)
                 {
-                    throw new ArgumentException($"Tags não encontradas: {string.Join(",", tagsInexistentes)}");
+                    throw new ArgumentException($"Tags nÃ£o encontradas: {string.Join(",", tagsInexistentes)}");
                 }
 
                 // Buscar tags com seus nomes para garantir que estejam carregadas no log
@@ -294,7 +294,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     @$"From Tags t Where t.Id in ({string.Join(",", listTags)}) and 
                     Not Exists(Select dc.Tags From GrupoImagemHomeTags dc Where dc.GrupoImagemHome = {grupoImagemHome.Id} and dc.Tags = t.Id and dc.UsuarioRemocao is null and dc.DataHoraRemocao is null)")).ToList();
 
-                // Buscar grupo com nome carregado usando HQL para garantir que o nome esteja disponível
+                // Buscar grupo com nome carregado usando HQL para garantir que o nome esteja disponÃ­vel
                 var grupoComNome = (await _repository.FindByHql<GrupoImagemHome>(
                     $"From GrupoImagemHome g Where g.Id = {grupoImagemHome.Id}")).FirstOrDefault() ?? grupoImagemHome;
 

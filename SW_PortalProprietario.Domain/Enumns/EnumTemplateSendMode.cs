@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Domain.Enumns
+ï»¿namespace SW_PortalProprietario.Domain.Enumns
 {
     /// <summary>
-    /// Modo de envio do template de comunicação
+    /// Modo de envio do template de comunicaÃ§Ã£o
     /// </summary>
     public enum EnumTemplateSendMode
     {

@@ -1,4 +1,4 @@
-using FluentNHibernate.Mapping;
+﻿using FluentNHibernate.Mapping;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 using SW_PortalProprietario.Domain.Enumns;
 

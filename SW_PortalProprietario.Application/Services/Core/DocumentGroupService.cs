@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -15,7 +15,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 {
     public class DocumentGroupService : IDocumentGroupService
     {
-        // DTO interno para projeção leve de DocumentoTags + Tags via SQL
+        // DTO interno para projeÃ§Ã£o leve de DocumentoTags + Tags via SQL
         private class DocumentoTagRow
         {
             public int Id { get; set; }
@@ -60,7 +60,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var grupoDocumento = (await _repository.FindByHql<GrupoDocumento>($"From GrupoDocumento gd Left Join Fetch gd.Empresa emp Left Join Fetch emp.Pessoa pe Where gd.Id = {id} and gd.UsuarioRemocao is null and gd.DataHoraRemocao is null")).FirstOrDefault();
                 if (grupoDocumento is null)
                 {
-                    throw new ArgumentException($"Não foi encontrado o grupo de documento com Id: {id}!");
+                    throw new ArgumentException($"NÃ£o foi encontrado o grupo de documento com Id: {id}!");
                 }
 
 
@@ -93,7 +93,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -102,7 +102,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o grupo de documento: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o grupo de documento: {id}");
                 throw;
             }
 
@@ -116,7 +116,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var empresa = (await _repository.FindByHql<Empresa>("From Empresa emp Inner Join Fetch emp.Pessoa p")).AsList();
                 if (empresa.Count > 1 || empresa.Count == 0)
-                    throw new ArgumentException($"Não foi possível salvar o grupo de documento - Emp count:{empresa.Count}");
+                    throw new ArgumentException($"NÃ£o foi possÃ­vel salvar o grupo de documento - Emp count:{empresa.Count}");
 
                 GrupoDocumento grupoDocumentoOriginal = null;
                 if (model.Id.GetValueOrDefault(0) > 0)
@@ -134,7 +134,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     grupoDocumento.GrupoDocumentoPai = null;
                 }
 
-                // Se for uma inclusão e não tiver ordem definida, definir ordem padrão
+                // Se for uma inclusÃ£o e nÃ£o tiver ordem definida, definir ordem padrÃ£o
                 if (grupoDocumentoOriginal == null && (model.Ordem == null || model.Ordem == 0))
                 {
                     var maxOrdem = (await _repository.FindBySql<int?>("Select Max(Ordem) From GrupoDocumento Where UsuarioRemocao is null and DataHoraRemocao is null")).FirstOrDefault();
@@ -156,11 +156,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     }
 
                 }
-                throw exception ?? new Exception($"Não foi possível salvar o Grupo de Documento: ({grupoDocumento.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o Grupo de Documento: ({grupoDocumento.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o Grupo de documento: ({model.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o Grupo de documento: ({model.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -188,7 +188,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var tagsInexistentes = listTags.Where(c => !allTags.Any(b => b.Id == c)).AsList();
                 if (tagsInexistentes.Count > 0)
                 {
-                    throw new ArgumentException($"Tags não encontradas: {string.Join(",", tagsInexistentes)}");
+                    throw new ArgumentException($"Tags nÃ£o encontradas: {string.Join(",", tagsInexistentes)}");
                 }
 
                 var tags = (await _repository.FindBySql<TagsModel>($"Select t.Id From Tags t Where t.Id in ({string.Join(",", listTags)}) and Not Exists(Select dc.Tags From GrupoDocumentoTags dc Where dc.UsuarioRemocao is null and dc.DataHoraRemocao is null and dc.GrupoDocumento = {grupoDocumento.Id} and dc.Tags = t.Id)")).AsList();
@@ -222,19 +222,19 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             var loggedUser = await _repository.GetLoggedUser();
             if (!loggedUser.HasValue)
-                throw new ArgumentException("Não foi possível retornar os grupos de documentos");
+                throw new ArgumentException("NÃ£o foi possÃ­vel retornar os grupos de documentos");
 
             if (!loggedUser.Value.isAdm)
             {
                 if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o usuÃ¡rio para comunicaÃ§Ã£o com o eSolution!");
 
                 if (string.IsNullOrEmpty(loggedUser.Value.userId) || !Helper.IsNumeric(loggedUser.Value.userId))
-                    throw new ArgumentNullException("Não foi possível identificar o id do usuário logado.");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o id do usuÃ¡rio logado.");
 
                 var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
                 if (pessoaProvider == null || !pessoaProvider.Any() || pessoaProvider.Any(a=> string.IsNullOrEmpty(a.PessoaProvider)))
-                    throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
+                    throw new ArgumentNullException($"NÃ£o foi possÃ­vel encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
 
             }
 
@@ -301,7 +301,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     {
                         List<SW_Utils.Auxiliar.Parameter> parametersDoc = new();
 
-                        // Consulta projetando apenas os campos necessários (sem campo Arquivo)
+                        // Consulta projetando apenas os campos necessÃ¡rios (sem campo Arquivo)
                         var sbDocumentos = new StringBuilder();
                         sbDocumentos.AppendLine("Select ");
                         sbDocumentos.AppendLine("  d.Id, ");
@@ -328,7 +328,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         {
                             var dataAtual = DateTime.Now;
                             sbDocumentos.AppendLine("  and Coalesce(d.Disponivel,0) = 1 ");
-                            // Filtro de vigência: documentos dentro do período ou sem período definido
+                            // Filtro de vigÃªncia: documentos dentro do perÃ­odo ou sem perÃ­odo definido
                             sbDocumentos.AppendLine("  and ((d.DataInicioVigencia is null or d.DataInicioVigencia <= :dataAtual) ");
                             sbDocumentos.AppendLine("       and (d.DataFimVigencia is null or d.DataFimVigencia >= :dataAtual)) ");
                             parametersDoc.Add(new SW_Utils.Auxiliar.Parameter("dataAtual", dataAtual));
@@ -338,7 +338,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                         sbDocumentos.AppendLine("Order By Coalesce(d.Ordem, 999999), d.Id ");
 
-                        // Projeção direta para DocumentoModelSimplificado (sem Arquivo)
+                        // ProjeÃ§Ã£o direta para DocumentoModelSimplificado (sem Arquivo)
                         var documentosDosGrupos = await _repository.FindBySql<DocumentoModelSimplificado>(sbDocumentos.ToString(), parameters: parametersDoc.ToArray());
                         var itensRetornoDocumentos = documentosDosGrupos.AsList();
 
@@ -443,7 +443,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     _logger.LogInformation($"Ordem dos grupos de documentos atualizada com sucesso!");
                     return true;
                 }
-                throw exception ?? new Exception("Não foi possível atualizar a ordem dos grupos de documentos");
+                throw exception ?? new Exception("NÃ£o foi possÃ­vel atualizar a ordem dos grupos de documentos");
             }
             catch (Exception err)
             {

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NHibernate;
 using SW_PortalProprietario.Application.Interfaces;
@@ -14,8 +14,8 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Proccessing.IncentivoAgendamento;
 
 /// <summary>
-/// Serviço responsável pelo processamento em lote de incentivos para agendamento
-/// Usa o mesmo código de geração de layout via IncentivoAgendamentoGenerationService
+/// ServiÃ§o responsÃ¡vel pelo processamento em lote de incentivos para agendamento
+/// Usa o mesmo cÃ³digo de geraÃ§Ã£o de layout via IncentivoAgendamentoGenerationService
 /// </summary>
 public class IncentivoAgendamentoProcessingService
 {
@@ -46,7 +46,7 @@ public class IncentivoAgendamentoProcessingService
     }
 
     /// <summary>
-    /// Processa incentivos Multipropriedade para um intervalo específico
+    /// Processa incentivos Multipropriedade para um intervalo especÃ­fico
     /// </summary>
     public async Task ProcessarIncentivosMultiPropriedadeAsync(
         IStatelessSession session,
@@ -62,7 +62,7 @@ public class IncentivoAgendamentoProcessingService
         {
             _logger.LogInformation("Processando incentivos Multipropriedade para intervalo {Intervalo} dias", intervalo);
 
-            // Buscar contratos elegíveis usando o método do serviço de geração
+            // Buscar contratos elegÃ­veis usando o mÃ©todo do serviÃ§o de geraÃ§Ã£o
             var ano = DateTime.Now.Month >= 6 ? DateTime.Now.Year + 1 : DateTime.Now.Year;
             var contratosElegiveis = await _incentivoGenerationService.GetContratosElegiveisAsync(
                 EnumProjetoType.Multipropriedade,
@@ -73,21 +73,21 @@ public class IncentivoAgendamentoProcessingService
 
             if (contratosElegiveis == null || !contratosElegiveis.Any())
             {
-                _logger.LogInformation("Nenhum contrato elegível encontrado para intervalo {Intervalo}", intervalo);
+                _logger.LogInformation("Nenhum contrato elegÃ­vel encontrado para intervalo {Intervalo}", intervalo);
                 return;
             }
 
-            _logger.LogInformation("Encontrados {Count} contratos elegíveis para intervalo {Intervalo}",
+            _logger.LogInformation("Encontrados {Count} contratos elegÃ­veis para intervalo {Intervalo}",
                 contratosElegiveis.Count, intervalo);
 
             foreach (var contratoItem in contratosElegiveis)
             {
                 try
                 {
-                    // Verificar se já foi enviado para este contrato e intervalo
+                    // Verificar se jÃ¡ foi enviado para este contrato e intervalo
                     if (await CheckIfAlreadySentAsync(session, contratoItem.contrato.FrAtendimentoVendaId.GetValueOrDefault(0), intervalo, EnumProjetoType.Multipropriedade))
                     {
-                        _logger.LogDebug("Incentivo já enviado para contrato {ContratoId} no intervalo {Intervalo}",
+                        _logger.LogDebug("Incentivo jÃ¡ enviado para contrato {ContratoId} no intervalo {Intervalo}",
                             contratoItem.contrato.FrAtendimentoVendaId, intervalo);
                         continue;
                     }
@@ -96,20 +96,20 @@ public class IncentivoAgendamentoProcessingService
                     var email = contratoItem.contrato.PessoaTitular1Email ?? contratoItem.contrato.PessoaTitular2Email;
                     if (!IsValidEmail(email))
                     {
-                        _logger.LogWarning("Email inválido para contrato {ContratoId}: {Email}",
+                        _logger.LogWarning("Email invÃ¡lido para contrato {ContratoId}: {Email}",
                             contratoItem.contrato.FrAtendimentoVendaId, email);
                         continue;
                     }
 
-                    // Verificar filtros de negócio usando método do serviço de geração
+                    // Verificar filtros de negÃ³cio usando mÃ©todo do serviÃ§o de geraÃ§Ã£o
                     if (!await _incentivoGenerationService.ShouldSendEmailForContrato(contratoItem.contrato, config, inadimplentes))
                     {
-                        _logger.LogDebug("Contrato {ContratoId} não atende critérios de filtro",
+                        _logger.LogDebug("Contrato {ContratoId} nÃ£o atende critÃ©rios de filtro",
                             contratoItem.contrato.FrAtendimentoVendaId);
                         continue;
                     }
 
-                    // Gerar e enviar incentivo usando o serviço de geração
+                    // Gerar e enviar incentivo usando o serviÃ§o de geraÃ§Ã£o
                     var emailId = await GerarEEnviarIncentivoAsync(contratoItem.contrato, contratoItem.statusAgendamento, config, intervalo);
 
                     if (emailId.HasValue)
@@ -136,7 +136,7 @@ public class IncentivoAgendamentoProcessingService
                 }
             }
 
-            _logger.LogInformation("Processamento concluído: {QtdeEnviados} incentivos enviados para intervalo {Intervalo}",
+            _logger.LogInformation("Processamento concluÃ­do: {QtdeEnviados} incentivos enviados para intervalo {Intervalo}",
                 qtdeEnviados, intervalo);
         }
         catch (Exception ex)
@@ -146,7 +146,7 @@ public class IncentivoAgendamentoProcessingService
     }
 
     /// <summary>
-    /// Processa incentivos Timesharing para um intervalo específico
+    /// Processa incentivos Timesharing para um intervalo especÃ­fico
     /// </summary>
     public async Task ProcessarIncentivosTimesharingAsync(
         IStatelessSession session,
@@ -167,7 +167,7 @@ public class IncentivoAgendamentoProcessingService
                 return;
             }
 
-            // TODO: Implementar busca de contratos Timesharing quando disponível
+            // TODO: Implementar busca de contratos Timesharing quando disponÃ­vel
             var contratos = await _serviceBase.GetContratos(new List<int>());
             var ano = DateTime.Now.Month >= 6 ? DateTime.Now.Year + 1 : DateTime.Now.Year;
             var contratosElegiveis = await _incentivoGenerationService.GetContratosElegiveisAsync(
@@ -179,7 +179,7 @@ public class IncentivoAgendamentoProcessingService
 
             if (contratosElegiveis == null || !contratosElegiveis.Any())
             {
-                _logger.LogInformation("Nenhum contrato Timesharing elegível encontrado para intervalo {Intervalo}", intervalo);
+                _logger.LogInformation("Nenhum contrato Timesharing elegÃ­vel encontrado para intervalo {Intervalo}", intervalo);
                 return;
             }
 
@@ -189,7 +189,7 @@ public class IncentivoAgendamentoProcessingService
                 {
                     if (await CheckIfAlreadySentAsync(session, contratoItem.contrato.FrAtendimentoVendaId.GetValueOrDefault(0), intervalo, EnumProjetoType.Timesharing))
                     {
-                        _logger.LogDebug("Incentivo já enviado para contrato Timesharing {ContratoId} no intervalo {Intervalo}",
+                        _logger.LogDebug("Incentivo jÃ¡ enviado para contrato Timesharing {ContratoId} no intervalo {Intervalo}",
                             contratoItem.contrato.FrAtendimentoVendaId, intervalo);
                         continue;
                     }
@@ -197,7 +197,7 @@ public class IncentivoAgendamentoProcessingService
                     var email = contratoItem.contrato.PessoaTitular1Email ?? contratoItem.contrato.PessoaTitular2Email;
                     if (!IsValidEmail(email))
                     {
-                        _logger.LogWarning("Email inválido para contrato Timesharing {ContratoId}: {Email}",
+                        _logger.LogWarning("Email invÃ¡lido para contrato Timesharing {ContratoId}: {Email}",
                             contratoItem.contrato.FrAtendimentoVendaId, email);
                         continue;
                     }
@@ -233,7 +233,7 @@ public class IncentivoAgendamentoProcessingService
         }
     }
 
-    #region Métodos Privados
+    #region MÃ©todos Privados
 
     private async Task<int?> GerarEEnviarIncentivoAsync(
         DadosContratoModel contrato,
@@ -243,16 +243,16 @@ public class IncentivoAgendamentoProcessingService
     {
         try
         {
-            // Usar o serviço de geração para gerar o conteúdo completo
+            // Usar o serviÃ§o de geraÃ§Ã£o para gerar o conteÃºdo completo
             var emailData = await _incentivoGenerationService.GerarAvisoCompletoAsync(config, contrato, statusAgendamento, intervalo);
 
             if (emailData == null)
             {
-                _logger.LogWarning("Erro ao gerar conteúdo do email para contrato {ContratoId}", contrato.FrAtendimentoVendaId);
+                _logger.LogWarning("Erro ao gerar conteÃºdo do email para contrato {ContratoId}", contrato.FrAtendimentoVendaId);
                 return null;
             }
 
-            // Determinar destinatário
+            // Determinar destinatÃ¡rio
             var enviarApenasPermitidos = _configuration.GetValue("EnviarEmailApenasParaDestinatariosPermitidos", true);
             var destinatarioPermitido = enviarApenasPermitidos ? _configuration.GetValue("DestinatarioEmailPermitido", "glebersonsm@gmail.com") : null;
             var email = contrato.PessoaTitular1Email ?? contrato.PessoaTitular2Email ?? "";
@@ -304,7 +304,7 @@ public class IncentivoAgendamentoProcessingService
     {
         try
         {
-            // Para incentivo de agendamento, usamos o contratoId no campo ReservaId (já que não há reserva)
+            // Para incentivo de agendamento, usamos o contratoId no campo ReservaId (jÃ¡ que nÃ£o hÃ¡ reserva)
             var sent = await _repository.FindByHql<AutomaticCommunicationSent>(
                 $"From AutomaticCommunicationSent a Where a.ReservaId = {contratoId} " +
                 $"and a.DaysBeforeCheckIn = {intervalo} " +
@@ -315,7 +315,7 @@ public class IncentivoAgendamentoProcessingService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Erro ao verificar se já foi enviado para contrato {ContratoId}", contratoId);
+            _logger.LogWarning(ex, "Erro ao verificar se jÃ¡ foi enviado para contrato {ContratoId}", contratoId);
             return false;
         }
     }

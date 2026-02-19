@@ -1,4 +1,4 @@
-using FluentNHibernate.Mapping;
+﻿using FluentNHibernate.Mapping;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 
 namespace SW_PortalProprietario.Infra.Data.Mappings.Core.Geral

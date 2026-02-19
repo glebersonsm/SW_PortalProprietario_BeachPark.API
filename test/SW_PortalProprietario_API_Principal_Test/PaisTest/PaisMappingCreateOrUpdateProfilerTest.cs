@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Interfaces;
+﻿using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Domain.Entities.Core.Geral;
 

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+Ôªøusing Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Proccessing.Voucher;
@@ -9,8 +9,8 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Handlers.Voucher;
 
 /// <summary>
-/// Handler para envio autom·tico de vouchers de reserva
-/// Usa VoucherGenerationService para geraÁ„o de layout (simulaÁ„o e processamento)
+/// Handler para envio autom√°tico de vouchers de reserva
+/// Usa VoucherGenerationService para gera√ß√£o de layout (simula√ß√£o e processamento)
 /// </summary>
 public class VoucherReservaCommunicationHandler : ICommunicationHandler
 {
@@ -32,7 +32,7 @@ public class VoucherReservaCommunicationHandler : ICommunicationHandler
 
     public async Task ProcessMultiPropriedadeAsync(NHibernate.IStatelessSession session, AutomaticCommunicationConfigModel config)
     {
-        _logger.LogInformation("=== INÕCIO PROCESSAMENTO VOUCHERS - MULTIPROPRIEDADE ===");
+        _logger.LogInformation("=== IN√çCIO PROCESSAMENTO VOUCHERS - MULTIPROPRIEDADE ===");
 
         if (config.DaysBeforeCheckIn == null || !config.DaysBeforeCheckIn.Any())
         {
@@ -48,7 +48,7 @@ public class VoucherReservaCommunicationHandler : ICommunicationHandler
                 
                 await _processingService.ProcessarVouchersMultiPropriedadeAsync(session, config, daysBefore, qtdeMaxima: null);
                 
-                _logger.LogInformation("Processamento concluÌdo para {DaysBefore} dias", daysBefore);
+                _logger.LogInformation("Processamento conclu√≠do para {DaysBefore} dias", daysBefore);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ public class VoucherReservaCommunicationHandler : ICommunicationHandler
 
     public async Task ProcessTimesharingAsync(NHibernate.IStatelessSession session, AutomaticCommunicationConfigModel config)
     {
-        _logger.LogInformation("=== INÕCIO PROCESSAMENTO VOUCHERS - TIMESHARING ===");
+        _logger.LogInformation("=== IN√çCIO PROCESSAMENTO VOUCHERS - TIMESHARING ===");
 
         if (config.DaysBeforeCheckIn == null || !config.DaysBeforeCheckIn.Any())
         {
@@ -77,7 +77,7 @@ public class VoucherReservaCommunicationHandler : ICommunicationHandler
                 
                 await _processingService.ProcessarVouchersTimesharingAsync(session, config, daysBefore, qtdeMaxima: null);
                 
-                _logger.LogInformation("Processamento Timesharing concluÌdo para {DaysBefore} dias", daysBefore);
+                _logger.LogInformation("Processamento Timesharing conclu√≠do para {DaysBefore} dias", daysBefore);
             }
             catch (Exception ex)
             {
@@ -93,7 +93,7 @@ public class VoucherReservaCommunicationHandler : ICommunicationHandler
         string userEmail,
         int userId)
     {
-        _logger.LogInformation("Gerando email de simulaÁ„o de voucher para {UserEmail}", userEmail);
+        _logger.LogInformation("Gerando email de simula√ß√£o de voucher para {UserEmail}", userEmail);
         return await _simulationService.GenerateSimulationEmailAsync(config, userEmail, userId);
     }
 }

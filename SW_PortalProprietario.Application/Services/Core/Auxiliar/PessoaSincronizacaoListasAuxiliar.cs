@@ -45,13 +45,13 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                         throw new ArgumentException($"Não foi encontrado o tipo de documento informado: {documento.TipoDocumentoId.GetValueOrDefault()}");
 
 
-                    if (tipoDocumento.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim && documento.DataEmissao.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
+                    if (tipoDocumento.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim && documento.DataEmissao.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
                         throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informação da daa de emissão no documento: {documento.Numero}");
 
-                    if (tipoDocumento.ExigeDataValidade.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim && documento.DataValidade.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
+                    if (tipoDocumento.ExigeDataValidade.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim && documento.DataValidade.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
                         throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informação da data de validade no documento: {documento.Numero}");
 
-                    if (tipoDocumento.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim && string.IsNullOrEmpty(documento.OrgaoEmissor))
+                    if (tipoDocumento.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim && string.IsNullOrEmpty(documento.OrgaoEmissor))
                         throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informação do orgão emissão no documento: {documento.Numero}");
 
                     var documentoExistente = documento.Id.GetValueOrDefault(0) > 0 ?
@@ -72,7 +72,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
 
                         if (validarAlteracaoDocumento && !_repository.IsAdm)
                         {
-                            if (companyConfiguration != null && companyConfiguration.PermitirUsuarioAlterarSeuDoc.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Não)
+                            if (companyConfiguration != null && companyConfiguration.PermitirUsuarioAlterarSeuDoc.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Nao)
                             {
                                 if (documentoExistente.Numero != Helper.ApenasNumeros(documento.Numero))
                                     throw new ArgumentException("Alteração de documento não permitida");
@@ -87,9 +87,9 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                         documentoExistente.Pessoa = pessoa;
                     }
 
-                    documentoExistente.DataEmissao = tipoDocumento.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim ? documento.DataEmissao.GetValueOrDefault() : null;
-                    documentoExistente.DataValidade = tipoDocumento.ExigeDataValidade.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim ? documento.DataValidade.GetValueOrDefault() : null;
-                    documentoExistente.OrgaoEmissor = tipoDocumento.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim ? documento.OrgaoEmissor : null;
+                    documentoExistente.DataEmissao = tipoDocumento.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim ? documento.DataEmissao.GetValueOrDefault() : null;
+                    documentoExistente.DataValidade = tipoDocumento.ExigeDataValidade.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim ? documento.DataValidade.GetValueOrDefault() : null;
+                    documentoExistente.OrgaoEmissor = tipoDocumento.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim ? documento.OrgaoEmissor : null;
 
 
                     documentoExistente.ValorNumerico = Helper.ApenasNumeros(documentoExistente.Numero);
@@ -121,7 +121,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                 foreach (var telefone in telefones)
                 {
                     if (!telefone.Preferencial.HasValue)
-                        telefone.Preferencial = EnumSimNao.Não;
+                        telefone.Preferencial = EnumSimNao.Nao;
 
                     var tipoTelefone = (await _repository.FindBySql<TipoTelefone>($"Select te.* From TipoTelefone te Where te.Id =  {telefone.TipoTelefoneId.GetValueOrDefault()}")).FirstOrDefault();
                     if (tipoTelefone == null)
@@ -159,7 +159,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                         var outrosTelefones = (await _repository.FindByHql<PessoaTelefone>($"From PessoaTelefone pt Inner Join Fetch pt.TipoTelefone tt Inner Join Fetch pt.Pessoa p Where p.Id = {pessoa.Id} and pt.Id <> {telefoneExistente.Id} and pt.Preferencial = 1")).AsList();
                         foreach (var item in outrosTelefones)
                         {
-                            item.Preferencial = EnumSimNao.Não;
+                            item.Preferencial = EnumSimNao.Nao;
                             await _repository.Save(item);
                         }
                     }
@@ -187,7 +187,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Auxiliar
                 foreach (var endereco in enderecos)
                 {
                     if (!endereco.Preferencial.HasValue)
-                        endereco.Preferencial = EnumSimNao.Não;
+                        endereco.Preferencial = EnumSimNao.Nao;
 
                     var tipoEndereco = (await _repository.FindBySql<TipoEndereco>($"Select te.* From TipoEndereco te Where te.Id =  {endereco.TipoEnderecoId.GetValueOrDefault()}")).FirstOrDefault();
                     if (tipoEndereco == null)

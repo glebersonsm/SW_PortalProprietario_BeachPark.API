@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -38,7 +38,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var pessoa = await _repository.FindById<Domain.Entities.Core.DadosPessoa.Pessoa>(id);
                 if (pessoa is null)
                 {
-                    throw new ArgumentException($"Não foi encontrado pessoa com Id: {id}!");
+                    throw new ArgumentException($"NÃ£o foi encontrado pessoa com Id: {id}!");
                 }
 
 
@@ -52,7 +52,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -61,7 +61,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar a Pessoa: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar a Pessoa: {id}");
                 throw;
             }
         }
@@ -101,11 +101,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                     }
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar a Pessoa: ({pessoaFisica.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar a Pessoa: ({pessoaFisica.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a Pessoa: ({pessoaFisica.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a Pessoa: ({pessoaFisica.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -146,11 +146,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                     }
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar a Pessoa: ({pessoaJuridica.RazaoSocial})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar a Pessoa: ({pessoaJuridica.RazaoSocial})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a Pessoa: ({pessoaJuridica.RazaoSocial})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a Pessoa: ({pessoaJuridica.RazaoSocial})");
                 _repository.Rollback();
                 throw;
             }

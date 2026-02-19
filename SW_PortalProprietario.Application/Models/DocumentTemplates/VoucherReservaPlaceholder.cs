@@ -1,9 +1,9 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 namespace SW_PortalProprietario.Application.Models.DocumentTemplates;
 
 /// <summary>
-/// Lista de chaves disponíveis para montagem do template de voucher de reserva.
+/// Lista de chaves disponÃ­veis para montagem do template de voucher de reserva.
 /// As chaves devem ser utilizadas no arquivo DOCX no formato {{NomeDaChave}}.
 /// </summary>
 public static class VoucherReservaPlaceholder
@@ -35,28 +35,28 @@ public static class VoucherReservaPlaceholder
     private static readonly IReadOnlyCollection<PlaceholderDescriptionReservas> _all = new ReadOnlyCollection<PlaceholderDescriptionReservas>(
         new[]
         {
-            new PlaceholderDescriptionReservas(NomeCliente, "Nome do cliente (proprietário principal)."),
+            new PlaceholderDescriptionReservas(NomeCliente, "Nome do cliente (proprietÃ¡rio principal)."),
             new PlaceholderDescriptionReservas(DocumentoCliente, "Documento (CPF/CNPJ) do cliente."),
-            new PlaceholderDescriptionReservas(NomeCoCessionario, "Nome do co-cessionário."),
-            new PlaceholderDescriptionReservas(DocumentoCoCessionario, "Documento do co-cessionário."),
-            new PlaceholderDescriptionReservas(ContratoNumero, "Código do contrato vinculado à reserva."),
-            new PlaceholderDescriptionReservas(ReservaNumero, "Número da reserva gerado pela TSE."),
+            new PlaceholderDescriptionReservas(NomeCoCessionario, "Nome do co-cessionÃ¡rio."),
+            new PlaceholderDescriptionReservas(DocumentoCoCessionario, "Documento do co-cessionÃ¡rio."),
+            new PlaceholderDescriptionReservas(ContratoNumero, "CÃ³digo do contrato vinculado Ã  reserva."),
+            new PlaceholderDescriptionReservas(ReservaNumero, "NÃºmero da reserva gerado pela TSE."),
             new PlaceholderDescriptionReservas(HotelNome, "Nome do hotel ou empreendimento."),
             new PlaceholderDescriptionReservas(CheckInData, "Data do check-in formatada (dd/MM/yyyy)."),
-            new PlaceholderDescriptionReservas(CheckInHora, "Horário de início permitido para check-in."),
+            new PlaceholderDescriptionReservas(CheckInHora, "HorÃ¡rio de inÃ­cio permitido para check-in."),
             new PlaceholderDescriptionReservas(CheckOutData, "Data do check-out formatada (dd/MM/yyyy)."),
-            new PlaceholderDescriptionReservas(CheckOutHora, "Horário limite para check-out."),
-            new PlaceholderDescriptionReservas(HospedePrincipalNome, "Nome do hóspede principal informado na reserva."),
-            new PlaceholderDescriptionReservas(HospedePrincipalDocumento, "Documento do hóspede principal."),
-            new PlaceholderDescriptionReservas(TipoUtilizacao, "Tipo de utilização (Uso Próprio, Uso Convidado, Intercambiadora)."),
-            new PlaceholderDescriptionReservas(TipoDisponibilizacao, "Descrição complementar do tipo de utilização."),
-            new PlaceholderDescriptionReservas(TipoApartamento, "Descrição da UH (ex.: Apartamento de 1 quarto)."),
-            new PlaceholderDescriptionReservas(OcupacaoMaxima, "Quantidade máxima de hóspedes permitidos para a UH."),
-            new PlaceholderDescriptionReservas(VagaEstacionamento, "Informação sobre vagas de estacionamento."),
-            new PlaceholderDescriptionReservas(HospedesLista, "Lista formatada dos hóspedes vinculados à reserva."),
-            new PlaceholderDescriptionReservas(TermoCessao, "Conteúdo configurável do termo de cessão."),
-            new PlaceholderDescriptionReservas(Observacoes, "Observações adicionais ou instruções específicas."),
-            new PlaceholderDescriptionReservas(QuantidadePaxPorFaixaEtaria, "Quantidade de PAX por faixa etária."),
+            new PlaceholderDescriptionReservas(CheckOutHora, "HorÃ¡rio limite para check-out."),
+            new PlaceholderDescriptionReservas(HospedePrincipalNome, "Nome do hÃ³spede principal informado na reserva."),
+            new PlaceholderDescriptionReservas(HospedePrincipalDocumento, "Documento do hÃ³spede principal."),
+            new PlaceholderDescriptionReservas(TipoUtilizacao, "Tipo de utilizaÃ§Ã£o (Uso PrÃ³prio, Uso Convidado, Intercambiadora)."),
+            new PlaceholderDescriptionReservas(TipoDisponibilizacao, "DescriÃ§Ã£o complementar do tipo de utilizaÃ§Ã£o."),
+            new PlaceholderDescriptionReservas(TipoApartamento, "DescriÃ§Ã£o da UH (ex.: Apartamento de 1 quarto)."),
+            new PlaceholderDescriptionReservas(OcupacaoMaxima, "Quantidade mÃ¡xima de hÃ³spedes permitidos para a UH."),
+            new PlaceholderDescriptionReservas(VagaEstacionamento, "InformaÃ§Ã£o sobre vagas de estacionamento."),
+            new PlaceholderDescriptionReservas(HospedesLista, "Lista formatada dos hÃ³spedes vinculados Ã  reserva."),
+            new PlaceholderDescriptionReservas(TermoCessao, "ConteÃºdo configurÃ¡vel do termo de cessÃ£o."),
+            new PlaceholderDescriptionReservas(Observacoes, "ObservaÃ§Ãµes adicionais ou instruÃ§Ãµes especÃ­ficas."),
+            new PlaceholderDescriptionReservas(QuantidadePaxPorFaixaEtaria, "Quantidade de PAX por faixa etÃ¡ria."),
             new PlaceholderDescriptionReservas(LocalAtendimento, "Nome do local de atendimento ao cliente")
         });
 

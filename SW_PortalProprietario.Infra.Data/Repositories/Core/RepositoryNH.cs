@@ -1,4 +1,4 @@
-using AccessCenterDomain;
+﻿using AccessCenterDomain;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using NHibernate;
@@ -21,8 +21,8 @@ using System.Text;
 namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 {
     /// <summary>
-    /// Entrada pendente de auditoria - processada APÓS o commit da transação principal,
-    /// garantindo segregação entre a session da operação e a que grava os logs.
+    /// Entrada pendente de auditoria - processada APÃ“S o commit da transaÃ§Ã£o principal,
+    /// garantindo segregaÃ§Ã£o entre a session da operaÃ§Ã£o e a que grava os logs.
     /// </summary>
     public enum PendingAuditAction { Create, Update, Delete }
 
@@ -87,11 +87,11 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 }
                 else
                 {
-                    // Busca genérica sem relacionamentos
+                    // Busca genÃ©rica sem relacionamentos
                     hql = $"From {entityName} e Where e.Id = :id";
                 }
                 
-                // Usar FindByHql que já está implementado
+                // Usar FindByHql que jÃ¡ estÃ¡ implementado
                 var results = await FindByHql<T>(hql, new Parameter("id", id));
                 
                 return results.FirstOrDefault();
@@ -109,7 +109,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             
             try
             {
-                // Propriedades que não devem ser consideradas como relacionamentos
+                // Propriedades que nÃ£o devem ser consideradas como relacionamentos
                 var excludedPropertyNames = new HashSet<string>
                 {
                     "Id", "UsuarioCriacao", "UsuarioAlteracao", "DataHoraCriacao",
@@ -120,11 +120,11 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 
                 foreach (var prop in properties)
                 {
-                    // Ignorar propriedades excluídas
+                    // Ignorar propriedades excluÃ­das
                     if (excludedPropertyNames.Contains(prop.Name))
                         continue;
 
-                    // Verificar se a propriedade é do tipo EntityBaseCore (relacionamento ManyToOne)
+                    // Verificar se a propriedade Ã© do tipo EntityBaseCore (relacionamento ManyToOne)
                     if (typeof(EntityBaseCore).IsAssignableFrom(prop.PropertyType) && 
                         prop.PropertyType != typeof(EntityBaseCore))
                     {
@@ -141,7 +141,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
         }
 
         /// <summary>
-        /// Clona uma entidade para auditoria, garantindo que temos uma cópia independente do estado original
+        /// Clona uma entidade para auditoria, garantindo que temos uma cÃ³pia independente do estado original
         /// </summary>
         private EntityBaseCore? CloneEntityForAudit(EntityBaseCore entity)
         {
@@ -150,8 +150,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 
             try
             {
-                // Usar serialização JSON para fazer clone profundo
-                // Isso garante que temos uma cópia completamente independente do estado original
+                // Usar serializaÃ§Ã£o JSON para fazer clone profundo
+                // Isso garante que temos uma cÃ³pia completamente independente do estado original
                 var options = new System.Text.Json.JsonSerializerOptions
                 {
                     ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
@@ -167,7 +167,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             }
             catch
             {
-                // Se falhar a serialização JSON, tentar MemberwiseClone se disponível
+                // Se falhar a serializaÃ§Ã£o JSON, tentar MemberwiseClone se disponÃ­vel
                 try
                 {
                     if (entity is ICloneable cloneable)
@@ -178,11 +178,11 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 catch
                 {
                     // Se tudo falhar, retornar a entidade original
-                    // Isso é melhor do que não ter nada para comparar
+                    // Isso Ã© melhor do que nÃ£o ter nada para comparar
                 }
                 
-                // Último recurso: retornar a mesma instância
-                // Isso pode não ser ideal, mas é melhor do que null
+                // Ãšltimo recurso: retornar a mesma instÃ¢ncia
+                // Isso pode nÃ£o ser ideal, mas Ã© melhor do que null
                 return entity;
             }
         }
@@ -235,22 +235,22 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                     objEntity.ObjectGuid = $"{Guid.NewGuid()}";
                     await Session.InsertAsync(objEntity, CancellationToken);
 
-                    // Auditoria: enfileirar para processar APÓS o commit (segregação de sessão)
+                    // Auditoria: enfileirar para processar APÃ“S o commit (segregaÃ§Ã£o de sessÃ£o)
                     if (_auditHelper != null)
                         _pendingAudits.Enqueue((PendingAuditAction.Create, objEntity, null));
                 }
                 else
                 {
-                    // Buscar entidade antiga para comparação (apenas se auditHelper estiver disponível)
+                    // Buscar entidade antiga para comparaÃ§Ã£o (apenas se auditHelper estiver disponÃ­vel)
                     // IMPORTANTE: Buscar ANTES de modificar qualquer propriedade da entidade
-                    // Como estamos usando IStatelessSession, a busca sempre vem do banco, não da sessão
+                    // Como estamos usando IStatelessSession, a busca sempre vem do banco, nÃ£o da sessÃ£o
                     EntityBaseCore? oldEntity = null;
                     if (_auditHelper != null)
                     {
                         try
                         {
-                            // IMPORTANTE: Usar uma nova sessão stateless para garantir que buscamos do banco
-                            // e não de qualquer cache ou instância modificada na sessão atual
+                            // IMPORTANTE: Usar uma nova sessÃ£o stateless para garantir que buscamos do banco
+                            // e nÃ£o de qualquer cache ou instÃ¢ncia modificada na sessÃ£o atual
                             // Tentar buscar com relacionamentos carregados usando HQL
                             oldEntity = await FindEntityWithRelationships<T>(objEntity.Id) as EntityBaseCore;
                             
@@ -260,13 +260,13 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                 oldEntity = await FindById<T>(objEntity.Id) as EntityBaseCore;
                             }
                             
-                            // CRÍTICO: Fazer clone profundo da entidade antiga ANTES de qualquer modificação
-                            // Isso garante que temos o estado original do banco, não a instância que pode ter sido modificada
-                            // O clone deve ser feito imediatamente após buscar, antes de qualquer acesso às propriedades
+                            // CRÃTICO: Fazer clone profundo da entidade antiga ANTES de qualquer modificaÃ§Ã£o
+                            // Isso garante que temos o estado original do banco, nÃ£o a instÃ¢ncia que pode ter sido modificada
+                            // O clone deve ser feito imediatamente apÃ³s buscar, antes de qualquer acesso Ã s propriedades
                             if (oldEntity != null)
                             {
-                                // Forçar acesso às propriedades antes de clonar para garantir que estão carregadas
-                                // Isso é especialmente importante para propriedades lazy-loaded ou nullable
+                                // ForÃ§ar acesso Ã s propriedades antes de clonar para garantir que estÃ£o carregadas
+                                // Isso Ã© especialmente importante para propriedades lazy-loaded ou nullable
                                 var entityType = oldEntity.GetType();
                                 var properties = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
                                 foreach (var prop in properties)
@@ -277,7 +277,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                     {
                                         try
                                         {
-                                            // Acessar a propriedade para forçar carregamento (se for lazy)
+                                            // Acessar a propriedade para forÃ§ar carregamento (se for lazy)
                                             _ = prop.GetValue(oldEntity);
                                         }
                                         catch
@@ -291,8 +291,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                 oldEntity = CloneEntityForAudit(oldEntity);
                             }
                             
-                            // Se ainda não encontrou, pode ser que a entidade não exista no banco ainda
-                            // Nesse caso, não há entidade antiga para comparar
+                            // Se ainda nÃ£o encontrou, pode ser que a entidade nÃ£o exista no banco ainda
+                            // Nesse caso, nÃ£o hÃ¡ entidade antiga para comparar
                         }
                         catch
                         {
@@ -310,7 +310,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                             catch
                             {
                                 // Ignorar erro ao buscar entidade antiga
-                                // A entidade pode não existir no banco ainda
+                                // A entidade pode nÃ£o existir no banco ainda
                             }
                         }
                     }
@@ -321,7 +321,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                         objEntity.ObjectGuid = $"{Guid.NewGuid()}";
                     await Session.UpdateAsync(objEntity, CancellationToken);
 
-                    // Auditoria: enfileirar para processar APÓS o commit (segregação de sessão)
+                    // Auditoria: enfileirar para processar APÃ“S o commit (segregaÃ§Ã£o de sessÃ£o)
                     if (_auditHelper != null && oldEntity != null)
                         _pendingAudits.Enqueue((PendingAuditAction.Update, oldEntity, objEntity));
                 }
@@ -432,7 +432,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 ArgumentNullException.ThrowIfNull(Session?.Connection, nameof(Session.Connection));
 
                 if (!sql.Contains("order by", StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentException("A consulta deve conter ordenação para utilização de paginação.");
+                    throw new ArgumentException("A consulta deve conter ordenaÃ§Ã£o para utilizaÃ§Ã£o de paginaÃ§Ã£o.");
 
                 sql = NormalizaParameterName(sql, parameters);
 
@@ -498,9 +498,9 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
         }
 
         /// <summary>
-        /// Processa os logs de auditoria enfileirados - executado APÓS o commit da transação principal.
-        /// Garante segregação: a session da operação já foi liberada; os logs vão para a fila (RabbitMQ)
-        /// e serão persistidos pelo consumer em sessão isolada.
+        /// Processa os logs de auditoria enfileirados - executado APÃ“S o commit da transaÃ§Ã£o principal.
+        /// Garante segregaÃ§Ã£o: a session da operaÃ§Ã£o jÃ¡ foi liberada; os logs vÃ£o para a fila (RabbitMQ)
+        /// e serÃ£o persistidos pelo consumer em sessÃ£o isolada.
         /// </summary>
         private async Task ProcessPendingAuditsAsync()
         {
@@ -523,7 +523,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 }
                 catch (Exception)
                 {
-                    // Não relançar - auditoria não deve quebrar a operação principal
+                    // NÃ£o relanÃ§ar - auditoria nÃ£o deve quebrar a operaÃ§Ã£o principal
                 }
             }
         }
@@ -615,7 +615,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 
             var empresas = (await FindByHql<Empresa>("From Empresa e Inner Join Fetch e.Pessoa p")).AsList();
             if (empresas.Count() > 1 || empresas.Count() == 0)
-                throw new ArgumentException($"Não foi possível salvar os parâmetros do sistema empCount = {empresas.Count()}");
+                throw new ArgumentException($"NÃ£o foi possÃ­vel salvar os parÃ¢metros do sistema empCount = {empresas.Count()}");
 
             var empFirst = empresas.First();
 
@@ -694,8 +694,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 return parametroSistema;
 
             parametroSistema.HabilitarPagamentosOnLine =
-                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim ||
-                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Não;
+                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim ||
+                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Nao;
 
 
             return parametroSistema;
@@ -791,7 +791,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 
         public IStatelessSession? CreateSession()
         {
-            throw new NotImplementedException("CreateSession não está disponível para este repositório");
+            throw new NotImplementedException("CreateSession nÃ£o estÃ¡ disponÃ­vel para este repositÃ³rio");
         }
 
         public async Task<T> Save<T>(T entity, IStatelessSession? session = null)
@@ -814,7 +814,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                     objEntity.ObjectGuid = $"{Guid.NewGuid()}";
                     await sessionToUse.InsertAsync(objEntity, CancellationToken);
 
-                    // Auditoria: enfileirar para processar APÓS o commit (segregação de sessão)
+                    // Auditoria: enfileirar para processar APÃ“S o commit (segregaÃ§Ã£o de sessÃ£o)
                     if (_auditHelper != null && session == null)
                         _pendingAudits.Enqueue((PendingAuditAction.Create, objEntity, null));
                 }
@@ -878,7 +878,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                         objEntity.ObjectGuid = $"{Guid.NewGuid()}";
                     await sessionToUse.UpdateAsync(objEntity, CancellationToken);
 
-                    // Auditoria: enfileirar para processar APÓS o commit (segregação de sessão)
+                    // Auditoria: enfileirar para processar APÃ“S o commit (segregaÃ§Ã£o de sessÃ£o)
                     if (_auditHelper != null && oldEntity != null && session == null)
                         _pendingAudits.Enqueue((PendingAuditAction.Update, oldEntity, objEntity));
                 }
@@ -1098,7 +1098,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                         return (true, null);
                     }
                     var result = await _unitOfWork.CommitAsync();
-                    // Processar auditorias APÓS o commit bem-sucedido (segregação: transação principal já finalizada)
+                    // Processar auditorias APÃ“S o commit bem-sucedido (segregaÃ§Ã£o: transaÃ§Ã£o principal jÃ¡ finalizada)
                     if (result.executed && result.exception == null && _auditHelper != null)
                         await ProcessPendingAuditsAsync();
                     return result;
@@ -1122,7 +1122,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                             await currentTransaction.CommitAsync();
                             return (true, null);
                         }
-                        return (false, new Exception("A transação não estava ativa"));
+                        return (false, new Exception("A transaÃ§Ã£o nÃ£o estava ativa"));
                     }
                     catch (Exception err)
                     {
@@ -1176,11 +1176,11 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
         /// </summary>
         private string AddSchemaToTables(string sql)
         {
-            // Só aplica para PostgreSQL
+            // SÃ³ aplica para PostgreSQL
             if (DataBaseType != EnumDataBaseType.PostgreSql)
                 return sql;
 
-            // Obtém o schema da configuração ou usa o padrão
+            // ObtÃ©m o schema da configuraÃ§Ã£o ou usa o padrÃ£o
             var schemaName = GetSchemaName();
             if (string.IsNullOrEmpty(schemaName))
                 return sql;
@@ -1188,9 +1188,9 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             // Lista de palavras-chave SQL que precedem nomes de tabelas
             var tableKeywords = new[] { "FROM", "JOIN", "INTO", "UPDATE", "TABLE" };
 
-            // Padrão para identificar tabelas sem schema
-            // Captura: palavra-chave SQL + espaço + nome_da_tabela (sem schema)
-            // Não captura se já tiver schema (formato: schema.tabela)
+            // PadrÃ£o para identificar tabelas sem schema
+            // Captura: palavra-chave SQL + espaÃ§o + nome_da_tabela (sem schema)
+            // NÃ£o captura se jÃ¡ tiver schema (formato: schema.tabela)
             var pattern = @"\b(" + string.Join("|", tableKeywords) + @")\s+(?!(?:[a-zA-Z_][a-zA-Z0-9_]*\.))([a-zA-Z_][a-zA-Z0-9_]*)";
 
             var result = System.Text.RegularExpressions.Regex.Replace(
@@ -1201,7 +1201,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                     var keyword = match.Groups[1].Value;
                     var tableName = match.Groups[2].Value;
 
-                    // Ignora subqueries com parênteses ou aliases comuns
+                    // Ignora subqueries com parÃªnteses ou aliases comuns
                     if (tableName.Equals("SELECT", StringComparison.OrdinalIgnoreCase) ||
                         tableName.Equals("VALUES", StringComparison.OrdinalIgnoreCase) ||
                         tableName.Equals("DUAL", StringComparison.OrdinalIgnoreCase))
@@ -1218,19 +1218,19 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
         }
 
         /// <summary>
-        /// Obtém o schema name da configuração
+        /// ObtÃ©m o schema name da configuraÃ§Ã£o
         /// </summary>
         private string GetSchemaName()
         {
             try
             {
-                // Tenta obter do arquivo de configuração
+                // Tenta obter do arquivo de configuraÃ§Ã£o
                 var schemaName = System.Environment.GetEnvironmentVariable("DEFAULT_SCHEMA");
 
                 if (!string.IsNullOrEmpty(schemaName))
                     return schemaName;
 
-                // Valor padrão para o projeto
+                // Valor padrÃ£o para o projeto
                 return "portalohana";
             }
             catch (Exception ex)

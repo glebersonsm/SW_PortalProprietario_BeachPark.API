@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -74,7 +74,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 sb.AppendLine($" and Lower(e.Assunto) like '%{searchModel.Assunto.ToLower()}%'");
 
             if (searchModel.Enviado.HasValue)
-                sb.AppendLine($" and e.Enviado = {(int)searchModel.Enviado.GetValueOrDefault(EnumSimNao.Não)}");
+                sb.AppendLine($" and e.Enviado = {(int)searchModel.Enviado.GetValueOrDefault(EnumSimNao.Nao)}");
 
             if (searchModel.DataHoraCriacaoInicial.GetValueOrDefault(DateTime.MinValue) != DateTime.MinValue)
             {
@@ -154,7 +154,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var email = await _repository.FindById<Email>(id);
                 if (email is null)
                 {
-                    throw new ArgumentException($"Não foi encontrado o Email com Id: {id}!");
+                    throw new ArgumentException($"NÃ£o foi encontrado o Email com Id: {id}!");
                 }
 
 
@@ -168,7 +168,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -177,7 +177,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o Email: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o Email: {id}");
                 throw;
             }
         }
@@ -189,7 +189,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _repository.BeginTransaction();
 
                 Email email = _mapper.Map<Email>(model);
-                email.Enviado = EnumSimNao.Não;
+                email.Enviado = EnumSimNao.Nao;
 
                 var result = await _repository.Save(email);
 
@@ -200,11 +200,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     await _emailQueue.AddEmailMessageToQueue(_mapper.Map<EmailModel>(result));
                     return true;
                 }
-                throw exception ?? new Exception($"Não foi possível salvar o email: ({model.Assunto})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o email: ({model.Assunto})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o email: ({model.Assunto})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o email: ({model.Assunto})");
                 _repository.Rollback();
                 throw;
             }
@@ -215,7 +215,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             try
             {
                 Email email = _mapper.Map<Email>(model);
-                email.Enviado = EnumSimNao.Não;
+                email.Enviado = EnumSimNao.Nao;
                 if (!string.IsNullOrEmpty(email.ConteudoEmail))
                     email.ConteudoEmail = email.ConteudoEmail.Replace("  ", "");
                 var result = await _repository.Save(email);
@@ -226,7 +226,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o email: ({model.Assunto})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o email: ({model.Assunto})");
                 throw;
             }
         }
@@ -239,7 +239,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var emailExistente = (await _repository.FindByHql<Email>($"From Email e Inner Join Fetch e.Empresa emp Where e.Id = {model.Id}")).FirstOrDefault();
                 if (emailExistente == null)
-                    throw new ArgumentException($"Não foi encontrado o email com Id: {model.Id}");
+                    throw new ArgumentException($"NÃ£o foi encontrado o email com Id: {model.Id}");
 
                 Email email = _mapper.Map(model, emailExistente);
 
@@ -253,18 +253,18 @@ namespace SW_PortalProprietario.Application.Services.Core
                     if (result != null)
                     {
                         var emailModel = _mapper.Map<EmailModel>(result);
-                        if (result.Enviado == EnumSimNao.Não)
+                        if (result.Enviado == EnumSimNao.Nao)
                             await _emailQueue.AddEmailMessageToQueue(emailModel);
 
                         return emailModel;
                     }
 
                 }
-                throw exception ?? new Exception($"Não foi possível salvar o email: ({model.Assunto})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o email: ({model.Assunto})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o email: ({model.Assunto})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o email: ({model.Assunto})");
                 _repository.Rollback();
                 throw;
             }
@@ -278,7 +278,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 Email email = await _repository.FindById<Email>(id);
                 if (email.Enviado == EnumSimNao.Sim)
-                    throw new ArgumentException($"O email id: {id}, já foi enviado anteriormente em: {email.DataHoraEnvio.GetValueOrDefault():dd/MM/yyyy:HH:mm:ss}");
+                    throw new ArgumentException($"O email id: {id}, jÃ¡ foi enviado anteriormente em: {email.DataHoraEnvio.GetValueOrDefault():dd/MM/yyyy:HH:mm:ss}");
 
                 email.Enviado = EnumSimNao.Sim;
                 email.DataHoraEnvio = DateTime.Now;
@@ -303,7 +303,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var emailExistente = (await _repository.FindByHql<Email>($"From Email e Left Join Fetch e.Empresa emp Where e.Id = {id}")).FirstOrDefault();
                 if (emailExistente == null)
-                    throw new ArgumentException($"Não foi encontrado o email com Id: {id}");
+                    throw new ArgumentException($"NÃ£o foi encontrado o email com Id: {id}");
 
                 await _repository.Lock(emailExistente, NHibernate.LockMode.UpgradeNoWait);
 
@@ -329,11 +329,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     });
                     return true;
                 }
-                throw exception ?? new Exception($"Não foi possível salvar o email: ({emailExistente.Assunto})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o email: ({emailExistente.Assunto})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o email");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o email");
                 _repository.Rollback();
                 throw;
             }

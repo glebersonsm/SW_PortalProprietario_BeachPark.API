@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SW_PortalProprietario.Application.Interfaces;
@@ -46,7 +46,7 @@ namespace SW_PortalProprietario.Test.Services
             var cidade = new Cidade
             {
                 Id = id,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308"
             };
 
@@ -72,7 +72,7 @@ namespace SW_PortalProprietario.Test.Services
             _serviceBaseMock.Verify(x => x.Compare(cidade, null), Times.Once);
         }
 
-        [Fact(DisplayName = "DeleteCity - Deve lançar ArgumentException quando cidade não existe")]
+        [Fact(DisplayName = "DeleteCity - Deve lanÃ§ar ArgumentException quando cidade nÃ£o existe")]
         public async Task DeleteCity_DeveLancarArgumentException_QuandoCidadeNaoExiste()
         {
             // Arrange
@@ -94,7 +94,7 @@ namespace SW_PortalProprietario.Test.Services
             // Arrange
             var inputModel = new RegistroCidadeInputModel
             {
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308",
                 EstadoId = 1
             };
@@ -102,14 +102,14 @@ namespace SW_PortalProprietario.Test.Services
             var cidadeEntity = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308"
             };
 
             var cidadeModel = new CidadeModel
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308"
             };
 
@@ -139,7 +139,7 @@ namespace SW_PortalProprietario.Test.Services
             // Assert
             result.Should().NotBeNull();
             result.Id.Should().Be(1);
-            result.Nome.Should().Be("São Paulo");
+            result.Nome.Should().Be("SÃ£o Paulo");
             result.CodigoIbge.Should().Be("3550308");
 
             _repositoryMock.Verify(x => x.BeginTransaction(), Times.Once);
@@ -154,7 +154,7 @@ namespace SW_PortalProprietario.Test.Services
             var inputModel = new AlteracaoCidadeInputModel
             {
                 Id = 1,
-                Nome = "São Paulo Atualizado",
+                Nome = "SÃ£o Paulo Atualizado",
                 CodigoIbge = "3550308",
                 EstadoId = 1
             };
@@ -162,21 +162,21 @@ namespace SW_PortalProprietario.Test.Services
             var cidadeExistente = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308"
             };
 
             var estado = new Estado
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 Sigla = "SP"
             };
 
             var cidadeModel = new CidadeModel
             {
                 Id = 1,
-                Nome = "São Paulo Atualizado",
+                Nome = "SÃ£o Paulo Atualizado",
                 CodigoIbge = "3550308"
             };
 
@@ -214,14 +214,14 @@ namespace SW_PortalProprietario.Test.Services
             // Assert
             result.Should().NotBeNull();
             result.Id.Should().Be(1);
-            result.Nome.Should().Be("São Paulo Atualizado");
+            result.Nome.Should().Be("SÃ£o Paulo Atualizado");
 
             _repositoryMock.Verify(x => x.BeginTransaction(), Times.Once);
             _repositoryMock.Verify(x => x.Save(It.IsAny<Cidade>()), Times.Once);
             _repositoryMock.Verify(x => x.CommitAsync(), Times.Once);
         }
 
-        [Fact(DisplayName = "UpdateCity - Deve lançar ArgumentException quando cidade não existe")]
+        [Fact(DisplayName = "UpdateCity - Deve lanÃ§ar ArgumentException quando cidade nÃ£o existe")]
         public async Task UpdateCity_DeveLancarArgumentException_QuandoCidadeNaoExiste()
         {
             // Arrange

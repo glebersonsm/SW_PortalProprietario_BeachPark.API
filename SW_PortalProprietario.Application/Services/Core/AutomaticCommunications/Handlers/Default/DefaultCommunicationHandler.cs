@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+Ôªøusing Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
@@ -7,7 +7,7 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Handlers.Default;
 
 /// <summary>
-/// Handler base para tipos de comunicaÁ„o ainda n„o implementados
+/// Handler base para tipos de comunica√ß√£o ainda n√£o implementados
 /// </summary>
 public class DefaultCommunicationHandler : ICommunicationHandler
 {
@@ -29,11 +29,11 @@ public class DefaultCommunicationHandler : ICommunicationHandler
 
     public Task ProcessMultiPropriedadeAsync(NHibernate.IStatelessSession session, AutomaticCommunicationConfigModel config)
     {
-        _logger.LogInformation("Processamento de comunicaÁ„o {CommunicationType} - Multipropriedade ainda n„o implementado completamente", _communicationType);
+        _logger.LogInformation("Processamento de comunica√ß√£o {CommunicationType} - Multipropriedade ainda n√£o implementado completamente", _communicationType);
 
         foreach (var daysBefore in config.DaysBeforeCheckIn)
         {
-            _logger.LogDebug("Processando comunicaÁ„o {CommunicationType} com {DaysBefore} dias - Multipropriedade", _communicationType, daysBefore);
+            _logger.LogDebug("Processando comunica√ß√£o {CommunicationType} com {DaysBefore} dias - Multipropriedade", _communicationType, daysBefore);
         }
 
         return Task.CompletedTask;
@@ -41,11 +41,11 @@ public class DefaultCommunicationHandler : ICommunicationHandler
 
     public Task ProcessTimesharingAsync(NHibernate.IStatelessSession session, AutomaticCommunicationConfigModel config)
     {
-        _logger.LogInformation("Processamento de comunicaÁ„o {CommunicationType} - Timesharing ainda n„o implementado completamente", _communicationType);
+        _logger.LogInformation("Processamento de comunica√ß√£o {CommunicationType} - Timesharing ainda n√£o implementado completamente", _communicationType);
 
         foreach (var daysBefore in config.DaysBeforeCheckIn)
         {
-            _logger.LogDebug("Processando comunicaÁ„o {CommunicationType} com {DaysBefore} dias - Timesharing", _communicationType, daysBefore);
+            _logger.LogDebug("Processando comunica√ß√£o {CommunicationType} com {DaysBefore} dias - Timesharing", _communicationType, daysBefore);
         }
 
         return Task.CompletedTask;
@@ -56,7 +56,7 @@ public class DefaultCommunicationHandler : ICommunicationHandler
         string userEmail,
         int userId)
     {
-        _logger.LogInformation("Gerando email de simulaÁ„o padr„o para tipo {CommunicationType}", _communicationType);
+        _logger.LogInformation("Gerando email de simula√ß√£o padr√£o para tipo {CommunicationType}", _communicationType);
 
         // Buscar template HTML se configurado
         var templateHtml = config.TemplateId.HasValue
@@ -68,14 +68,14 @@ public class DefaultCommunicationHandler : ICommunicationHandler
             : $@"
                 <html>
                 <body>
-                    <h2>SimulaÁ„o de Envio Autom·tico</h2>
-                    <p>Este È um email de teste da configuraÁ„o de envio autom·tico.</p>
-                    <p><strong>Tipo de ComunicaÁ„o:</strong> {_communicationType}</p>
+                    <h2>Simula√ß√£o de Envio Autom√°tico</h2>
+                    <p>Este √© um email de teste da configura√ß√£o de envio autom√°tico.</p>
+                    <p><strong>Tipo de Comunica√ß√£o:</strong> {_communicationType}</p>
                     <p><strong>Tipo de Projeto:</strong> {config.ProjetoType}</p>
                     <p><strong>Assunto Configurado:</strong> {config.Subject}</p>
                     <p style='margin-top: 20px; color: #666; font-size: 12px;'>
-                        Este È um email de simulaÁ„o. O email real ser· enviado conforme a configuraÁ„o estabelecida.
-                        A implementaÁ„o especÌfica para este tipo de comunicaÁ„o est· pendente.
+                        Este √© um email de simula√ß√£o. O email real ser√° enviado conforme a configura√ß√£o estabelecida.
+                        A implementa√ß√£o espec√≠fica para este tipo de comunica√ß√£o est√° pendente.
                     </p>
                 </body>
                 </html>";
@@ -83,7 +83,7 @@ public class DefaultCommunicationHandler : ICommunicationHandler
 
         return new List<EmailInputInternalModel>() { new EmailInputInternalModel
         {
-            Assunto = $"[SIMULA«√O] {config.Subject}",
+            Assunto = $"[SIMULA√á√ÉO] {config.Subject}",
             Destinatario = userEmail,
             ConteudoEmail = emailBody,
             EmpresaId = 1,

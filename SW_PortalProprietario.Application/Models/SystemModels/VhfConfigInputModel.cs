@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Application.Models.SystemModels
+﻿namespace SW_PortalProprietario.Application.Models.SystemModels
 {
     /// <summary>
-    /// Modelo de entrada para criar/atualizar configuração VHF.
+    /// Modelo de entrada para criar/atualizar configuraÃ§Ã£o VHF.
     /// </summary>
     public class VhfConfigInputModel
     {
@@ -18,9 +18,9 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public string? Segmento { get; set; }
         public string CodigoPensao { get; set; } = string.Empty;
         public bool PermiteIntercambioMultipropriedade { get; set; }
-        /// <summary>Percentual máximo de ocupação para retorno de disponibilidade (Timesharing). Se atingido, não retorna disponibilidade.</summary>
+        /// <summary>Percentual mÃ¡ximo de ocupaÃ§Ã£o para retorno de disponibilidade (Timesharing). Se atingido, nÃ£o retorna disponibilidade.</summary>
         public decimal? OcupacaoMaxRetDispTS { get; set; }
-        /// <summary>Percentual máximo de ocupação para retorno de disponibilidade (Multipropriedade). Se atingido, não retorna disponibilidade.</summary>
+        /// <summary>Percentual mÃ¡ximo de ocupaÃ§Ã£o para retorno de disponibilidade (Multipropriedade). Se atingido, nÃ£o retorna disponibilidade.</summary>
         public decimal? OcupacaoMaxRetDispMP { get; set; }
     }
 }

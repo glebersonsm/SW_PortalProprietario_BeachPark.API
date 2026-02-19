@@ -1,18 +1,18 @@
-# Schema Auto-Prefix para PostgreSQL
+Ôªø# Schema Auto-Prefix para PostgreSQL
 
-## ?? Vis„o Geral
+## ?? Vis√£o Geral
 
 O sistema agora adiciona **automaticamente** o schema name antes de cada tabela em queries SQL quando usando PostgreSQL, eliminando a necessidade de escrever manualmente `schemaname.tabela` em cada query.
 
 ## ?? Funcionalidade
 
-### MÈtodos Afetados
+### M√©todos Afetados
 
-Os seguintes mÈtodos do `RepositoryHosted` agora aplicam automaticamente o schema:
+Os seguintes m√©todos do `RepositoryHosted` agora aplicam automaticamente o schema:
 
 1. ? **`FindBySql<T>`** - Consultas SQL diretas
 2. ? **`CountTotalEntry`** - Contagem de registros
-3. ? **`GetParametroSistemaViewModel`** - Consulta de par‚metros do sistema
+3. ? **`GetParametroSistemaViewModel`** - Consulta de par√¢metros do sistema
 
 ### Como Funciona
 
@@ -22,18 +22,18 @@ var sql = "SELECT * FROM portalohana.Usuario WHERE Id = 1";
 var usuarios = await repository.FindBySql<Usuario>(sql);
 ```
 
-#### Agora (Autom·tico)
+#### Agora (Autom√°tico)
 ```csharp
 // Escreve sem schema - o sistema adiciona automaticamente!
 var sql = "SELECT * FROM Usuario WHERE Id = 1";
 var usuarios = await repository.FindBySql<Usuario>(sql);
 
-// O SQL executado ser·: SELECT * FROM portalohana.Usuario WHERE Id = 1
+// O SQL executado ser√°: SELECT * FROM portalohana.Usuario WHERE Id = 1
 ```
 
-## ?? ConfiguraÁ„o
+## ?? Configura√ß√£o
 
-### MÈtodo 1: Arquivo de ConfiguraÁ„o (Recomendado)
+### M√©todo 1: Arquivo de Configura√ß√£o (Recomendado)
 
 Adicione ao `appsettings.json` ou `BeachParkConfigurations.json`:
 
@@ -45,17 +45,17 @@ Adicione ao `appsettings.json` ou `BeachParkConfigurations.json`:
 }
 ```
 
-### MÈtodo 2: Connection String
+### M√©todo 2: Connection String
 
-Adicione ‡ connection string:
+Adicione √† connection string:
 
 ```
 Host=localhost;PORT=5432;Database=mydb;Username=user;Password=pass;SearchPath=portalohana
 ```
 
-### MÈtodo 3: Padr„o Autom·tico
+### M√©todo 3: Padr√£o Autom√°tico
 
-Se n„o houver configuraÁ„o, o sistema usa `portalohana` como padr„o.
+Se n√£o houver configura√ß√£o, o sistema usa `portalohana` como padr√£o.
 
 ## ?? Exemplos de Uso
 
@@ -122,22 +122,22 @@ var total = await repository.CountTotalEntry(sql, null, new Parameter("userId", 
 - ? `UPDATE Usuario`
 - ? `INTO Empresa`
 
-### ?? O que N√O È modificado:
+### ?? O que N√ÉO √© modificado:
 
-- ? Tabelas que **j· tÍm schema**: `portalohana.Usuario` (mantÈm como est·)
+- ? Tabelas que **j√° t√™m schema**: `portalohana.Usuario` (mant√©m como est√°)
 - ? Subqueries com `SELECT`
 - ? Palavras reservadas como `DUAL`, `VALUES`
 - ? Bancos de dados diferentes de PostgreSQL (SQL Server, Oracle, etc.)
 
-## ?? Detalhes TÈcnicos
+## ?? Detalhes T√©cnicos
 
 ### Algoritmo
 
-1. **Detecta o tipo de banco**: SÛ aplica para PostgreSQL
-2. **ObtÈm o schema**: Da configuraÁ„o ou connection string
-3. **Identifica tabelas**: Usando regex para encontrar padrıes `FROM tabela`, `JOIN tabela`, etc.
-4. **Adiciona schema**: Somente se a tabela ainda n„o tiver schema
-5. **Preserva aliases**: MantÈm aliases e subqueries intactos
+1. **Detecta o tipo de banco**: S√≥ aplica para PostgreSQL
+2. **Obt√©m o schema**: Da configura√ß√£o ou connection string
+3. **Identifica tabelas**: Usando regex para encontrar padr√µes `FROM tabela`, `JOIN tabela`, etc.
+4. **Adiciona schema**: Somente se a tabela ainda n√£o tiver schema
+5. **Preserva aliases**: Mant√©m aliases e subqueries intactos
 
 ### Pattern Regex
 
@@ -146,31 +146,31 @@ var total = await repository.CountTotalEntry(sql, null, new Parameter("userId", 
 ```
 
 - Captura palavras-chave SQL que precedem tabelas
-- Ignora tabelas que j· tÍm schema (formato `schema.tabela`)
-- Captura apenas identificadores v·lidos
+- Ignora tabelas que j√° t√™m schema (formato `schema.tabela`)
+- Captura apenas identificadores v√°lidos
 
-## ?? BenefÌcios
+## ?? Benef√≠cios
 
 ### ? Vantagens
 
-1. **Menos cÛdigo repetitivo**: N„o precisa escrever `portalohana.` toda hora
-2. **Mais legÌvel**: Queries ficam mais limpas
-3. **ManutenÌvel**: Se mudar o schema, sÛ altera em um lugar
-4. **RetrocompatÌvel**: Queries com schema explÌcito continuam funcionando
-5. **Seguro**: SÛ aplica para PostgreSQL, n„o afeta outros bancos
+1. **Menos c√≥digo repetitivo**: N√£o precisa escrever `portalohana.` toda hora
+2. **Mais leg√≠vel**: Queries ficam mais limpas
+3. **Manuten√≠vel**: Se mudar o schema, s√≥ altera em um lugar
+4. **Retrocompat√≠vel**: Queries com schema expl√≠cito continuam funcionando
+5. **Seguro**: S√≥ aplica para PostgreSQL, n√£o afeta outros bancos
 
 ### ? Performance
 
-- **Impacto mÌnimo**: Processamento de string leve
-- **ExecuÁ„o ˙nica**: Aplicado uma vez por query
-- **Cache-friendly**: Resultado pode ser cacheado se necess·rio
+- **Impacto m√≠nimo**: Processamento de string leve
+- **Execu√ß√£o √∫nica**: Aplicado uma vez por query
+- **Cache-friendly**: Resultado pode ser cacheado se necess√°rio
 
 ## ?? Casos Especiais
 
-### Caso 1: Schema ExplÌcito (Preservado)
+### Caso 1: Schema Expl√≠cito (Preservado)
 
 ```csharp
-// Se vocÍ REALMENTE quer especificar um schema diferente:
+// Se voc√™ REALMENTE quer especificar um schema diferente:
 var sql = "SELECT * FROM outro_schema.Tabela";
 var dados = await repository.FindBySql<Tabela>(sql);
 // Resultado: SELECT * FROM outro_schema.Tabela (inalterado)
@@ -190,19 +190,19 @@ var sql = @"SELECT * FROM (
 ### Caso 3: SQL Server / Oracle
 
 ```csharp
-// Quando conectado ao SQL Server ou Oracle, nada È modificado
+// Quando conectado ao SQL Server ou Oracle, nada √© modificado
 var sql = "SELECT * FROM Usuario";
 // Resultado: SELECT * FROM Usuario (inalterado)
 ```
 
 ## ?? Troubleshooting
 
-### Problema: Schema n„o est· sendo aplicado
+### Problema: Schema n√£o est√° sendo aplicado
 
-**VerificaÁıes:**
-1. Certifique-se de que est· usando PostgreSQL
-2. Verifique a configuraÁ„o do schema
-3. Confirme que est· usando `FindBySql` (n„o HQL)
+**Verifica√ß√µes:**
+1. Certifique-se de que est√° usando PostgreSQL
+2. Verifique a configura√ß√£o do schema
+3. Confirme que est√° usando `FindBySql` (n√£o HQL)
 
 ```csharp
 // Debug: Verificar tipo de banco
@@ -210,23 +210,23 @@ var dbType = repository.DataBaseType;
 Console.WriteLine($"Database Type: {dbType}"); // Deve ser PostgreSql
 ```
 
-### Problema: Query quebrou apÛs adicionar schema
+### Problema: Query quebrou ap√≥s adicionar schema
 
-**PossÌveis causas:**
-- Tabela n„o existe no schema especificado
-- Nome da tabela est· incorreto
-- Tabela est· em outro schema
+**Poss√≠veis causas:**
+- Tabela n√£o existe no schema especificado
+- Nome da tabela est√° incorreto
+- Tabela est√° em outro schema
 
-**SoluÁ„o:** Use schema explÌcito:
+**Solu√ß√£o:** Use schema expl√≠cito:
 ```csharp
-var sql = "SELECT * FROM public.MinhaTabela"; // ForÁa uso do schema 'public'
+var sql = "SELECT * FROM public.MinhaTabela"; // For√ßa uso do schema 'public'
 ```
 
-## ?? MigraÁ„o de CÛdigo Existente
+## ?? Migra√ß√£o de C√≥digo Existente
 
 ### Passo 1: Identificar Queries
 
-Busque por queries SQL no cÛdigo:
+Busque por queries SQL no c√≥digo:
 ```bash
 # Buscar queries com schema hardcoded
 grep -r "portalohana\." --include="*.cs"
@@ -243,9 +243,9 @@ grep -r "portalohana\." --include="*.cs"
 
 Execute os testes para garantir que as queries continuam funcionando.
 
-## ?? Boas Pr·ticas
+## ?? Boas Pr√°ticas
 
-### ? FaÁa
+### ? Fa√ßa
 
 ```csharp
 // Escreva SQL limpo sem schema
@@ -258,29 +258,29 @@ var sql = "SELECT u.*, p.Nome FROM Usuario u JOIN Pessoa p ON u.Pessoa = p.Id";
 var usuarios = await repository.FindBySql<Usuario>(sql);
 ```
 
-### ? N„o FaÁa
+### ? N√£o Fa√ßa
 
 ```csharp
-// N„o hardcode o schema (a menos que seja necess·rio)
+// N√£o hardcode o schema (a menos que seja necess√°rio)
 var sql = "SELECT * FROM portalohana.Usuario"; // Evite!
 
-// N„o misture schemas sem motivo
+// N√£o misture schemas sem motivo
 var sql = "SELECT * FROM portalohana.Usuario u JOIN public.Pessoa p"; // Confuso!
 ```
 
-## ?? ReferÍncias
+## ?? Refer√™ncias
 
 - **Arquivo**: `SW_PortalProprietario.Infra.Data\Repositories\Core\RepositoryHosted.cs`
-- **MÈtodos**:
+- **M√©todos**:
   - `AddSchemaToTables(string sql)`: Aplica schema automaticamente
-  - `GetSchemaName()`: ObtÈm schema da configuraÁ„o
+  - `GetSchemaName()`: Obt√©m schema da configura√ß√£o
   - `FindBySql<T>()`: Usa auto-prefix
   - `CountTotalEntry()`: Usa auto-prefix
 
 ## ?? Changelog
 
-- **v1.0**: ImplementaÁ„o inicial
+- **v1.0**: Implementa√ß√£o inicial
   - Auto-prefix para `FROM`, `JOIN`, `INTO`, `UPDATE`, `TABLE`
-  - Suporte a configuraÁ„o via `appsettings.json`
-  - Fallback para `portalohana` como padr„o
-  - CompatÌvel apenas com PostgreSQL
+  - Suporte a configura√ß√£o via `appsettings.json`
+  - Fallback para `portalohana` como padr√£o
+  - Compat√≠vel apenas com PostgreSQL

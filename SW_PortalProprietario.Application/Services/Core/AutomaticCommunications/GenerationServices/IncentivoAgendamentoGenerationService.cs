@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+Ôªøusing Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
@@ -17,8 +17,8 @@ using Dapper;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.GenerationServices;
 
 /// <summary>
-/// ServiÁo compartilhado para geraÁ„o de incentivos para agendamento
-/// Usado tanto na simulaÁ„o quanto no processamento autom·tico
+/// Servi√ßo compartilhado para gera√ß√£o de incentivos para agendamento
+/// Usado tanto na simula√ß√£o quanto no processamento autom√°tico
 /// </summary>
 public class IncentivoAgendamentoGenerationService
 {
@@ -54,7 +54,7 @@ public class IncentivoAgendamentoGenerationService
                 contrato.NumeroContrato, config.TemplateSendMode);
 
             if (config.TemplateId.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("TemplateId inv·lido para incentivo para agendamento.");
+                throw new ArgumentException("TemplateId inv√°lido para incentivo para agendamento.");
 
             string? htmlContent = await _documentTemplateService.GetTemplateContentHtmlAsync(
                 EnumDocumentTemplateType.IncentivoParaAgendamento,
@@ -67,7 +67,7 @@ public class IncentivoAgendamentoGenerationService
 
             if (string.IsNullOrEmpty(htmlContent))
             {
-                _logger.LogWarning("Template HTML n„o encontrado ou vazio para incentivo para agendamento.");
+                _logger.LogWarning("Template HTML n√£o encontrado ou vazio para incentivo para agendamento.");
                 return null;
             }
 
@@ -96,7 +96,7 @@ public class IncentivoAgendamentoGenerationService
     }
 
     /// <summary>
-    /// Busca contratos elegÌveis para receber incentivo de agendamento
+    /// Busca contratos eleg√≠veis para receber incentivo de agendamento
     /// </summary>
     public async Task<List<(DadosContratoModel contrato, PosicaoAgendamentoViewModel statusAgendamento, int intervalo)>> GetContratosElegiveisAsync(
         EnumProjetoType projetoType,
@@ -115,14 +115,14 @@ public class IncentivoAgendamentoGenerationService
 
             var contratosComPendenciaAgendamento = await _empreendimentoProviderService.GetPosicaoAgendamentoAnoAsync(ano);
 
-            // PrÈ-processar contratos ativos com email v·lido
+            // Pr√©-processar contratos ativos com email v√°lido
             var contratosAtivos = todosContratos
                 .Where(c => c.Status == "A" && 
                             !string.IsNullOrEmpty(c.PessoaTitular1Email) && 
                             c.PessoaTitular1Email.Contains("@"))
                 .ToList();
 
-            // Criar Ìndice de agendamentos por chave composta (CotaNormalizada + NumeroImovel)
+            // Criar √≠ndice de agendamentos por chave composta (CotaNormalizada + NumeroImovel)
             var agendamentosIndex = contratosComPendenciaAgendamento
                 .Where(a => !string.IsNullOrEmpty(a.CotaNome) &&
                            !string.IsNullOrEmpty(a.UhCondominioNumero) &&
@@ -131,7 +131,7 @@ public class IncentivoAgendamentoGenerationService
                 .GroupBy(a => $"{a.CotaNome.RemoveAccents().ToUpperInvariant()}|{a.UhCondominioNumero}")
                 .ToDictionary(g => g.Key, g => g.First());
 
-            // HashSet para rastreamento r·pido de contratos j· adicionados
+            // HashSet para rastreamento r√°pido de contratos j√° adicionados
             var contratosAdicionadosIds = new HashSet<int>();
 
             foreach (var daysBefore in config.DaysBeforeCheckIn)
@@ -140,16 +140,16 @@ public class IncentivoAgendamentoGenerationService
 
                 foreach (var contrato in contratosAtivos)
                 {
-                    // Se simulaÁ„o e j· encontrou um contrato, pular
+                    // Se simula√ß√£o e j√° encontrou um contrato, pular
                     if (simulacao && contratosAdicionadosIds.Any())
                         break;
 
-                    // Pular se j· foi adicionado
+                    // Pular se j√° foi adicionado
                     var contratoId = contrato.FrAtendimentoVendaId.GetValueOrDefault();
                     if (contratosAdicionadosIds.Contains(contratoId))
                         continue;
 
-                    // ValidaÁıes r·pidas antes de buscar no Ìndice
+                    // Valida√ß√µes r√°pidas antes de buscar no √≠ndice
                     if (string.IsNullOrEmpty(contrato.GrupoCotaTipoCotaNome) || 
                         string.IsNullOrEmpty(contrato.NumeroImovel))
                         continue;
@@ -157,7 +157,7 @@ public class IncentivoAgendamentoGenerationService
                     // Criar chave para lookup O(1)
                     var chave = $"{contrato.GrupoCotaTipoCotaNome.RemoveAccents().ToUpperInvariant()}|{contrato.NumeroImovel}";
 
-                    // Buscar agendamento correspondente no Ìndice
+                    // Buscar agendamento correspondente no √≠ndice
                     if (!agendamentosIndex.TryGetValue(chave, out var statusAgendamento))
                         continue;
 
@@ -171,16 +171,16 @@ public class IncentivoAgendamentoGenerationService
                     if (!dataValida)
                         continue;
 
-                    // Adicionar ‡ lista de elegÌveis
+                    // Adicionar √† lista de eleg√≠veis
                     contratosElegiveis.Add((contrato, statusAgendamento, daysBefore));
                     contratosAdicionadosIds.Add(contratoId);
 
-                    // Em simulaÁ„o, sair apÛs encontrar o primeiro
+                    // Em simula√ß√£o, sair ap√≥s encontrar o primeiro
                     if (simulacao)
                         break;
                 }
 
-                // Em simulaÁ„o, sair apÛs encontrar um contrato
+                // Em simula√ß√£o, sair ap√≥s encontrar um contrato
                 if (simulacao && contratosAdicionadosIds.Any())
                     break;
             }
@@ -198,7 +198,7 @@ public class IncentivoAgendamentoGenerationService
     }
 
     /// <summary>
-    /// Verifica se deve enviar email para um contrato especÌfico
+    /// Verifica se deve enviar email para um contrato espec√≠fico
     /// </summary>
     public async Task<bool> ShouldSendEmailForContrato(
         DadosContratoModel contrato,
@@ -228,7 +228,7 @@ public class IncentivoAgendamentoGenerationService
 
                 if (statusCrcAtivos.Any(statusId => config.ExcludedStatusCrcIds.Contains(statusId)))
                 {
-                    _logger.LogDebug("Contrato {NumeroContrato} possui Status CRC excluÌdo", contrato.NumeroContrato);
+                    _logger.LogDebug("Contrato {NumeroContrato} possui Status CRC exclu√≠do", contrato.NumeroContrato);
                     return false;
                 }
             }
@@ -248,7 +248,7 @@ public class IncentivoAgendamentoGenerationService
 
                 if (temBloqueio || clienteInadimplente != null)
                 {
-                    _logger.LogDebug("Contrato {NumeroContrato} possui inadimplÍncia ou bloqueio", contrato.NumeroContrato);
+                    _logger.LogDebug("Contrato {NumeroContrato} possui inadimpl√™ncia ou bloqueio", contrato.NumeroContrato);
                     return false;
                 }
             }
@@ -257,7 +257,7 @@ public class IncentivoAgendamentoGenerationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao verificar filtros para contrato {NumeroContrato}. Enviando por padr„o.",
+            _logger.LogError(ex, "Erro ao verificar filtros para contrato {NumeroContrato}. Enviando por padr√£o.",
                 contrato.NumeroContrato);
             return true;
         }
@@ -320,11 +320,11 @@ public class IncentivoAgendamentoGenerationService
                 if (valores.TryGetValue(chave, out var valor))
                 {
                     result = result.Replace(placeholder, valor);
-                    _logger.LogDebug("Placeholder {Placeholder} substituÌdo por: {Valor}", placeholder, valor);
+                    _logger.LogDebug("Placeholder {Placeholder} substitu√≠do por: {Valor}", placeholder, valor);
                 }
                 else
                 {
-                    _logger.LogWarning("Placeholder {Placeholder} n„o encontrado no dicion·rio de valores", placeholder);
+                    _logger.LogWarning("Placeholder {Placeholder} n√£o encontrado no dicion√°rio de valores", placeholder);
                 }
             }
 
@@ -337,7 +337,7 @@ public class IncentivoAgendamentoGenerationService
         }
     }
 
-    #region MÈtodos Auxiliares
+    #region M√©todos Auxiliares
 
     private static string ApplyQuillLayout(string htmlContent)
     {

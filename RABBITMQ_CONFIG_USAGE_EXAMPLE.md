@@ -1,8 +1,8 @@
-# Exemplo de Uso - ConfiguraÁ„o RabbitMQ com Prioridade .env
+Ôªø# Exemplo de Uso - Configura√ß√£o RabbitMQ com Prioridade .env
 
 ## Problema Anterior
 
-O cÛdigo buscava configuraÁıes diretamente do `IConfiguration`, o que ignorava valores no `.env`:
+O c√≥digo buscava configura√ß√µes diretamente do `IConfiguration`, o que ignorava valores no `.env`:
 
 ```csharp
 ? INCORRETO:
@@ -11,13 +11,13 @@ var port = _configuration.GetValue<int>("RabbitMqConnectionPort");
 var programId = _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
 ```
 
-**Problema:** Se vocÍ definir `RABBITMQ_HOST=localhost` no `.env`, o cÛdigo acima **ignoraria** e usaria o valor do `appsettings.json`.
+**Problema:** Se voc√™ definir `RABBITMQ_HOST=localhost` no `.env`, o c√≥digo acima **ignoraria** e usaria o valor do `appsettings.json`.
 
-## SoluÁ„o Implementada
+## Solu√ß√£o Implementada
 
-### Forma Atual (j· implementada no cÛdigo)
+### Forma Atual (j√° implementada no c√≥digo)
 
-O cÛdigo usa o padr„o existente que **j· prioriza** o `.env`:
+O c√≥digo usa o padr√£o existente que **j√° prioriza** o `.env`:
 
 ```csharp
 ? CORRETO (forma atual):
@@ -32,13 +32,13 @@ var programId = _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
 ```
 
 **Como funciona:**
-1. `OverrideConfigurationWithEnvironmentVariables` j· sobrescreve `ProgramId` com `PROGRAM_ID` do `.env`
-2. Para RabbitMQ, o cÛdigo verifica explicitamente `Environment.GetEnvironmentVariable` primeiro
-3. Se n„o encontrar, usa o `IConfiguration` (que j· foi sobrescrito pelo `.env` se existir)
+1. `OverrideConfigurationWithEnvironmentVariables` j√° sobrescreve `ProgramId` com `PROGRAM_ID` do `.env`
+2. Para RabbitMQ, o c√≥digo verifica explicitamente `Environment.GetEnvironmentVariable` primeiro
+3. Se n√£o encontrar, usa o `IConfiguration` (que j√° foi sobrescrito pelo `.env` se existir)
 
 ### Forma Alternativa (usando helper novo)
 
-VocÍ tambÈm pode usar o helper criado para clareza:
+Voc√™ tamb√©m pode usar o helper criado para clareza:
 
 ```csharp
 ? ALTERNATIVA (com helper):
@@ -67,21 +67,21 @@ var programId = EnvironmentConfigurationHelper.GetConfigValue(
 
 ## Ordem de Busca Garantida
 
-Para qualquer configuraÁ„o, a ordem È **sempre**:
+Para qualquer configura√ß√£o, a ordem √© **sempre**:
 
 ```
-1. Vari·vel de ambiente (.env)
-   ? (se n„o encontrar)
+1. Vari√°vel de ambiente (.env)
+   ? (se n√£o encontrar)
 2. appsettings.{Environment}.json
-   ? (se n„o encontrar)
+   ? (se n√£o encontrar)
 3. appsettings.json
-   ? (se n„o encontrar)
-4. Valor padr„o no cÛdigo
+   ? (se n√£o encontrar)
+4. Valor padr√£o no c√≥digo
 ```
 
 ## Exemplo Completo - RabbitMQQueueService
 
-### ConfiguraÁ„o nos arquivos
+### Configura√ß√£o nos arquivos
 
 **`.env` (desenvolvimento):**
 ```env
@@ -95,7 +95,7 @@ RABBITMQ_FILA_LOG=gravacaoLogs_mvc
 RABBITMQ_FILA_EMAIL=emails_mvc
 ```
 
-**`appsettings.json` (valores padr„o/fallback):**
+**`appsettings.json` (valores padr√£o/fallback):**
 ```json
 {
   "ProgramId": "PORTALPROP_",
@@ -109,12 +109,12 @@ RABBITMQ_FILA_EMAIL=emails_mvc
 }
 ```
 
-### CÛdigo (forma atual j· implementada)
+### C√≥digo (forma atual j√° implementada)
 
 ```csharp
 private async Task SyncQueuesFromRabbitMQ()
 {
-    // ? Busca com precedÍncia .env > appsettings.json
+    // ? Busca com preced√™ncia .env > appsettings.json
     var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") 
         ?? _configuration.GetValue<string>("RabbitMqConnectionHost");
     
@@ -128,7 +128,7 @@ private async Task SyncQueuesFromRabbitMQ()
     var pass = Environment.GetEnvironmentVariable("RABBITMQ_PASS") 
         ?? _configuration.GetValue<string>("RabbitMqConnectionPass");
     
-    // ProgramId j· foi sobrescrito pelo OverrideConfigurationWithEnvironmentVariables
+    // ProgramId j√° foi sobrescrito pelo OverrideConfigurationWithEnvironmentVariables
     var programId = _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
     
     _logger.LogInformation($"ProgramId configurado: '{programId}'");
@@ -150,19 +150,19 @@ private async Task SyncQueuesFromRabbitMQ()
 
 ### Resultado dos Nomes das Filas
 
-Com o `.env` acima, as filas ser„o criadas como:
+Com o `.env` acima, as filas ser√£o criadas como:
 - `PortalClienteBP_auditoria_bp` ?
 - `PortalClienteBP_gravacaoLogs_mvc` ?
 - `PortalClienteBP_emails_mvc` ?
 
-**N„o mais:** `PORTALCLIENTE_BPgravacaoLogs_mvc` ? (erro anterior)
+**N√£o mais:** `PORTALCLIENTE_BPgravacaoLogs_mvc` ? (erro anterior)
 
-## VerificaÁ„o em Runtime
+## Verifica√ß√£o em Runtime
 
-Para confirmar qual valor est· sendo usado:
+Para confirmar qual valor est√° sendo usado:
 
 ```csharp
-_logger.LogInformation($"=== ConfiguraÁıes RabbitMQ ===");
+_logger.LogInformation($"=== Configura√ß√µes RabbitMQ ===");
 _logger.LogInformation($"ProgramId: '{programId}'");
 _logger.LogInformation($"Host: '{host}'");
 _logger.LogInformation($"Port: {port}");
@@ -176,31 +176,31 @@ _logger.LogInformation($"Nome completo fila log: '{programId}{queueLogNomeRaw}'"
 ## Casos de Uso
 
 ### Caso 1: Desenvolvimento Local
-- **`.env`**: ConfiguraÁıes locais (localhost, portas locais, etc)
-- **`appsettings.json`**: Valores padr„o ignorados
+- **`.env`**: Configura√ß√µes locais (localhost, portas locais, etc)
+- **`appsettings.json`**: Valores padr√£o ignorados
 - **Resultado**: Usa tudo do `.env`
 
 ### Caso 2: CI/CD
-- **Vari·veis de ambiente**: Injetadas pelo pipeline
-- **`appsettings.json`**: Valores padr„o ignorados
-- **Resultado**: Usa vari·veis do pipeline
+- **Vari√°veis de ambiente**: Injetadas pelo pipeline
+- **`appsettings.json`**: Valores padr√£o ignorados
+- **Resultado**: Usa vari√°veis do pipeline
 
-### Caso 3: ProduÁ„o (sem .env)
-- **`.env`**: N„o existe
-- **`appsettings.Production.json`**: ConfiguraÁıes de produÁ„o
+### Caso 3: Produ√ß√£o (sem .env)
+- **`.env`**: N√£o existe
+- **`appsettings.Production.json`**: Configura√ß√µes de produ√ß√£o
 - **Resultado**: Usa appsettings
 
-## MigraÁ„o de CÛdigo Existente
+## Migra√ß√£o de C√≥digo Existente
 
-Se vocÍ encontrar cÛdigo assim:
+Se voc√™ encontrar c√≥digo assim:
 
 ```csharp
 ? var programId = _configuration.GetValue<string>("ProgramId", "PORTALPROP_");
 ```
 
-**N„o precisa alterar!** Est· correto porque `OverrideConfigurationWithEnvironmentVariables` j· sobrescreveu o valor no `IConfiguration`.
+**N√£o precisa alterar!** Est√° correto porque `OverrideConfigurationWithEnvironmentVariables` j√° sobrescreveu o valor no `IConfiguration`.
 
-Se quiser deixar mais explÌcito:
+Se quiser deixar mais expl√≠cito:
 
 ```csharp
 ? var programId = EnvironmentConfigurationHelper.GetConfigValue(
@@ -211,14 +211,14 @@ Se quiser deixar mais explÌcito:
 );
 ```
 
-## Conclus„o
+## Conclus√£o
 
-O sistema **j· funciona corretamente** priorizando `.env`. As melhorias adicionadas foram:
+O sistema **j√° funciona corretamente** priorizando `.env`. As melhorias adicionadas foram:
 
-1. ? Helper `GetConfigValue` para uso opcional mais explÌcito
+1. ? Helper `GetConfigValue` para uso opcional mais expl√≠cito
 2. ? Logs detalhados mostrando valores usados
-3. ? DocumentaÁ„o clara da precedÍncia
-4. ? Mapeamento de vari·veis RabbitMQ no `OverrideConfigurationWithEnvironmentVariables`
-5. ? CorreÁ„o do `PROGRAM_ID` no `.env` (estava sem `_` no final)
+3. ? Documenta√ß√£o clara da preced√™ncia
+4. ? Mapeamento de vari√°veis RabbitMQ no `OverrideConfigurationWithEnvironmentVariables`
+5. ? Corre√ß√£o do `PROGRAM_ID` no `.env` (estava sem `_` no final)
 
-**N„o È necess·rio alterar cÛdigo existente**, apenas seguir o padr„o ao adicionar novas configuraÁıes.
+**N√£o √© necess√°rio alterar c√≥digo existente**, apenas seguir o padr√£o ao adicionar novas configura√ß√µes.

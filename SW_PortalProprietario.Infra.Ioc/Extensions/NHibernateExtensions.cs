@@ -1,4 +1,4 @@
-using FluentNHibernate.Cfg;
+﻿using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +22,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             var connectionString = System.Environment.GetEnvironmentVariable("DEFAULT_CONNECTION");
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new ArgumentException("Não foi configurada a string de conexão DEFAULT_CONNECTION.");
+                throw new ArgumentException("NÃ£o foi configurada a string de conexÃ£o DEFAULT_CONNECTION.");
             }
 
             if (connectionString.Contains(".db", StringComparison.InvariantCultureIgnoreCase))
@@ -69,12 +69,12 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
             .Database(PostgreSQLConfiguration.Standard.ConnectionString(connectionString)
-            .Raw("hibernate.connection.provider", "NHibernate.Connection.C3P0ConnectionProvider") // Configuração do provedor de conexão
-            .Raw("hibernate.c3p0.min_size", "5")  // Tamanho mínimo do pool de conexões
-            .Raw("hibernate.c3p0.max_size", "300") // Tamanho máximo do pool de conexões
-            .Raw("hibernate.c3p0.timeout", "300") // Tempo limite de conexão em segundos
-            .Raw("default_schema", "portalohana") // Schema padrão para PostgreSQL
-            .Raw("throw_on_error", "true"))  // Lançar exceções em erros
+            .Raw("hibernate.connection.provider", "NHibernate.Connection.C3P0ConnectionProvider") // ConfiguraÃ§Ã£o do provedor de conexÃ£o
+            .Raw("hibernate.c3p0.min_size", "5")  // Tamanho mÃ­nimo do pool de conexÃµes
+            .Raw("hibernate.c3p0.max_size", "300") // Tamanho mÃ¡ximo do pool de conexÃµes
+            .Raw("hibernate.c3p0.timeout", "300") // Tempo limite de conexÃ£o em segundos
+            .Raw("default_schema", "portalohana") // Schema padrÃ£o para PostgreSQL
+            .Raw("throw_on_error", "true"))  // LanÃ§ar exceÃ§Ãµes em erros
             .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AutomappingConfigurationDefault>());
 
             if (configuration.GetValue<bool>("UpdateDataBase"))
@@ -133,12 +133,12 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             try
             {
                 Console.WriteLine("========================================");
-                Console.WriteLine("INICIANDO ATUALIZAÇÃO DO SCHEMA NO POSTGRESQL");
+                Console.WriteLine("INICIANDO ATUALIZAÃ‡ÃƒO DO SCHEMA NO POSTGRESQL");
                 Console.WriteLine("========================================");
 
                 var schemaUpdate = new SchemaUpdate(configuration);
 
-                // Capturar erros durante a execução
+                // Capturar erros durante a execuÃ§Ã£o
                 var errorMessages = new List<string>();
                 
                 schemaUpdate.Execute(
@@ -151,7 +151,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
                 if (schemaUpdate.Exceptions != null && schemaUpdate.Exceptions.Any())
                 {
                     Console.WriteLine("========================================");
-                    Console.WriteLine("ERROS ENCONTRADOS DURANTE A ATUALIZAÇÃO DO SCHEMA:");
+                    Console.WriteLine("ERROS ENCONTRADOS DURANTE A ATUALIZAÃ‡ÃƒO DO SCHEMA:");
                     Console.WriteLine("========================================");
                     
                     foreach (var exception in schemaUpdate.Exceptions)
@@ -175,7 +175,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             catch (Exception ex)
             {
                 Console.WriteLine("========================================");
-                Console.WriteLine("ERRO CRÍTICO NA ATUALIZAÇÃO DO SCHEMA:");
+                Console.WriteLine("ERRO CRÃTICO NA ATUALIZAÃ‡ÃƒO DO SCHEMA:");
                 Console.WriteLine("========================================");
                 Console.WriteLine($"MENSAGEM: {ex.Message}");
                 Console.WriteLine($"TIPO: {ex.GetType().FullName}");
@@ -184,7 +184,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
                 if (ex.InnerException != null)
                 {
                     Console.WriteLine("----------------------------------------");
-                    Console.WriteLine("EXCEÇÃO INTERNA:");
+                    Console.WriteLine("EXCEÃ‡ÃƒO INTERNA:");
                     Console.WriteLine($"MENSAGEM: {ex.InnerException.Message}");
                     Console.WriteLine($"STACK TRACE: {ex.InnerException.StackTrace}");
                 }

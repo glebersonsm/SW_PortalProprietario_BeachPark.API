@@ -1,4 +1,4 @@
-{
+﻿{
   "ConnectionStrings": {
     //"DefaultConnection": "Data Source=C:\\SW_Solucoes\\Projetos\\Bd\\SwPortal.db",
     //"DefaultConnection": "Data Source=187.73.180.122;Initial Catalog=swportal;User ID=sa;Password=SW@dba#2024!",

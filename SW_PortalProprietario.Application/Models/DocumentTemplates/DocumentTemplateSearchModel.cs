@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Domain.Enumns;
 
