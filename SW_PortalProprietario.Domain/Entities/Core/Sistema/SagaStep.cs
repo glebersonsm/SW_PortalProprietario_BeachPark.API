@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
+﻿namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
 {
     /// <summary>
     /// Representa um passo individual dentro de uma Saga
@@ -8,7 +8,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual int? Id { get; set; }
 
         /// <summary>
-        /// Referência para a Saga pai
+        /// ReferÃªncia para a Saga pai
         /// </summary>
         public virtual SagaExecution? SagaExecution { get; set; }
 
@@ -18,7 +18,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string StepName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Ordem de execução (1, 2, 3...)
+        /// Ordem de execuÃ§Ã£o (1, 2, 3...)
         /// </summary>
         public virtual int StepOrder { get; set; }
 
@@ -48,42 +48,42 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? StackTrace { get; set; }
 
         /// <summary>
-        /// Data/hora de início da execução
+        /// Data/hora de inÃ­cio da execuÃ§Ã£o
         /// </summary>
         public virtual DateTime? DataHoraInicio { get; set; }
 
         /// <summary>
-        /// Data/hora de conclusão
+        /// Data/hora de conclusÃ£o
         /// </summary>
         public virtual DateTime? DataHoraConclusao { get; set; }
 
         /// <summary>
-        /// Duração em milissegundos
+        /// DuraÃ§Ã£o em milissegundos
         /// </summary>
         public virtual long? DuracaoMs { get; set; }
 
         /// <summary>
-        /// Data/hora de início da compensação
+        /// Data/hora de inÃ­cio da compensaÃ§Ã£o
         /// </summary>
         public virtual DateTime? DataHoraInicioCompensacao { get; set; }
 
         /// <summary>
-        /// Data/hora de conclusão da compensação
+        /// Data/hora de conclusÃ£o da compensaÃ§Ã£o
         /// </summary>
         public virtual DateTime? DataHoraConclusaoCompensacao { get; set; }
 
         /// <summary>
-        /// Duração da compensação em milissegundos
+        /// DuraÃ§Ã£o da compensaÃ§Ã£o em milissegundos
         /// </summary>
         public virtual long? DuracaoCompensacaoMs { get; set; }
 
         /// <summary>
-        /// Número de tentativas de execução
+        /// NÃºmero de tentativas de execuÃ§Ã£o
         /// </summary>
         public virtual int Tentativas { get; set; } = 0;
 
         /// <summary>
-        /// Número de tentativas de compensação
+        /// NÃºmero de tentativas de compensaÃ§Ã£o
         /// </summary>
         public virtual int TentativasCompensacao { get; set; } = 0;
 

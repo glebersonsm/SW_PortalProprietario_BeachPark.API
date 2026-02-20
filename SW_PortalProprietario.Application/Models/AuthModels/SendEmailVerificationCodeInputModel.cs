@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Application.Models.AuthModels
+﻿namespace SW_PortalProprietario.Application.Models.AuthModels
 {
     /// <summary>
-    /// Modelo para envio do código de verificação de e-mail ao alterar o e-mail do usuário.
+    /// Modelo para envio do cÃ³digo de verificaÃ§Ã£o de e-mail ao alterar o e-mail do usuÃ¡rio.
     /// </summary>
     public class SendEmailVerificationCodeInputModel
     {

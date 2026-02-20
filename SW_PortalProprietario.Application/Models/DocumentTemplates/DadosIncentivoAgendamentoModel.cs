@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Application.Models.DocumentTemplates;
+﻿namespace SW_PortalProprietario.Application.Models.DocumentTemplates;
 
 public class DadosIncentivoAgendamentoModel
 {
@@ -9,7 +9,7 @@ public class DadosIncentivoAgendamentoModel
     public string EmailCliente { get; set; } = string.Empty;
     public string TelefoneCliente { get; set; } = string.Empty;
     
-    // Dados do Período de Agendamento
+    // Dados do PerÃ­odo de Agendamento
     public DateTime DataInicioAgendamento { get; set; }
     public DateTime DataFinalAgendamento { get; set; }
     public string PeriodoAgendamentoFormatado { get; set; } = string.Empty;

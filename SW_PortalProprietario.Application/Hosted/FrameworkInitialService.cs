@@ -1,4 +1,4 @@
-using AccessCenterDomain.AccessCenter;
+Ôªøusing AccessCenterDomain.AccessCenter;
 using CMDomain.Models.AuthModels;
 using Dapper;
 using Microsoft.Extensions.Configuration;
@@ -121,7 +121,7 @@ namespace SW_PortalProprietario.Application.Hosted
                     }
                     else
                     {
-                        // Fallback para configura??o antiga se ParametroSistema N„o existir
+                        // Fallback para configura??o antiga se ParametroSistema N√£o existir
                         if (_configuration.GetValue<bool>("CriarUsuariosLegado", false))
                         {
                             await CriarUsuariosLegado(_repository, _communicationProvider, _mapper, tipoTelefone!, session);
@@ -146,7 +146,7 @@ namespace SW_PortalProprietario.Application.Hosted
             // Verifica se o arquivo existe
             if (!File.Exists(caminhoArquivo))
             {
-                Console.WriteLine($"O arquivo '{caminhoArquivo}' N„o foi encontrado.");
+                Console.WriteLine($"O arquivo '{caminhoArquivo}' N√£o foi encontrado.");
                 return;
             }
 
@@ -164,7 +164,7 @@ namespace SW_PortalProprietario.Application.Hosted
                     string[] partes = line.Split("[]", StringSplitOptions.RemoveEmptyEntries);
                     if (partes.Length < 2)
                     {
-                        Console.WriteLine($"Linha inv·lida: {line}");
+                        Console.WriteLine($"Linha inv√°lida: {line}");
                         continue; // Pula linhas inv?lidas
                     }
                     string pergunta = partes[0].Trim();
@@ -280,7 +280,7 @@ namespace SW_PortalProprietario.Application.Hosted
                     (await _repository.FindBySql<UserRegisterInputModel>(sb.ToString(), session)).AsList();
 
                 var tipoTelefone = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoTelefone>($"Select tt.* From TipoTelefone tt Where Lower(tt.Nome) in ('celular')", session)).FirstOrDefault();
-                if (tipoTelefone == null) throw new Exception("Tipo de telefone 'Celular' N„o encontrado no banco de dados.");
+                if (tipoTelefone == null) throw new Exception("Tipo de telefone 'Celular' N√£o encontrado no banco de dados.");
 
 
                 if (!usuariosSistema.Any(b => !string.IsNullOrEmpty(b.Login) && b.Login.Contains("glebersonsm", StringComparison.InvariantCultureIgnoreCase)))
@@ -393,7 +393,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         {
                             if (!SW_Utils.Functions.Helper.IsCpf(item.CpfCnpj) && !SW_Utils.Functions.Helper.IsCnpj(item.CpfCnpj))
                             {
-                                _logger.LogWarning($"N„o foi poss?vel importar o CPF/CNPJ do usu?rio com login: {item.Login} - Pois o n?mero informado N„o ? v?lido: '{item.CpfCnpj}'");
+                                _logger.LogWarning($"N√£o foi poss?vel importar o CPF/CNPJ do usu?rio com login: {item.Login} - Pois o n?mero informado N√£o ? v?lido: '{item.CpfCnpj}'");
                                 item.CpfCnpj = null;
                             }
                         }
@@ -511,7 +511,7 @@ namespace SW_PortalProprietario.Application.Hosted
                 //            usuario.Status = EnumStatus.Inativo;
                 //            await _repository.ForcedSave(usuario, session);
                 //            var resultCommit = await _repository.CommitAsync(session);
-                //            _logger.LogInformation($"Usu?rio: {usuario.Login} desativado, pois N„o possui contrato ativo no provider {providerName}.");
+                //            _logger.LogInformation($"Usu?rio: {usuario.Login} desativado, pois N√£o possui contrato ativo no provider {providerName}.");
                 //        }
                 //        catch (Exception err)
                 //        {
@@ -604,7 +604,7 @@ namespace SW_PortalProprietario.Application.Hosted
                 }
                 else
                 {
-                    _logger.LogInformation("Provider N„o ? h?brido. Usando importa??o padr?o...");
+                    _logger.LogInformation("Provider N√£o ? h?brido. Usando importa??o padr?o...");
                     usuariosLegado = await _communicationProvider.GetClientesUsuariosLegado(parametroSistema);
                 }
 
@@ -672,7 +672,7 @@ namespace SW_PortalProprietario.Application.Hosted
                             var apenasNumeros = Helper.ApenasNumeros(item.CpfCnpj);
                             if (string.IsNullOrEmpty(apenasNumeros))
                             {
-                                _logger.LogWarning($"N„o foi poss?vel determinar o tipo do documento do usu?rio com login: {item.Login} - Pois o n?mero informado N„o ? um CPF ou CNPJ v?lido: '{item.CpfCnpj}'");
+                                _logger.LogWarning($"N√£o foi poss?vel determinar o tipo do documento do usu?rio com login: {item.Login} - Pois o n?mero informado N√£o ? um CPF ou CNPJ v?lido: '{item.CpfCnpj}'");
                                 item.CpfCnpj = null;
                                 _repository.Rollback(session);
                                 continue;
@@ -684,7 +684,7 @@ namespace SW_PortalProprietario.Application.Hosted
                                 item.TipoDocumentoClienteNome = "CNPJ";
                             else
                             {
-                                _logger.LogWarning($"N„o foi poss?vel determinar o tipo do documento do usu?rio com login: {item.Login} - Pois o n?mero informado N„o ? um CPF ou CNPJ v?lido: '{item.CpfCnpj}'");
+                                _logger.LogWarning($"N√£o foi poss?vel determinar o tipo do documento do usu?rio com login: {item.Login} - Pois o n?mero informado N√£o ? um CPF ou CNPJ v?lido: '{item.CpfCnpj}'");
                                 item.CpfCnpj = null;
                                 _repository.Rollback(session);
                                 continue;
@@ -692,7 +692,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         }
                         else
                         {
-                            _logger.LogWarning($"N„o foi poss?vel determinar o tipo do documento do usu?rio com login: {item.Login} - Pois o n?mero informado N„o ? um CPF ou CNPJ v?lido: '{item.CpfCnpj}'");
+                            _logger.LogWarning($"N√£o foi poss?vel determinar o tipo do documento do usu?rio com login: {item.Login} - Pois o n?mero informado N√£o ? um CPF ou CNPJ v?lido: '{item.CpfCnpj}'");
                             item.CpfCnpj = null;
                             _repository.Rollback(session);
                             continue;
@@ -700,7 +700,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
                         var pass = item.Password = "Abc@123";
 
-                        item.Administrator = EnumSimNao.N„o;
+                        item.Administrator = EnumSimNao.Nao;
                         await RegistrarUsuarioExecute(_repository, _communicationProvider, _mapper, item,tipoTelefone, session);
                         usuariosSistema.Add(item);
 
@@ -836,7 +836,7 @@ namespace SW_PortalProprietario.Application.Hosted
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(userInputModel?.Password),
                     DataHoraCriacao = DateTime.Now,
                     Status = EnumStatus.Ativo,
-                    Administrador = userInputModel != null ? userInputModel.Administrator.GetValueOrDefault(EnumSimNao.N„o) : EnumSimNao.N„o
+                    Administrador = userInputModel != null ? userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao) : EnumSimNao.Nao
                 };
 
 
@@ -1064,17 +1064,17 @@ namespace SW_PortalProprietario.Application.Hosted
                     var apenasNumero = SW_Utils.Functions.Helper.ApenasNumeros(documento.Numero);
                     var tipoDocumento = (await _repository.FindBySql<TipoDocumentoPessoa>($"Select te.* From TipoDocumentoPessoa te Where te.Id =  {documento.TipoDocumentoId.GetValueOrDefault()}", session)).FirstOrDefault();
                     if (tipoDocumento == null)
-                        throw new ArgumentException($"N„o foi encontrado o tipo de documento informado: {documento.TipoDocumentoId.GetValueOrDefault()}");
+                        throw new ArgumentException($"N√£o foi encontrado o tipo de documento informado: {documento.TipoDocumentoId.GetValueOrDefault()}");
 
 
-                    if (tipoDocumento.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.N„o) == EnumSimNao.Sim && documento.DataEmissao.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
-                        throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informaÁ„o da daa de emiss„o no documento: {documento.Numero}");
+                    if (tipoDocumento.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim && documento.DataEmissao.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
+                        throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informa√ß√£o da daa de emiss√£o no documento: {documento.Numero}");
 
-                    if (tipoDocumento.ExigeDataValidade.GetValueOrDefault(EnumSimNao.N„o) == EnumSimNao.Sim && documento.DataValidade.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
-                        throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informaÁ„o da data de validade no documento: {documento.Numero}");
+                    if (tipoDocumento.ExigeDataValidade.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim && documento.DataValidade.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
+                        throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informa√ß√£o da data de validade no documento: {documento.Numero}");
 
-                    if (tipoDocumento.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.N„o) == EnumSimNao.Sim && string.IsNullOrEmpty(documento.OrgaoEmissor))
-                        throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informaÁ„o do Ûrg„o emissor no documento: {documento.Numero}");
+                    if (tipoDocumento.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim && string.IsNullOrEmpty(documento.OrgaoEmissor))
+                        throw new Exception($"O tipo de documento: {tipoDocumento.Nome} exige a informa√ß√£o do √≥rg√£o emissor no documento: {documento.Numero}");
 
                     var documentoExistente = documento.Id.GetValueOrDefault(0) > 0 ?
                         (await _repository.FindByHql<PessoaDocumento>($"From PessoaDocumento pe Inner Join Fetch pe.TipoDocumento te Inner Join Fetch pe.Pessoa p Where pe.Id = {documento.Id.GetValueOrDefault()}", session)).FirstOrDefault() :
@@ -1103,9 +1103,9 @@ namespace SW_PortalProprietario.Application.Hosted
                             documentoExistente.Numero = documentoExistente.Numero.PadLeft(14, '0');
                     }
 
-                    documentoExistente.DataEmissao = tipoDocumento.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.N„o) == EnumSimNao.Sim ? documento.DataEmissao.GetValueOrDefault() : null;
-                    documentoExistente.DataValidade = tipoDocumento.ExigeDataValidade.GetValueOrDefault(EnumSimNao.N„o) == EnumSimNao.Sim ? documento.DataValidade.GetValueOrDefault() : null;
-                    documentoExistente.OrgaoEmissor = tipoDocumento.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.N„o) == EnumSimNao.Sim ? documento.OrgaoEmissor : null;
+                    documentoExistente.DataEmissao = tipoDocumento.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim ? documento.DataEmissao.GetValueOrDefault() : null;
+                    documentoExistente.DataValidade = tipoDocumento.ExigeDataValidade.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim ? documento.DataValidade.GetValueOrDefault() : null;
+                    documentoExistente.OrgaoEmissor = tipoDocumento.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim ? documento.OrgaoEmissor : null;
 
                     documentoExistente.ValorNumerico = Helper.ApenasNumeros(documentoExistente.Numero);
 
@@ -1131,11 +1131,11 @@ namespace SW_PortalProprietario.Application.Hosted
                 foreach (var telefone in telefones)
                 {
                     if (!telefone.Preferencial.HasValue)
-                        telefone.Preferencial = EnumSimNao.N„o;
+                        telefone.Preferencial = EnumSimNao.Nao;
 
                     var tipoTelefone = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoTelefone>($"Select te.* From TipoTelefone te Where te.Id =  {telefone.TipoTelefoneId.GetValueOrDefault()}", session)).FirstOrDefault();
                     if (tipoTelefone == null)
-                        throw new ArgumentException($"N„o foi encontrado o tipo de telefone informado: {telefone.TipoTelefoneId.GetValueOrDefault()}");
+                        throw new ArgumentException($"N√£o foi encontrado o tipo de telefone informado: {telefone.TipoTelefoneId.GetValueOrDefault()}");
 
 
                     var telefoneExistente = telefone.Id.GetValueOrDefault(0) > 0 ?
@@ -1165,7 +1165,7 @@ namespace SW_PortalProprietario.Application.Hosted
                         var outrosTelefones = (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaTelefone>($"From PessoaTelefone pt Inner Join Fetch pt.TipoTelefone tt Inner Join Fetch pt.Pessoa p Where p.Id = {pessoa.Id} and pt.Id <> {telefoneExistente.Id} and pt.Preferencial = 1", session)).AsList();
                         foreach (var item in outrosTelefones)
                         {
-                            item.Preferencial = EnumSimNao.N„o;
+                            item.Preferencial = EnumSimNao.Nao;
                             await _repository.ForcedSave(item, session);
                         }
                     }
@@ -1188,15 +1188,15 @@ namespace SW_PortalProprietario.Application.Hosted
                 foreach (var endereco in enderecos)
                 {
                     if (!endereco.Preferencial.HasValue)
-                        endereco.Preferencial = EnumSimNao.N„o;
+                        endereco.Preferencial = EnumSimNao.Nao;
 
                     var tipoEndereco = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.TipoEndereco>($"Select te.* From TipoEndereco te Where te.Id =  {endereco.TipoEnderecoId.GetValueOrDefault()}", session)).FirstOrDefault();
                     if (tipoEndereco == null)
-                        throw new ArgumentException($"N„o foi encontrado o tipo de endere?o informado: {endereco.TipoEnderecoId.GetValueOrDefault()}");
+                        throw new ArgumentException($"N√£o foi encontrado o tipo de endere?o informado: {endereco.TipoEnderecoId.GetValueOrDefault()}");
 
                     var cidade = (await _repository.FindByHql<Domain.Entities.Core.Geral.Cidade>($"From Cidade c Inner Join Fetch c.Estado e Inner Join Fetch e.Pais p Where c.Id =  {endereco.CidadeId.GetValueOrDefault()}", session)).FirstOrDefault();
                     if (cidade == null)
-                        throw new ArgumentException($"N„o foi encontrada a Cidade informada: {endereco.CidadeId.GetValueOrDefault()}");
+                        throw new ArgumentException($"N√£o foi encontrada a Cidade informada: {endereco.CidadeId.GetValueOrDefault()}");
 
                     var enderecoExistente = endereco.Id.GetValueOrDefault(0) > 0 ?
                         (await _repository.FindByHql<Domain.Entities.Core.DadosPessoa.PessoaEndereco>($"From PessoaEndereco pe Inner Join Fetch pe.TipoEndereco te Inner Join Fetch pe.Pessoa p Inner Join Fetch pe.Cidade cid Inner Join Fetch cid.Estado est Inner Join Fetch est.Pais pa Where pe.Id = {endereco.Id.GetValueOrDefault()}", session)).FirstOrDefault() :
@@ -1248,7 +1248,7 @@ namespace SW_PortalProprietario.Application.Hosted
             }
             catch (Exception err)
             {
-                _logger.LogWarning(err, "N„o foi possÌvel buscar ParametroSistema, usando configuraÁ„o padr„o");
+                _logger.LogWarning(err, "N√£o foi poss√≠vel buscar ParametroSistema, usando configura√ß√£o padr√£o");
                 return null;
             }
         }
@@ -1268,14 +1268,14 @@ namespace SW_PortalProprietario.Application.Hosted
                         {
                             Empresa = empresas.First(),
                             AgruparCertidaoPorCliente = EnumSimNao.Sim,
-                            EmitirCertidaoPorUnidCliente = EnumSimNao.N„o,
-                            HabilitarBaixarBoleto = EnumSimNao.N„o,
-                            HabilitarPagamentosOnLine = EnumSimNao.N„o,
-                            HabilitarPagamentoEmCartao = EnumSimNao.N„o,
-                            HabilitarPagamentoEmPix = EnumSimNao.N„o,
-                            ExibirContasVencidas = EnumSimNao.N„o,
-                            PermitirUsuarioAlterarSeuEmail = EnumSimNao.N„o,
-                            PermitirUsuarioAlterarSeuDoc = EnumSimNao.N„o
+                            EmitirCertidaoPorUnidCliente = EnumSimNao.Nao,
+                            HabilitarBaixarBoleto = EnumSimNao.Nao,
+                            HabilitarPagamentosOnLine = EnumSimNao.Nao,
+                            HabilitarPagamentoEmCartao = EnumSimNao.Nao,
+                            HabilitarPagamentoEmPix = EnumSimNao.Nao,
+                            ExibirContasVencidas = EnumSimNao.Nao,
+                            PermitirUsuarioAlterarSeuEmail = EnumSimNao.Nao,
+                            PermitirUsuarioAlterarSeuDoc = EnumSimNao.Nao
                         };
 
                         await _repository.ForcedSave(parametroSistema, session);
@@ -1443,8 +1443,8 @@ namespace SW_PortalProprietario.Application.Hosted
                     {
                         Nome = "CPF",
                         Mascara = "###.###.###-##",
-                        ExigeDataEmissao = EnumSimNao.N„o,
-                        ExigeDataValidade = EnumSimNao.N„o,
+                        ExigeDataEmissao = EnumSimNao.Nao,
+                        ExigeDataValidade = EnumSimNao.Nao,
                         TipoPessoa = EnumTiposPessoa.PessoaFisica
                     };
 
@@ -1458,8 +1458,8 @@ namespace SW_PortalProprietario.Application.Hosted
                     {
                         Nome = "CNPJ",
                         Mascara = "##.###.###/####-##",
-                        ExigeDataEmissao = EnumSimNao.N„o,
-                        ExigeDataValidade = EnumSimNao.N„o,
+                        ExigeDataEmissao = EnumSimNao.Nao,
+                        ExigeDataValidade = EnumSimNao.Nao,
                         TipoPessoa = EnumTiposPessoa.PessoaJuridica
                     };
 
@@ -1524,7 +1524,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
                         var cnpj = (await _repository.FindByHql<TipoDocumentoPessoa>($"From TipoDocumentoPessoa tdp Where tdp.TipoPessoa = {(int)EnumTiposPessoa.PessoaJuridica} and Lower(tdp.Nome) like '%cnpj%'", session)).FirstOrDefault();
                         if (cnpj == null)
-                            throw new FileNotFoundException("N„o foi encontrado o tipo de documento CNPJ para cadastrado no sisetma");
+                            throw new FileNotFoundException("N√£o foi encontrado o tipo de documento CNPJ para cadastrado no sisetma");
 
                         var empresa = await _communicationProvider.GetEmpresaVinculadaLegado_Esol(int.Parse(empresaId));
                         if (empresa != null && !string.IsNullOrEmpty(empresa.Cnpj))
@@ -1730,7 +1730,7 @@ namespace SW_PortalProprietario.Application.Hosted
 
                         var commitResult = await _repository.CommitAsync(session);
                         if (!commitResult.executed)
-                            throw commitResult.exception ?? new Exception("N„o foi possÌvel importar as cidades");
+                            throw commitResult.exception ?? new Exception("N√£o foi poss√≠vel importar as cidades");
                     }
                     catch (Exception err)
                     {
@@ -1968,7 +1968,7 @@ namespace SW_PortalProprietario.Application.Hosted
             permissao.Id = Convert.ToInt32(xeElement.GetAttribute("Id"));
             permissao.Nome = xeElement.GetAttribute("NomeNormalizado");
             permissao.NomeInterno = xeElement.GetAttribute("NomeInterno");
-            permissao.UsarNomeInterno = Convert.ToBoolean(xeElement.GetAttribute("UsarNomeInterno")) ? EnumSimNao.Sim : EnumSimNao.N„o;
+            permissao.UsarNomeInterno = Convert.ToBoolean(xeElement.GetAttribute("UsarNomeInterno")) ? EnumSimNao.Sim : EnumSimNao.Nao;
             permissao.TipoPermissao = xeElement.GetAttribute("TipoPermissao");
             return permissao;
         }

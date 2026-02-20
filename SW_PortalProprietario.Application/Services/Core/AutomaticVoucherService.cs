@@ -1,4 +1,4 @@
-using CMDomain.Entities;
+Ôªøusing CMDomain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -14,8 +14,8 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core;
 
 /// <summary>
-/// ServiÁo de envio autom·tico de vouchers
-/// ? USA O MESMO C”DIGO DA SIMULA«√O via VoucherGenerationService
+/// Servi√ßo de envio autom√°tico de vouchers
+/// ? USA O MESMO C√ìDIGO DA SIMULA√á√ÉO via VoucherGenerationService
 /// </summary>
 public class AutomaticVoucherService : IAutomaticVoucherService
 {
@@ -68,29 +68,29 @@ public class AutomaticVoucherService : IAutomaticVoucherService
                 {
                     if (await CheckIfAlreadySentMultiPropriedade(session, reserva.ReservaId, daysBefore))
                     {
-                        _logger.LogDebug("Email j· enviado para reserva {ReservaId}", reserva.ReservaId);
+                        _logger.LogDebug("Email j√° enviado para reserva {ReservaId}", reserva.ReservaId);
                         continue;
                     }
 
                     if (!IsValidEmail(reserva.EmailCliente))
                     {
-                        _logger.LogWarning("Email inv·lido para reserva {ReservaId}: {Email}", reserva.ReservaId, reserva.EmailCliente);
+                        _logger.LogWarning("Email inv√°lido para reserva {ReservaId}: {Email}", reserva.ReservaId, reserva.EmailCliente);
                         continue;
                     }
 
                     if (!await ShouldSendEmailForReserva(reserva, config, contratos, inadimplentes))
                     {
-                        _logger.LogDebug("Reserva {ReservaId} n„o atende critÈrios de filtro", reserva.ReservaId);
+                        _logger.LogDebug("Reserva {ReservaId} n√£o atende crit√©rios de filtro", reserva.ReservaId);
                         continue;
                     }
 
-                    // ? USAR SERVI«O COMPARTILHADO - MESMA L”GICA DA SIMULA«√O
+                    // ? USAR SERVI√áO COMPARTILHADO - MESMA L√ìGICA DA SIMULA√á√ÉO
                     var voucherData = await _voucherGenerationService.GerarVoucherCompletoAsync(
                         agendamentoIdGroup.Key, false, config, contratos);
 
                     if (voucherData == null)
                     {
-                        _logger.LogWarning("N„o foi possÌvel gerar voucher para reserva {ReservaId}", reserva.ReservaId);
+                        _logger.LogWarning("N√£o foi poss√≠vel gerar voucher para reserva {ReservaId}", reserva.ReservaId);
                         continue;
                     }
 
@@ -165,23 +165,23 @@ public class AutomaticVoucherService : IAutomaticVoucherService
                 {
                     if (await CheckIfAlreadySentTimesharing(session, reserva.ReservaId, daysBefore))
                     {
-                        _logger.LogDebug("Email j· enviado para reserva Timesharing {ReservaId}", reserva.ReservaId);
+                        _logger.LogDebug("Email j√° enviado para reserva Timesharing {ReservaId}", reserva.ReservaId);
                         continue;
                     }
 
                     if (!IsValidEmail(reserva.EmailCliente))
                     {
-                        _logger.LogWarning("Email inv·lido para reserva Timesharing {ReservaId}: {Email}", reserva.ReservaId, reserva.EmailCliente);
+                        _logger.LogWarning("Email inv√°lido para reserva Timesharing {ReservaId}: {Email}", reserva.ReservaId, reserva.EmailCliente);
                         continue;
                     }
 
-                    // ? USAR SERVI«O COMPARTILHADO
+                    // ? USAR SERVI√áO COMPARTILHADO
                     var voucherData = await _voucherGenerationService.GerarVoucherCompletoAsync(
                         reserva.AgendamentoId, true, null);
 
                     if (voucherData == null)
                     {
-                        _logger.LogWarning("N„o foi possÌvel gerar voucher para reserva Timesharing {ReservaId}", reserva.ReservaId);
+                        _logger.LogWarning("N√£o foi poss√≠vel gerar voucher para reserva Timesharing {ReservaId}", reserva.ReservaId);
                         continue;
                     }
 
@@ -235,7 +235,7 @@ public class AutomaticVoucherService : IAutomaticVoucherService
         }
     }
 
-    #region MÈtodos Auxiliares
+    #region M√©todos Auxiliares
 
     private async Task<List<ReservaInfo>> GetReservasByCheckInDateMultiPropriedade(DateTime checkInDate)
     {
@@ -382,7 +382,7 @@ public class AutomaticVoucherService : IAutomaticVoucherService
 
             if (contrato == null)
             {
-                _logger.LogWarning("Contrato n„o encontrado para reserva {ReservaId}. Enviando por padr„o.", reserva.ReservaId);
+                _logger.LogWarning("Contrato n√£o encontrado para reserva {ReservaId}. Enviando por padr√£o.", reserva.ReservaId);
                 return true;
             }
 
@@ -401,7 +401,7 @@ public class AutomaticVoucherService : IAutomaticVoucherService
 
                 if (statusCrcAtivos.Any(statusId => config.ExcludedStatusCrcIds.Contains(statusId)))
                 {
-                    _logger.LogDebug("Reserva {ReservaId} possui Status CRC excluÌdo", reserva.ReservaId);
+                    _logger.LogDebug("Reserva {ReservaId} possui Status CRC exclu√≠do", reserva.ReservaId);
                     return false;
                 }
             }
@@ -419,7 +419,7 @@ public class AutomaticVoucherService : IAutomaticVoucherService
 
                 if (temBloqueio || clienteInadimplente != null)
                 {
-                    _logger.LogDebug("Reserva {ReservaId} possui inadimplÍncia ou bloqueio", reserva.ReservaId);
+                    _logger.LogDebug("Reserva {ReservaId} possui inadimpl√™ncia ou bloqueio", reserva.ReservaId);
                     return false;
                 }
             }
@@ -428,7 +428,7 @@ public class AutomaticVoucherService : IAutomaticVoucherService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao verificar filtros para reserva {ReservaId}. Enviando por padr„o.", reserva.ReservaId);
+            _logger.LogError(ex, "Erro ao verificar filtros para reserva {ReservaId}. Enviando por padr√£o.", reserva.ReservaId);
             return true;
         }
     }

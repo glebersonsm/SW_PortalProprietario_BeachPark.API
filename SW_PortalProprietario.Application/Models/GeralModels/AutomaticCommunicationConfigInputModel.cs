@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Enumns;
+﻿using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.GeralModels
 {
@@ -16,7 +16,7 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public bool AllCompanies { get; set; } = true;
         public List<int> EmpresaIds { get; set; } = new List<int>();
         public int TemplateSendMode { get; set; } = 1; // Default: BodyHtmlOnly
-        public string? SimulationEmail { get; set; } // Email opcional para simulação automática após sincronização
+        public string? SimulationEmail { get; set; } // Email opcional para simulaÃ§Ã£o automÃ¡tica apÃ³s sincronizaÃ§Ã£o
     }
 }
 

@@ -802,7 +802,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
                 if (lastCodigoVerificacaoGerado.CodigoEnviadoAoCliente.TrimEnd().TrimStart().Equals(codigoVerificacao.TrimEnd().TrimStart()))
                 {
-                    if (lastCodigoVerificacaoGerado.LiberacaoConfirmada.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
+                    if (lastCodigoVerificacaoGerado.LiberacaoConfirmada.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Nao)
                     {
                         lastCodigoVerificacaoGerado.LiberacaoConfirmada = Domain.Enumns.EnumSimNao.Sim;
                         lastCodigoVerificacaoGerado.UsuarioAlteracao = usuario.Id;
@@ -826,7 +826,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                         throw resultCommit.exception ?? new Exception("Erro na operação");
                 }
 
-                return lastCodigoVerificacaoGerado.LiberacaoConfirmada.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim;
+                return lastCodigoVerificacaoGerado.LiberacaoConfirmada.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim;
 
             }
             catch (Exception err)

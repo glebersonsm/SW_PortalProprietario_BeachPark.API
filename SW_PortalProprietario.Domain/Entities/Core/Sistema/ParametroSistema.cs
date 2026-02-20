@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Entities.Core.Framework;
+﻿using SW_PortalProprietario.Domain.Entities.Core.Framework;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
@@ -7,18 +7,18 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
     {
         public virtual Empresa? Empresa { get; set; }
         public virtual string? SiteParaReserva { get; set; }
-        public virtual EnumSimNao? AgruparCertidaoPorCliente { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? EmitirCertidaoPorUnidCliente { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? HabilitarBaixarBoleto { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? HabilitarPagamentosOnLine { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? HabilitarPagamentoEmPix { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? HabilitarPagamentoEmCartao { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? ExibirContasVencidas { get; set; } = EnumSimNao.Não;
+        public virtual EnumSimNao? AgruparCertidaoPorCliente { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? EmitirCertidaoPorUnidCliente { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? HabilitarBaixarBoleto { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? HabilitarPagamentosOnLine { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? HabilitarPagamentoEmPix { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? HabilitarPagamentoEmCartao { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? ExibirContasVencidas { get; set; } = EnumSimNao.Nao;
         public virtual int? QtdeMaximaDiasContasAVencer { get; set; }
-        public virtual EnumSimNao? PermitirUsuarioAlterarSeuEmail { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? PermitirUsuarioAlterarSeuDoc { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? IntegradoComMultiPropriedade { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? IntegradoComTimeSharing { get; set; } = EnumSimNao.Não;
+        public virtual EnumSimNao? PermitirUsuarioAlterarSeuEmail { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? PermitirUsuarioAlterarSeuDoc { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? IntegradoComMultiPropriedade { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? IntegradoComTimeSharing { get; set; } = EnumSimNao.Nao;
         #region Imagens empreendimetno I
         public virtual string? ImagemHomeUrl1 { get; set; }
         public virtual string? ImagemHomeUrl2 { get; set; }
@@ -54,43 +54,43 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? ExibirFinanceirosDasEmpresaIds { get; set; }
         public virtual int? PontosRci { get; set; } = 5629;
         
-        #region Configurações de Reserva - Campos Obrigatórios para Hóspedes Convidados
-        public virtual EnumSimNao? ExigeEnderecoHospedeConvidado { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? ExigeTelefoneHospedeConvidado { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? ExigeDocumentoHospedeConvidado { get; set; } = EnumSimNao.Não;
+        #region ConfiguraÃ§Ãµes de Reserva - Campos ObrigatÃ³rios para HÃ³spedes Convidados
+        public virtual EnumSimNao? ExigeEnderecoHospedeConvidado { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? ExigeTelefoneHospedeConvidado { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? ExigeDocumentoHospedeConvidado { get; set; } = EnumSimNao.Nao;
         #endregion
 
-        #region Configurações de Reserva RCI
-        public virtual EnumSimNao? PermiteReservaRciApenasClientesComContratoRci { get; set; } = EnumSimNao.Não;
+        #region ConfiguraÃ§Ãµes de Reserva RCI
+        public virtual EnumSimNao? PermiteReservaRciApenasClientesComContratoRci { get; set; } = EnumSimNao.Nao;
         #endregion
 
-        #region Autenticação em duas etapas (2FA)
-        public virtual EnumSimNao? Habilitar2FAPorEmail { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? Habilitar2FAPorSms { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? Habilitar2FAParaCliente { get; set; } = EnumSimNao.Não;
-        public virtual EnumSimNao? Habilitar2FAParaAdministrador { get; set; } = EnumSimNao.Não;
-        /// <summary> URL do endpoint de envio de SMS para token 2FA (ex.: http://host:porta/cxf/sms/rest/enviar). Configurável no cadastro; nada interno no código. </summary>
+        #region AutenticaÃ§Ã£o em duas etapas (2FA)
+        public virtual EnumSimNao? Habilitar2FAPorEmail { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? Habilitar2FAPorSms { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? Habilitar2FAParaCliente { get; set; } = EnumSimNao.Nao;
+        public virtual EnumSimNao? Habilitar2FAParaAdministrador { get; set; } = EnumSimNao.Nao;
+        /// <summary> URL do endpoint de envio de SMS para token 2FA (ex.: http://host:porta/cxf/sms/rest/enviar). ConfigurÃ¡vel no cadastro; nada interno no cÃ³digo. </summary>
         public virtual string? EndpointEnvioSms2FA { get; set; }
         #endregion
 
-        #region Configurações de envio de e-mail (SMTP)
+        #region ConfiguraÃ§Ãµes de envio de e-mail (SMTP)
         public virtual string? SmtpHost { get; set; }
         public virtual int? SmtpPort { get; set; }
-        public virtual EnumSimNao? SmtpUseSsl { get; set; } = EnumSimNao.Não;
+        public virtual EnumSimNao? SmtpUseSsl { get; set; } = EnumSimNao.Nao;
         public virtual string? SmtpIamUser { get; set; }
         public virtual string? SmtpUser { get; set; }
         public virtual string? SmtpPass { get; set; }
         public virtual string? SmtpFromName { get; set; }
         public virtual EnumTipoEnvioEmail? TipoEnvioEmail { get; set; } = EnumTipoEnvioEmail.ClienteEmailDireto;
-        /// <summary> URL base para confirmação de leitura do e-mail (pixel de rastreio). Se vazio, usa .env/appsettings. </summary>
+        /// <summary> URL base para confirmaÃ§Ã£o de leitura do e-mail (pixel de rastreio). Se vazio, usa .env/appsettings. </summary>
         public virtual string? EmailTrackingBaseUrl { get; set; }
         #endregion
 
-        #region Configurações de Importação de Usuários/Clientes do Legado
-        /// <summary> Habilita a criação automática de usuários do sistema legado. </summary>
-        public virtual EnumSimNao? CriarUsuariosLegado { get; set; } = EnumSimNao.Não;
-        /// <summary> Habilita a criação automática de usuários clientes do sistema legado. </summary>
-        public virtual EnumSimNao? CriarUsuariosClientesLegado { get; set; } = EnumSimNao.Não;
+        #region ConfiguraÃ§Ãµes de ImportaÃ§Ã£o de UsuÃ¡rios/Clientes do Legado
+        /// <summary> Habilita a criaÃ§Ã£o automÃ¡tica de usuÃ¡rios do sistema legado. </summary>
+        public virtual EnumSimNao? CriarUsuariosLegado { get; set; } = EnumSimNao.Nao;
+        /// <summary> Habilita a criaÃ§Ã£o automÃ¡tica de usuÃ¡rios clientes do sistema legado. </summary>
+        public virtual EnumSimNao? CriarUsuariosClientesLegado { get; set; } = EnumSimNao.Nao;
         #endregion
 
         public virtual async Task SaveValidate()

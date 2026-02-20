@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Domain.Entities.Core.Geral
+﻿namespace SW_PortalProprietario.Domain.Entities.Core.Geral
 {
     public class RegraPaxFreeConfiguracao : EntityBaseCore, IEntityValidateCore
     {
@@ -22,7 +22,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
                 mensagens.Add("A Quantidade de Adultos deve ser informada e maior que zero");
 
             if (IdadeMaximaAnos == null || IdadeMaximaAnos < 0)
-                mensagens.Add("A Idade Máxima em Anos deve ser informada e maior ou igual a zero");
+                mensagens.Add("A Idade MÃ¡xima em Anos deve ser informada e maior ou igual a zero");
 
             if (QuantidadePessoasFree == null || QuantidadePessoasFree < 0)
                 mensagens.Add("A Quantidade de pessoas free deve ser informada.");
@@ -31,7 +31,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
                 mensagens.Add("O Tipo de Operador de Idade deve ser informado e deve ser '>=' ou '<='");
 
             if (!string.IsNullOrEmpty(TipoDataReferencia) && TipoDataReferencia != "RESERVA" && TipoDataReferencia != "CHECKIN")
-                mensagens.Add("O Tipo de Data de Referência deve ser 'RESERVA' ou 'CHECKIN'");
+                mensagens.Add("O Tipo de Data de ReferÃªncia deve ser 'RESERVA' ou 'CHECKIN'");
 
             if (mensagens.Any())
                 await Task.FromException(new ArgumentException(string.Join($"{Environment.NewLine}", mensagens.Select(a => a).ToList())));

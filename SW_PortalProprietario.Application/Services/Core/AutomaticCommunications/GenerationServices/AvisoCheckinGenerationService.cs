@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+ï»¿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
@@ -14,8 +14,8 @@ using System.Text.RegularExpressions;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.GenerationServices;
 
 /// <summary>
-/// Serviço compartilhado para geração de avisos de check-in próximo
-/// Usado tanto na simulação quanto no processamento automático
+/// ServiÃ§o compartilhado para geraÃ§Ã£o de avisos de check-in prÃ³ximo
+/// Usado tanto na simulaÃ§Ã£o quanto no processamento automÃ¡tico
 /// </summary>
 public class AvisoCheckinGenerationService
 {
@@ -49,7 +49,7 @@ public class AvisoCheckinGenerationService
                 reserva.ReservaId, sendMode);
 
             if (templateId.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("TemplateId inválido para geração de aviso de check-in.");
+                throw new ArgumentException("TemplateId invÃ¡lido para geraÃ§Ã£o de aviso de check-in.");
 
             string? htmlContent = await _documentTemplateService.GetTemplateContentHtmlAsync(
                 EnumDocumentTemplateType.AvisoReservaCheckinProximo,
@@ -61,7 +61,7 @@ public class AvisoCheckinGenerationService
             }
 
 
-            // Se não tiver template ou falhou, gerar HTML padrão
+            // Se nÃ£o tiver template ou falhou, gerar HTML padrÃ£o
             if (string.IsNullOrEmpty(htmlContent) && 
                 (sendMode == EnumTemplateSendMode.BodyHtmlOnly || 
                 sendMode == EnumTemplateSendMode.BodyHtmlAndAttachment))
@@ -174,7 +174,7 @@ public class AvisoCheckinGenerationService
 
         var resultado = texto;
 
-        // Substituições diretas (case-insensitive)
+        // SubstituiÃ§Ãµes diretas (case-insensitive)
         resultado = ReplaceIgnoreCase(resultado, "{{ReservaId}}", reserva.ReservaId > 0 ? reserva.ReservaId.ToString() : dadosReserva.NumeroReserva ?? "");
         resultado = ReplaceIgnoreCase(resultado, "{{AgendamentoId}}", reserva.AgendamentoId > 0 ? reserva.AgendamentoId.ToString() : dadosReserva.AgendamentoId?.ToString() ?? "");
         resultado = ReplaceIgnoreCase(resultado, "{{NomeCliente}}", dadosReserva.NomeCliente ?? dadosReserva.HospedePrincipal ?? "");
@@ -202,7 +202,7 @@ public class AvisoCheckinGenerationService
     }
 
     /// <summary>
-    /// Gera HTML padrão profissional para o aviso
+    /// Gera HTML padrÃ£o profissional para o aviso
     /// </summary>
     public string GerarHtmlPadrao(ReservaInfo reserva, DadosImpressaoVoucherResultModel dadosReserva, int daysBefore)
     {
@@ -229,7 +229,7 @@ public class AvisoCheckinGenerationService
         sb.AppendLine("<div class=\"container\">");
         
         sb.AppendLine("<div class=\"header\">");
-        sb.AppendLine("<h1 style=\"margin: 0; font-size: 32px;\">??? Seu Check-in Está Chegando!</h1>");
+        sb.AppendLine("<h1 style=\"margin: 0; font-size: 32px;\">??? Seu Check-in EstÃ¡ Chegando!</h1>");
         sb.AppendLine("</div>");
         
         sb.AppendLine("<div class=\"countdown\">");
@@ -238,8 +238,8 @@ public class AvisoCheckinGenerationService
         sb.AppendLine("</div>");
 
         var nomeCliente = dadosReserva.NomeCliente ?? dadosReserva.HospedePrincipal ?? "Cliente";
-        sb.AppendLine($"<p style=\"font-size: 16px; line-height: 1.8;\">Olá{(!string.IsNullOrEmpty(nomeCliente) ? $" <strong>{nomeCliente}</strong>" : "")}! ??</p>");
-        sb.AppendLine($"<p style=\"font-size: 16px; line-height: 1.8;\">Estamos ansiosos para recebê-lo! Faltam apenas <strong>{daysBefore} dia{(daysBefore != 1 ? "s" : "")}</strong> para o seu check-in.</p>");
+        sb.AppendLine($"<p style=\"font-size: 16px; line-height: 1.8;\">OlÃ¡{(!string.IsNullOrEmpty(nomeCliente) ? $" <strong>{nomeCliente}</strong>" : "")}! ??</p>");
+        sb.AppendLine($"<p style=\"font-size: 16px; line-height: 1.8;\">Estamos ansiosos para recebÃª-lo! Faltam apenas <strong>{daysBefore} dia{(daysBefore != 1 ? "s" : "")}</strong> para o seu check-in.</p>");
 
         sb.AppendLine("<div class=\"info-box\">");
         sb.AppendLine("<h3 style=\"margin-top: 0; color: #1976d2;\">?? Detalhes da Reserva</h3>");
@@ -258,16 +258,16 @@ public class AvisoCheckinGenerationService
         sb.AppendLine("</div>");
 
         sb.AppendLine("<div class=\"highlight\">");
-        sb.AppendLine("?? <strong>Lembrete importante:</strong> Prepare sua documentação e certifique-se de chegar no horário programado para o check-in.");
+        sb.AppendLine("?? <strong>Lembrete importante:</strong> Prepare sua documentaÃ§Ã£o e certifique-se de chegar no horÃ¡rio programado para o check-in.");
         sb.AppendLine("</div>");
 
-        sb.AppendLine("<p style=\"font-size: 16px; line-height: 1.8; margin-top: 30px;\">Estamos preparando tudo para que você tenha uma experiência maravilhosa!</p>");
+        sb.AppendLine("<p style=\"font-size: 16px; line-height: 1.8; margin-top: 30px;\">Estamos preparando tudo para que vocÃª tenha uma experiÃªncia maravilhosa!</p>");
 
         var localAtendimento = dadosReserva.LocalAtendimento ?? "Equipe MY Mabu";
         sb.AppendLine($"<p style=\"margin-top: 30px;\">Atenciosamente,<br/><strong>{localAtendimento}</strong></p>");
 
         sb.AppendLine("<div class=\"footer\">");
-        sb.AppendLine("<p><em>Este é um email automático de aviso. Em caso de dúvidas, entre em contato conosco.</em></p>");
+        sb.AppendLine("<p><em>Este Ã© um email automÃ¡tico de aviso. Em caso de dÃºvidas, entre em contato conosco.</em></p>");
         sb.AppendLine("</div>");
         
         sb.AppendLine("</div>");
@@ -298,12 +298,12 @@ public class AvisoCheckinGenerationService
         sb.AppendLine("<div class=\"container\">");
         
         var nomeCliente = dadosReserva.NomeCliente ?? dadosReserva.HospedePrincipal;
-        sb.AppendLine($"<p>Olá{(!string.IsNullOrEmpty(nomeCliente) ? $" <strong>{nomeCliente}</strong>" : "")},</p>");
+        sb.AppendLine($"<p>OlÃ¡{(!string.IsNullOrEmpty(nomeCliente) ? $" <strong>{nomeCliente}</strong>" : "")},</p>");
         sb.AppendLine($"<p>Faltam <strong>{daysBefore} dia{(daysBefore != 1 ? "s" : "")}</strong> para o seu check-in!</p>");
         
         sb.AppendLine("<div class=\"attachment-box\">");
         sb.AppendLine("<p style=\"font-size: 48px; margin: 10px 0;\">??</p>");
-        sb.AppendLine("<p style=\"font-size: 16px; margin: 10px 0;\"><strong>Informações em Anexo</strong></p>");
+        sb.AppendLine("<p style=\"font-size: 16px; margin: 10px 0;\"><strong>InformaÃ§Ãµes em Anexo</strong></p>");
         sb.AppendLine("<p>Confira os detalhes da sua reserva no documento PDF anexado a este email.</p>");
         sb.AppendLine("</div>");
         
@@ -313,7 +313,7 @@ public class AvisoCheckinGenerationService
         if (!string.IsNullOrEmpty(dadosReserva.NomeHotel))
             sb.AppendLine($"<p><strong>Hotel:</strong> {dadosReserva.NomeHotel}</p>");
         
-        sb.AppendLine("<p style=\"margin-top: 30px; color: #666; font-size: 14px;\">Aguardamos você!</p>");
+        sb.AppendLine("<p style=\"margin-top: 30px; color: #666; font-size: 14px;\">Aguardamos vocÃª!</p>");
         sb.AppendLine("</div>");
         sb.AppendLine("</body>");
         sb.AppendLine("</html>");
@@ -321,7 +321,7 @@ public class AvisoCheckinGenerationService
         return sb.ToString();
     }
 
-    #region Métodos Auxiliares
+    #region MÃ©todos Auxiliares
 
     private string ReplaceIgnoreCase(string text, string oldValue, string newValue)
     {

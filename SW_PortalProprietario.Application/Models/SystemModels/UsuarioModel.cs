@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Models.GeralModels;
+﻿using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Models.PessoaModels;
 using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 using SW_PortalProprietario.Domain.Enumns;
@@ -58,7 +58,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
             } 
         }
         
-        // Propriedade para uso no código (List<string>)
+        // Propriedade para uso no cÃ³digo (List<string>)
         public List<string>? MenuPermissions { get; set; }
 
         public static explicit operator UsuarioModel(Usuario model)

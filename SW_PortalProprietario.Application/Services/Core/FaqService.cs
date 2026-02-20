@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -48,7 +48,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var faq = await _repository.FindById<Faq>(id);
                 if (faq is null)
                 {
-                    throw new ArgumentException($"Não foi encontrado o FAQ com Id: {id}!");
+                    throw new ArgumentException($"NÃ£o foi encontrado o FAQ com Id: {id}!");
                 }
 
 
@@ -63,7 +63,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -72,7 +72,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o FAQ: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o FAQ: {id}");
                 throw;
             }
         }
@@ -92,7 +92,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                     if (inclusao)
                     {
-                        model.Disponivel = EnumSimNao.Não;
+                        model.Disponivel = EnumSimNao.Nao;
                     }
                 }
 
@@ -102,7 +102,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var faqSalvar = faq != null ? _mapper.Map(model, faq) : _mapper.Map(model, new Faq());
 
-                // Se for uma inclusão e não tiver ordem definida, definir ordem padrão dentro do grupo
+                // Se for uma inclusÃ£o e nÃ£o tiver ordem definida, definir ordem padrÃ£o dentro do grupo
                 if (faq == null && (model.Ordem == null || model.Ordem == 0) && model.GrupoFaqId.HasValue)
                 {
                     var maxOrdem = (await _repository.FindBySql<int?>($"Select Max(Ordem) From Faq Where GrupoFaq = {model.GrupoFaqId.Value}")).FirstOrDefault();
@@ -113,7 +113,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 faq = result;
                 await SincronizarTagsRequeridas(faq, model.TagsRequeridas ?? new List<int>(), true);
 
-                #region Parte que envia email ao usuário que adicionou a pergunta e ou teve sua dúvida respondida (Retirada do escopo do projeto)
+                #region Parte que envia email ao usuÃ¡rio que adicionou a pergunta e ou teve sua dÃºvida respondida (Retirada do escopo do projeto)
                 //var grupoFaq = (await _repository.FindByHql<GrupoFaq>($"From GrupoFaq gf Inner Join Fetch gf.Empresa emp Where gf.Id = {result.GrupoFaq?.Id}")).FirstOrDefault();
 
                 //if (grupoFaq != null)
@@ -127,25 +127,25 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 //            if (inclusao)
                 //            {
-                //                if (grupoFaq.EnviarPerguntaAoCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                //                if (grupoFaq.EnviarPerguntaAoCliente.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 //                {
 
-                //                    if (grupoFaq.EnviarPerguntaAoCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                //                    if (grupoFaq.EnviarPerguntaAoCliente.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 //                    {
 
                 //                        await _emailService.SaveInternal(new EmailInputInternalModel()
                 //                        {
                 //                            UsuarioCriacao = usuarioCriadorFaq.Id,
-                //                            Assunto = @$"Sua pergunta/dúvida foi adicionada com sucesso no Portal do Proprietário",
+                //                            Assunto = @$"Sua pergunta/dÃºvida foi adicionada com sucesso no Portal do ProprietÃ¡rio",
                 //                            Destinatario = emailUtilizar,
-                //                            ConteudoEmail = @$"Olá, {usuarioCriadorFaq.Pessoa?.Nome}!
+                //                            ConteudoEmail = @$"OlÃ¡, {usuarioCriadorFaq.Pessoa?.Nome}!
                 //                            <br>
-                //                            Você está recebendo esse email por ter adicionado uma pergunta no Portal do Proprietário!
+                //                            VocÃª estÃ¡ recebendo esse email por ter adicionado uma pergunta no Portal do ProprietÃ¡rio!
                 //                            <br>
                 //                            Pergunta adicionada: 
                 //                            <b> ({result.Pergunta})!</b>
                 //                            <br>
-                //                            Assim que sua pergunta for respondida, você receberá um novo email com a resposta.
+                //                            Assim que sua pergunta for respondida, vocÃª receberÃ¡ um novo email com a resposta.
                 //                            <br>
                 //                            Agradecemos o seu contato!"
                 //                        });
@@ -158,11 +158,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                 //                        await _emailService.SaveInternal(new EmailInputInternalModel()
                 //                        {
                 //                            UsuarioCriacao = usuarioCriadorFaq.Id,
-                //                            Assunto = @$"Sua pergunta/dúvida foi adicionada com sucesso no Portal do Proprietário",
+                //                            Assunto = @$"Sua pergunta/dÃºvida foi adicionada com sucesso no Portal do ProprietÃ¡rio",
                 //                            Destinatario = emailUtilizar,
-                //                            ConteudoEmail = @$"Olá, {usuarioCriadorFaq.Pessoa?.Nome}!
+                //                            ConteudoEmail = @$"OlÃ¡, {usuarioCriadorFaq.Pessoa?.Nome}!
                 //                            <br>
-                //                            Você está recebendo esse email por ter adicionado uma pergunta no Portal do Proprietário!
+                //                            VocÃª estÃ¡ recebendo esse email por ter adicionado uma pergunta no Portal do ProprietÃ¡rio!
                 //                            <br>
                 //                            Pergunta adicionada: 
                 //                            <b> ({result.Pergunta})!</b>
@@ -176,16 +176,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                 //                    await _repository.Save(result);
                 //                }
                 //            }
-                //            else if (grupoFaq.EnviarRespostaAoCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim && !string.IsNullOrEmpty(faq.Resposta)) 
+                //            else if (grupoFaq.EnviarRespostaAoCliente.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim && !string.IsNullOrEmpty(faq.Resposta)) 
                 //            {
                 //                await _emailService.SaveInternal(new EmailInputInternalModel()
                 //                {
                 //                    UsuarioCriacao = usuarioCriadorFaq.Id,
-                //                    Assunto = @$"Sua pergunta/dúvida foi respondida pelo Portal do Proprietário",
+                //                    Assunto = @$"Sua pergunta/dÃºvida foi respondida pelo Portal do ProprietÃ¡rio",
                 //                    Destinatario = emailUtilizar,
-                //                    ConteudoEmail = @$"Olá, {usuarioCriadorFaq.Pessoa?.Nome}!
+                //                    ConteudoEmail = @$"OlÃ¡, {usuarioCriadorFaq.Pessoa?.Nome}!
                 //                            <br>
-                //                            Você está recebendo esse email por ter adicionado uma pergunta no Portal do Proprietário e agora ela ter sido respondida!
+                //                            VocÃª estÃ¡ recebendo esse email por ter adicionado uma pergunta no Portal do ProprietÃ¡rio e agora ela ter sido respondida!
                 //                            <br>
                 //                            Pergunta adicionada: 
                 //                            <b> ({result.Pergunta})!</b>
@@ -214,11 +214,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                         return _mapper.Map(result, new FaqModel());
 
                 }
-                throw exception ?? new Exception($"Não foi possível salvar a FAQ: ({faqSalvar.Pergunta})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar a FAQ: ({faqSalvar.Pergunta})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a FAQ: ({model.Pergunta})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a FAQ: ({model.Pergunta})");
                 _repository.Rollback();
                 throw;
             }
@@ -245,7 +245,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var tagsInexistentes = listTags.Where(c => !allTags.Any(b => b.Id == c)).AsList();
                 if (tagsInexistentes.Count > 0)
                 {
-                    throw new ArgumentException($"Tags não encontradas: {string.Join(",", tagsInexistentes)}");
+                    throw new ArgumentException($"Tags nÃ£o encontradas: {string.Join(",", tagsInexistentes)}");
                 }
 
                 var tags = (await _repository.FindBySql<TagsModel>(@$"Select t.Id From Tags t Where t.Id in ({string.Join(",", listTags)}) and 
@@ -274,15 +274,15 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 var loggedUser = await _repository.GetLoggedUser();
                 if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o usuÃ¡rio para comunicaÃ§Ã£o com o eSolution!");
 
                 var userId = loggedUser.Value.userId;
                 if (string.IsNullOrEmpty(userId) || !Helper.IsNumeric(userId))
-                    throw new ArgumentNullException("Não foi possível identificar o id do usuário logado.");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o id do usuÃ¡rio logado.");
 
                 var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(userId), _communicationProvider.CommunicationProviderName);
                 if (pessoaProvider == null || !pessoaProvider.Any() || pessoaProvider.Any(a => string.IsNullOrEmpty(a.PessoaProvider)))
-                    throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
+                    throw new ArgumentNullException($"NÃ£o foi possÃ­vel encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
 
             }
 
@@ -358,7 +358,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     _logger.LogInformation($"Ordem das FAQs atualizada com sucesso!");
                     return true;
                 }
-                throw exception ?? new Exception("Não foi possível atualizar a ordem das FAQs");
+                throw exception ?? new Exception("NÃ£o foi possÃ­vel atualizar a ordem das FAQs");
             }
             catch (Exception err)
             {

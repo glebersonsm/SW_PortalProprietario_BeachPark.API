@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -43,8 +43,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
                 return BadRequest(new ResultModel<bool>(false)
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Email: ({model.Assunto})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Email: ({model.Assunto})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Email: ({model.Assunto})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Email: ({model.Assunto})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -54,8 +54,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<EmailModel>(new EmailModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Email: ( {model.Assunto})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Email: ( {model.Assunto})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Email: ( {model.Assunto})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Email: ( {model.Assunto})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -84,8 +84,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
                 return BadRequest(new ResultModel<EmailModel>(new EmailModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Email: (  {model.Assunto})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Email: (  {model.Assunto})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Email: (  {model.Assunto})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Email: (  {model.Assunto})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -95,8 +95,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<EmailModel>(new EmailModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Email: (   {model.Assunto})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Email: (   {model.Assunto})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Email: (   {model.Assunto})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Email: (   {model.Assunto})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -123,7 +123,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
             {
                 return NotFound(new DeleteResultModel()
                 {
-                    Result = "Não deletado",
+                    Result = "NÃ£o deletado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -134,7 +134,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
             {
                 return BadRequest(new DeleteResultModel()
                 {
-                    Result = "Não deletado",
+                    Result = "NÃ£o deletado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -145,7 +145,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new DeleteResultModel()
                 {
-                    Result = "Não deletado",
+                    Result = "NÃ£o deletado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -176,8 +176,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
                 return BadRequest(new ResultModel<bool>(false)
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível enviar o Email: (  {id})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível enviar o Email: (   {id})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel enviar o Email: (  {id})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel enviar o Email: (   {id})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -187,8 +187,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<bool>(false)
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível enviar o Email: (   {id})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível enviar o Email: (    {id})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel enviar o Email: (   {id})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel enviar o Email: (    {id})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -231,8 +231,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
                 {
                     Data = new List<EmailModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -243,8 +243,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
                 {
                     Data = new List<EmailModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -253,7 +253,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
         /// <summary>
         /// Endpoint usado pelo pixel de rastreio de abertura de e-mail.
         /// Chamado quando o cliente de e-mail carrega as imagens do corpo do e-mail.
-        /// Público (sem autenticação) para o pixel poder ser carregado.
+        /// PÃºblico (sem autenticaÃ§Ã£o) para o pixel poder ser carregado.
         /// </summary>
         [HttpGet("track/open")]
         [AllowAnonymous]
@@ -268,7 +268,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Email
             }
             catch
             {
-                // Não expor erro ao cliente; apenas retornar a imagem
+                // NÃ£o expor erro ao cliente; apenas retornar a imagem
             }
             return File(TransparentGif1x1(), "image/gif", "pixel.gif");
         }

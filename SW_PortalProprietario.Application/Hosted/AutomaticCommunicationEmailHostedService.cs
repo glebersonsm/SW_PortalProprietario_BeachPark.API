@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+Ôªøusing Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -9,9 +9,9 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Hosted;
 
 /// <summary>
-/// ServiÁo em background para processamento autom·tico de comunicaÁıes
+/// Servi√ßo em background para processamento autom√°tico de comunica√ß√µes
 /// (Vouchers, Avisos de Check-in, Incentivo para Agendamento, etc.)
-/// ? UNIFICADO - Processa TODOS os tipos de comunicaÁ„o dinamicamente
+/// ? UNIFICADO - Processa TODOS os tipos de comunica√ß√£o dinamicamente
 /// </summary>
 public class AutomaticCommunicationEmailHostedService : BackgroundService
 {
@@ -45,7 +45,7 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "? Erro ao processar comunicaÁıes autom·ticas");
+                    _logger.LogError(ex, "? Erro ao processar comunica√ß√µes autom√°ticas");
                 }
                 finally
                 {
@@ -55,7 +55,7 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
 
             // Executar uma vez por dia (24 horas)
             var intervalHours = _configuration.GetValue<int>("AutomaticCommunicationEmailIntervalHours", 24);
-            _logger.LogInformation("? PrÛxima execuÁ„o em {Hours} horas", intervalHours);
+            _logger.LogInformation("? Pr√≥xima execu√ß√£o em {Hours} horas", intervalHours);
             
             await Task.Delay(TimeSpan.FromHours(intervalHours), stoppingToken);
         }
@@ -66,10 +66,10 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
     private async Task ProcessAllCommunicationsAsync()
     {
         _logger.LogInformation("???????????????????????????????????????????????????");
-        _logger.LogInformation("?? INICIANDO PROCESSAMENTO DE COMUNICA«’ES AUTOM¡TICAS");
+        _logger.LogInformation("?? INICIANDO PROCESSAMENTO DE COMUNICA√á√ïES AUTOM√ÅTICAS");
         _logger.LogInformation("???????????????????????????????????????????????????");
 
-        // ? PROCESSAR TODOS OS TIPOS DE COMUNICA«√O DINAMICAMENTE
+        // ? PROCESSAR TODOS OS TIPOS DE COMUNICA√á√ÉO DINAMICAMENTE
         var allCommunicationTypes = Enum.GetValues<EnumDocumentTemplateType>();
         
         foreach (var communicationType in allCommunicationTypes)
@@ -79,7 +79,7 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
         }
 
         _logger.LogInformation("???????????????????????????????????????????????????");
-        _logger.LogInformation("? PROCESSAMENTO DE COMUNICA«’ES AUTOM¡TICAS CONCLUÕDO");
+        _logger.LogInformation("? PROCESSAMENTO DE COMUNICA√á√ïES AUTOM√ÅTICAS CONCLU√çDO");
         _logger.LogInformation("???????????????????????????????????????????????????");
     }
 
@@ -129,23 +129,23 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
                     
                     _logger.LogInformation(" ?? Tipo: {FriendlyName} - {ProjectType}", friendlyName, projectTypeName);
 
-                    // Buscar configuraÁ„o ativa
+                    // Buscar configura√ß√£o ativa
                     var config = await configService.GetByCommunicationTypeAsync(communicationType, projetoType);
                     
                     if (config == null || !config.Enabled)
                     {
-                        _logger.LogInformation(" ?? ConfiguraÁ„o n„o encontrada ou desabilitada");
+                        _logger.LogInformation(" ?? Configura√ß√£o n√£o encontrada ou desabilitada");
                         return;
                     }
 
                     if (config.TemplateId == null || config.TemplateId <= 0)
                     {
-                        _logger.LogWarning(" ?? Template n„o configurado");
+                        _logger.LogWarning(" ?? Template n√£o configurado");
                         return;
                     }
 
-                    // ? VERIFICA«√O CONDICIONAL PARA DaysBeforeCheckIn
-                    // Alguns tipos de comunicaÁ„o (como Incentivo para Agendamento) n„o usam DaysBeforeCheckIn
+                    // ? VERIFICA√á√ÉO CONDICIONAL PARA DaysBeforeCheckIn
+                    // Alguns tipos de comunica√ß√£o (como Incentivo para Agendamento) n√£o usam DaysBeforeCheckIn
                     var requiresDaysBeforeCheckIn = communicationType == EnumDocumentTemplateType.VoucherReserva ||
                                                     communicationType == EnumDocumentTemplateType.AvisoReservaCheckinProximo || 
                                                     communicationType == EnumDocumentTemplateType.IncentivoParaAgendamento;
@@ -160,7 +160,7 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
                     var handler = handlerFactory.GetHandler(communicationType);
                     if (handler == null)
                     {
-                        _logger.LogWarning(" ?? Handler n„o encontrado para {CommunicationType}", communicationType);
+                        _logger.LogWarning(" ?? Handler n√£o encontrado para {CommunicationType}", communicationType);
                         return;
                     }
 
@@ -179,7 +179,7 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
                         await handler.ProcessTimesharingAsync(session!, config);
                     }
 
-                    _logger.LogInformation(" ?? Processamento concluÌdo: {FriendlyName} - {ProjectType}", 
+                    _logger.LogInformation(" ?? Processamento conclu√≠do: {FriendlyName} - {ProjectType}", 
                         friendlyName, projectTypeName);
                 }
                 catch (Exception ex)
@@ -192,7 +192,7 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
     }
 
     /// <summary>
-    /// Retorna nome amig·vel para o tipo de comunicaÁ„o
+    /// Retorna nome amig√°vel para o tipo de comunica√ß√£o
     /// </summary>
     private string GetFriendlyName(EnumDocumentTemplateType communicationType)
     {
@@ -200,7 +200,7 @@ public class AutomaticCommunicationEmailHostedService : BackgroundService
         {
             EnumDocumentTemplateType.VoucherReserva => "Vouchers de Reserva",
             EnumDocumentTemplateType.ComunicacaoCancelamentoReservaRci => "Cancelamento de Reserva RCI",
-            EnumDocumentTemplateType.AvisoReservaCheckinProximo => "Avisos de Check-in PrÛximo",
+            EnumDocumentTemplateType.AvisoReservaCheckinProximo => "Avisos de Check-in Pr√≥ximo",
             EnumDocumentTemplateType.IncentivoParaAgendamento => "Incentivo para Agendamento",
             _ => communicationType.ToString()
         };

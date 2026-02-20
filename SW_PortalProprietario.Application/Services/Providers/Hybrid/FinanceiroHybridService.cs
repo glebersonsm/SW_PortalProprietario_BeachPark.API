@@ -381,7 +381,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (searchModel.VencimentoInicial.GetValueOrDefault() > searchModel.VencimentoFinal.GetValueOrDefault())
                 throw new ArgumentException("A data de vencimento inicial, seve ser inferir a data de vencimento final");
 
-            if (parametrosSistema != null && parametrosSistema.ExibirContasVencidas.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
+            if (parametrosSistema != null && parametrosSistema.ExibirContasVencidas.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Nao)
                 searchModel.VencimentoInicial = DateTime.Today;
 
             var loggedUser = await _repositorySystem.GetLoggedUser();
@@ -528,7 +528,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
             if (parametroSistema != null)
             {
-                if (parametroSistema.ExibirContasVencidas == Domain.Enumns.EnumSimNao.Não)
+                if (parametroSistema.ExibirContasVencidas == Domain.Enumns.EnumSimNao.Nao)
                 {
                     sb.AppendLine($" and crp.Vencimento >= :dataAtual");
                     parameters.Add(new Parameter("dataAtual", DateTime.Today));
@@ -839,7 +839,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (searchModel.VencimentoInicial.GetValueOrDefault() > searchModel.VencimentoFinal.GetValueOrDefault())
                 throw new ArgumentException("A data de vencimento inicial, seve ser inferir a data de vencimento final");
 
-            if (parametrosSistema != null && parametrosSistema.ExibirContasVencidas.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
+            if (parametrosSistema != null && parametrosSistema.ExibirContasVencidas.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Nao)
                 searchModel.VencimentoInicial = DateTime.Today;
 
             var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
@@ -1604,7 +1604,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (!_repositorySystem.IsAdm)
             {
                 var systemConfiguration = await _repositorySystem.GetParametroSistemaViewModel();
-                if (systemConfiguration != null && systemConfiguration.HabilitarBaixarBoleto.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
+                if (systemConfiguration != null && systemConfiguration.HabilitarBaixarBoleto.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Nao)
                     throw new ArgumentException("O sistema está configurado para não permitir a baixa de boletos.");
             }
 

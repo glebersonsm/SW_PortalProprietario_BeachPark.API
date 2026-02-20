@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+Ôªøusing Microsoft.Extensions.Configuration;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.LogsBackGround;
 using SW_Utils.Models;
@@ -32,7 +32,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
             IChannel? channel = null;
             try
             {
-                // ? Reutiliza conex„o compartilhada ao invÈs de criar uma nova
+                // ? Reutiliza conex√£o compartilhada ao inv√©s de criar uma nova
                 var connection = await _connectionManager.GetProducerConnectionAsync();
                 channel = await _connectionManager.CreateChannelAsync(connection);
 
@@ -60,7 +60,7 @@ namespace SW_PortalProprietario.Infra.Data.RabbitMQ.Producers
             }
             finally
             {
-                // ? Fecha apenas o channel, n„o a conex„o (conex„o È reutilizada)
+                // ? Fecha apenas o channel, n√£o a conex√£o (conex√£o √© reutilizada)
                 if (channel != null)
                 {
                     try

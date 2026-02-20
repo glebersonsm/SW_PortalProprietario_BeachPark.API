@@ -1,4 +1,4 @@
-using EsolutionPortalDomain.Enums;
+﻿using EsolutionPortalDomain.Enums;
 
 namespace SW_PortalProprietario.Application.Models.TimeSharing
 {

@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -23,13 +23,13 @@ namespace SW_PortalProprietario.Test.Controllers
             _controller = new CidadeController(_cityServiceMock.Object);
         }
 
-        [Fact(DisplayName = "SaveCity - Deve retornar 200 OK quando cidade é salva com sucesso")]
+        [Fact(DisplayName = "SaveCity - Deve retornar 200 OK quando cidade Ã© salva com sucesso")]
         public async Task SaveCity_DeveRetornar200Ok_QuandoCidadeSalvaComSucesso()
         {
             // Arrange
             var inputModel = new RegistroCidadeInputModel
             {
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308",
                 EstadoId = 1
             };
@@ -37,7 +37,7 @@ namespace SW_PortalProprietario.Test.Controllers
             var cidadeModel = new CidadeModel
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308"
             };
 
@@ -55,23 +55,23 @@ namespace SW_PortalProprietario.Test.Controllers
             resultModel.Success.Should().BeTrue();
             resultModel.Status.Should().Be(200);
             resultModel.Data.Should().NotBeNull();
-            resultModel.Data!.Nome.Should().Be("São Paulo");
+            resultModel.Data!.Nome.Should().Be("SÃ£o Paulo");
             resultModel.Errors.Should().BeEmpty();
         }
 
-        [Fact(DisplayName = "SaveCity - Deve retornar 400 BadRequest quando ArgumentException é lançada")]
+        [Fact(DisplayName = "SaveCity - Deve retornar 400 BadRequest quando ArgumentException Ã© lanÃ§ada")]
         public async Task SaveCity_DeveRetornar400BadRequest_QuandoArgumentExceptionLancada()
         {
             // Arrange
             var inputModel = new RegistroCidadeInputModel
             {
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308"
             };
 
             _cityServiceMock
                 .Setup(x => x.SaveCity(It.IsAny<RegistroCidadeInputModel>()))
-                .ThrowsAsync(new ArgumentException("Cidade já existe"));
+                .ThrowsAsync(new ArgumentException("Cidade jÃ¡ existe"));
 
             // Act
             var result = await _controller.SaveCity(inputModel);
@@ -83,17 +83,17 @@ namespace SW_PortalProprietario.Test.Controllers
             resultModel.Success.Should().BeFalse();
             resultModel.Status.Should().Be(400);
             resultModel.Errors.Should().NotBeEmpty();
-            resultModel.Errors.Should().Contain("Não foi possível salvar a Cidade: (São Paulo)");
+            resultModel.Errors.Should().Contain("NÃ£o foi possÃ­vel salvar a Cidade: (SÃ£o Paulo)");
         }
 
-        [Fact(DisplayName = "UpdateCity - Deve retornar 200 OK quando cidade é atualizada com sucesso")]
+        [Fact(DisplayName = "UpdateCity - Deve retornar 200 OK quando cidade Ã© atualizada com sucesso")]
         public async Task UpdateCity_DeveRetornar200Ok_QuandoCidadeAtualizadaComSucesso()
         {
             // Arrange
             var inputModel = new AlteracaoCidadeInputModel
             {
                 Id = 1,
-                Nome = "São Paulo Atualizado",
+                Nome = "SÃ£o Paulo Atualizado",
                 CodigoIbge = "3550308",
                 EstadoId = 1
             };
@@ -101,7 +101,7 @@ namespace SW_PortalProprietario.Test.Controllers
             var cidadeModel = new CidadeModel
             {
                 Id = 1,
-                Nome = "São Paulo Atualizado",
+                Nome = "SÃ£o Paulo Atualizado",
                 CodigoIbge = "3550308"
             };
 
@@ -119,10 +119,10 @@ namespace SW_PortalProprietario.Test.Controllers
             resultModel.Success.Should().BeTrue();
             resultModel.Status.Should().Be(200);
             resultModel.Data.Should().NotBeNull();
-            resultModel.Data!.Nome.Should().Be("São Paulo Atualizado");
+            resultModel.Data!.Nome.Should().Be("SÃ£o Paulo Atualizado");
         }
 
-        [Fact(DisplayName = "DeleteCity - Deve retornar 200 OK quando cidade é deletada com sucesso")]
+        [Fact(DisplayName = "DeleteCity - Deve retornar 200 OK quando cidade Ã© deletada com sucesso")]
         public async Task DeleteCity_DeveRetornar200Ok_QuandoCidadeDeletadaComSucesso()
         {
             // Arrange
@@ -149,7 +149,7 @@ namespace SW_PortalProprietario.Test.Controllers
             resultModel.Errors.Should().BeEmpty();
         }
 
-        [Fact(DisplayName = "DeleteCity - Deve retornar 404 NotFound quando FileNotFoundException é lançada")]
+        [Fact(DisplayName = "DeleteCity - Deve retornar 404 NotFound quando FileNotFoundException Ã© lanÃ§ada")]
         public async Task DeleteCity_DeveRetornar404NotFound_QuandoFileNotFoundExceptionLancada()
         {
             // Arrange
@@ -157,7 +157,7 @@ namespace SW_PortalProprietario.Test.Controllers
 
             _cityServiceMock
                 .Setup(x => x.DeleteCity(It.IsAny<int>()))
-                .ThrowsAsync(new FileNotFoundException("Cidade não encontrada"));
+                .ThrowsAsync(new FileNotFoundException("Cidade nÃ£o encontrada"));
 
             // Act
             var result = await _controller.DeleteCity(id);
@@ -167,7 +167,7 @@ namespace SW_PortalProprietario.Test.Controllers
             var resultModel = notFoundResult.Value.Should().BeOfType<DeleteResultModel>().Subject;
             
             resultModel.Status.Should().Be(404);
-            resultModel.Result.Should().Be("Não deletado");
+            resultModel.Result.Should().Be("NÃ£o deletado");
             resultModel.Errors.Should().NotBeEmpty();
         }
     }

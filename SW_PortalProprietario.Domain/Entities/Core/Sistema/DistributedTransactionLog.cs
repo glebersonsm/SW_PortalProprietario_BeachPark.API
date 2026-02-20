@@ -1,20 +1,20 @@
-namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
+ï»¿namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
 {
     /// <summary>
-    /// Entidade para rastrear transações distribuídas (Saga Pattern)
-    /// Permite auditoria e investigação de problemas
+    /// Entidade para rastrear transaÃ§Ãµes distribuÃ­das (Saga Pattern)
+    /// Permite auditoria e investigaÃ§Ã£o de problemas
     /// </summary>
     public class DistributedTransactionLog
     {
         public virtual int? Id { get; set; }
         
         /// <summary>
-        /// ID único da operação (GUID)
+        /// ID Ãºnico da operaÃ§Ã£o (GUID)
         /// </summary>
         public virtual string OperationId { get; set; }
         
         /// <summary>
-        /// Tipo da operação (Ex: "ReservaTimeSharing", "LiberacaoPool", "TrocaPeriodo")
+        /// Tipo da operaÃ§Ã£o (Ex: "ReservaTimeSharing", "LiberacaoPool", "TrocaPeriodo")
         /// </summary>
         public virtual string OperationType { get; set; }
         
@@ -24,7 +24,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string StepName { get; set; }
         
         /// <summary>
-        /// Ordem de execução do step
+        /// Ordem de execuÃ§Ã£o do step
         /// </summary>
         public virtual int StepOrder { get; set; }
         
@@ -34,7 +34,7 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string Status { get; set; }
         
         /// <summary>
-        /// Dados da execução serializado em JSON
+        /// Dados da execuÃ§Ã£o serializado em JSON
         /// </summary>
         public virtual string? Payload { get; set; }
         
@@ -44,17 +44,17 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Sistema
         public virtual string? ErrorMessage { get; set; }
         
         /// <summary>
-        /// Data/hora de criação do registro
+        /// Data/hora de criaÃ§Ã£o do registro
         /// </summary>
         public virtual DateTime DataHoraCriacao { get; set; }
         
         /// <summary>
-        /// Data/hora da compensação (se houver)
+        /// Data/hora da compensaÃ§Ã£o (se houver)
         /// </summary>
         public virtual DateTime? DataHoraCompensacao { get; set; }
         
         /// <summary>
-        /// Usuário que iniciou a operação
+        /// UsuÃ¡rio que iniciou a operaÃ§Ã£o
         /// </summary>
         public virtual int? UsuarioCriacao { get; set; }
         

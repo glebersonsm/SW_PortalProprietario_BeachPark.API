@@ -1,39 +1,39 @@
-# Troubleshooting - CriaÁ„o de Schema no PostgreSQL
+Ôªø# Troubleshooting - Cria√ß√£o de Schema no PostgreSQL
 
 ## Problema
-As tabelas n„o est„o sendo geradas no schema `portalohana` no banco de dados PostgreSQL.
+As tabelas n√£o est√£o sendo geradas no schema `portalohana` no banco de dados PostgreSQL.
 
-## SoluÁ„o Implementada
+## Solu√ß√£o Implementada
 
 ### 1. Logs de Erro Habilitados
 
-Foi adicionado logging detalhado no mÈtodo `BuildSchema` da classe `NHibernateExtensions.cs` para capturar e exibir erros durante a criaÁ„o/atualizaÁ„o do schema.
+Foi adicionado logging detalhado no m√©todo `BuildSchema` da classe `NHibernateExtensions.cs` para capturar e exibir erros durante a cria√ß√£o/atualiza√ß√£o do schema.
 
-### 2. ConfiguraÁıes Adicionadas
+### 2. Configura√ß√µes Adicionadas
 
-As seguintes configuraÁıes foram habilitadas para PostgreSQL:
+As seguintes configura√ß√µes foram habilitadas para PostgreSQL:
 
 ```csharp
 .ShowSql()           // Exibir SQL gerado pelo NHibernate
 .FormatSql()         // Formatar SQL para melhor legibilidade
-.Raw("throw_on_error", "true")  // LanÁar exceÁıes em erros
+.Raw("throw_on_error", "true")  // Lan√ßar exce√ß√µes em erros
 ```
 
-### 3. Schema Padr„o Configurado
+### 3. Schema Padr√£o Configurado
 
 ```csharp
-.Raw("default_schema", "portalohana")  // Define o schema padr„o
+.Raw("default_schema", "portalohana")  // Define o schema padr√£o
 ```
 
 ## Como Ver os Logs de Erro
 
-### OpÁ„o 1: Console do Aplicativo
+### Op√ß√£o 1: Console do Aplicativo
 
-Ao iniciar a aplicaÁ„o, os logs ser„o exibidos no console com o seguinte formato:
+Ao iniciar a aplica√ß√£o, os logs ser√£o exibidos no console com o seguinte formato:
 
 ```
 ========================================
-INICIANDO ATUALIZA«√O DO SCHEMA NO POSTGRESQL
+INICIANDO ATUALIZA√á√ÉO DO SCHEMA NO POSTGRESQL
 ========================================
 [SQL] CREATE TABLE portalohana.usuario (...)
 [SQL] CREATE TABLE portalohana.pessoa (...)
@@ -47,7 +47,7 @@ SCHEMA ATUALIZADO COM SUCESSO!
 
 ```
 ========================================
-ERROS ENCONTRADOS DURANTE A ATUALIZA«√O DO SCHEMA:
+ERROS ENCONTRADOS DURANTE A ATUALIZA√á√ÉO DO SCHEMA:
 ========================================
 ERRO: permission denied for schema portalohana
 STACK TRACE: ...
@@ -55,22 +55,22 @@ STACK TRACE: ...
 ========================================
 ```
 
-### OpÁ„o 2: Visual Studio Output Window
+### Op√ß√£o 2: Visual Studio Output Window
 
 1. Abra o Visual Studio
-2. V· em **View ? Output** (ou pressione `Ctrl+Alt+O`)
+2. V√° em **View ? Output** (ou pressione `Ctrl+Alt+O`)
 3. Na janela Output, selecione "Debug" no dropdown
-4. Execute a aplicaÁ„o e observe os logs
+4. Execute a aplica√ß√£o e observe os logs
 
-### OpÁ„o 3: Logs do NLog (Se Configurado)
+### Op√ß√£o 3: Logs do NLog (Se Configurado)
 
-Se vocÍ tiver o NLog configurado, os logs tambÈm ser„o gravados nos arquivos de log configurados.
+Se voc√™ tiver o NLog configurado, os logs tamb√©m ser√£o gravados nos arquivos de log configurados.
 
-## VerificaÁıes Importantes
+## Verifica√ß√µes Importantes
 
-### 1. Verificar ConfiguraÁ„o do appsettings.json
+### 1. Verificar Configura√ß√£o do appsettings.json
 
-Certifique-se de que a propriedade `UpdateDataBase` est· definida como `true`:
+Certifique-se de que a propriedade `UpdateDataBase` est√° definida como `true`:
 
 ```json
 {
@@ -78,14 +78,14 @@ Certifique-se de que a propriedade `UpdateDataBase` est· definida como `true`:
 }
 ```
 
-**LocalizaÁ„o possÌvel:**
+**Localiza√ß√£o poss√≠vel:**
 - `appsettings.json`
 - `appsettings.Development.json`
 - `SourceConfiguration\BeachParkConfigurations.json`
 
-### 2. Verificar Vari·vel de Ambiente
+### 2. Verificar Vari√°vel de Ambiente
 
-Certifique-se de que a vari·vel de ambiente `DEFAULT_CONNECTION` est· configurada corretamente:
+Certifique-se de que a vari√°vel de ambiente `DEFAULT_CONNECTION` est√° configurada corretamente:
 
 ```
 DEFAULT_CONNECTION=Host=seu_host;PORT=5432;Database=seu_banco;Username=seu_usuario;Password=sua_senha
@@ -97,9 +97,9 @@ DEFAULT_CONNECTION=Host=seu_host;PORT=5432;Database=seu_banco;Username=seu_usuar
 DEFAULT_CONNECTION=Host=localhost;PORT=5432;Database=portaldb;Username=postgres;Password=senha123
 ```
 
-### 3. Verificar Permissıes do Banco de Dados
+### 3. Verificar Permiss√µes do Banco de Dados
 
-O usu·rio do banco de dados precisa ter permissıes para:
+O usu√°rio do banco de dados precisa ter permiss√µes para:
 
 ```sql
 -- Verificar se o schema existe
@@ -107,10 +107,10 @@ SELECT schema_name
 FROM information_schema.schemata 
 WHERE schema_name = 'portalohana';
 
--- Se n„o existir, criar:
+-- Se n√£o existir, criar:
 CREATE SCHEMA IF NOT EXISTS portalohana;
 
--- Dar permissıes ao usu·rio:
+-- Dar permiss√µes ao usu√°rio:
 GRANT ALL PRIVILEGES ON SCHEMA portalohana TO seu_usuario;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA portalohana TO seu_usuario;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA portalohana TO seu_usuario;
@@ -119,9 +119,9 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA portalohana TO seu_usuario;
 ALTER USER seu_usuario SET search_path TO portalohana, public;
 ```
 
-### 4. Testar Conex„o com o Banco
+### 4. Testar Conex√£o com o Banco
 
-Execute o seguinte script SQL para verificar se a conex„o est· funcionando:
+Execute o seguinte script SQL para verificar se a conex√£o est√° funcionando:
 
 ```sql
 -- Verificar schema atual
@@ -132,30 +132,30 @@ SELECT schema_name
 FROM information_schema.schemata 
 ORDER BY schema_name;
 
--- Verificar permissıes do usu·rio
+-- Verificar permiss√µes do usu√°rio
 SELECT * 
 FROM information_schema.role_table_grants 
 WHERE grantee = 'seu_usuario';
 ```
 
-## Erros Comuns e SoluÁıes
+## Erros Comuns e Solu√ß√µes
 
 ### Erro: "Dialect does not support DbType.Guid"
 
-**DescriÁ„o Completa:**
+**Descri√ß√£o Completa:**
 ```
 ERRO: Dialect does not support DbType.Guid (Parameter 'typecode')
 STACK TRACE:    at NHibernate.Dialect.TypeNames.Get(DbType typecode)
    at NHibernate.Dialect.Dialect.GetTypeName(SqlType sqlType)
 ```
 
-**Causa:** O PostgreSQL n„o suporta nativamente o tipo `DbType.Guid` do .NET. O PostgreSQL usa o tipo `UUID` ao invÈs de `GUID`. Este erro ocorre quando:
+**Causa:** O PostgreSQL n√£o suporta nativamente o tipo `DbType.Guid` do .NET. O PostgreSQL usa o tipo `UUID` ao inv√©s de `GUID`. Este erro ocorre quando:
 
 1. Alguma entidade tem propriedade `virtual Guid NomePropriedade` (tipo `System.Guid`)
-2. O NHibernate est· tentando fazer automapping dessa propriedade
-3. A entidade n„o tem um mapeamento FluentNHibernate explÌcito
+2. O NHibernate est√° tentando fazer automapping dessa propriedade
+3. A entidade n√£o tem um mapeamento FluentNHibernate expl√≠cito
 
-**SoluÁ„o Implementada:**
+**Solu√ß√£o Implementada:**
 
 ? **Todas as entidades agora usam `string?` para IDs/GUIDs:**
 ```csharp
@@ -163,7 +163,7 @@ STACK TRACE:    at NHibernate.Dialect.TypeNames.Get(DbType typecode)
 public virtual string? ObjectGuid { get; set; }
 public virtual string? SagaId { get; set; }
 
-// ? ERRADO - N√O usar System.Guid
+// ? ERRADO - N√ÉO usar System.Guid
 public virtual Guid ObjectGuid { get; set; }  // Causa erro!
 ```
 
@@ -179,9 +179,9 @@ public virtual Guid ObjectGuid { get; set; }  // Causa erro!
 grep -r "virtual Guid " --include="*.cs" SW_PortalProprietario.Domain
 ```
 
-2. **Se encontrar entidades com `Guid`, h· 3 opÁıes:**
+2. **Se encontrar entidades com `Guid`, h√° 3 op√ß√µes:**
 
-**OpÁ„o A: Converter para `string` (Recomendado)**
+**Op√ß√£o A: Converter para `string` (Recomendado)**
 ```csharp
 // ANTES
 public virtual Guid ObjectGuid { get; set; }
@@ -189,11 +189,11 @@ public virtual Guid ObjectGuid { get; set; }
 // DEPOIS
 public virtual string? ObjectGuid { get; set; }
 
-// E no cÛdigo, ao setar:
+// E no c√≥digo, ao setar:
 entity.ObjectGuid = Guid.NewGuid().ToString();
 ```
 
-**OpÁ„o B: Criar mapeamento explÌcito**
+**Op√ß√£o B: Criar mapeamento expl√≠cito**
 ```csharp
 public class MinhaEntidadeMap : ClassMap<MinhaEntidade>
 {
@@ -212,7 +212,7 @@ public class MinhaEntidadeMap : ClassMap<MinhaEntidade>
 }
 ```
 
-**OpÁ„o C: Usar UUID no PostgreSQL (AvanÁado)**
+**Op√ß√£o C: Usar UUID no PostgreSQL (Avan√ßado)**
 ```csharp
 // No mapeamento:
 Map(x => x.ObjectGuid).CustomSqlType("uuid");
@@ -223,7 +223,7 @@ public virtual Guid ObjectGuid { get; set; }
 
 ### Erro: "permission denied for schema portalohana"
 
-**SoluÁ„o:** O usu·rio n„o tem permissıes no schema. Execute:
+**Solu√ß√£o:** O usu√°rio n√£o tem permiss√µes no schema. Execute:
 
 ```sql
 GRANT ALL PRIVILEGES ON SCHEMA portalohana TO seu_usuario;
@@ -231,7 +231,7 @@ GRANT ALL PRIVILEGES ON SCHEMA portalohana TO seu_usuario;
 
 ### Erro: "schema 'portalohana' does not exist"
 
-**SoluÁ„o:** Crie o schema:
+**Solu√ß√£o:** Crie o schema:
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS portalohana;
@@ -240,19 +240,19 @@ GRANT ALL PRIVILEGES ON SCHEMA portalohana TO seu_usuario;
 
 ### Erro: "relation already exists"
 
-**SoluÁ„o:** As tabelas j· existem. O NHibernate est· tentando recriar. Isso pode ser ignorado ou vocÍ pode usar `SchemaUpdate` ao invÈs de `SchemaExport`.
+**Solu√ß√£o:** As tabelas j√° existem. O NHibernate est√° tentando recriar. Isso pode ser ignorado ou voc√™ pode usar `SchemaUpdate` ao inv√©s de `SchemaExport`.
 
 ### Erro: "timeout expired"
 
-**SoluÁ„o:** Aumente o timeout da conex„o:
+**Solu√ß√£o:** Aumente o timeout da conex√£o:
 
 ```csharp
 .Raw("hibernate.c3p0.timeout", "600")  // Aumentar para 10 minutos
 ```
 
-## Modo de DepuraÁ„o AvanÁado
+## Modo de Depura√ß√£o Avan√ßado
 
-Para obter mais informaÁıes de debug do NHibernate, adicione ao `appsettings.json`:
+Para obter mais informa√ß√µes de debug do NHibernate, adicione ao `appsettings.json`:
 
 ```json
 {
@@ -272,17 +272,17 @@ Para obter mais informaÁıes de debug do NHibernate, adicione ao `appsettings.jso
 Para gerar um script SQL com todas as tabelas que seriam criadas:
 
 ```csharp
-// Adicione este cÛdigo temporariamente no mÈtodo BuildSchema:
+// Adicione este c√≥digo temporariamente no m√©todo BuildSchema:
 var schemaExport = new SchemaExport(configuration);
 schemaExport.SetOutputFile(@"C:\temp\schema.sql");
 schemaExport.Create(scriptAction: null, execute: false);
 ```
 
-Isso gerar· um arquivo `schema.sql` que vocÍ pode revisar e executar manualmente.
+Isso gerar√° um arquivo `schema.sql` que voc√™ pode revisar e executar manualmente.
 
 ## Logs de SQL Detalhados
 
-Com as configuraÁıes atuais, vocÍ ver· cada comando SQL sendo executado:
+Com as configura√ß√µes atuais, voc√™ ver√° cada comando SQL sendo executado:
 
 ```
 [SQL] CREATE TABLE portalohana.usuario (
@@ -293,19 +293,19 @@ Com as configuraÁıes atuais, vocÍ ver· cada comando SQL sendo executado:
 )
 ```
 
-## PrÛximos Passos
+## Pr√≥ximos Passos
 
-1. Execute a aplicaÁ„o
+1. Execute a aplica√ß√£o
 2. Observe os logs no console
 3. Se houver erros, copie a mensagem de erro completa
-4. Verifique as permissıes do banco de dados
-5. Se necess·rio, execute os comandos SQL de permissıes acima
-6. Reinicie a aplicaÁ„o
+4. Verifique as permiss√µes do banco de dados
+5. Se necess√°rio, execute os comandos SQL de permiss√µes acima
+6. Reinicie a aplica√ß√£o
 
 ## Suporte
 
-Se os problemas persistirem, forneÁa:
+Se os problemas persistirem, forne√ßa:
 - Mensagem de erro completa do console
-- String de conex„o (sem senha)
-- Vers„o do PostgreSQL
-- Permissıes atuais do usu·rio no banco de dados
+- String de conex√£o (sem senha)
+- Vers√£o do PostgreSQL
+- Permiss√µes atuais do usu√°rio no banco de dados

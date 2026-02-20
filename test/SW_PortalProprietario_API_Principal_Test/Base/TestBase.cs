@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +11,7 @@ namespace SW_PortalProprietario.Test.Base
         {
             builder.ConfigureAppConfiguration((context, config) =>
             {
-                // Configuração para testes
+                // ConfiguraÃ§Ã£o para testes
                 config.AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     { "Jwt:Key", "TestKeyForJwtTokenGenerationInUnitTests123456789" },
@@ -24,7 +24,7 @@ namespace SW_PortalProprietario.Test.Base
 
             builder.ConfigureServices(services =>
             {
-                // Configurações adicionais para testes podem ser adicionadas aqui
+                // ConfiguraÃ§Ãµes adicionais para testes podem ser adicionadas aqui
             });
         }
     }

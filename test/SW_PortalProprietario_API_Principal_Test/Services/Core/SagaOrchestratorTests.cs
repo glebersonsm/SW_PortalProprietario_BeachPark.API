@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+Ôªøusing Microsoft.Extensions.Logging;
 using Moq;
 using SW_PortalProprietario.Application.Services.Core;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
@@ -7,8 +7,8 @@ using Xunit;
 namespace SW_PortalProprietario.Test.Services.Core
 {
     /// <summary>
-    /// Testes unit·rios completos para o SagaOrchestrator
-    /// Garante comportamento de Two-Phase Commit (atomicidade distribuÌda)
+    /// Testes unit√°rios completos para o SagaOrchestrator
+    /// Garante comportamento de Two-Phase Commit (atomicidade distribu√≠da)
     /// </summary>
     public class SagaOrchestratorTests
     {
@@ -95,7 +95,7 @@ namespace SW_PortalProprietario.Test.Services.Core
 
         #endregion
 
-        #region Testes de CompensaÁ„o (Rollback)
+        #region Testes de Compensa√ß√£o (Rollback)
 
         [Fact]
         public async Task ExecuteAsync_FalhaNoSegundoStep_DeveCompensarPrimeiro()
@@ -118,9 +118,9 @@ namespace SW_PortalProprietario.Test.Services.Core
             // Verificar que apenas step1 e step2 foram executados
             Mock.Get(step1).Verify(s => s.ExecuteAsync(), Times.Once);
             Mock.Get(step2).Verify(s => s.ExecuteAsync(), Times.Once);
-            Mock.Get(step3).Verify(s => s.ExecuteAsync(), Times.Never); // N„o deve executar
+            Mock.Get(step3).Verify(s => s.ExecuteAsync(), Times.Never); // N√£o deve executar
             
-            // Verificar que apenas step1 foi compensado (step2 falhou, ent„o n„o tem o que compensar)
+            // Verificar que apenas step1 foi compensado (step2 falhou, ent√£o n√£o tem o que compensar)
             Mock.Get(step1).Verify(s => s.CompensateAsync(It.IsAny<object>()), Times.Once);
             Mock.Get(step2).Verify(s => s.CompensateAsync(It.IsAny<object>()), Times.Never);
         }
@@ -145,7 +145,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             Assert.False(success);
             Assert.Contains("Erro no step 3", errorMessage);
             
-            // Verificar ordem de compensaÁ„o (reversa: Step2, Step1)
+            // Verificar ordem de compensa√ß√£o (reversa: Step2, Step1)
             Assert.Equal(2, compensationOrder.Count);
             Assert.Equal("Step2", compensationOrder[0]);
             Assert.Equal("Step1", compensationOrder[1]);
@@ -193,7 +193,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             step2Mock.Setup(s => s.ExecuteAsync()).ReturnsAsync((true, string.Empty, new object()));
             step2Mock.Setup(s => s.CompensateAsync(It.IsAny<object>()))
                 .Callback(() => compensationOrder.Add("Step2-FAILED"))
-                .ReturnsAsync(false); // CompensaÁ„o falha
+                .ReturnsAsync(false); // Compensa√ß√£o falha
             
             var step3 = CreateMockStep("Step3", 3, false, "Erro no step 3");
             
@@ -206,7 +206,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             // Assert
             Assert.False(success);
             
-            // Mesmo com falha na compensaÁ„o do Step2, deve tentar compensar Step1
+            // Mesmo com falha na compensa√ß√£o do Step2, deve tentar compensar Step1
             Assert.Equal(2, compensationOrder.Count);
             Assert.Equal("Step2-FAILED", compensationOrder[0]);
             Assert.Equal("Step1", compensationOrder[1]);
@@ -214,7 +214,7 @@ namespace SW_PortalProprietario.Test.Services.Core
 
         #endregion
 
-        #region Testes de Ordem de ExecuÁ„o
+        #region Testes de Ordem de Execu√ß√£o
 
         [Fact]
         public async Task ExecuteAsync_StepsForaDeOrdem_DeveExecutarNaOrdemCorreta()
@@ -255,7 +255,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             // Act
             await _orchestrator.ExecuteAsync(steps, operationId);
 
-            // Assert - Ordem est·vel
+            // Assert - Ordem est√°vel
             Assert.Equal(3, executionOrder.Count);
             Assert.Equal("StepA", executionOrder[0]);
             Assert.Equal("StepB", executionOrder[1]);
@@ -264,7 +264,7 @@ namespace SW_PortalProprietario.Test.Services.Core
 
         #endregion
 
-        #region Testes de ExceÁıes
+        #region Testes de Exce√ß√µes
 
         [Fact]
         public async Task ExecuteAsync_StepLancaExcecao_DeveCompensarERetornarErro()
@@ -275,7 +275,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             var step2Mock = new Mock<IDistributedTransactionStep>();
             step2Mock.Setup(s => s.StepName).Returns("Step2");
             step2Mock.Setup(s => s.Order).Returns(2);
-            step2Mock.Setup(s => s.ExecuteAsync()).ThrowsAsync(new InvalidOperationException("Erro crÌtico"));
+            step2Mock.Setup(s => s.ExecuteAsync()).ThrowsAsync(new InvalidOperationException("Erro cr√≠tico"));
             step2Mock.Setup(s => s.CompensateAsync(It.IsAny<object>())).ReturnsAsync(true);
             
             var steps = new List<IDistributedTransactionStep> { step1, step2Mock.Object };
@@ -286,7 +286,7 @@ namespace SW_PortalProprietario.Test.Services.Core
 
             // Assert
             Assert.False(success);
-            Assert.Contains("Erro crÌtico", errorMessage);
+            Assert.Contains("Erro cr√≠tico", errorMessage);
             
             // Step1 deve ser compensado
             Mock.Get(step1).Verify(s => s.CompensateAsync(It.IsAny<object>()), Times.Once);
@@ -307,7 +307,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             step2Mock.Setup(s => s.ExecuteAsync()).ReturnsAsync((true, string.Empty, new object()));
             step2Mock.Setup(s => s.CompensateAsync(It.IsAny<object>()))
                 .Callback(() => compensationOrder.Add("Step2-EXCEPTION"))
-                .ThrowsAsync(new Exception("Erro na compensaÁ„o"));
+                .ThrowsAsync(new Exception("Erro na compensa√ß√£o"));
             
             var step3 = CreateMockStep("Step3", 3, false, "Erro no step 3");
             
@@ -320,7 +320,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             // Assert
             Assert.False(success);
             
-            // Deve tentar compensar ambos, mesmo com exceÁ„o no Step2
+            // Deve tentar compensar ambos, mesmo com exce√ß√£o no Step2
             Assert.Equal(2, compensationOrder.Count);
             Assert.Contains("Step2-EXCEPTION", compensationOrder);
             Assert.Contains("Step1", compensationOrder);
@@ -385,7 +385,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             Mock.Get(step1).Verify(s => s.CompensateAsync(It.IsAny<object>()), Times.Never);
             Mock.Get(step2).Verify(s => s.CompensateAsync(It.IsAny<object>()), Times.Never);
             
-            // Step2 n„o deve ser executado
+            // Step2 n√£o deve ser executado
             Mock.Get(step2).Verify(s => s.ExecuteAsync(), Times.Never);
         }
 
@@ -396,7 +396,7 @@ namespace SW_PortalProprietario.Test.Services.Core
         [Fact]
         public async Task ExecuteAsync_SimulandoFalhaDeBanco_DeveGarantirAtomicidade()
         {
-            // Simula cen·rio real: Oracle OK, PostgreSQL OK, API Falha
+            // Simula cen√°rio real: Oracle OK, PostgreSQL OK, API Falha
             // Deve compensar PostgreSQL e Oracle
             
             // Arrange
@@ -464,16 +464,16 @@ namespace SW_PortalProprietario.Test.Services.Core
             Assert.True(postgresExecuted);
             Assert.True(apiExecuted);
             
-            // Nenhuma compensaÁ„o deve ocorrer em caso de sucesso total
-            Assert.False(oracleCompensated, "Oracle N√O deveria ser compensado");
-            Assert.False(postgresCompensated, "PostgreSQL N√O deveria ser compensado");
-            Assert.False(apiCompensated, "API N√O deveria ser compensada");
+            // Nenhuma compensa√ß√£o deve ocorrer em caso de sucesso total
+            Assert.False(oracleCompensated, "Oracle N√ÉO deveria ser compensado");
+            Assert.False(postgresCompensated, "PostgreSQL N√ÉO deveria ser compensado");
+            Assert.False(apiCompensated, "API N√ÉO deveria ser compensada");
         }
 
         [Fact]
         public async Task ExecuteAsync_CompensacaoParcialmenteFalhando_DeveRegistrarMasNaoInterromper()
         {
-            // Cen·rio: Oracle compensa OK, PostgreSQL falha na compensaÁ„o, mas n„o deve parar
+            // Cen√°rio: Oracle compensa OK, PostgreSQL falha na compensa√ß√£o, mas n√£o deve parar
             
             // Arrange
             var compensationAttempts = new List<string>();
@@ -495,7 +495,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             // Assert
             Assert.False(success);
             
-            // Ambas as compensaÁıes devem ter sido tentadas
+            // Ambas as compensa√ß√µes devem ter sido tentadas
             Assert.Equal(2, compensationAttempts.Count);
             Assert.Contains("PostgreSQL-FAIL", compensationAttempts);
             Assert.Contains("Oracle-OK", compensationAttempts);

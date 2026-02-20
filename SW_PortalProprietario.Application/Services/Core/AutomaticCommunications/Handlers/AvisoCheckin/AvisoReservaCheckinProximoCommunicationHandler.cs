@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+Ôªøusing Microsoft.Extensions.Logging;
 using NHibernate;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Proccessing.AvisoCheckin;
@@ -9,7 +9,7 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Handlers.AvisoCheckin;
 
 /// <summary>
-/// Handler para avisos de check-in prÛximo
+/// Handler para avisos de check-in pr√≥ximo
 /// </summary>
 public class AvisoReservaCheckinProximoCommunicationHandler : ICommunicationHandler
 {
@@ -31,7 +31,7 @@ public class AvisoReservaCheckinProximoCommunicationHandler : ICommunicationHand
 
     public async Task ProcessMultiPropriedadeAsync(IStatelessSession session, AutomaticCommunicationConfigModel config)
     {
-        _logger.LogInformation("=== INÕCIO PROCESSAMENTO AVISOS CHECK-IN - MULTIPROPRIEDADE ===");
+        _logger.LogInformation("=== IN√çCIO PROCESSAMENTO AVISOS CHECK-IN - MULTIPROPRIEDADE ===");
         
         if (config.DaysBeforeCheckIn == null || !config.DaysBeforeCheckIn.Any())
         {
@@ -51,7 +51,7 @@ public class AvisoReservaCheckinProximoCommunicationHandler : ICommunicationHand
                     daysBefore,
                     qtdeMaxima: null);
                 
-                _logger.LogInformation("Processamento concluÌdo para {DaysBefore} dias", daysBefore);
+                _logger.LogInformation("Processamento conclu√≠do para {DaysBefore} dias", daysBefore);
             }
             catch (Exception ex)
             {
@@ -64,7 +64,7 @@ public class AvisoReservaCheckinProximoCommunicationHandler : ICommunicationHand
 
     public async Task ProcessTimesharingAsync(IStatelessSession session, AutomaticCommunicationConfigModel config)
     {
-        _logger.LogInformation("=== INÕCIO PROCESSAMENTO AVISOS CHECK-IN - TIMESHARING ===");
+        _logger.LogInformation("=== IN√çCIO PROCESSAMENTO AVISOS CHECK-IN - TIMESHARING ===");
         
         if (config.DaysBeforeCheckIn == null || !config.DaysBeforeCheckIn.Any())
         {
@@ -84,7 +84,7 @@ public class AvisoReservaCheckinProximoCommunicationHandler : ICommunicationHand
                     daysBefore,
                     qtdeMaxima: null);
                 
-                _logger.LogInformation("Processamento Timesharing concluÌdo para {DaysBefore} dias", daysBefore);
+                _logger.LogInformation("Processamento Timesharing conclu√≠do para {DaysBefore} dias", daysBefore);
             }
             catch (Exception ex)
             {
@@ -100,7 +100,7 @@ public class AvisoReservaCheckinProximoCommunicationHandler : ICommunicationHand
         string userEmail,
         int userId)
     {
-        _logger.LogInformation("Gerando email de simulaÁ„o de aviso de check-in prÛximo");
+        _logger.LogInformation("Gerando email de simula√ß√£o de aviso de check-in pr√≥ximo");
         return await _simulationService.GenerateSimulationEmailAsync(config, userEmail, userId);
     }
 }

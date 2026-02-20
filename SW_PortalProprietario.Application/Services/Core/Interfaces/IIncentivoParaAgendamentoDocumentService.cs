@@ -1,10 +1,10 @@
-using SW_PortalProprietario.Application.Models.DocumentTemplates;
+﻿using SW_PortalProprietario.Application.Models.DocumentTemplates;
 
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces;
 
 /// <summary>
-/// Interface para geração de documentos de incentivo para agendamento
-/// Diferente de IIncentivoParaAgendamentoService em Application.Interfaces que é para comunicação automática
+/// Interface para geraÃ§Ã£o de documentos de incentivo para agendamento
+/// Diferente de IIncentivoParaAgendamentoService em Application.Interfaces que Ã© para comunicaÃ§Ã£o automÃ¡tica
 /// </summary>
 public interface IIncentivoParaAgendamentoDocumentService
 {

@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.LogsBackGround;
@@ -25,14 +25,14 @@ namespace SW_PortalProprietario.Test.Audit
             _auditHelper = new AuditHelper(_auditQueueProducerMock.Object, _httpContextAccessorMock.Object);
         }
 
-        [Fact(DisplayName = "LogCreateAsync - Deve criar log de auditoria para criação de entidade")]
+        [Fact(DisplayName = "LogCreateAsync - Deve criar log de auditoria para criaÃ§Ã£o de entidade")]
         public async Task LogCreateAsync_DeveCriarLogDeAuditoria_ParaCriacaoDeEntidade()
         {
             // Arrange
             var cidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308",
                 UsuarioCriacao = 1,
                 DataHoraCriacao = DateTime.Now,
@@ -64,7 +64,7 @@ namespace SW_PortalProprietario.Test.Audit
             capturedMessage.EntityDataJson.Should().NotBeNullOrEmpty();
         }
 
-        [Fact(DisplayName = "LogCreateAsync - Deve gerar mensagem amigável para criação de GrupoImagemHomeTags")]
+        [Fact(DisplayName = "LogCreateAsync - Deve gerar mensagem amigÃ¡vel para criaÃ§Ã£o de GrupoImagemHomeTags")]
         public async Task LogCreateAsync_DeveGerarMensagemAmigavel_ParaCriacaoDeGrupoImagemHomeTags()
         {
             // Arrange
@@ -104,14 +104,14 @@ namespace SW_PortalProprietario.Test.Audit
             changes["_operation"]["friendlyMessage"].ToString().Should().Contain("Grupo A");
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Deve criar log de auditoria para atualização de entidade")]
+        [Fact(DisplayName = "LogUpdateAsync - Deve criar log de auditoria para atualizaÃ§Ã£o de entidade")]
         public async Task LogUpdateAsync_DeveCriarLogDeAuditoria_ParaAtualizacaoDeEntidade()
         {
             // Arrange
             var oldCidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308",
                 UsuarioCriacao = 1,
                 DataHoraCriacao = DateTime.Now.AddDays(-1)
@@ -120,7 +120,7 @@ namespace SW_PortalProprietario.Test.Audit
             var newCidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo Atualizado",
+                Nome = "SÃ£o Paulo Atualizado",
                 CodigoIbge = "3550308",
                 UsuarioAlteracao = 1,
                 DataHoraAlteracao = DateTime.Now
@@ -151,18 +151,18 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage.ChangesJson);
             changes.Should().NotBeNull();
             changes!.Should().ContainKey("Nome");
-            changes["Nome"]["oldValue"].ToString().Should().Be("São Paulo");
-            changes["Nome"]["newValue"].ToString().Should().Be("São Paulo Atualizado");
+            changes["Nome"]["oldValue"].ToString().Should().Be("SÃ£o Paulo");
+            changes["Nome"]["newValue"].ToString().Should().Be("SÃ£o Paulo Atualizado");
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Não deve criar log quando não há mudanças")]
+        [Fact(DisplayName = "LogUpdateAsync - NÃ£o deve criar log quando nÃ£o hÃ¡ mudanÃ§as")]
         public async Task LogUpdateAsync_NaoDeveCriarLog_QuandoNaoHaMudancas()
         {
             // Arrange
             var cidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308"
             };
 
@@ -175,7 +175,7 @@ namespace SW_PortalProprietario.Test.Audit
             _auditQueueProducerMock.Verify(x => x.EnqueueAuditLogAsync(It.IsAny<AuditLogMessageEvent>()), Times.Never);
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Deve gerar mensagem amigável para remoção de tag")]
+        [Fact(DisplayName = "LogUpdateAsync - Deve gerar mensagem amigÃ¡vel para remoÃ§Ã£o de tag")]
         public async Task LogUpdateAsync_DeveGerarMensagemAmigavel_ParaRemocaoDeTag()
         {
             // Arrange
@@ -226,14 +226,14 @@ namespace SW_PortalProprietario.Test.Audit
             }
         }
 
-        [Fact(DisplayName = "LogDeleteAsync - Deve criar log de auditoria para exclusão de entidade")]
+        [Fact(DisplayName = "LogDeleteAsync - Deve criar log de auditoria para exclusÃ£o de entidade")]
         public async Task LogDeleteAsync_DeveCriarLogDeAuditoria_ParaExclusaoDeEntidade()
         {
             // Arrange
             var cidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308",
                 UsuarioCriacao = 1,
                 DataHoraCriacao = DateTime.Now,
@@ -270,7 +270,7 @@ namespace SW_PortalProprietario.Test.Audit
             var cidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 UsuarioCriacao = 1,
                 DataHoraCriacao = DateTime.Now
             };
@@ -288,17 +288,17 @@ namespace SW_PortalProprietario.Test.Audit
 
             // Assert
             capturedMessage.Should().NotBeNull();
-            // IP e UserAgent podem ser null quando não há HttpContext
+            // IP e UserAgent podem ser null quando nÃ£o hÃ¡ HttpContext
         }
 
-        [Fact(DisplayName = "LogCreateAsync - Deve capturar IP de X-Forwarded-For quando disponível")]
+        [Fact(DisplayName = "LogCreateAsync - Deve capturar IP de X-Forwarded-For quando disponÃ­vel")]
         public async Task LogCreateAsync_DeveCapturarIP_DeXForwardedFor()
         {
             // Arrange
             var cidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 UsuarioCriacao = 1,
                 DataHoraCriacao = DateTime.Now
             };
@@ -324,14 +324,14 @@ namespace SW_PortalProprietario.Test.Audit
             capturedMessage.UserAgent.Should().Be("TestAgent");
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alterações em propriedades de entidade relacionada (Pessoa.EmailPreferencial)")]
+        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alteraÃ§Ãµes em propriedades de entidade relacionada (Pessoa.EmailPreferencial)")]
         public async Task LogUpdateAsync_DeveCapturarAlteracoes_EmPropriedadesDeEntidadeRelacionada()
         {
             // Arrange
             var pessoaOld = new Domain.Entities.Core.DadosPessoa.Pessoa
             {
                 Id = 1,
-                Nome = "João Silva",
+                Nome = "JoÃ£o Silva",
                 EmailPreferencial = "joao.antigo@email.com",
                 EmailAlternativo = null,
                 TipoPessoa = Domain.Enumns.EnumTipoPessoa.Fisica
@@ -340,7 +340,7 @@ namespace SW_PortalProprietario.Test.Audit
             var pessoaNew = new Domain.Entities.Core.DadosPessoa.Pessoa
             {
                 Id = 1,
-                Nome = "João Silva",
+                Nome = "JoÃ£o Silva",
                 EmailPreferencial = "joao.novo@email.com", // Email alterado
                 EmailAlternativo = "joao.alternativo@email.com", // Email alternativo adicionado
                 TipoPessoa = Domain.Enumns.EnumTipoPessoa.Fisica
@@ -368,18 +368,18 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage.ChangesJson);
             changes.Should().NotBeNull();
             
-            // Deve capturar alteração no EmailPreferencial
+            // Deve capturar alteraÃ§Ã£o no EmailPreferencial
             changes!.Should().ContainKey("EmailPreferencial");
             changes["EmailPreferencial"]["oldValue"].ToString().Should().Be("joao.antigo@email.com");
             changes["EmailPreferencial"]["newValue"].ToString().Should().Be("joao.novo@email.com");
             
-            // Deve capturar alteração no EmailAlternativo (de null para valor)
+            // Deve capturar alteraÃ§Ã£o no EmailAlternativo (de null para valor)
             changes.Should().ContainKey("EmailAlternativo");
             changes["EmailAlternativo"]["oldValue"].Should().BeNull();
             changes["EmailAlternativo"]["newValue"].ToString().Should().Be("joao.alternativo@email.com");
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alterações em propriedades nullable de entidade relacionada")]
+        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alteraÃ§Ãµes em propriedades nullable de entidade relacionada")]
         public async Task LogUpdateAsync_DeveCapturarAlteracoes_EmPropriedadesNullableDeEntidadeRelacionada()
         {
             // Arrange
@@ -417,24 +417,24 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // Deve capturar alteração no EmailPreferencial (de null para valor)
+            // Deve capturar alteraÃ§Ã£o no EmailPreferencial (de null para valor)
             changes!.Should().ContainKey("EmailPreferencial");
             changes["EmailPreferencial"]["oldValue"].Should().BeNull();
             changes["EmailPreferencial"]["newValue"].ToString().Should().Be("maria@email.com");
             
-            // Deve capturar alteração no DataNascimento (de null para valor)
+            // Deve capturar alteraÃ§Ã£o no DataNascimento (de null para valor)
             changes.Should().ContainKey("DataNascimento");
             changes["DataNascimento"]["oldValue"].Should().BeNull();
             changes["DataNascimento"]["newValue"].Should().NotBeNull();
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alterações quando entidade relacionada é modificada (Usuario com Pessoa alterada)")]
+        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alteraÃ§Ãµes quando entidade relacionada Ã© modificada (Usuario com Pessoa alterada)")]
         public async Task LogUpdateAsync_DeveCapturarAlteracoes_QuandoEntidadeRelacionadaEModificada()
         {
             // Arrange
-            // IMPORTANTE: A lógica atual compara entidades relacionadas apenas por ID
-            // Se o ID for o mesmo, não detecta mudança na referência
-            // Para testar mudança na referência, precisamos de IDs diferentes
+            // IMPORTANTE: A lÃ³gica atual compara entidades relacionadas apenas por ID
+            // Se o ID for o mesmo, nÃ£o detecta mudanÃ§a na referÃªncia
+            // Para testar mudanÃ§a na referÃªncia, precisamos de IDs diferentes
             var pessoaOld = new Domain.Entities.Core.DadosPessoa.Pessoa
             {
                 Id = 1,
@@ -444,7 +444,7 @@ namespace SW_PortalProprietario.Test.Audit
 
             var pessoaNew = new Domain.Entities.Core.DadosPessoa.Pessoa
             {
-                Id = 2, // ID DIFERENTE para que a mudança seja detectada
+                Id = 2, // ID DIFERENTE para que a mudanÃ§a seja detectada
                 Nome = "Pedro Costa Novo",
                 EmailPreferencial = "pedro.novo@email.com"
             };
@@ -482,8 +482,8 @@ namespace SW_PortalProprietario.Test.Audit
             changes.Should().NotBeNull();
             
             // Deve detectar que a Pessoa foi alterada (ID diferente)
-            // Como a Pessoa é uma entidade relacionada (ManyToOne), deve capturar a mudança na referência
-            changes!.Should().ContainKey("Pessoa", "A alteração na Pessoa relacionada deve ser capturada");
+            // Como a Pessoa Ã© uma entidade relacionada (ManyToOne), deve capturar a mudanÃ§a na referÃªncia
+            changes!.Should().ContainKey("Pessoa", "A alteraÃ§Ã£o na Pessoa relacionada deve ser capturada");
             
             var pessoaChange = changes["Pessoa"];
             pessoaChange.Should().ContainKey("oldEntityId");
@@ -491,29 +491,29 @@ namespace SW_PortalProprietario.Test.Audit
             pessoaChange["oldEntityId"]?.ToString().Should().Be("1");
             pessoaChange["newEntityId"]?.ToString().Should().Be("2");
             
-            // NOTA: Mudanças internas em entidades relacionadas (como EmailPreferencial dentro da Pessoa)
-            // não são capturadas quando o ID da referência é o mesmo. Isso é comportamento esperado.
-            // Para capturar mudanças na Pessoa, é necessário salvar a Pessoa diretamente.
+            // NOTA: MudanÃ§as internas em entidades relacionadas (como EmailPreferencial dentro da Pessoa)
+            // nÃ£o sÃ£o capturadas quando o ID da referÃªncia Ã© o mesmo. Isso Ã© comportamento esperado.
+            // Para capturar mudanÃ§as na Pessoa, Ã© necessÃ¡rio salvar a Pessoa diretamente.
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alterações em strings com espaços (trim)")]
+        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alteraÃ§Ãµes em strings com espaÃ§os (trim)")]
         public async Task LogUpdateAsync_DeveCapturarAlteracoes_EmStringsComEspacos()
         {
             // Arrange
-            // IMPORTANTE: A comparação usa trim, então valores iguais após trim não geram log
-            // Para testar, vamos usar valores que são diferentes mesmo após trim
+            // IMPORTANTE: A comparaÃ§Ã£o usa trim, entÃ£o valores iguais apÃ³s trim nÃ£o geram log
+            // Para testar, vamos usar valores que sÃ£o diferentes mesmo apÃ³s trim
             var pessoaOld = new Domain.Entities.Core.DadosPessoa.Pessoa
             {
                 Id = 1,
-                Nome = "  João Silva  ", // Com espaços
-                EmailPreferencial = "joao.antigo@email.com" // Valor diferente para garantir que haja mudança
+                Nome = "  JoÃ£o Silva  ", // Com espaÃ§os
+                EmailPreferencial = "joao.antigo@email.com" // Valor diferente para garantir que haja mudanÃ§a
             };
 
             var pessoaNew = new Domain.Entities.Core.DadosPessoa.Pessoa
             {
                 Id = 1,
-                Nome = "João Silva", // Sem espaços (igual após trim, mas valor original diferente)
-                EmailPreferencial = "joao.novo@email.com" // Valor diferente para garantir que haja mudança
+                Nome = "JoÃ£o Silva", // Sem espaÃ§os (igual apÃ³s trim, mas valor original diferente)
+                EmailPreferencial = "joao.novo@email.com" // Valor diferente para garantir que haja mudanÃ§a
             };
 
             SetupHttpContext("192.168.1.1", "Mozilla/5.0", 1);
@@ -528,22 +528,22 @@ namespace SW_PortalProprietario.Test.Audit
             await _auditHelper.LogUpdateAsync(pessoaOld, pessoaNew);
 
             // Assert
-            // Como a comparação usa trim, "  João Silva  " e "João Silva" são considerados iguais
-            // Então apenas o EmailPreferencial deve gerar log
+            // Como a comparaÃ§Ã£o usa trim, "  JoÃ£o Silva  " e "JoÃ£o Silva" sÃ£o considerados iguais
+            // EntÃ£o apenas o EmailPreferencial deve gerar log
             capturedMessage.Should().NotBeNull();
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
             // O EmailPreferencial deve ser capturado (valores diferentes)
-            changes!.Should().ContainKey("EmailPreferencial", "A alteração no EmailPreferencial deve ser capturada");
+            changes!.Should().ContainKey("EmailPreferencial", "A alteraÃ§Ã£o no EmailPreferencial deve ser capturada");
             changes["EmailPreferencial"]["oldValue"]?.ToString().Should().Be("joao.antigo@email.com");
             changes["EmailPreferencial"]["newValue"]?.ToString().Should().Be("joao.novo@email.com");
             
-            // NOTA: O Nome não será capturado porque após trim são iguais
-            // Isso é o comportamento esperado - a comparação normaliza com trim
+            // NOTA: O Nome nÃ£o serÃ¡ capturado porque apÃ³s trim sÃ£o iguais
+            // Isso Ã© o comportamento esperado - a comparaÃ§Ã£o normaliza com trim
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Deve capturar múltiplas alterações em propriedades de objeto filho")]
+        [Fact(DisplayName = "LogUpdateAsync - Deve capturar mÃºltiplas alteraÃ§Ãµes em propriedades de objeto filho")]
         public async Task LogUpdateAsync_DeveCapturarMultiplasAlteracoes_EmPropriedadesDeObjetoFilho()
         {
             // Arrange
@@ -583,7 +583,7 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // Deve capturar todas as alterações
+            // Deve capturar todas as alteraÃ§Ãµes
             changes!.Should().ContainKey("Nome");
             changes.Should().ContainKey("EmailPreferencial");
             changes.Should().ContainKey("EmailAlternativo");
@@ -604,7 +604,7 @@ namespace SW_PortalProprietario.Test.Audit
             changes["NomeFantasia"]["newValue"].ToString().Should().Be("Ana P.");
         }
 
-        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alteração de null para string vazia e vice-versa")]
+        [Fact(DisplayName = "LogUpdateAsync - Deve capturar alteraÃ§Ã£o de null para string vazia e vice-versa")]
         public async Task LogUpdateAsync_DeveCapturarAlteracao_DeNullParaStringVaziaEViceVersa()
         {
             // Arrange
@@ -640,7 +640,7 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage!.ChangesJson);
             changes.Should().NotBeNull();
             
-            // Deve capturar alterações entre null e string vazia
+            // Deve capturar alteraÃ§Ãµes entre null e string vazia
             if (changes!.ContainsKey("EmailPreferencial"))
             {
                 changes["EmailPreferencial"]["oldValue"].Should().BeNull();
@@ -666,7 +666,7 @@ namespace SW_PortalProprietario.Test.Audit
                 EmailAlternativo = null
             };
 
-            // Simular clone usando JSON (como no método CloneEntityForAudit)
+            // Simular clone usando JSON (como no mÃ©todo CloneEntityForAudit)
             var json = JsonSerializer.Serialize(pessoaOriginal);
             var pessoaClonada = JsonSerializer.Deserialize<Domain.Entities.Core.DadosPessoa.Pessoa>(json);
 
@@ -674,21 +674,21 @@ namespace SW_PortalProprietario.Test.Audit
             pessoaOriginal.EmailPreferencial = "modificado@email.com";
             pessoaOriginal.EmailAlternativo = "alternativo@email.com";
 
-            // Act - Usar reflection para acessar o método privado CompareEntities
-            // Como é um método genérico, precisamos usar MakeGenericMethod
+            // Act - Usar reflection para acessar o mÃ©todo privado CompareEntities
+            // Como Ã© um mÃ©todo genÃ©rico, precisamos usar MakeGenericMethod
             var method = typeof(AuditHelper).GetMethod("CompareEntities", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             
             if (method == null)
             {
-                // Se não conseguir acessar o método privado, testar através de LogUpdateAsync
+                // Se nÃ£o conseguir acessar o mÃ©todo privado, testar atravÃ©s de LogUpdateAsync
                 return;
             }
 
-            // Fazer o método genérico com o tipo específico
+            // Fazer o mÃ©todo genÃ©rico com o tipo especÃ­fico
             var genericMethod = method.MakeGenericMethod(typeof(Domain.Entities.Core.DadosPessoa.Pessoa));
             
-            // Invocar o método genérico
+            // Invocar o mÃ©todo genÃ©rico
             var result = genericMethod.Invoke(_auditHelper, new object[] { pessoaClonada!, pessoaOriginal }) 
                 as Dictionary<string, Dictionary<string, object?>>;
 

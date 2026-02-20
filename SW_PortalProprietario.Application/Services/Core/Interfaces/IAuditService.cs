@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Models.AuditModels;
+﻿using SW_PortalProprietario.Application.Models.AuditModels;
 using SW_Utils.Models;
 
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces

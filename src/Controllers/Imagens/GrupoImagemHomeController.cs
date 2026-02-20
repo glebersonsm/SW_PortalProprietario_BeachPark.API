@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -40,8 +40,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Imagens
                 return BadRequest(new ResultModel<GrupoImagemHomeModel>(new GrupoImagemHomeModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Grupo de Imagem Home: ({model.Name})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Grupo de Imagem Home: ({model.Name})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Imagem Home: ({model.Name})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Imagem Home: ({model.Name})", err.Message },
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -50,8 +50,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Imagens
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<GrupoImagemHomeModel>(new GrupoImagemHomeModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Grupo de Imagem Home: ({model.Name})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Grupo de Imagem Home: ({model.Name})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Imagem Home: ({model.Name})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Imagem Home: ({model.Name})", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -76,7 +76,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Imagens
             {
                 return BadRequest(new DeleteResultModel()
                 {
-                    Result = "Não deletado",
+                    Result = "NÃ£o deletado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -87,7 +87,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Imagens
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new DeleteResultModel()
                 {
-                    Result = "Não deletado",
+                    Result = "NÃ£o deletado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -127,8 +127,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Imagens
                 {
                     Data = new List<GrupoImagemHomeModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -138,8 +138,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Imagens
                 {
                     Data = new List<GrupoImagemHomeModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }

@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Entities.Core;
+﻿using SW_PortalProprietario.Domain.Entities.Core;
 
 namespace SW_PortalProprietario.Domain.Entities.Core.Geral
 {

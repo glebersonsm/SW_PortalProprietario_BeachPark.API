@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Attributes;
@@ -8,7 +8,7 @@ using System.Reflection;
 namespace SW_PortalProprietario.Infra.Ioc.Middleware
 {
     /// <summary>
-    /// Middleware para interceptar requisições e aplicar Saga Pattern automaticamente
+    /// Middleware para interceptar requisiÃ§Ãµes e aplicar Saga Pattern automaticamente
     /// quando o endpoint estiver marcado com [UseSaga]
     /// </summary>
     public class SagaMiddleware
@@ -30,38 +30,38 @@ namespace SW_PortalProprietario.Infra.Ioc.Middleware
 
             if (sagaAttribute == null)
             {
-                // Não usa Saga, continua normalmente
+                // NÃ£o usa Saga, continua normalmente
                 await _next(context);
                 return;
             }
 
             _logger.LogInformation(
-                "🔷 Requisição com Saga detectada: {Method} {Path} - Operação: {Operation}",
+                "ðŸ”· RequisiÃ§Ã£o com Saga detectada: {Method} {Path} - OperaÃ§Ã£o: {Operation}",
                 context.Request.Method,
                 context.Request.Path,
                 sagaAttribute.OperationName);
 
-            // Adiciona informações da Saga no contexto
+            // Adiciona informaÃ§Ãµes da Saga no contexto
             context.Items["UseSaga"] = true;
             context.Items["SagaOperationName"] = sagaAttribute.OperationName;
             context.Items["SagaOrchestrator"] = sagaOrchestrator;
 
             try
             {
-                // Executa a requisição
+                // Executa a requisiÃ§Ã£o
                 await _next(context);
 
                 if (sagaOrchestrator.CurrentSagaId != null)
                 {
                     _logger.LogInformation(
-                        "✅ Requisição com Saga concluída: {SagaId}",
+                        "âœ… RequisiÃ§Ã£o com Saga concluÃ­da: {SagaId}",
                         sagaOrchestrator.CurrentSagaId);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
-                    "❌ Erro em requisição com Saga: {Operation}",
+                    "âŒ Erro em requisiÃ§Ã£o com Saga: {Operation}",
                     sagaAttribute.OperationName);
 
                 if (sagaAttribute.ThrowOnFailure)
@@ -71,7 +71,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Middleware
     }
 
     /// <summary>
-    /// Extensões para registrar o middleware
+    /// ExtensÃµes para registrar o middleware
     /// </summary>
     public static class SagaMiddlewareExtensions
     {

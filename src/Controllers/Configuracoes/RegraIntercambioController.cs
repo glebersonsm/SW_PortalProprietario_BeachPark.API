@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.SystemModels;
@@ -41,7 +41,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao buscar opções de regras de intercâmbio");
+                _logger.LogError(err, "Erro ao buscar opÃ§Ãµes de regras de intercÃ¢mbio");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RegraIntercambioOpcoesModel>(new RegraIntercambioOpcoesModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -69,7 +69,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao listar regras de intercâmbio");
+                _logger.LogError(err, "Erro ao listar regras de intercÃ¢mbio");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<List<RegraIntercambioModel>>(new List<RegraIntercambioModel>())
                 {
                     Errors = new List<string> { err.Message },
@@ -92,7 +92,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 if (result == null)
                     return NotFound(new ResultModel<RegraIntercambioModel>(new RegraIntercambioModel())
                     {
-                        Errors = new List<string> { $"Regra com ID {id} não encontrada" },
+                        Errors = new List<string> { $"Regra com ID {id} nÃ£o encontrada" },
                         Status = StatusCodes.Status404NotFound,
                         Success = false
                     });
@@ -105,7 +105,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao buscar regra de intercâmbio {Id}", id);
+                _logger.LogError(err, "Erro ao buscar regra de intercÃ¢mbio {Id}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RegraIntercambioModel>(new RegraIntercambioModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -143,7 +143,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao criar regra de intercâmbio");
+                _logger.LogError(err, "Erro ao criar regra de intercÃ¢mbio");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RegraIntercambioModel>(new RegraIntercambioModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -182,7 +182,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao atualizar regra de intercâmbio {Id}", model.Id);
+                _logger.LogError(err, "Erro ao atualizar regra de intercÃ¢mbio {Id}", model.Id);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RegraIntercambioModel>(new RegraIntercambioModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -220,7 +220,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao excluir regra de intercâmbio {Id}", id);
+                _logger.LogError(err, "Erro ao excluir regra de intercÃ¢mbio {Id}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<bool>(false)
                 {
                     Errors = new List<string> { err.Message },

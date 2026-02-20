@@ -1,34 +1,34 @@
-using SW_PortalProprietario.Application.Models.GeralModels;
+Ôªøusing SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces;
 
 /// <summary>
-/// Interface para handlers de tipos especÌficos de comunicaÁ„o autom·tica
+/// Interface para handlers de tipos espec√≠ficos de comunica√ß√£o autom√°tica
 /// </summary>
 public interface ICommunicationHandler
 {
     /// <summary>
-    /// Tipo de comunicaÁ„o que este handler processa
+    /// Tipo de comunica√ß√£o que este handler processa
     /// </summary>
     EnumDocumentTemplateType CommunicationType { get; }
 
     /// <summary>
-    /// Processa comunicaÁıes para Multipropriedade
+    /// Processa comunica√ß√µes para Multipropriedade
     /// </summary>
     Task ProcessMultiPropriedadeAsync(NHibernate.IStatelessSession session, AutomaticCommunicationConfigModel config);
 
     /// <summary>
-    /// Processa comunicaÁıes para Timesharing
+    /// Processa comunica√ß√µes para Timesharing
     /// </summary>
     Task ProcessTimesharingAsync(NHibernate.IStatelessSession session, AutomaticCommunicationConfigModel config);
 
     /// <summary>
-    /// Gera um email de simulaÁ„o para o tipo de comunicaÁ„o
+    /// Gera um email de simula√ß√£o para o tipo de comunica√ß√£o
     /// </summary>
-    /// <param name="config">ConfiguraÁ„o da comunicaÁ„o</param>
-    /// <param name="userEmail">Email do usu·rio que receber· a simulaÁ„o</param>
-    /// <param name="userId">ID do usu·rio solicitante</param>
+    /// <param name="config">Configura√ß√£o da comunica√ß√£o</param>
+    /// <param name="userEmail">Email do usu√°rio que receber√° a simula√ß√£o</param>
+    /// <param name="userId">ID do usu√°rio solicitante</param>
     /// <returns>Modelo de email pronto para envio</returns>
     Task<List<EmailInputInternalModel>> GenerateSimulationEmailAsync(
         SW_PortalProprietario.Application.Models.GeralModels.AutomaticCommunicationConfigModel config,

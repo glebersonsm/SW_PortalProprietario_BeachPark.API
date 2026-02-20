@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -40,7 +40,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var documentoPessoa = await _repository.FindById<PessoaDocumento>(id);
                 if (documentoPessoa is null)
                 {
-                    throw new FileNotFoundException($"Não foi encontrado documento com Id: {id}!");
+                    throw new FileNotFoundException($"NÃ£o foi encontrado documento com Id: {id}!");
                 }
 
                 var pessoaDocumentoUsing = (await _repository.FindBySql<PessoaDocumentoModel>("Select s.Id, s.Numero From PessoaDocumento s Where s.TipoDocumento =:tipodocumentoId", session: null, new Parameter("tipodocumentoId", id))).Take(5).ToList();
@@ -62,7 +62,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -71,7 +71,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o Tipo de documento: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o Tipo de documento: {id}");
                 throw;
             }
         }
@@ -82,7 +82,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             {
                 _repository.BeginTransaction();
 
-                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {model.PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"Não foi encontrada a Pessoa: {model.PessoaId}");
+                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {model.PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"NÃ£o foi encontrada a Pessoa: {model.PessoaId}");
 
                 var pessoaSincronizacaoListaAuxiliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
                 var result = await pessoaSincronizacaoListaAuxiliar.SincronizarDocumentos(pessoa, false, model);
@@ -95,11 +95,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                         return resultSearch.First();
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar o documento da pessoa: ({model.PessoaId})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o documento da pessoa: ({model.PessoaId})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o documento da pessoa: ({model.PessoaId})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o documento da pessoa: ({model.PessoaId})");
                 _repository.Rollback();
                 throw;
             }
@@ -112,7 +112,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             {
                 _repository.BeginTransaction();
 
-                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {pessoaDocumentos.First().PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"Não foi encontrada a Pessoa: {pessoaDocumentos.First().PessoaId}");
+                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {pessoaDocumentos.First().PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"NÃ£o foi encontrada a Pessoa: {pessoaDocumentos.First().PessoaId}");
 
                 var pessoaSincronizacaoListaAuxiliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
                 var result = await pessoaSincronizacaoListaAuxiliar.SincronizarDocumentos(pessoa, false, pessoaDocumentos.ToArray());
@@ -125,11 +125,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                         return resultSearch.AsList();
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar um ou mais documentos da pessoa: ({pessoaDocumentos.First().PessoaId})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar um ou mais documentos da pessoa: ({pessoaDocumentos.First().PessoaId})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar um ou mais documentos da pessoa: ({pessoaDocumentos.First().PessoaId})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar um ou mais documentos da pessoa: ({pessoaDocumentos.First().PessoaId})");
                 _repository.Rollback();
                 throw;
             }
@@ -180,7 +180,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             _repository.BeginTransaction();
             try
             {
-                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {model.PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"Não foi encontrado a Pessoa: {model.PessoaId.GetValueOrDefault()}");
+                var pessoa = (await _repository.FindBySql<Domain.Entities.Core.DadosPessoa.Pessoa>($"Select p.* From Pessoa p Where p.Id = {model.PessoaId.GetValueOrDefault()}")).FirstOrDefault() ?? throw new ArgumentException($"NÃ£o foi encontrado a Pessoa: {model.PessoaId.GetValueOrDefault()}");
 
                 var pessoaSincronizacaoListaAuxiliar = new PessoaSincronizacaoListasAuxiliar(_repository, _logger, _serviceBase, _mapper);
                 var result = await pessoaSincronizacaoListaAuxiliar.SincronizarDocumentos(pessoa, false, model);
@@ -193,7 +193,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                         return resultSearch.First();
                 }
 
-                throw exception ?? new Exception("Erro na operação");
+                throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception)
             {

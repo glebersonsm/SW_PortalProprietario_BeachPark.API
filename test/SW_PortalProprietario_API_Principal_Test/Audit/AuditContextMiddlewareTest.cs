@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using SW_PortalProprietario.Infra.Data.Middleware;
 using System.Net;
@@ -25,7 +25,7 @@ namespace SW_PortalProprietario.Test.Audit
             context.Items["AuditIpAddress"].Should().Be("192.168.1.100");
         }
 
-        [Fact(DisplayName = "InvokeAsync - Deve capturar IP de X-Forwarded-For quando disponível")]
+        [Fact(DisplayName = "InvokeAsync - Deve capturar IP de X-Forwarded-For quando disponÃ­vel")]
         public async Task InvokeAsync_DeveCapturarIP_DeXForwardedFor()
         {
             // Arrange
@@ -43,7 +43,7 @@ namespace SW_PortalProprietario.Test.Audit
             context.Items["AuditIpAddress"].Should().Be("10.0.0.1");
         }
 
-        [Fact(DisplayName = "InvokeAsync - Deve capturar IP de X-Real-IP quando disponível")]
+        [Fact(DisplayName = "InvokeAsync - Deve capturar IP de X-Real-IP quando disponÃ­vel")]
         public async Task InvokeAsync_DeveCapturarIP_DeXRealIP()
         {
             // Arrange
@@ -97,7 +97,7 @@ namespace SW_PortalProprietario.Test.Audit
             context.Items["AuditUserId"].Should().Be("123");
         }
 
-        [Fact(DisplayName = "InvokeAsync - Não deve capturar User ID quando não autenticado")]
+        [Fact(DisplayName = "InvokeAsync - NÃ£o deve capturar User ID quando nÃ£o autenticado")]
         public async Task InvokeAsync_NaoDeveCapturarUserId_QuandoNaoAutenticado()
         {
             // Arrange
@@ -113,7 +113,7 @@ namespace SW_PortalProprietario.Test.Audit
             context.Items.Should().NotContainKey("AuditUserId");
         }
 
-        [Fact(DisplayName = "InvokeAsync - Deve chamar próximo middleware")]
+        [Fact(DisplayName = "InvokeAsync - Deve chamar prÃ³ximo middleware")]
         public async Task InvokeAsync_DeveChamarProximoMiddleware()
         {
             // Arrange
@@ -135,7 +135,7 @@ namespace SW_PortalProprietario.Test.Audit
             nextCalled.Should().BeTrue();
         }
 
-        [Fact(DisplayName = "InvokeAsync - Deve processar múltiplos IPs em X-Forwarded-For")]
+        [Fact(DisplayName = "InvokeAsync - Deve processar mÃºltiplos IPs em X-Forwarded-For")]
         public async Task InvokeAsync_DeveProcessarMultiplosIPs_EmXForwardedFor()
         {
             // Arrange

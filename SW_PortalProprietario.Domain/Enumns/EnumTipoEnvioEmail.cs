@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Domain.Enumns
+﻿namespace SW_PortalProprietario.Domain.Enumns
 {
     /// <summary>
-    /// Tipo de cliente de envio de e-mail. Em ambos as credenciais vêm dos parâmetros do sistema (ou .env).
+    /// Tipo de cliente de envio de e-mail. Em ambos as credenciais vÃªm dos parÃ¢metros do sistema (ou .env).
     /// </summary>
     public enum EnumTipoEnvioEmail
     {

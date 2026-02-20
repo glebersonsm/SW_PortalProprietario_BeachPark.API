@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Models.GeralModels;
+﻿using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
 using SW_PortalProprietario.Domain.Enumns;
 

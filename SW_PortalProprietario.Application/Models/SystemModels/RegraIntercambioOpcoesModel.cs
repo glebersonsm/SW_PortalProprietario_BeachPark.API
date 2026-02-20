@@ -1,10 +1,10 @@
-using SW_PortalProprietario.Application.Models.TimeSharing;
+﻿using SW_PortalProprietario.Application.Models.TimeSharing;
 
 namespace SW_PortalProprietario.Application.Models.SystemModels
 {
     /// <summary>
-    /// Opções para configuração de regras de intercâmbio.
-    /// Tipos de semana: eSolution (Média, Alta, Super Alta) e CM (Super alta, Alta, Média, Baixa).
+    /// OpÃ§Ãµes para configuraÃ§Ã£o de regras de intercÃ¢mbio.
+    /// Tipos de semana: eSolution (MÃ©dia, Alta, Super Alta) e CM (Super alta, Alta, MÃ©dia, Baixa).
     /// </summary>
     public class RegraIntercambioOpcoesModel
     {

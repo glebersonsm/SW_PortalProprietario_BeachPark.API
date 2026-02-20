@@ -1,4 +1,4 @@
-using EsolutionPortalDomain.Portal;
+﻿using EsolutionPortalDomain.Portal;
 using EsolutionPortalDomain.Portal;
 using EsolutionPortalDomain.ReservasApiModels.Hotel;
 using SW_PortalProprietario.Application.Models;
@@ -14,7 +14,7 @@ namespace SW_PortalProprietario.Application.Interfaces
 {
     /// <summary>
     /// Interface unificada para todos os providers (Communication, Empreendimento e TimeSharing)
-    /// Todos os m�todos possuem sufixo _CM ou _Esol para identificar o provider de origem
+    /// Todos os métodos possuem sufixo _CM ou _Esol para identificar o provider de origem
     /// </summary>
     public interface IHybridProviderService
     {

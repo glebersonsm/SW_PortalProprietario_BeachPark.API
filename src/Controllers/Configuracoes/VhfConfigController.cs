@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.SystemModels;
@@ -24,8 +24,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
         }
 
         /// <summary>
-        /// Retorna todas as opções disponíveis para configuração de reservas VHF (PMS).
-        /// Inclui: Tipo de utilização, Hotéis (CM), Tipo de Hóspede (CM), Origem (CM), Tarifa Hotel (CM), Código de Pensão.
+        /// Retorna todas as opÃ§Ãµes disponÃ­veis para configuraÃ§Ã£o de reservas VHF (PMS).
+        /// Inclui: Tipo de utilizaÃ§Ã£o, HotÃ©is (CM), Tipo de HÃ³spede (CM), Origem (CM), Tarifa Hotel (CM), CÃ³digo de PensÃ£o.
         /// </summary>
         [HttpGet("opcoes")]
         [Authorize(Roles = "Administrador, GestorFinanceiro, GestorReservasAgendamentos")]
@@ -45,7 +45,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao buscar opções de configuração VHF");
+                _logger.LogError(err, "Erro ao buscar opÃ§Ãµes de configuraÃ§Ã£o VHF");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<VhfConfigOpcoesModel>(new VhfConfigOpcoesModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -73,7 +73,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao listar configurações VHF");
+                _logger.LogError(err, "Erro ao listar configuraÃ§Ãµes VHF");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<List<VhfConfigModel>>(new List<VhfConfigModel>())
                 {
                     Errors = new List<string> { err.Message },
@@ -96,7 +96,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 if (result == null)
                     return NotFound(new ResultModel<VhfConfigModel>(new VhfConfigModel())
                     {
-                        Errors = new List<string> { $"Configuração com ID {id} não encontrada" },
+                        Errors = new List<string> { $"ConfiguraÃ§Ã£o com ID {id} nÃ£o encontrada" },
                         Status = StatusCodes.Status404NotFound,
                         Success = false
                     });
@@ -109,7 +109,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao buscar configuração VHF {Id}", id);
+                _logger.LogError(err, "Erro ao buscar configuraÃ§Ã£o VHF {Id}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<VhfConfigModel>(new VhfConfigModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -147,7 +147,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao criar configuração VHF");
+                _logger.LogError(err, "Erro ao criar configuraÃ§Ã£o VHF");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<VhfConfigModel>(new VhfConfigModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -186,7 +186,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao atualizar configuração VHF {Id}", model.Id);
+                _logger.LogError(err, "Erro ao atualizar configuraÃ§Ã£o VHF {Id}", model.Id);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<VhfConfigModel>(new VhfConfigModel())
                 {
                     Errors = new List<string> { err.Message },
@@ -224,7 +224,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Erro ao excluir configuração VHF {Id}", id);
+                _logger.LogError(err, "Erro ao excluir configuraÃ§Ã£o VHF {Id}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<bool>(false)
                 {
                     Errors = new List<string> { err.Message },

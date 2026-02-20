@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Application.Models.GeralModels
+﻿namespace SW_PortalProprietario.Application.Models.GeralModels
 {
     /// <summary>
-    /// Registro de comunicação de token 2FA enviada (para listagem e gerenciamento de volume).
+    /// Registro de comunicaÃ§Ã£o de token 2FA enviada (para listagem e gerenciamento de volume).
     /// </summary>
     public class ComunicacaoTokenEnviadaViewModel
     {
@@ -15,14 +15,14 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
         public string? TwoFactorId { get; set; }
         public int? EmailId { get; set; }
         /// <summary>
-        /// Data/hora da primeira abertura do e-mail (quando o destinatário carregou as imagens).
-        /// Null se o e-mail não foi aberto ou o canal não for e-mail.
+        /// Data/hora da primeira abertura do e-mail (quando o destinatÃ¡rio carregou as imagens).
+        /// Null se o e-mail nÃ£o foi aberto ou o canal nÃ£o for e-mail.
         /// </summary>
         public DateTime? DataHoraPrimeiraAberturaEmail { get; set; }
     }
 
     /// <summary>
-    /// Filtros para busca de comunicações de token enviadas.
+    /// Filtros para busca de comunicaÃ§Ãµes de token enviadas.
     /// </summary>
     public class SearchComunicacaoTokenEnviadaModel
     {
@@ -35,7 +35,7 @@ namespace SW_PortalProprietario.Application.Models.GeralModels
     }
 
     /// <summary>
-    /// Resumo de volume de comunicações de token por canal e período.
+    /// Resumo de volume de comunicaÃ§Ãµes de token por canal e perÃ­odo.
     /// </summary>
     public class ResumoVolumeComunicacaoTokenModel
     {

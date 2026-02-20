@@ -1,4 +1,4 @@
-using Dapper;
+Ôªøusing Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -62,7 +62,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             throw new NotImplementedException();
             //var httpContext = _httpContextAccessor?.HttpContext?.Request;
             //if (httpContext is null)
-            //    throw new Exception("N„o foi possÌvel identificar a URL do servidor");
+            //    throw new Exception("N√£o foi poss√≠vel identificar a URL do servidor");
 
             //if (geracaoCertidaoInputModel.Data.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
             //    geracaoCertidaoInputModel.Data = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
@@ -78,31 +78,31 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             //    var loggedUser = await _repository.GetLoggedUser();
             //    if (loggedUser == null)
-            //        throw new ArgumentException("N„o foi possÌvel identificar o usu·rio logado no sistema");
+            //        throw new ArgumentException("N√£o foi poss√≠vel identificar o usu√°rio logado no sistema");
 
             //    var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _financeiroProviderService.ProviderName);
             //    if (pessoaVinculadaSistema == null)
-            //        throw new ArgumentException($"N„o foi encontrada pessoa do provider: {_financeiroProviderService.ProviderName} vinculada ao usu·rio logado: {loggedUser.Value.userId}");
+            //        throw new ArgumentException($"N√£o foi encontrada pessoa do provider: {_financeiroProviderService.ProviderName} vinculada ao usu√°rio logado: {loggedUser.Value.userId}");
 
             //    if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
-            //        throw new ArgumentException($"N„o foi encontrada pessoa do provider: {_financeiroProviderService.ProviderName} vinculada ao usu·rio logado: {loggedUser.Value.userId}");
+            //        throw new ArgumentException($"N√£o foi encontrada pessoa do provider: {_financeiroProviderService.ProviderName} vinculada ao usu√°rio logado: {loggedUser.Value.userId}");
 
             //    var proprietario = await _empreendimentoProviderService.GetProprietarios(new Models.Empreendimento.SearchProprietarioModel() { PessoaProviderId = Convert.ToInt32(pessoaVinculadaSistema.PessoaProvider) });
             //    if (proprietario == null || proprietario.Value.proprietarios == null || !proprietario.Value.proprietarios.Any())
-            //        throw new ArgumentException($"N„o foi encontrada nenhuma cota vinculada a pessoa id: {pessoaVinculadaSistema.PessoaProvider} do provider: {_financeiroProviderService.ProviderName}");
+            //        throw new ArgumentException($"N√£o foi encontrada nenhuma cota vinculada a pessoa id: {pessoaVinculadaSistema.PessoaProvider} do provider: {_financeiroProviderService.ProviderName}");
 
             //    if (!string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider))
             //    {
             //        var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(pessoaVinculadaSistema.PessoaProvider!) });
             //        if (propCache != null && propCache.Any(b=>b.frAtendimentoStatusCrcModels.Any(b=> b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S")))
             //        {
-            //            throw new ArgumentException("N„o foi possÌvel gerar a certid„o, motivo 0001BL");
+            //            throw new ArgumentException("N√£o foi poss√≠vel gerar a certid√£o, motivo 0001BL");
             //        }
             //    }
 
             //    var usuarios = await _userService.SearchNotPaginated(new UsuarioSearchModel() { CarregarDadosPessoa = true, Id = Convert.ToInt32(loggedUser.Value.userId) });
             //    if (usuarios == null || !usuarios.Any())
-            //        throw new ArgumentException($"N„o foi encontrado usu·rio com Id: {loggedUser.Value.userId}");
+            //        throw new ArgumentException($"N√£o foi encontrado usu√°rio com Id: {loggedUser.Value.userId}");
 
             //    var usuario = usuarios.First();
 
@@ -123,7 +123,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             //    var configuration = await _serviceBase.GetParametroSistema();
             //    if (configuration != null)
-            //        agruparCertidoesPorCliente = configuration.AgruparCertidaoPorCliente.GetValueOrDefault(Domain.Enumns.EnumSimNao.N„o) == Domain.Enumns.EnumSimNao.Sim;
+            //        agruparCertidoesPorCliente = configuration.AgruparCertidaoPorCliente.GetValueOrDefault(Domain.Enumns.EnumSimNao.N√£o) == Domain.Enumns.EnumSimNao.Sim;
 
             //    var certidoesModeloPath = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfig", "C:\\inetpub\\wwwroot\\ModeloCertidoes\\");
             //    var pathGeracaoPdf = _configuration.GetValue<string>($"CertidoesConfig:PositivaConfig", "C:\\inetpub\\wwwroot\\CertidoesFinanceiras\\");
@@ -131,53 +131,53 @@ namespace SW_PortalProprietario.Application.Services.Core
             //    if (!agruparCertidoesPorCliente)
             //    {
             //        if (string.IsNullOrEmpty(certidaoPositivaModeloPorUnidadeNome) || !certidaoPositivaModeloPorUnidadeNome.Contains("|"))
-            //            throw new FileNotFoundException($"N„o foi encontrada a configuraÁ„o de modelo para geraÁ„o de certid„o positiva de dÈbitos");
+            //            throw new FileNotFoundException($"N√£o foi encontrada a configura√ß√£o de modelo para gera√ß√£o de certid√£o positiva de d√©bitos");
 
             //        if (string.IsNullOrEmpty(certidaoNegativaModeloPorUnidadeNome) || !certidaoNegativaModeloPorUnidadeNome.Contains("|"))
-            //            throw new FileNotFoundException($"N„o foi encontrada a configuraÁ„o de modelo para geraÁ„o de certid„o negativa de dÈbitos");
+            //            throw new FileNotFoundException($"N√£o foi encontrada a configura√ß√£o de modelo para gera√ß√£o de certid√£o negativa de d√©bitos");
             //    }
             //    else
             //    {
             //        if (string.IsNullOrEmpty(certidaoPositivaModeloPorClienteNome) || !certidaoPositivaModeloPorClienteNome.Contains("|"))
-            //            throw new FileNotFoundException($"N„o foi encontrada a configuraÁ„o de modelo para geraÁ„o de certid„o positiva de dÈbitos");
+            //            throw new FileNotFoundException($"N√£o foi encontrada a configura√ß√£o de modelo para gera√ß√£o de certid√£o positiva de d√©bitos");
 
             //        if (string.IsNullOrEmpty(certidaoNegativaModeloPorClienteNome) || !certidaoNegativaModeloPorClienteNome.Contains("|"))
-            //            throw new FileNotFoundException($"N„o foi encontrada a configuraÁ„o de modelo para geraÁ„o de certid„o negativa de dÈbitos");
+            //            throw new FileNotFoundException($"N√£o foi encontrada a configura√ß√£o de modelo para gera√ß√£o de certid√£o negativa de d√©bitos");
             //    }
 
             //    if (!Directory.Exists(certidoesModeloPath))
-            //        throw new FileNotFoundException($"N„o foi encontrado o repositÛrio de modelos para emissıes de certidıes");
+            //        throw new FileNotFoundException($"N√£o foi encontrado o reposit√≥rio de modelos para emiss√µes de certid√µes");
 
             //    if (!Directory.Exists(pathGeracaoPdf))
-            //        throw new ArgumentException($"N„o foi encontrado o repositÛrio de gravaÁ„o tempor·ria das certidıes");
+            //        throw new ArgumentException($"N√£o foi encontrado o reposit√≥rio de grava√ß√£o tempor√°ria das certid√µes");
 
             //    string nomeCertidaoPositiva = !agruparCertidoesPorCliente ? certidaoPositivaModeloPorUnidadeNome!.Split("|")[0] : certidaoPositivaModeloPorClienteNome!.Split("|")[0];
             //    if (string.IsNullOrEmpty(nomeCertidaoPositiva))
-            //        throw new FileNotFoundException("N„o foi encontrado o modelo de certid„o para emiss„o de certid„o positiva");
+            //        throw new FileNotFoundException("N√£o foi encontrado o modelo de certid√£o para emiss√£o de certid√£o positiva");
 
             //    string nomeCertidaoNegativa = !agruparCertidoesPorCliente ? certidaoNegativaModeloPorUnidadeNome!.Split("|")[0] : certidaoNegativaModeloPorClienteNome!.Split("|")[0];
             //    if (string.IsNullOrEmpty(nomeCertidaoPositiva))
-            //        throw new FileNotFoundException("N„o foi encontrado o modelo de certid„o para emiss„o de certid„o negativa");
+            //        throw new FileNotFoundException("N√£o foi encontrado o modelo de certid√£o para emiss√£o de certid√£o negativa");
 
             //    string funcaoSubstituicoesEmissaoPositivas = !agruparCertidoesPorCliente ? certidaoPositivaModeloPorUnidadeNome!.Split("|")[1] : certidaoPositivaModeloPorClienteNome!.Split("|")[1];
 
             //    if (string.IsNullOrEmpty(funcaoSubstituicoesEmissaoPositivas))
-            //        throw new FileNotFoundException("N„o foi encontrada a funÁ„o para emiss„o de certid„o positiva");
+            //        throw new FileNotFoundException("N√£o foi encontrada a fun√ß√£o para emiss√£o de certid√£o positiva");
 
             //    string funcaoSubstituicoesEmissaoNegativa = !agruparCertidoesPorCliente ? certidaoNegativaModeloPorUnidadeNome!.Split("|")[1] : certidaoNegativaModeloPorClienteNome!.Split("|")[1];
 
             //    if (string.IsNullOrEmpty(funcaoSubstituicoesEmissaoNegativa))
-            //        throw new FileNotFoundException("N„o foi encontrada a funÁ„o para emiss„o de certid„o negativa");
+            //        throw new FileNotFoundException("N√£o foi encontrada a fun√ß√£o para emiss√£o de certid√£o negativa");
 
             //    if (contaspendentes.Value.contasPendentes.Any())
             //    {
             //        if (!File.Exists(Path.Combine(certidoesModeloPath, nomeCertidaoPositiva)))
-            //            throw new ArgumentException($"N„o foi encontrado o documento modelo para emiss„o de certid„o positiva de dÈbitos: '{Path.Combine(certidoesModeloPath, nomeCertidaoPositiva)}' ");
+            //            throw new ArgumentException($"N√£o foi encontrado o documento modelo para emiss√£o de certid√£o positiva de d√©bitos: '{Path.Combine(certidoesModeloPath, nomeCertidaoPositiva)}' ");
             //    }
             //    else
             //    {
             //        if (!File.Exists(Path.Combine(certidoesModeloPath, nomeCertidaoNegativa)))
-            //            throw new ArgumentException($"N„o foi encontrado o documento modelo para emiss„o de certid„o negativa de dÈbitos: '{Path.Combine(certidoesModeloPath, nomeCertidaoNegativa)}' ");
+            //            throw new ArgumentException($"N√£o foi encontrado o documento modelo para emiss√£o de certid√£o negativa de d√©bitos: '{Path.Combine(certidoesModeloPath, nomeCertidaoNegativa)}' ");
             //    }
 
 
@@ -255,14 +255,14 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             //    var commitResult = await _repository.CommitAsync();
             //    if (!commitResult.executed)
-            //        throw commitResult.exception ?? new Exception("N„o foi possÌvel realizar a operaÁ„o");
+            //        throw commitResult.exception ?? new Exception("N√£o foi poss√≠vel realizar a opera√ß√£o");
 
             //    return listRetorno;
 
             //}
             //catch (Exception err)
             //{
-            //    _logger.LogError(err, $"N„o foi possÌvel gerar a certid„o financeira para o usu·rio logado");
+            //    _logger.LogError(err, $"N√£o foi poss√≠vel gerar a certid√£o financeira para o usu√°rio logado");
             //    _repository.Rollback();
             //    throw;
             //}
@@ -278,7 +278,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }))
             {
                 var itens = itemGrouped.AsList();
-                //Gero a certid„o
+                //Gero a certid√£o
                 CertidaoFinanceira certidao = new CertidaoFinanceira()
                 {
                     Pessoa = new Domain.Entities.Core.DadosPessoa.Pessoa() { Id = usuario.PessoaId.GetValueOrDefault() },
@@ -315,7 +315,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 using var browser = await Puppeteer.LaunchAsync(launchOptions);
                 using var page = await browser.NewPageAsync();
 
-                // Carregar o conte˙do HTML na p·gina
+                // Carregar o conte√∫do HTML na p√°gina
                 await page.SetContentAsync(htmlContent);
 
                 // Gerar o PDF
@@ -331,7 +331,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         private async Task<CertidaoFinanceira> PrepararEmitirCertidoesNegativasDeDebito(GeracaoCertidaoInputModel geracaoCertidaoInputModel, UsuarioModel usuario, ProprietarioSimplificadoModel proprietario, string? certidoesModeloPath, string? pathGeracaoPdf, string nomeCertidao, string funcaoSubstituicoes, LaunchOptions launchOptions, string pathValidacaoProtocoloBase)
         {
-            //Gero a certid„o
+            //Gero a certid√£o
             CertidaoFinanceira certidao = new CertidaoFinanceira()
             {
                 Pessoa = new Domain.Entities.Core.DadosPessoa.Pessoa() { Id = usuario.PessoaId.GetValueOrDefault() },
@@ -369,7 +369,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             using var browser = await Puppeteer.LaunchAsync(launchOptions);
             using var page = await browser.NewPageAsync();
 
-            // Carregar o conte˙do HTML na p·gina
+            // Carregar o conte√∫do HTML na p√°gina
             await page.SetContentAsync(htmlContent);
 
             // Gerar o PDF
@@ -391,7 +391,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }))
             {
                 var itens = itemGrouped.AsList();
-                //Gero a certid„o
+                //Gero a certid√£o
                 CertidaoFinanceira certidao = new CertidaoFinanceira()
                 {
                     Pessoa = new Domain.Entities.Core.DadosPessoa.Pessoa() { Id = usuario.PessoaId.GetValueOrDefault() },
@@ -429,7 +429,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 using var browser = await Puppeteer.LaunchAsync(launchOptions);
                 using var page = await browser.NewPageAsync();
 
-                // Carregar o conte˙do HTML na p·gina
+                // Carregar o conte√∫do HTML na p√°gina
                 await page.SetContentAsync(htmlContent);
 
                 // Gerar o PDF
@@ -445,7 +445,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         private async Task<CertidaoFinanceira> PrepararEmitirCertidoesNegativasDeDebitoAgrupadoPorCliente(GeracaoCertidaoInputModel geracaoCertidaoInputModel, UsuarioModel usuario, ProprietarioSimplificadoModel proprietario, string? certidoesModeloPath, string? pathGeracaoPdf, string nomeCertidao, string funcaoSubstituicoes, LaunchOptions launchOptions, string pathValidacaoProtocoloBase)
         {
-            //Gero a certid„o
+            //Gero a certid√£o
             CertidaoFinanceira certidao = new CertidaoFinanceira()
             {
                 Pessoa = new Domain.Entities.Core.DadosPessoa.Pessoa() { Id = usuario.PessoaId.GetValueOrDefault() },
@@ -482,7 +482,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             using var browser = await Puppeteer.LaunchAsync(launchOptions);
             using var page = await browser.NewPageAsync();
 
-            // Carregar o conte˙do HTML na p·gina
+            // Carregar o conte√∫do HTML na p√°gina
             await page.SetContentAsync(htmlContent);
 
             // Gerar o PDF
@@ -498,29 +498,29 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             var parametrosSistema = await _repository.GetParametroSistemaViewModel();
             if (parametrosSistema == null)
-                throw new Exception("Deve ser configurado os par‚metros da empresa");
+                throw new Exception("Deve ser configurado os par√¢metros da empresa");
 
-            var nomeSistema = _configuration.GetValue<string>("NomeDoSistema", "Portal de multipropriedade SW - SoluÁıes");
+            var nomeSistema = _configuration.GetValue<string>("NomeDoSistema", "Portal de multipropriedade SW - Solu√ß√µes");
 
             if (itens == null || !itens.Any())
-                throw new FileNotFoundException("Deve ser enviado pelo menos uma conta pendente em itens para emiss„o de certid„o positiva de dÈbitos");
+                throw new FileNotFoundException("Deve ser enviado pelo menos uma conta pendente em itens para emiss√£o de certid√£o positiva de d√©bitos");
 
             var nomeProprietario = itens != null ? itens.First().NomePessoa : "";
 
             var empresa = (await _repository.FindByHql<Empresa>($"From Empresa e Inner Join Fetch e.Pessoa p Where e.Id = {parametrosSistema.EmpresaId}")).FirstOrDefault();
             if (empresa == null)
-                throw new FileNotFoundException($"N„o foi encontrada a empresa com o Id: {parametrosSistema.EmpresaId}");
+                throw new FileNotFoundException($"N√£o foi encontrada a empresa com o Id: {parametrosSistema.EmpresaId}");
 
             if (empresa.Pessoa == null || empresa.Pessoa.Id == 0)
-                throw new FileNotFoundException($"N„o foi encontrada a pessoa da empresa com o Id: {parametrosSistema.EmpresaId}");
+                throw new FileNotFoundException($"N√£o foi encontrada a pessoa da empresa com o Id: {parametrosSistema.EmpresaId}");
 
             var enderecoEmpresa = (await _repository.FindByHql<PessoaEndereco>($"From PessoaEndereco pe Inner Join Fetch pe.Cidade cid Inner Join Fetch pe.TipoEndereco te Where pe.Pessoa = {empresa.Pessoa.Id} and Coalesce(pe.Preferencial,0) = 1")).FirstOrDefault();
             if (enderecoEmpresa == null && string.IsNullOrEmpty(empresa.EnderecoCondominio) && string.IsNullOrEmpty(empresa.EnderecoAdministradoraCondominio) && string.IsNullOrEmpty(parametrosSistema.EnderecoAdministradoraCondominio) && string.IsNullOrEmpty(parametrosSistema.EnderecoCondominio))
-                throw new FileNotFoundException($"N„o foi encontrado endereÁo preferencial para a pessoa da empresa com o Id: {parametrosSistema.EmpresaId}, nem nos campos EndereÁo CondomÌnio/Endereco Administradora CondomÌnio na empresa: {empresa.Id} e nem nos campos EndereÁo empreendimento/EndereÁo administradora empreendimento no cadastro de par‚metros.");
+                throw new FileNotFoundException($"N√£o foi encontrado endere√ßo preferencial para a pessoa da empresa com o Id: {parametrosSistema.EmpresaId}, nem nos campos Endere√ßo Condom√≠nio/Endereco Administradora Condom√≠nio na empresa: {empresa.Id} e nem nos campos Endere√ßo empreendimento/Endere√ßo administradora empreendimento no cadastro de par√¢metros.");
 
             var cnpjEmpresa = (await _repository.FindByHql<PessoaDocumento>($"From PessoaDocumento pd Inner Join Fetch pd.TipoDocumento td Where pd.Pessoa = {empresa.Pessoa.Id} and Lower(td.Nome) = 'cnpj'")).FirstOrDefault();
             if (cnpjEmpresa == null && string.IsNullOrEmpty(empresa.CnpjCondominio) && string.IsNullOrEmpty(empresa.CnpjAdministradoraCondominio) && string.IsNullOrEmpty(parametrosSistema.CnpjCondominio) && string.IsNullOrEmpty(parametrosSistema.CnpjAdministradoraCondominio))
-                throw new FileNotFoundException($"N„o foi encontrado o CNPJ da empresa com o Id: {parametrosSistema.EmpresaId} e nem nos campos Cnpj CondomÌnio/Cnpj Administradora CondomÌnio no cadastro da empresa: {empresa.Id} e nem nos campos EndereÁo administradora/EndereÁo administradora empreendimento no cadastro de par‚metros.");
+                throw new FileNotFoundException($"N√£o foi encontrado o CNPJ da empresa com o Id: {parametrosSistema.EmpresaId} e nem nos campos Cnpj Condom√≠nio/Cnpj Administradora Condom√≠nio no cadastro da empresa: {empresa.Id} e nem nos campos Endere√ßo administradora/Endere√ßo administradora empreendimento no cadastro de par√¢metros.");
 
             List<ParameterValueResult>? result = new List<ParameterValueResult>();
             if (funcaoSubstituicoes.Equals("certidaopositivadebitos", StringComparison.InvariantCultureIgnoreCase))
@@ -795,7 +795,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                 }
                                 else
                                 {
-                                    certidao.Protocolo = "N„o informado";
+                                    certidao.Protocolo = "N√£o informado";
                                     result.Add(new ParameterValueResult(item.Key, certidao.Protocolo));
                                 }
 
@@ -809,7 +809,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                     if (valueUtilizar != null && !string.IsNullOrEmpty(valueUtilizar.FriendlyName))
                                         result.Add(new ParameterValueResult(item.Key, valueUtilizar.FriendlyName));
                                 }
-                                else result.Add(new ParameterValueResult(item.Key, $"N„o informado"));
+                                else result.Add(new ParameterValueResult(item.Key, $"N√£o informado"));
 
                             }
                             break;
@@ -825,24 +825,24 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             var parametrosSistema = await _repository.GetParametroSistemaViewModel();
             if (parametrosSistema == null)
-                throw new Exception("Deve ser configurado os par‚metros da empresa");
+                throw new Exception("Deve ser configurado os par√¢metros da empresa");
 
-            var nomeSistema = _configuration.GetValue<string>("NomeDoSistema", "Portal de multipropriedade SW - SoluÁıes");
+            var nomeSistema = _configuration.GetValue<string>("NomeDoSistema", "Portal de multipropriedade SW - Solu√ß√µes");
 
             var empresa = (await _repository.FindByHql<Empresa>($"From Empresa e Inner Join Fetch e.Pessoa p Where e.Id = {parametrosSistema.EmpresaId}")).FirstOrDefault();
             if (empresa == null)
-                throw new FileNotFoundException($"N„o foi encontrada a empresa com o Id: {parametrosSistema.EmpresaId}");
+                throw new FileNotFoundException($"N√£o foi encontrada a empresa com o Id: {parametrosSistema.EmpresaId}");
 
             if (empresa.Pessoa == null || empresa.Pessoa.Id == 0)
-                throw new FileNotFoundException($"N„o foi encontrada a pessoa da empresa com o Id: {parametrosSistema.EmpresaId}");
+                throw new FileNotFoundException($"N√£o foi encontrada a pessoa da empresa com o Id: {parametrosSistema.EmpresaId}");
 
             var enderecoEmpresa = (await _repository.FindByHql<PessoaEndereco>($"From PessoaEndereco pe Inner Join Fetch pe.Cidade cid Inner Join Fetch pe.TipoEndereco te Where pe.Pessoa = {empresa.Pessoa.Id} and Coalesce(pe.Preferencial,0) = 1")).FirstOrDefault();
             if (enderecoEmpresa == null && string.IsNullOrEmpty(empresa.EnderecoCondominio) && string.IsNullOrEmpty(empresa.EnderecoAdministradoraCondominio) && string.IsNullOrEmpty(parametrosSistema.EnderecoAdministradoraCondominio) && string.IsNullOrEmpty(parametrosSistema.EnderecoCondominio))
-                throw new FileNotFoundException($"N„o foi encontrado endereÁo preferencial para a pessoa da empresa com o Id: {parametrosSistema.EmpresaId}, nem nos campos EndereÁo CondomÌnio/Endereco Administradora CondomÌnio na empresa: {empresa.Id} e nem nos campos EndereÁo empreendimento/EndereÁo administradora empreendimento no cadastro de par‚metros.");
+                throw new FileNotFoundException($"N√£o foi encontrado endere√ßo preferencial para a pessoa da empresa com o Id: {parametrosSistema.EmpresaId}, nem nos campos Endere√ßo Condom√≠nio/Endereco Administradora Condom√≠nio na empresa: {empresa.Id} e nem nos campos Endere√ßo empreendimento/Endere√ßo administradora empreendimento no cadastro de par√¢metros.");
 
             var cnpjEmpresa = (await _repository.FindByHql<PessoaDocumento>($"From PessoaDocumento pd Inner Join Fetch pd.TipoDocumento td Where pd.Pessoa = {empresa.Pessoa.Id} and Lower(td.Nome) = 'cnpj'")).FirstOrDefault();
             if (cnpjEmpresa == null && string.IsNullOrEmpty(empresa.CnpjCondominio) && string.IsNullOrEmpty(empresa.CnpjAdministradoraCondominio) && string.IsNullOrEmpty(parametrosSistema.CnpjCondominio) && string.IsNullOrEmpty(parametrosSistema.CnpjAdministradoraCondominio))
-                throw new FileNotFoundException($"N„o foi encontrado o CNPJ da empresa com o Id: {parametrosSistema.EmpresaId} e nem nos campos Cnpj CondomÌnio/Cnpj Administradora CondomÌnio no cadastro da empresa: {empresa.Id} e nem nos campos EndereÁo administradora/EndereÁo administradora empreendimento no cadastro de par‚metros.");
+                throw new FileNotFoundException($"N√£o foi encontrado o CNPJ da empresa com o Id: {parametrosSistema.EmpresaId} e nem nos campos Cnpj Condom√≠nio/Cnpj Administradora Condom√≠nio no cadastro da empresa: {empresa.Id} e nem nos campos Endere√ßo administradora/Endere√ßo administradora empreendimento no cadastro de par√¢metros.");
 
 
             List<ParameterValueResult>? result = new List<ParameterValueResult>();
@@ -1102,7 +1102,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                 }
                                 else
                                 {
-                                    certidao.Protocolo = "N„o informado";
+                                    certidao.Protocolo = "N√£o informado";
                                     result.Add(new ParameterValueResult(item.Key, certidao.Protocolo));
                                 }
 
@@ -1116,7 +1116,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                     if (valueUtilizar != null && !string.IsNullOrEmpty(valueUtilizar.FriendlyName))
                                         result.Add(new ParameterValueResult(item.Key, valueUtilizar.FriendlyName));
                                 }
-                                else result.Add(new ParameterValueResult(item.Key, $"N„o informado"));
+                                else result.Add(new ParameterValueResult(item.Key, $"N√£o informado"));
 
                             }
                             break;
@@ -1131,7 +1131,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         public async Task<CertidaoViewModel?> ValidarCertidao(string protocolo)
         {
             if (string.IsNullOrEmpty(protocolo))
-                throw new FileNotFoundException("N„o foi encontrada certid„o com o protocolo informado.");
+                throw new FileNotFoundException("N√£o foi encontrada certid√£o com o protocolo informado.");
 
             var certidao = (await _repository.FindBySql<CertidaoViewModel>($"Select c.Protocolo, c.Competencia, c.MultiProprietario, c.CpfCnpj, c.ImovelNumero, c.TorreBlocoNumero, c.NumeroFracao as Cota, c.CertidaoEmitidaEm, c.NomeCampoCpfCnpj as NomeDocumento  From CertidaoFinanceira c Where Lower(c.Protocolo) = '{protocolo.TrimEnd().ToLower()}'")).FirstOrDefault();
 

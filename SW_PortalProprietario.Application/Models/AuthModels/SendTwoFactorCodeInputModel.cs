@@ -1,8 +1,8 @@
-namespace SW_PortalProprietario.Application.Models.AuthModels
+﻿namespace SW_PortalProprietario.Application.Models.AuthModels
 {
     /// <summary>
-    /// Modelo para envio do código 2FA pelo canal escolhido (sem validação de senha).
-    /// Usado quando o login está configurado com 2FA obrigatório.
+    /// Modelo para envio do cÃ³digo 2FA pelo canal escolhido (sem validaÃ§Ã£o de senha).
+    /// Usado quando o login estÃ¡ configurado com 2FA obrigatÃ³rio.
     /// </summary>
     public class SendTwoFactorCodeInputModel
     {

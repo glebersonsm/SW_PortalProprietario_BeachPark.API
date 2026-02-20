@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Interfaces.ReservasApi;
@@ -84,18 +84,18 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             services.TryAddScoped<IRegraIntercambioService, RegraIntercambioService>();
             services.TryAddScoped<IAutomaticVoucherService, AutomaticVoucherService>();
 
-            // Registrar Communication Handlers e serviços auxiliares
+            // Registrar Communication Handlers e serviÃ§os auxiliares
             //Simuladores
             services.TryAddScoped<VoucherSimulationService>();
             services.TryAddScoped<AvisoCheckinSimulationService>();
             services.TryAddScoped<IncentivoAgendamentoSimulationService>();
 
-            //Serviços de geração (GenerationServices)
+            //ServiÃ§os de geraÃ§Ã£o (GenerationServices)
             services.TryAddScoped<VoucherGenerationService>();
             services.TryAddScoped<AvisoCheckinGenerationService>();
             services.TryAddScoped<IncentivoAgendamentoGenerationService>();
 
-            //Serviços de processamento em massa (ProcessingServices)
+            //ServiÃ§os de processamento em massa (ProcessingServices)
             services.TryAddScoped<VoucherProcessingService>();
             services.TryAddScoped<AvisoCheckinProcessingService>();
             services.TryAddScoped<IncentivoAgendamentoProcessingService>();

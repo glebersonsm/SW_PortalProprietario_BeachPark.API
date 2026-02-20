@@ -1,4 +1,4 @@
-using FluentNHibernate.Cfg;
+﻿using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +19,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             var connectionString = System.Environment.GetEnvironmentVariable("DEFAULT_CONNECTION");
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new ArgumentException("Não foi configurada a string de conexão DEFAULT_CONNECTION.");
+                throw new ArgumentException("NÃ£o foi configurada a string de conexÃ£o DEFAULT_CONNECTION.");
             }
 
             if (connectionString.Contains(".db", StringComparison.InvariantCultureIgnoreCase))
@@ -91,10 +91,10 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
         {
             var _sessionFactory = Fluently.Configure()
                          .Database(PostgreSQLConfiguration.Standard.ConnectionString(connectionString)
-                         .Raw("hibernate.connection.provider", "NHibernate.Connection.C3P0ConnectionProvider") // Configuração do provedor de conexão
-                         .Raw("hibernate.c3p0.min_size", "5")  // Tamanho mínimo do pool de conexões
-                         .Raw("hibernate.c3p0.max_size", "300") // Tamanho máximo do pool de conexões
-                         .Raw("hibernate.c3p0.timeout", "300")) // Tempo limite de conexão em segundos
+                         .Raw("hibernate.connection.provider", "NHibernate.Connection.C3P0ConnectionProvider") // ConfiguraÃ§Ã£o do provedor de conexÃ£o
+                         .Raw("hibernate.c3p0.min_size", "5")  // Tamanho mÃ­nimo do pool de conexÃµes
+                         .Raw("hibernate.c3p0.max_size", "300") // Tamanho mÃ¡ximo do pool de conexÃµes
+                         .Raw("hibernate.c3p0.timeout", "300")) // Tempo limite de conexÃ£o em segundos
                          .Mappings(m => m.FluentMappings.AddFromAssemblyOf<AutomappingConfigurationDefault>());
 
             var sessionFactory = _sessionFactory.BuildSessionFactory();

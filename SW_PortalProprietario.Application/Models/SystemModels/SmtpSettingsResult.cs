@@ -1,7 +1,7 @@
-namespace SW_PortalProprietario.Application.Models.SystemModels
+﻿namespace SW_PortalProprietario.Application.Models.SystemModels
 {
     /// <summary>
-    /// Configurações SMTP para envio de e-mail (podem vir de ParametroSistema ou appsettings).
+    /// ConfiguraÃ§Ãµes SMTP para envio de e-mail (podem vir de ParametroSistema ou appsettings).
     /// </summary>
     public class SmtpSettingsResult
     {

@@ -1,8 +1,8 @@
-namespace SW_PortalProprietario.Domain.Entities.Core.Geral
+﻿namespace SW_PortalProprietario.Domain.Entities.Core.Geral
 {
     /// <summary>
-    /// Configuração padrão para reservas VHF (PMS).
-    /// Armazena valores padrão para integração com sistemas legados.
+    /// ConfiguraÃ§Ã£o padrÃ£o para reservas VHF (PMS).
+    /// Armazena valores padrÃ£o para integraÃ§Ã£o com sistemas legados.
     /// </summary>
     public class ConfigReservaVhf : EntityBaseCore
     {
@@ -18,9 +18,9 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
         public virtual string? Segmento { get; set; }
         public virtual string CodigoPensao { get; set; } = string.Empty;
         public virtual bool PermiteIntercambioMultipropriedade { get; set; }
-        /// <summary>Percentual máximo de ocupação para retorno de disponibilidade (Timesharing). Se atingido, não retorna disponibilidade.</summary>
+        /// <summary>Percentual mÃ¡ximo de ocupaÃ§Ã£o para retorno de disponibilidade (Timesharing). Se atingido, nÃ£o retorna disponibilidade.</summary>
         public virtual decimal? OcupacaoMaxRetDispTS { get; set; }
-        /// <summary>Percentual máximo de ocupação para retorno de disponibilidade (Multipropriedade). Se atingido, não retorna disponibilidade.</summary>
+        /// <summary>Percentual mÃ¡ximo de ocupaÃ§Ã£o para retorno de disponibilidade (Multipropriedade). Se atingido, nÃ£o retorna disponibilidade.</summary>
         public virtual decimal? OcupacaoMaxRetDispMP { get; set; }
     }
 }

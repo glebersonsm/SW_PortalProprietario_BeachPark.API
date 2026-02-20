@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.GeralModels;
@@ -43,8 +43,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<List<AutomaticCommunicationConfigModel>>(new List<AutomaticCommunicationConfigModel>())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { "Erro ao buscar todas as configurações de comunicação automática", err.Message, err.InnerException.Message } :
-                    new List<string>() { "Erro ao buscar todas as configurações de comunicação automática", err.Message },
+                    new List<string>() { "Erro ao buscar todas as configuraÃ§Ãµes de comunicaÃ§Ã£o automÃ¡tica", err.Message, err.InnerException.Message } :
+                    new List<string>() { "Erro ao buscar todas as configuraÃ§Ãµes de comunicaÃ§Ã£o automÃ¡tica", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -66,7 +66,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 {
                     return NotFound(new ResultModel<AutomaticCommunicationConfigModel>(new AutomaticCommunicationConfigModel())
                     {
-                        Errors = new List<string> { $"Configuração para o tipo '{communicationType}' não encontrada" },
+                        Errors = new List<string> { $"ConfiguraÃ§Ã£o para o tipo '{communicationType}' nÃ£o encontrada" },
                         Status = StatusCodes.Status404NotFound,
                         Success = false
                     });
@@ -84,8 +84,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<AutomaticCommunicationConfigModel>(new AutomaticCommunicationConfigModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Erro ao buscar configuração: {communicationType}", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Erro ao buscar configuração: {communicationType}", err.Message },
+                    new List<string>() { $"Erro ao buscar configuraÃ§Ã£o: {communicationType}", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"Erro ao buscar configuraÃ§Ã£o: {communicationType}", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -115,8 +115,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return BadRequest(new ResultModel<AutomaticCommunicationConfigModel>(new AutomaticCommunicationConfigModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar a configuração: ({model.CommunicationType})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar a configuração: ({model.CommunicationType})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a configuraÃ§Ã£o: ({model.CommunicationType})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a configuraÃ§Ã£o: ({model.CommunicationType})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -126,8 +126,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<AutomaticCommunicationConfigModel>(new AutomaticCommunicationConfigModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar a configuração: ({model.CommunicationType})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar a configuração: ({model.CommunicationType})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a configuraÃ§Ã£o: ({model.CommunicationType})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a configuraÃ§Ã£o: ({model.CommunicationType})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -158,8 +158,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return BadRequest(new ResultModel<AutomaticCommunicationConfigModel>(new AutomaticCommunicationConfigModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível atualizar a configuração: ({id})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível atualizar a configuração: ({id})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel atualizar a configuraÃ§Ã£o: ({id})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel atualizar a configuraÃ§Ã£o: ({id})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -169,8 +169,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<AutomaticCommunicationConfigModel>(new AutomaticCommunicationConfigModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível atualizar a configuração: ({id})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível atualizar a configuração: ({id})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel atualizar a configuraÃ§Ã£o: ({id})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel atualizar a configuraÃ§Ã£o: ({id})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -199,8 +199,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return BadRequest(new ResultModel<bool>(false)
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível deletar a configuração: ({id})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível deletar a configuração: ({id})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel deletar a configuraÃ§Ã£o: ({id})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel deletar a configuraÃ§Ã£o: ({id})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -210,8 +210,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<bool>(false)
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível deletar a configuração: ({id})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível deletar a configuração: ({id})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel deletar a configuraÃ§Ã£o: ({id})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel deletar a configuraÃ§Ã£o: ({id})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -231,7 +231,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 {
                     return BadRequest(new ResultModel<bool>(false)
                     {
-                        Errors = new List<string>() { "Email do usuário não informado" },
+                        Errors = new List<string>() { "Email do usuÃ¡rio nÃ£o informado" },
                         Status = StatusCodes.Status400BadRequest,
                         Success = false
                     });
@@ -250,8 +250,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return BadRequest(new ResultModel<bool>(false)
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível simular o envio: ({id})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível simular o envio: ({id})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel simular o envio: ({id})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel simular o envio: ({id})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -261,8 +261,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Configuracoes
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<bool>(false)
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível simular o envio: ({id})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível simular o envio: ({id})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel simular o envio: ({id})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel simular o envio: ({id})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });

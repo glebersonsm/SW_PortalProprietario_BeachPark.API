@@ -2,7 +2,7 @@
 {
     public enum EnumSimNao
     {
-        Não = 0,
+        Nao = 0,
         Sim = 1
     }
 

@@ -1,4 +1,4 @@
-using AccessCenterDomain.AccessCenter.Fractional;
+﻿using AccessCenterDomain.AccessCenter.Fractional;
 using CMDomain.Entities;
 using CMDomain.Models.Pessoa;
 using Dapper;
@@ -379,18 +379,18 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             var empresaCmId = _configuration.GetValue<int>("EmpresaCMId", 3);
             var loggedUser = await _repository.GetLoggedUser();
             if (loggedUser == null)
-                throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
+                throw new ArgumentException("NÃ£o foi possÃ­vel identificar o usuÃ¡rio logado no sistema");
 
             List<PessoaSistemaXProviderModel> pessoasVinculadas = new List<PessoaSistemaXProviderModel>();
 
-            // Se IdCliente foi fornecido, verifica se o usuário é administrador
+            // Se IdCliente foi fornecido, verifica se o usuÃ¡rio Ã© administrador
             var admAsUser = false;
             if (searchModel.IdCliente.HasValue)
             {
                 if (!loggedUser.Value.isAdm)
                 {
                     if (searchModel.IdCliente.GetValueOrDefault(0) <= 0)
-                        throw new ArgumentException("IdCliente deve ser fornecido para usuários não administradores.");
+                        throw new ArgumentException("IdCliente deve ser fornecido para usuÃ¡rios nÃ£o administradores.");
 
                     pessoasVinculadas = await _serviceBase.GetPessoaSistemaVinculadaPessoaProvider(searchModel.IdCliente.GetValueOrDefault(0).ToString(), "cm");
                 }
@@ -401,10 +401,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 new PessoaSistemaXProviderModel() { PessoaProvider = searchModel.IdCliente.GetValueOrDefault().ToString()} : 
                 pessoasVinculadas.FirstOrDefault();
             if (pessoaVinculadaSistema == null)
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
+                throw new ArgumentException($"NÃ£o foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuÃ¡rio logado: {loggedUser.Value.userId}");
 
             if (string.IsNullOrEmpty(pessoaVinculadaSistema.PessoaProvider) || !Helper.IsNumeric(pessoaVinculadaSistema.PessoaProvider))
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
+                throw new ArgumentException($"NÃ£o foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuÃ¡rio logado: {loggedUser.Value.userId}");
 
             if (searchModel.FormaSimplificada.GetValueOrDefault(false))
             {
@@ -833,7 +833,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                         RF.NUMRESERVA,
                                         RF.IDRESERVASFRONT,
                                         CASE 
-                                            WHEN RF.NUMVOO IS NULL OR RTRIM(RF.NUMVOO) = '' THEN 'Não'
+                                            WHEN RF.NUMVOO IS NULL OR RTRIM(RF.NUMVOO) = '' THEN 'NÃ£o'
                                             ELSE 'Sim'
                                         END AS NUMVOO,
                                         CASE 
@@ -864,7 +864,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                         COALESCE(RTX.VLRTAXA, 0) AS ValorTaxa,
                                         CASE 
                                             WHEN (COALESCE(RTX.VLRTAXA, 0) = 0 AND RTX.VLRTAXAISENTA IS NOT NULL) THEN 'Sim'
-                                            ELSE 'Não'
+                                            ELSE 'NÃ£o'
                                         END AS TAXAISENTA,
                                         ( SELECT COALESCE(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RF.IDRESERVASFRONT ) VALORPENSAO,
                                         PH.NOME AS HOSPEDEPRINCIPAL,
@@ -934,14 +934,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 sb.AppendLine($" AND LOWER(ST.DESCRICAO) LIKE '%{searchModel.StatusReserva.ToLower().TrimEnd()}%' ");
             }
 
-            #region Reserva Migrada não incluidas
+            #region Reserva Migrada nÃ£o incluidas
             //sb.AppendLine($@")
             //                                UNION ALL
             //                                (
             //                                SELECT
             //                                    DISTINCT
             //                                    RM.NUMRESERVA AS NUMRESERVA,
-            //                                    TO_CHAR(RM.LOCRESERVA) AS LOCALIZADOR, 'Não' AS NUMVOO,
+            //                                    TO_CHAR(RM.LOCRESERVA) AS LOCALIZADOR, 'NÃ£o' AS NUMVOO,
             //                                    RM.DATACHEGADA AS CHECKIN,
             //                                    RM.DATAPARTIDA AS CHECKOUT,
             //                                    DECODE(SIGN(TO_NUMBER(RM.DATAPARTIDA-PH.DATASISTEMA)),1,DECODE(SIGN(TO_NUMBER(PH.DATASISTEMA-RM.DATACHEGADA)),1,'Check-In','Confirmada'),'Check-out') AS STATUSRESERVA,
@@ -957,8 +957,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             //                                    US.NOMEUSUARIO AS CRIADAPOR,
             //                                    COALESCE(PR.VALOR,0) AS PONTORESERVA,
             //                                    COALESCE(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
-            //                                    'Não' AS TAXAISENTA,
-            //                                    CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'Não' END AS LISTAESPERA,
+            //                                    'NÃ£o' AS TAXAISENTA,
+            //                                    CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'NÃ£o' END AS LISTAESPERA,
             //                                    V.IDVENDATS,
             //                                    DTTX.DATALANCAMENTO AS DATAPAGTAXA,
             //                                    ( SELECT COALESCE(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RM.IDRESERVAMIGRADA ) VALORPENSAO,
@@ -1969,20 +1969,20 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var loggedUser = await _repository.GetLoggedUser();
             if (loggedUser == null)
-                throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
+                throw new ArgumentException("NÃ£o foi possÃ­vel identificar o usuÃ¡rio logado no sistema");
 
             var pessoaVinculadaSistema = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
             if (pessoaVinculadaSistema == null)
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
+                throw new ArgumentException($"NÃ£o foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuÃ¡rio logado: {loggedUser.Value.userId}");
 
             if (pessoaVinculadaSistema.Any(a => string.IsNullOrEmpty(a.PessoaProvider)) || !pessoaVinculadaSistema.All(a => Helper.IsNumeric(a.PessoaProvider)))
-                throw new ArgumentException($"Não foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuário logado: {loggedUser.Value.userId}");
+                throw new ArgumentException($"NÃ£o foi encontrada pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada ao usuÃ¡rio logado: {loggedUser.Value.userId}");
 
 
             var sb = new StringBuilder(@$"(SELECT
                                               DISTINCT
                                               RF.NUMRESERVA AS NUMRESERVA, 
-                                              CASE WHEN (RF.NUMVOO IS NULL) OR (RTRIM(RF.NUMVOO) = '') THEN 'Não' ELSE 'Sim' END AS NUMVOO,
+                                              CASE WHEN (RF.NUMVOO IS NULL) OR (RTRIM(RF.NUMVOO) = '') THEN 'NÃ£o' ELSE 'Sim' END AS NUMVOO,
                                               CASE WHEN (SELECT MIN(LOCRESERVA) FROM RESERVASFRONT WHERE IDRESERVAMULTROOM = RF.IDRESERVASFRONT GROUP BY IDRESERVASFRONT) > 0 THEN
                                                 RF.LOCRESERVA || '/' || (SELECT LOCRESERVA FROM RESERVASFRONT WHERE IDRESERVAMULTROOM = RF.IDRESERVASFRONT)
                                               ELSE
@@ -2003,8 +2003,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                               US.NOMEUSUARIO AS CRIADAPOR,
                                               COALESCE(PR.VALOR,0) AS PONTORESERVA,
                                               COALESCE(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
-                                              CASE WHEN ((COALESCE(LTX.VLRTAXA,0) = 0) AND (LTX.VLRTAXAISENTA IS NOT NULL)) THEN 'Sim' ELSE 'Não' END TAXAISENTA,
-                                              CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'Não' END AS LISTAESPERA,
+                                              CASE WHEN ((COALESCE(LTX.VLRTAXA,0) = 0) AND (LTX.VLRTAXAISENTA IS NOT NULL)) THEN 'Sim' ELSE 'NÃ£o' END TAXAISENTA,
+                                              CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'NÃ£o' END AS LISTAESPERA,
                                               V.IDVENDATS,
                                               DTTX.DATALANCAMENTO AS DATAPAGTAXA,
                                               ( SELECT COALESCE(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RF.IDRESERVASFRONT ) VALORPENSAO,
@@ -2183,7 +2183,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                             SELECT
                                                 DISTINCT
                                                 RM.NUMRESERVA AS NUMRESERVA,
-                                                TO_CHAR(RM.LOCRESERVA) AS LOCALIZADOR, 'Não' AS NUMVOO,
+                                                TO_CHAR(RM.LOCRESERVA) AS LOCALIZADOR, 'NÃ£o' AS NUMVOO,
                                                 RM.DATACHEGADA AS CHECKIN,
                                                 RM.DATAPARTIDA AS CHECKOUT,
                                                 DECODE(SIGN(TO_NUMBER(RM.DATAPARTIDA-PH.DATASISTEMA)),1,DECODE(SIGN(TO_NUMBER(PH.DATASISTEMA-RM.DATACHEGADA)),1,'Check-In','Confirmada'),'Check-out') AS STATUS,
@@ -2199,8 +2199,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                 US.NOMEUSUARIO AS CRIADAPOR,
                                                 COALESCE(PR.VALOR,0) AS PONTORESERVA,
                                                 COALESCE(LTX.VLRTAXA,0) AS TAXAMANUTENCAO,
-                                                'Não' AS TAXAISENTA,
-                                                CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'Não' END AS LISTAESPERA,
+                                                'NÃ£o' AS TAXAISENTA,
+                                                CASE WHEN LS.IDLISTAESPERA IS NOT NULL THEN 'Sim' ELSE 'NÃ£o' END AS LISTAESPERA,
                                                 V.IDVENDATS,
                                                 DTTX.DATALANCAMENTO AS DATAPAGTAXA,
                                                 ( SELECT COALESCE(SUM(ORC.VALOR),0) FROM ORCAMENTORESERVA ORC WHERE ORC.IDRESERVASFRONT = RM.IDRESERVAMIGRADA ) VALORPENSAO,
@@ -2410,11 +2410,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var loggedUser = await _repository.GetLoggedUser();
             if (loggedUser == null)
-                throw new ArgumentException("Não foi possível identificar o usuário logado no sistema");
+                throw new ArgumentException("NÃ£o foi possÃ­vel identificar o usuÃ¡rio logado no sistema");
 
             List<PessoaSistemaXProviderModel> pessoas = new List<PessoaSistemaXProviderModel>();
 
-            // Se IdCliente foi fornecido, verifica se o usuário é administrador
+            // Se IdCliente foi fornecido, verifica se o usuÃ¡rio Ã© administrador
             bool admAsCLiente = false;
             if (searchModel.IdCliente.HasValue)
             {
@@ -2891,7 +2891,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                      ,
 	                                    FX.TIPOETARIO,
 	                                    H.NOME || ' ' || H.SOBRENOME AS NOMEHOSPEDECOMPLETO,
-                                     Decode(RCI.IDRESERVASRCI,NULL,'Não','Sim') as RCI,
+                                     Decode(RCI.IDRESERVASRCI,NULL,'NÃ£o','Sim') as RCI,
                                      Case 
                                         when afrac.IdFracionamentoTs is not null then 'Inicio Fracionamento'
                                         when ffrac.IdFracionamentoTs is not null then 'Encerramento Fracionamento'
@@ -3079,7 +3079,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                     AND R.IDRESERVASFRONT = afrac.IdReservasFront1(+)
                                     AND R.IDRESERVASFRONT = ffrac.IdReservasFront2(+)");
             
-            // Se IdCliente foi fornecido, usa ele; senão usa a pessoa vinculada ao usuário logado
+            // Se IdCliente foi fornecido, usa ele; senÃ£o usa a pessoa vinculada ao usuÃ¡rio logado
             if (searchModel.IdCliente.HasValue)
             {
                 sb.AppendLine($" AND PRO.IDPESSOA = {searchModel.IdCliente.Value} {txtExibirTodosOsHospedes}");
@@ -3188,7 +3188,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
         public async Task<IList<PeriodoDisponivelResultModel>?> Disponibilidade(SearchDisponibilidadeModel searchModel)
         {
             if (string.IsNullOrEmpty(searchModel.NumeroContrato) || searchModel.IdVendaXContrato.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Deve ser informado o número do contrato e o Id da venda x contrato para busca de disponibilidades.");
+                throw new ArgumentException("Deve ser informado o nÃºmero do contrato e o Id da venda x contrato para busca de disponibilidades.");
 
             if (searchModel.DataInicial.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue)
                 throw new ArgumentException("Deve ser informada a data inicial e data final para busca de disponibiliades.");
@@ -3201,7 +3201,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             PeriodoDisponivelResultModel? baseSaldoPontos = await GetSaldo(searchModel);
             if (baseSaldoPontos == null || baseSaldoPontos.IdContratoTs.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Falha na busca de disponibilidade 'Contrato não encontrado'");
+                throw new ArgumentException("Falha na busca de disponibilidade 'Contrato nÃ£o encontrado'");
 
             var condicaoFinanceira = await PosicaoFinanceiraContrato(baseSaldoPontos.IdVendaTs.GetValueOrDefault(), baseSaldoPontos.SaldoPontos);
 
@@ -3641,14 +3641,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             decimal? ocupacaoMaxima = 70)
         {
             if (string.IsNullOrEmpty(searchModel.NumeroContrato) || searchModel.IdVendaXContrato.GetValueOrDefault(0) <= 0)
-                throw new ArgumentException("Falha na busca de disponibilidade 'Contrato não encontrado'");
+                throw new ArgumentException("Falha na busca de disponibilidade 'Contrato nÃ£o encontrado'");
 
             if (baseSaldoPontos.IdVendaTs.GetValueOrDefault(0) <= 0 && condicaoFinanceira?.IdVendaTs.GetValueOrDefault(0) <= 0)
-                throw new ArgumentException("Não foi possível identificar o IdVendaTs");
+                throw new ArgumentException("NÃ£o foi possÃ­vel identificar o IdVendaTs");
 
             AtendClienteTs? atendClienteTs = await GetAtendimentoCliente(baseSaldoPontos.IdVendaXContrato.GetValueOrDefault(0));
             if (atendClienteTs == null || atendClienteTs.IdVendaXContrato.GetValueOrDefault(0) == 0)
-                throw new ArgumentException($"Não foi localizado os dados da venda");
+                throw new ArgumentException($"NÃ£o foi localizado os dados da venda");
 
             if (searchModel.TipoDeBusca == "A")
             {
@@ -3678,7 +3678,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 return new List<PeriodoDisponivelResultModel>();
 
             if (condicaoFinanceira == null)
-                throw new ArgumentException("Falha na busca de disponibilidade 'Contrato não encontrado'");
+                throw new ArgumentException("Falha na busca de disponibilidade 'Contrato nÃ£o encontrado'");
 
             //if (condicaoFinanceira.SaldoInadimplente.GetValueOrDefault(0) > 0)
             //    throw new ArgumentException("Falha na busca de disponibilidade: 'PARC_INAD'");
@@ -3749,7 +3749,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                                                     c.IdContratoTs = 
                                                                                     (Select vxc.IdContratoTs From VendaXContratoTs vxc Where vxc.IdVendaXContrato = {atendClienteTs.IdVendaXContrato})")).FirstOrDefault();
             if (padraoContrato == null)
-                throw new ArgumentException($"Não foi possível encontrar o ContratoTs vinculado a venda: {atendClienteTs.IdVendaXContrato}");
+                throw new ArgumentException($"NÃ£o foi possÃ­vel encontrar o ContratoTs vinculado a venda: {atendClienteTs.IdVendaXContrato}");
 
             return padraoContrato;
         }
@@ -4162,7 +4162,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         if ((item.MinimoDias.GetValueOrDefault() == 7 || temporada) && item.DataInicial <= dataBase.Date && 
                             item.DataFinal >= dataBase.Date && item.DataInicial <= dataFinal.Date && item.DataFinal >= dataFinal.Date)
                         {
-                            // Começa um novo período.
+                            // ComeÃ§a um novo perÃ­odo.
                             PeriodoDisponivelResultModel? periodoAtual = new PeriodoDisponivelResultModel
                             {
                                 Checkin = dataBase,
@@ -4252,7 +4252,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                     }
                                     catch (Exception err)
                                     {
-                                        _logger.LogError("Erro ao calcular pontos necessários.", err.Message);
+                                        _logger.LogError("Erro ao calcular pontos necessÃ¡rios.", err.Message);
                                     }
                                 }
 
@@ -4272,7 +4272,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                     if (item.DataInicial <= dataBase.Date &&
                                             item.DataFinal >= dataBase.Date && item.DataInicial <= dataFinalMenosQue7Dias.Date && item.DataFinal >= dataFinalMenosQue7Dias.Date)
                                     {
-                                        // Começa um novo período.
+                                        // ComeÃ§a um novo perÃ­odo.
                                         PeriodoDisponivelResultModel? novoPeriodo = new PeriodoDisponivelResultModel
                                         {
                                             Checkin = dataBase,
@@ -4364,7 +4364,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                 }
                                                 catch (Exception err)
                                                 {
-                                                    _logger.LogError("Erro ao calcular pontos necessários.", err.Message);
+                                                    _logger.LogError("Erro ao calcular pontos necessÃ¡rios.", err.Message);
                                                 }
                                             }
 
@@ -4378,7 +4378,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                 dadosFinanceiroContrato != null && dadosFinanceiroContrato.NumeroPontos.GetValueOrDefault(0) == 7))
                             {
 
-                                // Começa um novo período.
+                                // ComeÃ§a um novo perÃ­odo.
                                 PeriodoDisponivelResultModel? periodoAtual = new PeriodoDisponivelResultModel
                                 {
                                     Checkin = dataBase,
@@ -4475,7 +4475,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                         }
                                         catch (Exception err)
                                         {
-                                            _logger.LogError("Erro ao calcular pontos necessários.", err.Message);
+                                            _logger.LogError("Erro ao calcular pontos necessÃ¡rios.", err.Message);
                                         }
                                     }
 
@@ -4530,7 +4530,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             CP.FLGDESCONTO, 
             D.DATA, 
             TD.IDTEMPORADATS,
-            DECODE(TEM.FLGTIPO, 'S','Super alta','A','Alta','M','Média','B','Baixa') AS TIPOPERIODO
+            DECODE(TEM.FLGTIPO, 'S','Super alta','A','Alta','M','MÃ©dia','B','Baixa') AS TIPOPERIODO
               FROM CM.CONTRTSXPONTOS CP
               JOIN CM.TEMPORADATSXDATA TD ON TD.IDTEMPORADATS = CP.IDTEMPORADATS
               JOIN CM.TIPOUHXPONTOTS TU ON CP.IDCONTRTSXPONTOS = TU.IDCONTRTSXPONTOS
@@ -4571,7 +4571,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                              TO_NUMBER(DECODE(C.FLGUTILVLRPROP,'N',CP.TAXAMANUTENCAO, (CP.TAXAMANUTENCAO / CP.NUMERODIAS) * (TRUNC(TO_NUMBER(:dataFinal - :dataInicial))+1)  )) AS TAXAMANUTENCAO,
                              TO_NUMBER(DECODE(C.FLGUTILPONTOSPROP,'N',CP.NUMEROPONTOS, (CP.NUMEROPONTOS / CP.NUMERODIAS) * (TRUNC(TO_NUMBER(:dataFinal - :dataInicial))+1) )) AS NUMEROPONTOS,
                              CP.VLRREPHOTEL,
-                             DECODE(TEM.FLGTIPO, 'S','Super alta','A','Alta','M','Média','B','Baixa') AS TIPOPERIODO,
+                             DECODE(TEM.FLGTIPO, 'S','Super alta','A','Alta','M','MÃ©dia','B','Baixa') AS TIPOPERIODO,
                              C.FlgAdultosFree, C.FlgCrianca1Free, C.FlgCrianca2Free, C.AnosFree, C.PagantesRegraFree, TD.TRGDTINCLUSAO
                     FROM     CONTRTSXPONTOS CP, TEMPORADATSXDATA TD, CONTRATOTS C, TIPOUHXPONTOTS TU, TEMPORADATS TEM
                     WHERE    TD.IDTEMPORADATS    = CP.IDTEMPORADATS
@@ -4611,7 +4611,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
                 if (tipoTemporadaUtilizar == null)
                     tipoTemporadaUtilizar = tarifariosResult.FirstOrDefault(a => a.IdHotel == itemTarifario.IdHotel && a.TrgDtInclusao >= itemTarifario.TrgDtInclusao && a.DataInicial <= itemTarifario.DataInicial && a.DataFinal >= itemTarifario.DataFinal &&
-                    !string.IsNullOrEmpty(a.TipoPeriodo) && (a.TipoPeriodo.Contains("Média", StringComparison.InvariantCultureIgnoreCase) ||
+                    !string.IsNullOrEmpty(a.TipoPeriodo) && (a.TipoPeriodo.Contains("MÃ©dia", StringComparison.InvariantCultureIgnoreCase) ||
                     a.TipoPeriodo.Contains("Media", StringComparison.InvariantCultureIgnoreCase)));
 
                 if (tipoTemporadaUtilizar == null)
@@ -4685,8 +4685,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             var sb = new StringBuilder(@$"SELECT
                  TO_DATE( TO_CHAR( COALESCE(R.DATAREVERSAO,V.DATAVENDA),'DD/MM/YYYY' ),'DD/MM/YYYY') DATAVENDA,
                  VC.IDVENDATS, VC.IDVENDAXCONTRATO, VC.FLGREVERTIDO, VC.FLGCANCELADO,
-                 CASE WHEN COALESCE(VC.FLGREVERTIDO,'N') = 'N' THEN 'Não' ELSE 'Sim' END AS REVERTIDO,
-                 CASE WHEN COALESCE(VC.FLGCANCELADO,'N') = 'N' THEN 'Não' ELSE 'Sim' END AS CANCELADO,
+                 CASE WHEN COALESCE(VC.FLGREVERTIDO,'N') = 'N' THEN 'NÃ£o' ELSE 'Sim' END AS REVERTIDO,
+                 CASE WHEN COALESCE(VC.FLGCANCELADO,'N') = 'N' THEN 'NÃ£o' ELSE 'Sim' END AS CANCELADO,
                  TO_DATE( TO_CHAR(R.DATAREVERSAO,'DD/MM/YYYY'),'DD/MM/YYYY') DATAREVERSAO,
                  TO_DATE( TO_CHAR(DECODE(VC.FLGREVERTIDO,'N',CC.DATACANCELAMENTO,R2.DATAREVERSAO),'DD/MM/YYYY'),'DD/MM/YYYY') DATACANCELAMENTO,
                  TO_CHAR( COALESCE(PJ.NUMEROPROJETO,'-1') ) || '-' || TO_CHAR(VC.NUMEROCONTRATO) AS NUMPROJETOCONTRATO,
@@ -4694,11 +4694,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                  C.NOME AS NOMEPRODUTO,
                  P.IDPESSOA,
                  P.NOME AS NOMECLIENTE,
-                 CASE WHEN U1.TIPOLANC = 'Débito' THEN U1.NUMEROPONTOS*-1 ELSE U1.NUMEROPONTOS END AS PONTOSBAIXADOSNAOPERACAO,
+                 CASE WHEN U1.TIPOLANC = 'DÃ©bito' THEN U1.NUMEROPONTOS*-1 ELSE U1.NUMEROPONTOS END AS PONTOSBAIXADOSNAOPERACAO,
                  U1.TIPOLANC DEBCRED,
                  TO_DATE(TO_CHAR(U1.DATALANCAMENTO,'DD/MM/YYYY'),'DD/MM/YYYY') DATAOPERACAOLANCAMENTO,
                  U1.IDTIPOLANCPONTOTS,
-                 DECODE(COALESCE(U1.STATUSRESERVA,'Não aplicável'),'Não aplicável', U1.TIPOLANCAMENTO, DECODE(U1.IDTIPOLANCPONTOTS,4,'Reserva',U1.TIPOLANCAMENTO)) DESCRICAOTIPOLANC,
+                 DECODE(COALESCE(U1.STATUSRESERVA,'NÃ£o aplicÃ¡vel'),'NÃ£o aplicÃ¡vel', U1.TIPOLANCAMENTO, DECODE(U1.IDTIPOLANCPONTOTS,4,'Reserva',U1.TIPOLANCAMENTO)) DESCRICAOTIPOLANC,
                  U1.DESCRICAO MOTIVOLANCAMENTO,
                  U1.IDRESERVASFRONT, 
                  U1.HOTEL,
@@ -4713,7 +4713,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     DECODE( COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS),
                     (COALESCE(VAL.TOTAL, VC.VALORFINAL) * C.VALORPERCPONTO)/ 100),
                     COALESCE(C.VALORPONTO,0))),6) AS VALORPONTO,
-                 Round(CASE WHEN U1.TIPOLANC = 'Débito' THEN U1.NUMEROPONTOS*-1 ELSE U1.NUMEROPONTOS END *
+                 Round(CASE WHEN U1.TIPOLANC = 'DÃ©bito' THEN U1.NUMEROPONTOS*-1 ELSE U1.NUMEROPONTOS END *
                   TO_NUMBER((DECODE(COALESCE(C.VALORPONTO,0),0, DECODE(COALESCE(C.VALORPERCPONTO,0),0,
                   DECODE(COALESCE(C.NUMEROPONTOS,0),0,0, COALESCE(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS),
                   (COALESCE(VAL.TOTAL, VC.VALORFINAL) * C.VALORPERCPONTO)/ 100), COALESCE(C.VALORPONTO,0)))),6) AS VALORUTILIZACAO,
@@ -4726,10 +4726,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   ((C.NUMEROPONTOS - COALESCE(COALESCE(PONTOSANO.UTILIZACAO, U.UTILIZACAO),0)) * TO_NUMBER(DECODE(COALESCE(C.NUMEROPONTOS,0),0,0,COALESCE(VAL.TOTAL, VC.VALORFINAL) / C.NUMEROPONTOS)))
  	                 ELSE 0
                  END,6) AS VALORSALDOATUAL,
-                 COALESCE(U1.STATUSRESERVA, 'Não aplicável') STATUSRESERVA,
+                 COALESCE(U1.STATUSRESERVA, 'NÃ£o aplicÃ¡vel') STATUSRESERVA,
                  COALESCE(U1.RCI, 'X') RCI,
-                 COALESCE(U1.FRACIONAMENTO, 'Não aplicável') FRACIONAMENTO,
-                 COALESCE(U1.STATUS_BOOK, 'Não aplicável') STATUS_BOOK,
+                 COALESCE(U1.FRACIONAMENTO, 'NÃ£o aplicÃ¡vel') FRACIONAMENTO,
+                 COALESCE(U1.STATUS_BOOK, 'NÃ£o aplicÃ¡vel') STATUS_BOOK,
                  TO_DATE( TO_CHAR(DECODE(U1.IDTIPOLANCPONTOTS,4,DECODE(C.FLGGERACREDNUTIL,'S',U1.VALIDADECREDITO,U1.DATALANCAMENTO),''),'DD/MM/YYYY'),'DD/MM/YYYY') AS VALIDADECREDITO,
                  C.DESCONTOANUAL,
                  C.VALIDADE,
@@ -4746,7 +4746,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                   ), 'DD/MM/YYYY'
                               ), 'DD/MM/YYYY'
                           ) IS NOT NULL THEN
-                -- Calcula a data inicial (24 meses atrás + 1 dia)
+                -- Calcula a data inicial (24 meses atrÃ¡s + 1 dia)
                 TO_CHAR(
                     ADD_MONTHS(
                         TO_DATE(
@@ -4759,7 +4759,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         ), -24
                     ) + 1, 'DD/MM/YYYY'
                 ) || ' a ' ||
-                -- Calcula a data final (12 meses atrás)
+                -- Calcula a data final (12 meses atrÃ¡s)
                 TO_CHAR(
                     ADD_MONTHS(
                         TO_DATE(
@@ -4820,7 +4820,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   AND LP.IDLANCPONTOSTS = L.IDLANCPONTOSTS (+)
                   GROUP BY LP.IDLANCPONTOSTS) TX,
                  (SELECT L.IDVENDAXCONTRATO, L.IDLANCPONTOSTS,
-                  DECODE(L.DEBITOCREDITO,'D','Débito','C','Crédito') TIPOLANC,
+                  DECODE(L.DEBITOCREDITO,'D','DÃ©bito','C','CrÃ©dito') TIPOLANC,
                   L.NUMEROPONTOS,
                   L.DATALANCAMENTO,
                   L.IDTIPOLANCPONTOTS,
@@ -4835,8 +4835,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   TO_CHAR(RM.DATAPARTIDA,'DD/MM/YYYY') CHECKOUT,
                   'Check-out' STATUSRESERVA,
                   DECODE(RCI.IDRESERVASRCI, NULL, 'N', 'S') RCI,
-                  'Não aplicável' FRACIONAMENTO,
-                  'Não aplicável' AS STATUS_BOOK,
+                  'NÃ£o aplicÃ¡vel' FRACIONAMENTO,
+                  'NÃ£o aplicÃ¡vel' AS STATUS_BOOK,
                   L.VALIDADECREDITO,
                   L.TRGDTINCLUSAO
                   FROM LANCPONTOSTS L, TIPOLANCPONTOTS T, MOTIVOTS M, RESERVAMIGRADATS RM, PESSOA P, RESERVASRCI RCI
@@ -4850,7 +4850,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   AND L.FLGMIGRADO  = 'S'
                  UNION
                  (SELECT L.IDVENDAXCONTRATO, L.IDLANCPONTOSTS,
-                  DECODE(L.DEBITOCREDITO,'D','Débito','C','Crédito') TIPOLANC,
+                  DECODE(L.DEBITOCREDITO,'D','DÃ©bito','C','CrÃ©dito') TIPOLANC,
                   TO_NUMBER(DECODE(L.DEBITOCREDITO, 'C',-L.NUMEROPONTOS,L.NUMEROPONTOS)) *
                   TO_NUMBER(DECODE(L.IDTIPOLANCPONTOTS, 1, DECODE(R.STATUSRESERVA, 6, 0, 1), 1)) AS NUMEROPONTOS,
                   L.DATALANCAMENTO,
@@ -4866,8 +4866,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   TO_CHAR(R.DATAPARTPREVISTA,'DD/MM/YYYY') CHECKOUT,
                   S.DESCRICAO STATUSRESERVA,
                   DECODE(RCI.IDRESERVASRCI, NULL, 'N', 'S') RCI,
-                  DECODE(FRAC1.IDFRACIONAMENTOTS, NULL, DECODE(FRAC2.IDFRACIONAMENTOTS, NULL, 'Não', 'Fechamento'), 'Início') FRACIONAMENTO,
-                  'Não aplicável' AS STATUS_BOOK,
+                  DECODE(FRAC1.IDFRACIONAMENTOTS, NULL, DECODE(FRAC2.IDFRACIONAMENTOTS, NULL, 'NÃ£o', 'Fechamento'), 'InÃ­cio') FRACIONAMENTO,
+                  'NÃ£o aplicÃ¡vel' AS STATUS_BOOK,
                   L.VALIDADECREDITO,
                   L.TRGDTINCLUSAO
                   FROM LANCPONTOSTS L, TIPOLANCPONTOTS T, MOTIVOTS M, RESERVASFRONT R, PESSOA P, STATUSRESERVA S, RESERVASRCI RCI,
@@ -4884,7 +4884,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   AND R.STATUSRESERVA  = S.STATUSRESERVA )
                  UNION
                  (SELECT L.IDVENDAXCONTRATO, L.IDLANCPONTOSTS,
-                  DECODE(L.DEBITOCREDITO,'D','Débito','C','Crédito') TIPOLANC,
+                  DECODE(L.DEBITOCREDITO,'D','DÃ©bito','C','CrÃ©dito') TIPOLANC,
                   L.NUMEROPONTOS,
                   L.DATALANCAMENTO,
                   L.IDTIPOLANCPONTOTS,
@@ -4897,10 +4897,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   TO_CHAR(L.IDRESERVAMIGRADA) HOTEL,
                   TO_CHAR(L.DATALANCAMENTO,'DD/MM/YYYY') CHECKIN,
                   TO_CHAR(L.DATALANCAMENTO,'DD/MM/YYYY') CHECKOUT,
-                  'Não aplicável' STATUSRESERVA,
+                  'NÃ£o aplicÃ¡vel' STATUSRESERVA,
                   'X' RCI,
-                  'Não aplicável' FRACIONAMENTO,
-                  'Não aplicável' AS STATUS_BOOK,
+                  'NÃ£o aplicÃ¡vel' FRACIONAMENTO,
+                  'NÃ£o aplicÃ¡vel' AS STATUS_BOOK,
                   L.VALIDADECREDITO,
                   L.TRGDTINCLUSAO
                   FROM LANCPONTOSTS L, TIPOLANCPONTOTS T, MOTIVOTS M, RESERVASFRONT R, RESERVAMIGRADATS RM
@@ -4914,7 +4914,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   AND L.IDTIPOLANCPONTOTS != 1)
                   UNION
                  (SELECT L.IDVENDAXCONTRATO, L.IDLANCPONTOSTS,
-                  DECODE(L.DEBITOCREDITO,'D','Débito','C','Crédito') TIPOLANC,
+                  DECODE(L.DEBITOCREDITO,'D','DÃ©bito','C','CrÃ©dito') TIPOLANC,
                   L.NUMEROPONTOS,
                   L.DATALANCAMENTO,
                   L.IDTIPOLANCPONTOTS,
@@ -4929,7 +4929,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                   TO_CHAR(L.DATALANCAMENTO,'DD/MM/YYYY') CHECKOUT,
                   BOOK.STATUS_BOOK AS STATUSRESERVA,
                   'X' RCI,
-                  'Não aplicável' FRACIONAMENTO,
+                  'NÃ£o aplicÃ¡vel' FRACIONAMENTO,
                   BOOK.STATUS_BOOK,
                   L.VALIDADECREDITO,
                   L.TRGDTINCLUSAO
@@ -5063,8 +5063,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                             Status = "Confirmada",
                             Checkin = utilizacaoTemp.Checkin,
                             Checkout = utilizacaoTemp.Checkout,
-                            DebitoCredito = "Débito",
-                            Reserva = "Não aplicável"
+                            DebitoCredito = "DÃ©bito",
+                            Reserva = "NÃ£o aplicÃ¡vel"
                         };
 
                         if (utilizacaoItem.Pontos.GetValueOrDefault(0) != 0)
@@ -5385,8 +5385,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                             }
                         }
 
-                        // Calcular a ocupação percentual atual
-                        // Ocupação = (Total - Disponível) / Total * 100
+                        // Calcular a ocupaÃ§Ã£o percentual atual
+                        // OcupaÃ§Ã£o = (Total - DisponÃ­vel) / Total * 100
                         decimal ocupacaoAtual = 0;
                         if (dd.QtdeTotalUh > 0)
                         {
@@ -5469,21 +5469,21 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
                 AtendClienteTs? atendClienteTs = await GetAtendimentoCliente(model.IdVendaXContrato.GetValueOrDefault());
                 if (atendClienteTs == null || atendClienteTs.IdVendaXContrato.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException($"Não foi localizado os dados da venda");
+                    throw new ArgumentException($"NÃ£o foi localizado os dados da venda");
 
                 VendaXContratoTs? vendaXContrato = await GetVendaXContrato(atendClienteTs);
 
                 if (vendaXContrato == null)
-                    throw new ArgumentException("Não foi localizado os dados da venda");
+                    throw new ArgumentException("NÃ£o foi localizado os dados da venda");
 
                 PeriodoDisponivelResultModel? baseSaldoPontos = await GetSaldo(new SearchDisponibilidadeModel() { IdVendaXContrato = vendaXContrato.IdVendaXContrato, NumeroContrato = vendaXContrato.NumeroContrato.GetValueOrDefault().ToString() });
                 if (baseSaldoPontos == null || baseSaldoPontos.IdContratoTs.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException("Falha na busca de disponibilidade 'Contrato não encontrado'");
+                    throw new ArgumentException("Falha na busca de disponibilidade 'Contrato nÃ£o encontrado'");
 
                 var condicaoFinanceira = await PosicaoFinanceiraContrato(baseSaldoPontos.IdVendaTs.GetValueOrDefault(), baseSaldoPontos.SaldoPontos);
 
                 if (condicaoFinanceira != null && condicaoFinanceira.SaldoInadimplente.GetValueOrDefault(0) > 0)
-                    throw new ArgumentException($"Existe pendência financeira no valor de: R$ {condicaoFinanceira.SaldoInadimplente:N2} favor procure a Central de Atendimento ao Cliente.");
+                    throw new ArgumentException($"Existe pendÃªncia financeira no valor de: R$ {condicaoFinanceira.SaldoInadimplente:N2} favor procure a Central de Atendimento ao Cliente.");
 
                 if (condicaoFinanceira != null && condicaoFinanceira.BloqueioTsModel != null)
                 {
@@ -5522,7 +5522,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                             var percIntegralizadoAtual = condicaoFinanceira.PercentualIntegralizacao;
 
                             if (percIntegralizadoAtual < percIntegralizadoMinimo)
-                                throw new ArgumentException($"Não é possível realizar a reserva, pois o percentual de integralização atual: {percIntegralizadoAtual:N2}% é inferior ao percentual requerido para realização de reservas: {percIntegralizadoMinimo:N2}%. Favor procurar a Central de Atendimento ao Cliente.");
+                                throw new ArgumentException($"NÃ£o Ã© possÃ­vel realizar a reserva, pois o percentual de integralizaÃ§Ã£o atual: {percIntegralizadoAtual:N2}% Ã© inferior ao percentual requerido para realizaÃ§Ã£o de reservas: {percIntegralizadoMinimo:N2}%. Favor procurar a Central de Atendimento ao Cliente.");
                         }
                     }
                 }
@@ -5530,19 +5530,19 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 ContratoTsModel? padraoContrato = await GetPadraoContrato(atendClienteTs);
 
                 if (padraoContrato == null)
-                    throw new ArgumentException($"Não foi possível encontrar o contrato vinculado ao IdVendaXContrato: {atendClienteTs.IdVendaXContrato}");
+                    throw new ArgumentException($"NÃ£o foi possÃ­vel encontrar o contrato vinculado ao IdVendaXContrato: {atendClienteTs.IdVendaXContrato}");
 
                 if (padraoContrato.NumeroPontos == 7)
                 {
                     if (model.TipoUso == "I")
-                        throw new ArgumentException($"Não é possível realizar liberação de semana para a RCI - Intercambiadora para do tipo de contrato: {vendaXContrato.NumeroContrato} de {padraoContrato.NumeroPontos} pontos");
+                        throw new ArgumentException($"NÃ£o Ã© possÃ­vel realizar liberaÃ§Ã£o de semana para a RCI - Intercambiadora para do tipo de contrato: {vendaXContrato.NumeroContrato} de {padraoContrato.NumeroPontos} pontos");
                     if (condicaoFinanceira != null && condicaoFinanceira.PercentualIntegralizacao.GetValueOrDefault(0) < 100)
-                        throw new ArgumentException($"Não é possível realizar reserva para o contrato: {vendaXContrato.NumeroContrato} de {padraoContrato.NumeroPontos} antes de integralizar 100%");
+                        throw new ArgumentException($"NÃ£o Ã© possÃ­vel realizar reserva para o contrato: {vendaXContrato.NumeroContrato} de {padraoContrato.NumeroPontos} antes de integralizar 100%");
 
                     if ((string.IsNullOrEmpty(model.TipoUso) ||
                        (!model.TipoUso.RemoveAccents().Contains("proprio", StringComparison.InvariantCultureIgnoreCase) &&
                        !model.TipoUso.Contains("up", StringComparison.InvariantCultureIgnoreCase))))
-                            throw new ArgumentException($"O contrato: {atendClienteTs.NumeroContrato} só pode ser utilizado pelo titular");
+                            throw new ArgumentException($"O contrato: {atendClienteTs.NumeroContrato} sÃ³ pode ser utilizado pelo titular");
                 }
 
                 if (string.IsNullOrEmpty(model.TipoUso) || model.TipoUso.Contains("prop", StringComparison.CurrentCultureIgnoreCase))
@@ -5587,7 +5587,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     {
                         var principal = model.Hospedes.FirstOrDefault(a => a.Principal == "S");
                         if (principal == null)
-                            throw new ArgumentException("Deve ser informado o hóspede principal");
+                            throw new ArgumentException("Deve ser informado o hÃ³spede principal");
 
                         if (principal.IdHospede.GetValueOrDefault() == int.Parse(pessoaProprietaria.PessoaId!) ||
                             principal.IdHospede.GetValueOrDefault(0) == 0)
@@ -5603,7 +5603,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         }
 
                     }
-                    else throw new ArgumentException("Não foi possível encontrar os dados do proprietário");
+                    else throw new ArgumentException("NÃ£o foi possÃ­vel encontrar os dados do proprietÃ¡rio");
                 }
 
                 if (model.Hospedes == null || !model.Hospedes.Any())
@@ -5699,7 +5699,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 });
 
                 if (disponibilidades == null || disponibilidades.Count == 0)
-                    throw new ArgumentException($"Não foi localizada disponibilidade para o período de: {model.Checkin.GetValueOrDefault().Date:dd/MM/yyyy} até: {model.Checkout.GetValueOrDefault().Date:dd/MM/yyyy}");
+                    throw new ArgumentException($"NÃ£o foi localizada disponibilidade para o perÃ­odo de: {model.Checkin.GetValueOrDefault().Date:dd/MM/yyyy} atÃ©: {model.Checkout.GetValueOrDefault().Date:dd/MM/yyyy}");
 
                 
                 var qtdePax = model.QuantidadeAdultos.GetValueOrDefault(0) + model.QuantidadeCrianca1.GetValueOrDefault(0) + model.QuantidadeCrianca2.GetValueOrDefault(0);
@@ -5712,7 +5712,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 a.CapacidadePontos2 >= qtdePax && a.HotelId == model.IdHotel).FirstOrDefault();
 
                 if ((disponibidadeAssociada == null || disponibidadeAssociada.HotelId != model.IdHotel) && model.TipoUso != "I" && !model.TipoUso.Contains("int",StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentException($"Não foi localizada disponibilidade para o período de: {model.Checkin.GetValueOrDefault().Date:dd/MM/yyyy} até: {model.Checkout.GetValueOrDefault().Date:dd/MM/yyyy}");
+                    throw new ArgumentException($"NÃ£o foi localizada disponibilidade para o perÃ­odo de: {model.Checkin.GetValueOrDefault().Date:dd/MM/yyyy} atÃ©: {model.Checkout.GetValueOrDefault().Date:dd/MM/yyyy}");
 
 
                 model.IdHotel = disponibidadeAssociada != null ? disponibidadeAssociada.HotelId : model.IdHotel;
@@ -5724,16 +5724,16 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     if (disponibidadeAssociada.IdContrTsXPontos2 != null && qtdePax > disponibidadeAssociada.CapacidadePontos1)
                         contrTsXPontosUtilizar = disponibidadeAssociada.IdContrTsXPontos2;
 
-                    // Usar método centralizado para calcular pontos (ÚNICO LUGAR onde pontos são calculados)
+                    // Usar mÃ©todo centralizado para calcular pontos (ÃšNICO LUGAR onde pontos sÃ£o calculados)
                     pontosUtilizar = CalcularPontosNecessarios(model, disponibidadeAssociada, model.IdHotel, qtdePax);
 
                     if (model.IdFracionamentoTs.GetValueOrDefault(disponibidadeAssociada.FechamentoFracionamentoPossivelId.GetValueOrDefault()) > 0)
                     {
                         var fracionamento = (await _repository.FindBySql<FracionamentoTs>($"Select f.* From FracionamentoTs f Where f.IdFracionamentoTs = {model.IdFracionamentoTs.GetValueOrDefault(disponibidadeAssociada.FechamentoFracionamentoPossivelId.GetValueOrDefault())} and f.IdReservasFront2 is null")).FirstOrDefault();
                         if (fracionamento == null)
-                            throw new ArgumentException("Não foi localizado o fracionamento indicado");
+                            throw new ArgumentException("NÃ£o foi localizado o fracionamento indicado");
                         else if (fracionamento.IdReservasFront2.GetValueOrDefault(0) > 0)
-                            throw new ArgumentException($"O Fracionamento: {fracionamento.IdFracionamentoTs} já foi finaliado.");
+                            throw new ArgumentException($"O Fracionamento: {fracionamento.IdFracionamentoTs} jÃ¡ foi finaliado.");
 
                         pontosUtilizar = 0;
                     }
@@ -5749,7 +5749,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     model.NumeroPontos = pontosUtilizar;
                 }
 
-                // Buscar regra tarifária vigente filtrando por hotel se informado
+                // Buscar regra tarifÃ¡ria vigente filtrando por hotel se informado
                 var regraTarifaria = await _regraPaxFreeService.GetRegraVigente(disponibidadeAssociada?.HotelId);
 
 
@@ -5766,7 +5766,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 if (paramTs.NumMaxPernoites.GetValueOrDefault(0) > 0 &&
                     diasReservaAtual > paramTs.NumMaxPernoites.GetValueOrDefault(0))
                 {
-                    throw new ArgumentException($"A reserva pode conter no máximo: {paramTs.NumMaxPernoites.GetValueOrDefault(0)} pernoites/diárias.");
+                    throw new ArgumentException($"A reserva pode conter no mÃ¡ximo: {paramTs.NumMaxPernoites.GetValueOrDefault(0)} pernoites/diÃ¡rias.");
                 }
 
                 await SetarParametrosReserva(model);
@@ -5776,17 +5776,17 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 model.ClienteReservante = $"{atendClienteTs.IdCliente}";
                 model.IdPessoaChave = atendClienteTs.IdCliente;
 
-                // 🔥 Garantir que TipoUso seja definido antes do envio (valor padrão: "UP" - Uso Próprio)
+                // ðŸ”¥ Garantir que TipoUso seja definido antes do envio (valor padrÃ£o: "UP" - Uso PrÃ³prio)
                 if (string.IsNullOrEmpty(model.TipoUso))
                 {
                     model.TipoUso = model.TipoDeUso ?? "UP";
-                    _logger.LogInformation("TipoUso não informado no model, definindo valor padrão: UP (Uso Próprio)");
+                    _logger.LogInformation("TipoUso nÃ£o informado no model, definindo valor padrÃ£o: UP (Uso PrÃ³prio)");
                 }
 
                 if (string.IsNullOrEmpty(model.TipoDeUso))
                 {
                     model.TipoDeUso = model.TipoUso ?? "UP";
-                    _logger.LogInformation("TipoUso não informado no model, definindo valor padrão: UP (Uso Próprio)");
+                    _logger.LogInformation("TipoUso nÃ£o informado no model, definindo valor padrÃ£o: UP (Uso PrÃ³prio)");
                 }
 
 
@@ -5803,7 +5803,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     CalcularRegraTarifaria(model, disponibilidades, qtdePax, ref disponibidadeAssociada, ref contrTsXPontosUtilizar, ref pontosUtilizar, regraTarifaria);
 
                 if (pontosUtilizar != null && pontosUtilizar > condicaoFinanceira?.PontosIntegralizadosDisponiveis)
-                    throw new ArgumentException($"Saldo de pontos integralizados disponíveis: {condicaoFinanceira.PontosIntegralizadosDisponiveis} é inferir aos {pontosUtilizar.Value}, necesários para a criação da reserva");
+                    throw new ArgumentException($"Saldo de pontos integralizados disponÃ­veis: {condicaoFinanceira.PontosIntegralizadosDisponiveis} Ã© inferir aos {pontosUtilizar.Value}, necesÃ¡rios para a criaÃ§Ã£o da reserva");
 
 
                 var result = new ResultModel<Int64?>();
@@ -5832,7 +5832,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
                 var commitReservaTransaction = await _repository.CommitAsync();
                 if (!commitReservaTransaction.executed)
-                    throw commitReservaTransaction.exception ?? throw new Exception("Falha na criação da reserva");
+                    throw commitReservaTransaction.exception ?? throw new Exception("Falha na criaÃ§Ã£o da reserva");
 
                 await _repositorySystem.CommitAsync();
 
@@ -5878,14 +5878,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
         }
 
         /// <summary>
-        /// MÉTODO CENTRALIZADO: Calcula os pontos necessários para uma reserva considerando regras tarifárias e capacidades
-        /// Este é o ÚNICO lugar onde o cálculo de pontos deve ser feito
+        /// MÃ‰TODO CENTRALIZADO: Calcula os pontos necessÃ¡rios para uma reserva considerando regras tarifÃ¡rias e capacidades
+        /// Este Ã© o ÃšNICO lugar onde o cÃ¡lculo de pontos deve ser feito
         /// </summary>
-        /// <param name="model">Modelo da reserva com hóspedes e datas</param>
+        /// <param name="model">Modelo da reserva com hÃ³spedes e datas</param>
         /// <param name="disponibilidade">Disponibilidade selecionada com capacidades e pontos</param>
-        /// <param name="hotelId">ID do hotel para buscar regras tarifárias</param>
-        /// <param name="totalHospedes">Total de hóspedes (adultos + crianças)</param>
-        /// <returns>Pontos necessários para a reserva</returns>
+        /// <param name="hotelId">ID do hotel para buscar regras tarifÃ¡rias</param>
+        /// <param name="totalHospedes">Total de hÃ³spedes (adultos + crianÃ§as)</param>
+        /// <returns>Pontos necessÃ¡rios para a reserva</returns>
         private decimal CalcularPontosNecessarios(
             InclusaoReservaInputModel model, 
             PeriodoDisponivelResultModel disponibilidade, 
@@ -5897,18 +5897,18 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 if (disponibilidade.CapacidadePontos2 > 0 && totalHospedes > disponibilidade.CapacidadePontos2)
                 {
                     _logger.LogWarning(
-                        "Total de hóspedes ({TotalHospedes}) excede a capacidade máxima ({CapacidadeMaxima}) para pontos no hotel {HotelId}. Usando pontos padrão.", 
+                        "Total de hÃ³spedes ({TotalHospedes}) excede a capacidade mÃ¡xima ({CapacidadeMaxima}) para pontos no hotel {HotelId}. Usando pontos padrÃ£o.", 
                         totalHospedes, 
                         disponibilidade.CapacidadePontos2, 
                         hotelId);
-                    throw new ArgumentException($"Total de hóspedes ({totalHospedes}) excede a capacidade máxima ({disponibilidade.CapacidadePontos2}) para pontos no hotel {hotelId}. Usando pontos padrão.");
+                    throw new ArgumentException($"Total de hÃ³spedes ({totalHospedes}) excede a capacidade mÃ¡xima ({disponibilidade.CapacidadePontos2}) para pontos no hotel {hotelId}. Usando pontos padrÃ£o.");
                 }
 
-                // 1. Calcular quantos hóspedes pagam (aplicando regras tarifárias)
+                // 1. Calcular quantos hÃ³spedes pagam (aplicando regras tarifÃ¡rias)
                 int hospedesPagantes = CalcularHospedesPagantes(model, totalHospedes, hotelId);
                 
                 _logger.LogInformation(
-                    "Cálculo de pontos - Hotel: {HotelId}, Total hóspedes: {TotalHospedes}, Hóspedes pagantes: {HospedesPagantes}", 
+                    "CÃ¡lculo de pontos - Hotel: {HotelId}, Total hÃ³spedes: {TotalHospedes}, HÃ³spedes pagantes: {HospedesPagantes}", 
                     hotelId, 
                     totalHospedes, 
                     hospedesPagantes);
@@ -5932,38 +5932,38 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 }
                 else
                 {
-                    // Usar pontos necessário padrão
+                    // Usar pontos necessÃ¡rio padrÃ£o
                     pontosNecessarios = disponibilidade.PontosNecessario.GetValueOrDefault(0);
-                    _logger.LogInformation("Usando pontos padrão: {Pontos} pontos", pontosNecessarios);
+                    _logger.LogInformation("Usando pontos padrÃ£o: {Pontos} pontos", pontosNecessarios);
                 }
 
                 return pontosNecessarios;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao calcular pontos necessários. Usando valor padrão da disponibilidade.");
+                _logger.LogError(ex, "Erro ao calcular pontos necessÃ¡rios. Usando valor padrÃ£o da disponibilidade.");
                 return disponibilidade.PontosNecessario.GetValueOrDefault(0);
             }
         }
 
         /// <summary>
-        /// Calcula quantos hóspedes pagam pontos baseado nas regras tarifárias vigentes
+        /// Calcula quantos hÃ³spedes pagam pontos baseado nas regras tarifÃ¡rias vigentes
         /// </summary>
         /// <summary>
-        /// Método público simplificado para calcular pontos necessários baseado em datas e quantidade de pessoas
-        /// Este método pode ser consumido pelo frontend para cálculos em tempo real
+        /// MÃ©todo pÃºblico simplificado para calcular pontos necessÃ¡rios baseado em datas e quantidade de pessoas
+        /// Este mÃ©todo pode ser consumido pelo frontend para cÃ¡lculos em tempo real
         /// </summary>
         /// <param name="dataInicial">Data inicial (checkin)</param>
         /// <param name="dataFinal">Data final (checkout)</param>
         /// <param name="quantidadeAdultos">Quantidade de adultos</param>
-        /// <param name="quantidadeCriancas1">Quantidade de crianças de 6 a 11 anos</param>
-        /// <param name="quantidadeCriancas2">Quantidade de crianças de 0 a 5 anos</param>
+        /// <param name="quantidadeCriancas1">Quantidade de crianÃ§as de 6 a 11 anos</param>
+        /// <param name="quantidadeCriancas2">Quantidade de crianÃ§as de 0 a 5 anos</param>
         /// <param name="hotelId">ID do hotel</param>
         /// <param name="tipoUhId">ID do tipo de UH</param>
         /// <param name="idVendaXContrato">ID da venda x contrato</param>
-        /// <param name="numeroContrato">Número do contrato</param>
-        /// <param name="hospedes">Lista de hóspedes com datas de nascimento (opcional)</param>
-        /// <returns>Pontos necessários para o período</returns>
+        /// <param name="numeroContrato">NÃºmero do contrato</param>
+        /// <param name="hospedes">Lista de hÃ³spedes com datas de nascimento (opcional)</param>
+        /// <returns>Pontos necessÃ¡rios para o perÃ­odo</returns>
         public async Task<decimal> CalcularPontosNecessariosSimplificado(
             DateTime dataInicial,
             DateTime dataFinal,
@@ -5979,16 +5979,16 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
         {
             try
             {
-                // Validações básicas
+                // ValidaÃ§Ãµes bÃ¡sicas
                 if (dataFinal <= dataInicial)
                     throw new ArgumentException("Data final deve ser maior que data inicial");
 
                 if (idVendaXContrato <= 0 || string.IsNullOrEmpty(numeroContrato))
-                    throw new ArgumentException("Contrato inválido");
+                    throw new ArgumentException("Contrato invÃ¡lido");
 
                 var vendaXContrato = (await _repository.FindBySql<VendaXContratoTs>($"Select v.* From VendaXContratoTs v Where v.IdVendaXContrato = {idVendaXContrato}")).FirstOrDefault();
                 if (vendaXContrato == null)
-                    throw new ArgumentException($"Não foi possível identificar a VendaXContrato: {idVendaXContrato}");
+                    throw new ArgumentException($"NÃ£o foi possÃ­vel identificar a VendaXContrato: {idVendaXContrato}");
 
                 if (hotelId == 0)
                     throw new ArgumentException($"Deve ser informado o HotelId");
@@ -6012,11 +6012,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
 
                 if (reserva == null)
-                    throw new ArgumentException($"Não foi possível localizar reserva com o número informado: {numReserva}");
+                    throw new ArgumentException($"NÃ£o foi possÃ­vel localizar reserva com o nÃºmero informado: {numReserva}");
 
 
                 if (!string.IsNullOrEmpty(numReserva) && int.Parse(numReserva) > 0 && reserva == null)
-                    throw new ArgumentException($"Não foi encontrada a reserva informada: {numReserva}");
+                    throw new ArgumentException($"NÃ£o foi encontrada a reserva informada: {numReserva}");
 
                 var tarifarios = await GetTarifarios(
                 dataInicial,
@@ -6025,7 +6025,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 new List<int>() { hotelId },
                 new List<int>() { tipoUhId });
 
-                // Criar modelo temporário para cálculo
+                // Criar modelo temporÃ¡rio para cÃ¡lculo
                 var modelTemp = new InclusaoReservaInputModel
                 {
                     QuantidadeAdultos = quantidadeAdultos,
@@ -6039,8 +6039,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     Hospedes = hospedes ?? new List<HospedeInputModel>()
                 };
 
-                // Se não foram informados hóspedes mas foram informadas quantidades,
-                // criar hóspedes fictícios para o cálculo
+                // Se nÃ£o foram informados hÃ³spedes mas foram informadas quantidades,
+                // criar hÃ³spedes fictÃ­cios para o cÃ¡lculo
                 if (!modelTemp.Hospedes.Any() && (quantidadeAdultos > 0 || quantidadeCriancas1 > 0 || quantidadeCriancas2 > 0))
                 {
                     // Adicionar adultos
@@ -6048,27 +6048,27 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     {
                         modelTemp.Hospedes.Add(new HospedeInputModel
                         {
-                            DataNascimento = DateTime.Today.AddYears(-25), // Adulto padrão
+                            DataNascimento = DateTime.Today.AddYears(-25), // Adulto padrÃ£o
                             Principal = i == 0 ? "S" : "N"
                         });
                     }
 
-                    // Adicionar crianças de 6 a 11 anos
+                    // Adicionar crianÃ§as de 6 a 11 anos
                     for (int i = 0; i < quantidadeCriancas1; i++)
                     {
                         modelTemp.Hospedes.Add(new HospedeInputModel
                         {
-                            DataNascimento = DateTime.Today.AddYears(-8), // Criança de 8 anos
+                            DataNascimento = DateTime.Today.AddYears(-8), // CrianÃ§a de 8 anos
                             Principal = "N"
                         });
                     }
 
-                    // Adicionar crianças de 0 a 5 anos
+                    // Adicionar crianÃ§as de 0 a 5 anos
                     for (int i = 0; i < quantidadeCriancas2; i++)
                     {
                         modelTemp.Hospedes.Add(new HospedeInputModel
                         {
-                            DataNascimento = DateTime.Today.AddYears(-3), // Criança de 3 anos
+                            DataNascimento = DateTime.Today.AddYears(-3), // CrianÃ§a de 3 anos
                             Principal = "N"
                         });
                     }
@@ -6097,43 +6097,43 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 }
 
                 if (tarifarioUtilizar == null)
-                    throw new ArgumentException("Não foi possível localizar o tarifário para cálculo de pontos");
+                    throw new ArgumentException("NÃ£o foi possÃ­vel localizar o tarifÃ¡rio para cÃ¡lculo de pontos");
 
                 
                 var pontosRetono = tarifarioUtilizar.NumeroPontos.GetValueOrDefault(0) > 0 ? tarifarioUtilizar.NumeroPontos.GetValueOrDefault() : 0;
 
                 if (pontosRetono == 0)
-                    throw new ArgumentException("Não foi possível encontrar tarifário compatível com a nova configuração");
+                    throw new ArgumentException("NÃ£o foi possÃ­vel encontrar tarifÃ¡rio compatÃ­vel com a nova configuraÃ§Ã£o");
 
                 return pontosRetono;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao calcular pontos necessários simplificado");
+                _logger.LogError(ex, "Erro ao calcular pontos necessÃ¡rios simplificado");
                 throw;
             }
         }
 
         private int CalcularHospedesPagantes(InclusaoReservaInputModel model, int totalHospedes, int? hotelId)
         {
-            // Se não houver hóspedes ou hotel, todos pagam
+            // Se nÃ£o houver hÃ³spedes ou hotel, todos pagam
             if (model.Hospedes == null || !model.Hospedes.Any() || !hotelId.HasValue)
                 return totalHospedes;
 
             try
             {
-                // Buscar regra tarifária vigente para o hotel
+                // Buscar regra tarifÃ¡ria vigente para o hotel
                 var regraTarifaria = _regraPaxFreeService.GetRegraVigente(hotelId).GetAwaiter().GetResult();
                 
-                // Se não há regra tarifária, todos pagam
+                // Se nÃ£o hÃ¡ regra tarifÃ¡ria, todos pagam
                 if (regraTarifaria == null || regraTarifaria.Configuracoes == null || !regraTarifaria.Configuracoes.Any())
                     return totalHospedes;
 
-                // Separar adultos e crianças
+                // Separar adultos e crianÃ§as
                 int qtdAdultos = 0;
                 var criancas = new List<(int idade, int indice)>();
 
-                // Determinar data de referência (usar a primeira configuração como referência, ou RESERVA como padrão)
+                // Determinar data de referÃªncia (usar a primeira configuraÃ§Ã£o como referÃªncia, ou RESERVA como padrÃ£o)
                 var primeiraConfig = regraTarifaria.Configuracoes.FirstOrDefault();
                 var tipoDataReferencia = primeiraConfig?.TipoDataReferencia ?? "RESERVA";
                 DateTime dataReferencia = tipoDataReferencia == "CHECKIN" && model.Checkin.HasValue
@@ -6145,7 +6145,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     var hospede = model.Hospedes[i];
                     if (!hospede.DataNascimento.HasValue || hospede.DataNascimento.Value.Date >= dataReferencia.AddYears(-1))
                     {
-                        // Sem data de nascimento ou data inválida, considera como adulto
+                        // Sem data de nascimento ou data invÃ¡lida, considera como adulto
                         qtdAdultos++;
                         continue;
                     }
@@ -6162,7 +6162,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     }
                 }
 
-                // Ordenar configurações por quantidade de adultos (maior primeiro) para aplicar as mais específicas primeiro
+                // Ordenar configuraÃ§Ãµes por quantidade de adultos (maior primeiro) para aplicar as mais especÃ­ficas primeiro
                 var configuracoes = regraTarifaria.Configuracoes
                     .Where(c => c.QuantidadeAdultos.HasValue && c.QuantidadePessoasFree.HasValue && c.IdadeMaximaAnos.HasValue)
                     .OrderByDescending(c => c.QuantidadeAdultos)
@@ -6171,10 +6171,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 if (!configuracoes.Any())
                     return totalHospedes;
 
-                // Ordenar crianças por idade (menores primeiro) para aplicar regras corretamente
+                // Ordenar crianÃ§as por idade (menores primeiro) para aplicar regras corretamente
                 var criancasOrdenadas = criancas.OrderBy(c => c.idade).ToList();
                 
-                // Aplicar regras tarifárias
+                // Aplicar regras tarifÃ¡rias
                 int criancasFree = 0;
                 var criancasMarcadasComoFree = new HashSet<int>();
 
@@ -6188,7 +6188,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     
                     if (vezesAplicavel > 0)
                     {
-                        // Quantas crianças podem ser free com esta regra
+                        // Quantas crianÃ§as podem ser free com esta regra
                         int pessoasFreeDisponiveis = vezesAplicavel * config.QuantidadePessoasFree.Value;
                         int pessoasFreeAplicadas = 0;
 
@@ -6199,7 +6199,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                             if (pessoasFreeAplicadas >= pessoasFreeDisponiveis)
                                 break;
 
-                            // Verificar se a criança se qualifica e ainda não foi marcada como free
+                            // Verificar se a crianÃ§a se qualifica e ainda nÃ£o foi marcada como free
                             bool qualifica = tipoOperador == ">=" 
                                 ? crianca.idade >= config.IdadeMaximaAnos.Value
                                 : crianca.idade <= config.IdadeMaximaAnos.Value;
@@ -6214,14 +6214,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     }
                 }
 
-                // Total de hóspedes que pagam = adultos (sempre pagam) + crianças que não são free
+                // Total de hÃ³spedes que pagam = adultos (sempre pagam) + crianÃ§as que nÃ£o sÃ£o free
                 int hospedesQuePagam = qtdAdultos + (criancas.Count - criancasFree);
                 
                 return hospedesQuePagam;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Erro ao calcular hóspedes pagantes. Usando valor total: {TotalHospedes}", totalHospedes);
+                _logger.LogWarning(ex, "Erro ao calcular hÃ³spedes pagantes. Usando valor total: {TotalHospedes}", totalHospedes);
                 return totalHospedes;
             }
         }
@@ -6239,9 +6239,9 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 {
                     var idadePessoaFree = item.IdadeMaximaAnos.GetValueOrDefault(0);
                     var tipoOperador = string.IsNullOrEmpty(item.TipoOperadorIdade) ? "<=" : item.TipoOperadorIdade;
-                    var tipoDataReferencia = string.IsNullOrEmpty(item.TipoDataReferencia) ? "RESERVA" : item.TipoDataReferencia; // Valor padrão "RESERVA" para compatibilidade
+                    var tipoDataReferencia = string.IsNullOrEmpty(item.TipoDataReferencia) ? "RESERVA" : item.TipoDataReferencia; // Valor padrÃ£o "RESERVA" para compatibilidade
 
-                    // Determinar data de referência para cálculo da idade
+                    // Determinar data de referÃªncia para cÃ¡lculo da idade
                     DateTime dataReferencia = tipoDataReferencia == "CHECKIN" && model.Checkin.HasValue
                         ? model.Checkin.Value.Date
                         : DateTime.Today.Date;
@@ -6363,7 +6363,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     if (disponibilidadeAjustada.IdContrTsXPontos2 != null && model.QtdePaxConsiderar > disponibilidadeAjustada.CapacidadePontos1)
                         contrTsXPontosUtilizar = disponibilidadeAjustada.IdContrTsXPontos2;
 
-                    // Usar método centralizado para calcular pontos (ÚNICO LUGAR onde pontos são calculados)
+                    // Usar mÃ©todo centralizado para calcular pontos (ÃšNICO LUGAR onde pontos sÃ£o calculados)
                     pontosUtilizar = CalcularPontosNecessarios(model, disponibilidadeAjustada, model.IdHotel, qtdePax);
                 }
 
@@ -6374,33 +6374,33 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
         public async Task<ReservaTsModel?> AlterarReserva(InclusaoReservaInputModel model)
         {
             if (model.IdReservasFront.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Deve ser informado o IdReservasFront para alteração da reserva");
+                throw new ArgumentException("Deve ser informado o IdReservasFront para alteraÃ§Ã£o da reserva");
 
             if (model.NumReserva.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Deve ser informado o NumReserva para alteração da reserva");
+                throw new ArgumentException("Deve ser informado o NumReserva para alteraÃ§Ã£o da reserva");
 
             if (model.Reserva.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Deve ser informado o Id da Reserva para alteração");
+                throw new ArgumentException("Deve ser informado o Id da Reserva para alteraÃ§Ã£o");
 
             AtendClienteTs? atendClienteTs = await GetAtendimentoCliente(model.IdVendaXContrato.GetValueOrDefault());
             if (atendClienteTs == null || atendClienteTs.IdVendaXContrato.GetValueOrDefault(0) == 0)
-                throw new ArgumentException($"Não foi localizado os dados da venda");
+                throw new ArgumentException($"NÃ£o foi localizado os dados da venda");
 
             VendaXContratoTs? vendaXContrato = await GetVendaXContrato(atendClienteTs);
 
             ContratoTsModel? padraoContrato = await GetPadraoContrato(atendClienteTs);
 
             if (padraoContrato == null)
-                throw new ArgumentException($"Não foi possível encontrar o contrato vinculado ao IdVendaXContrato: {atendClienteTs.IdVendaXContrato}");
+                throw new ArgumentException($"NÃ£o foi possÃ­vel encontrar o contrato vinculado ao IdVendaXContrato: {atendClienteTs.IdVendaXContrato}");
 
             PeriodoDisponivelResultModel? baseSaldoPontos = await GetSaldo(new SearchDisponibilidadeModel() { IdVendaXContrato = vendaXContrato.IdVendaXContrato, NumeroContrato = vendaXContrato.NumeroContrato.GetValueOrDefault().ToString() });
             if (baseSaldoPontos == null || baseSaldoPontos.IdContratoTs.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Falha na busca de disponibilidade 'Contrato não encontrado'");
+                throw new ArgumentException("Falha na busca de disponibilidade 'Contrato nÃ£o encontrado'");
 
             var condicaoFinanceira = await PosicaoFinanceiraContrato(baseSaldoPontos.IdVendaTs.GetValueOrDefault(), baseSaldoPontos.SaldoPontos);
 
             if (condicaoFinanceira != null && condicaoFinanceira.SaldoInadimplente.GetValueOrDefault(0) > 0)
-                throw new ArgumentException($"Existe pendência financeira no valor de: R$ {condicaoFinanceira.SaldoInadimplente:N2} favor procure a Central de Atendimento ao Cliente.");
+                throw new ArgumentException($"Existe pendÃªncia financeira no valor de: R$ {condicaoFinanceira.SaldoInadimplente:N2} favor procure a Central de Atendimento ao Cliente.");
 
             if (condicaoFinanceira != null && condicaoFinanceira.BloqueioTsModel != null)
             {
@@ -6410,14 +6410,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             if (padraoContrato.NumeroPontos == 7)
             {
                 if (model.TipoUso == "I")
-                    throw new ArgumentException($"Não é possível realizar liberação de semana para a RCI - Intercambiadora para do tipo de contrato: {vendaXContrato.NumeroContrato} de {padraoContrato.NumeroPontos} pontos");
+                    throw new ArgumentException($"NÃ£o Ã© possÃ­vel realizar liberaÃ§Ã£o de semana para a RCI - Intercambiadora para do tipo de contrato: {vendaXContrato.NumeroContrato} de {padraoContrato.NumeroPontos} pontos");
                 if (condicaoFinanceira != null && condicaoFinanceira.PercentualIntegralizacao.GetValueOrDefault(0) < 100)
-                    throw new ArgumentException($"Não é possível realizar reserva para o contrato: {vendaXContrato.NumeroContrato} de {padraoContrato.NumeroPontos} antes de integralizar 100%");
+                    throw new ArgumentException($"NÃ£o Ã© possÃ­vel realizar reserva para o contrato: {vendaXContrato.NumeroContrato} de {padraoContrato.NumeroPontos} antes de integralizar 100%");
 
                 if ((string.IsNullOrEmpty(model.TipoUso) ||
                    (!model.TipoUso.RemoveAccents().Contains("proprio", StringComparison.InvariantCultureIgnoreCase) &&
                    !model.TipoUso.Contains("up", StringComparison.InvariantCultureIgnoreCase))))
-                    throw new ArgumentException($"O contrato: {atendClienteTs.NumeroContrato} só pode ser utilizado pelo titular");
+                    throw new ArgumentException($"O contrato: {atendClienteTs.NumeroContrato} sÃ³ pode ser utilizado pelo titular");
             }
 
             if (string.IsNullOrEmpty(model.TipoUso))
@@ -6440,14 +6440,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             {
                 reservaCriada = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.IdReservasFront.GetValueOrDefault()}")).FirstOrDefault();
                 if (reservaCriada == null)
-                    throw new ArgumentException("Reserva não encontrada");
+                    throw new ArgumentException("Reserva nÃ£o encontrada");
 
                 var lancPontosTs = (await _repository.FindByHql<LancPontosTs>($"From LancPontosTs Where IdReservasFront = {reservaCriada.IdReservasFront}")).FirstOrDefault();
                 if (lancPontosTs == null)
-                    throw new ArgumentException("Lançamento de pontos não encontrato");
+                    throw new ArgumentException("LanÃ§amento de pontos nÃ£o encontrato");
 
                 if (vendaXContrato == null || vendaXContrato.NumeroContrato.GetValueOrDefault(0) == 0 || vendaXContrato.FlgCancelado == "S" || vendaXContrato.FlgRevertido == "S")
-                    throw new ArgumentException("Não foi posível um contrato ativo vinculado a reserva para alteração");
+                    throw new ArgumentException("NÃ£o foi posÃ­vel um contrato ativo vinculado a reserva para alteraÃ§Ã£o");
 
                 if (model.IdHotel.GetValueOrDefault(0) == 0)
                 {
@@ -6476,10 +6476,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     }
                 }
             }
-            else throw new ArgumentException("Não foi possível localizar a reserva para alteração");
+            else throw new ArgumentException("NÃ£o foi possÃ­vel localizar a reserva para alteraÃ§Ã£o");
 
             if (model.IdVendaXContrato.GetValueOrDefault(0) <= 0)
-                throw new ArgumentException("Não foi encontrado o IdVendaXContrato");
+                throw new ArgumentException("NÃ£o foi encontrado o IdVendaXContrato");
 
 
             try
@@ -6497,24 +6497,24 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     {
                         var reservaCancelada = await CancelarReservaAPICM(new CancelarReservaTsModel() { ReservaId = reservaCriada.NumReserva });
                         if (reservaCancelada.GetValueOrDefault() == false)
-                            throw new ArgumentException("Não foi possível cancelar a reserva vinculada para liberação da semana para RCI - Intercambiadora");
+                            throw new ArgumentException("NÃ£o foi possÃ­vel cancelar a reserva vinculada para liberaÃ§Ã£o da semana para RCI - Intercambiadora");
 
                         await ReverterLancamentosTimeSharing(reservaCriada.IdReservasFront.GetValueOrDefault());
                     }
 
                     var parametroSistema = await _serviceBase.GetParametroSistema();
                     if (parametroSistema == null)
-                        throw new ArgumentException("Parâmetros do sistema não encontrados");
+                        throw new ArgumentException("ParÃ¢metros do sistema nÃ£o encontrados");
 
                     if (parametroSistema.PontosRci.GetValueOrDefault(0) <= 0)
-                        throw new ArgumentException("Parâmetro de pontos para RCI - Intercambiadora não configurado no sistema");
+                        throw new ArgumentException("ParÃ¢metro de pontos para RCI - Intercambiadora nÃ£o configurado no sistema");
 
                     baseSaldoPontos = await GetSaldo(new SearchDisponibilidadeModel() { IdVendaXContrato = vendaXContrato.IdVendaXContrato, NumeroContrato = vendaXContrato.NumeroContrato.GetValueOrDefault().ToString() });
                     if (baseSaldoPontos == null || baseSaldoPontos.IdContratoTs.GetValueOrDefault(0) == 0)
-                        throw new ArgumentException("Falha na busca de disponibilidade 'Contrato não encontrado'");
+                        throw new ArgumentException("Falha na busca de disponibilidade 'Contrato nÃ£o encontrado'");
 
                     if (baseSaldoPontos.SaldoPontos.GetValueOrDefault(0) < parametroSistema.PontosRci.GetValueOrDefault(0))
-                        throw new ArgumentException($"Saldo de pontos insuficiente para liberação de semana para RCI - Intercambiadora. Saldo atual: {baseSaldoPontos.SaldoPontos.GetValueOrDefault(0)} pontos");
+                        throw new ArgumentException($"Saldo de pontos insuficiente para liberaÃ§Ã£o de semana para RCI - Intercambiadora. Saldo atual: {baseSaldoPontos.SaldoPontos.GetValueOrDefault(0)} pontos");
 
                     var pessoaProprietaria = (await _repository.FindBySql<UserRegisterInputModel>($@"SELECT
                             cp.IdPessoa AS PessoaId,
@@ -6540,18 +6540,18 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                             vts.FlgRevertido = 'N' AND 
                             pes.IdPessoa = {atendClienteTs.IdCliente}")).FirstOrDefault();
 
-                    //Salvo a pendência para vinculação com RCI
+                    //Salvo a pendÃªncia para vinculaÃ§Ã£o com RCI
                     var reservaInputModel = new InclusaoReservaInputDto()
                     { };
 
                     var reservaTimeSharingHistorico = await SalvarVinculosHistoricosReservasViaPortal(model, pessoaProprietaria, vendaXContrato, atendClienteTs, reservaInputModel, null, parametroSistema.PontosRci);
 
                 }
-                else throw new ArgumentException("Não foi possível salvar a reserva! 'Tipo uso não informado'");
+                else throw new ArgumentException("NÃ£o foi possÃ­vel salvar a reserva! 'Tipo uso nÃ£o informado'");
 
                 var commitReservaTransaction = await _repository.CommitAsync();
                 if (!commitReservaTransaction.executed)
-                    throw commitReservaTransaction.exception ?? throw new Exception("Falha na criação da reserva");
+                    throw commitReservaTransaction.exception ?? throw new Exception("Falha na criaÃ§Ã£o da reserva");
 
                 await _repositorySystem.CommitAsync();
 
@@ -6580,21 +6580,21 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             AtendClienteTs? atendClienteTs = atendClienteTsReceived ?? await GetAtendimentoCliente(model.IdVendaXContrato.GetValueOrDefault());
             if (atendClienteTs == null || atendClienteTs.IdVendaXContrato.GetValueOrDefault(0) == 0)
-                throw new ArgumentException($"Não foi localizado os dados da venda");
+                throw new ArgumentException($"NÃ£o foi localizado os dados da venda");
 
             VendaXContratoTs? vendaXContrato = await GetVendaXContrato(atendClienteTs);
 
             if (vendaXContrato == null)
-                throw new ArgumentException("Não foi localizado os dados da venda");
+                throw new ArgumentException("NÃ£o foi localizado os dados da venda");
 
             PeriodoDisponivelResultModel? baseSaldoPontos = await GetSaldo(new SearchDisponibilidadeModel() { IdVendaXContrato = vendaXContrato.IdVendaXContrato, NumeroContrato = vendaXContrato.NumeroContrato.GetValueOrDefault().ToString() });
             if (baseSaldoPontos == null || baseSaldoPontos.IdContratoTs.GetValueOrDefault(0) == 0)
-                throw new ArgumentException("Falha na busca de disponibilidade não foi possível calcular a diferença de pontos");
+                throw new ArgumentException("Falha na busca de disponibilidade nÃ£o foi possÃ­vel calcular a diferenÃ§a de pontos");
 
             var condicaoFinanceira = await PosicaoFinanceiraContrato(baseSaldoPontos.IdVendaTs.GetValueOrDefault(), baseSaldoPontos.SaldoPontos);
 
             if (condicaoFinanceira != null && condicaoFinanceira.SaldoInadimplente.GetValueOrDefault(0) > 0)
-                throw new ArgumentException($"Existe pendência financeira no valor de: R$ {condicaoFinanceira.SaldoInadimplente:N2} favor procure a Central de Atendimento ao Cliente.");
+                throw new ArgumentException($"Existe pendÃªncia financeira no valor de: R$ {condicaoFinanceira.SaldoInadimplente:N2} favor procure a Central de Atendimento ao Cliente.");
 
             if (condicaoFinanceira != null && condicaoFinanceira.BloqueioTsModel != null)
             {
@@ -6623,13 +6623,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             ContratoTsModel? padraoContrato = await GetPadraoContrato(atendClienteTs);
 
             if (padraoContrato == null)
-                throw new ArgumentException($"Não foi possível encontrar o contrato vinculado ao IdVendaXContrato: {atendClienteTs.IdVendaXContrato}");
+                throw new ArgumentException($"NÃ£o foi possÃ­vel encontrar o contrato vinculado ao IdVendaXContrato: {atendClienteTs.IdVendaXContrato}");
 
 
             if (padraoContrato.NumeroPontos == 7 && (string.IsNullOrEmpty(model.TipoUso) || 
                 (!model.TipoUso.RemoveAccents().Contains("proprio", StringComparison.InvariantCultureIgnoreCase) && 
                 !model.TipoUso.Contains("up",StringComparison.OrdinalIgnoreCase))))
-                throw new ArgumentException($"O contrato: {atendClienteTs.NumeroContrato} só pode ser utilizado pelo titular");
+                throw new ArgumentException($"O contrato: {atendClienteTs.NumeroContrato} sÃ³ pode ser utilizado pelo titular");
 
             var pessoaProprietaria = (await _repository.FindBySql<UserRegisterInputModel>($@"SELECT
                             cp.IdPessoa AS PessoaId,
@@ -6663,7 +6663,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 {
                     var principal = model.Hospedes.FirstOrDefault(a => a.Principal == "S");
                     if (principal == null)
-                        throw new ArgumentException("Deve ser informado o hóspede principal");
+                        throw new ArgumentException("Deve ser informado o hÃ³spede principal");
 
                     if (principal.IdHospede.GetValueOrDefault() == int.Parse(pessoaProprietaria.PessoaId!) || principal.IdHospede.GetValueOrDefault(0) == 0)
                     {
@@ -6728,7 +6728,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             if (paramTs.NumMaxPernoites.GetValueOrDefault(0) > 0 &&
                 diasReservaAtual > paramTs.NumMaxPernoites.GetValueOrDefault(0))
             {
-                throw new ArgumentException($"A reserva pode conter no máximo: {paramTs.NumMaxPernoites.GetValueOrDefault(0)} pernoites/diárias.");
+                throw new ArgumentException($"A reserva pode conter no mÃ¡ximo: {paramTs.NumMaxPernoites.GetValueOrDefault(0)} pernoites/diÃ¡rias.");
             }
 
             await SetarParametrosReserva(model);
@@ -6748,7 +6748,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             var reservaModel = (InclusaoReservaInputDto)model;
 
-            // Buscar dados do usuário logado para preencher LoginPms e LoginSistemaVenda
+            // Buscar dados do usuÃ¡rio logado para preencher LoginPms e LoginSistemaVenda
             var loggedUser = await _repositorySystem.GetLoggedUser();
             if (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId))
             {
@@ -6807,14 +6807,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             if (model.IdReservasFront.GetValueOrDefault(0) == 0)
                 throw new ArgumentException("Deve ser informado o Id da reserva para ser alterada.");
 
-            // Verificar se a quantidade de pessoas mudou e recalcular pontos se necessário
+            // Verificar se a quantidade de pessoas mudou e recalcular pontos se necessÃ¡rio
             var reservaOriginal = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.LocReserva, rf.LocReserva as AgendamentoId, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.IdReservasFront.GetValueOrDefault()} and rf.StatusReserva in (0,1,5,6)")).FirstOrDefault();
             if (reservaOriginal != null)
             {
                 var lancPontosTs = (await _repository.FindByHql<LancPontosTs>($"From LancPontosTs Where IdReservasFront = {reservaOriginal.IdReservasFront}")).FirstOrDefault();
                 if (lancPontosTs != null)
                 {
-                    // 1. Calcular pontos da configuração ORIGINAL usando o método simplificado
+                    // 1. Calcular pontos da configuraÃ§Ã£o ORIGINAL usando o mÃ©todo simplificado
                     var pontosOriginais = await CalcularPontosNecessariosSimplificado(
                         reservaOriginal.Checkin.GetValueOrDefault(model.Checkin.GetValueOrDefault()),
                         reservaOriginal.Checkout.GetValueOrDefault(model.Checkout.GetValueOrDefault()),
@@ -6829,7 +6829,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         null
                     );
 
-                    // 2. Calcular pontos da configuração NOVA usando o método simplificado
+                    // 2. Calcular pontos da configuraÃ§Ã£o NOVA usando o mÃ©todo simplificado
                     var pontosNovos = await CalcularPontosNecessariosSimplificado(
                         model.Checkin.GetValueOrDefault(),
                         model.Checkout.GetValueOrDefault(),
@@ -6844,39 +6844,39 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         model.Hospedes
                     );
 
-                    // 3. Calcular diferença
+                    // 3. Calcular diferenÃ§a
                     var diferencaPontos = pontosNovos - pontosOriginais;
 
                     _logger.LogInformation(
-                        "Recálculo de pontos - Original: {PontosOriginais}, Novo: {PontosNovos}, Diferença: {Diferenca}",
+                        "RecÃ¡lculo de pontos - Original: {PontosOriginais}, Novo: {PontosNovos}, DiferenÃ§a: {Diferenca}",
                         pontosOriginais,
                         pontosNovos,
                         diferencaPontos
                     );
 
-                    // 4. Verificar se saldo é suficiente para cobrir a diferença
+                    // 4. Verificar se saldo Ã© suficiente para cobrir a diferenÃ§a
                     if (diferencaPontos > 0)
                     {
                         var saldoAtual = baseSaldoPontos.SaldoPontos.GetValueOrDefault(0);
 
                         if (saldoAtual < diferencaPontos)
                             throw new ArgumentException(
-                                $"Saldo de pontos insuficiente para a alteração. " +
+                                $"Saldo de pontos insuficiente para a alteraÃ§Ã£o. " +
                                 $"Pontos originais: {pontosOriginais:N0}, " +
-                                $"Pontos necessários: {pontosNovos:N0}, " +
-                                $"Diferença a pagar: {diferencaPontos:N0}. " +
-                                $"Saldo disponível: {saldoAtual:N0}."
+                                $"Pontos necessÃ¡rios: {pontosNovos:N0}, " +
+                                $"DiferenÃ§a a pagar: {diferencaPontos:N0}. " +
+                                $"Saldo disponÃ­vel: {saldoAtual:N0}."
                             );
                     }
 
 
                     if (diferencaPontos != 0)
                     {
-                        // 5. Estornar lançamento anterior
+                        // 5. Estornar lanÃ§amento anterior
                         await EfetuarLancamentoPontosTsCancelamento(lancPontosTs, paramTs, cmUserId);
                     }
 
-                    // 6. Atualizar modelo com pontos necessários
+                    // 6. Atualizar modelo com pontos necessÃ¡rios
                     model.NumeroPontos = pontosNovos;
 
                     _logger.LogInformation(
@@ -6901,16 +6901,16 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         if (qtdeDiasReservaAtual != 7)
                         {
                             if (qtdeDiasReservaAtual != qtdeDiasReservaReservaAnterior)
-                                throw new ArgumentException($"Não é possível alterar uma reserva de fracionamento de: {qtdeDiasReservaReservaAnterior} para {qtdeDiasReservaAtual} dias.");
+                                throw new ArgumentException($"NÃ£o Ã© possÃ­vel alterar uma reserva de fracionamento de: {qtdeDiasReservaReservaAnterior} para {qtdeDiasReservaAtual} dias.");
 
                             if (reservaOriginal.Checkin.GetValueOrDefault().DayOfWeek != model.Checkin.GetValueOrDefault().DayOfWeek)
-                                throw new ArgumentException($"Não é possível alterar uma reserva de fracionamento iniciando no dia: {reservaOriginal.Checkin.GetValueOrDefault():ddd} para início no dia {model.Checkin.GetValueOrDefault():ddd}.");
+                                throw new ArgumentException($"NÃ£o Ã© possÃ­vel alterar uma reserva de fracionamento iniciando no dia: {reservaOriginal.Checkin.GetValueOrDefault():ddd} para inÃ­cio no dia {model.Checkin.GetValueOrDefault():ddd}.");
 
                             if (reservaOriginal.Checkout.GetValueOrDefault().DayOfWeek != model.Checkout.GetValueOrDefault().DayOfWeek)
-                                throw new ArgumentException($"Não é possível alterar uma reserva de fracionamento encerrando no dia: {reservaOriginal.Checkout.GetValueOrDefault():ddd} para encerramento no dia {model.Checkout.GetValueOrDefault():ddd}.");
+                                throw new ArgumentException($"NÃ£o Ã© possÃ­vel alterar uma reserva de fracionamento encerrando no dia: {reservaOriginal.Checkout.GetValueOrDefault():ddd} para encerramento no dia {model.Checkout.GetValueOrDefault():ddd}.");
 
                             if (fracionamentoVinculado.IdReservasFront2.GetValueOrDefault(0) > 0 && fracionamentoVinculado.IdReservasFront2.GetValueOrDefault() != reservaOriginal.IdReservasFront)
-                                throw new ArgumentException("Não é possível alterar uma reserva vinculada a um fracionamento já encerrado.");
+                                throw new ArgumentException("NÃ£o Ã© possÃ­vel alterar uma reserva vinculada a um fracionamento jÃ¡ encerrado.");
                         }
                     }
                     else if (model.Checkout.GetValueOrDefault().Subtract(model.Checkin.GetValueOrDefault()).TotalDays != 7)
@@ -6951,7 +6951,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     {
                         var pessoaProprietaria = (await _repository.FindBySql<UserRegisterInputModel>($"Select p.IdPessoa as PessoaId, p.Nome as FullName From Pessoa p Where p.IdPessoa = {atendClienteTs.IdCliente}")).FirstOrDefault();
                         if (pessoaProprietaria == null)
-                            throw new ArgumentException("Não foi possível localizar os dados do proprietário para salvar o histórico da reserva.");
+                            throw new ArgumentException("NÃ£o foi possÃ­vel localizar os dados do proprietÃ¡rio para salvar o histÃ³rico da reserva.");
 
                         reservaTimeShaging = await SalvarVinculosHistoricosReservasViaPortal(model, pessoaProprietaria, vendaXContrato, atendClienteTs, (InclusaoReservaInputDto)model, reservaCriada, reservaOriginal.IdReservasFront.GetValueOrDefault());
                     }
@@ -6989,13 +6989,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         }
                     }
 
-                    // Se pontos foram recalculados, criar novo lançamento
+                    // Se pontos foram recalculados, criar novo lanÃ§amento
                     if (reservaCriada != null && model.NumeroPontos.HasValue && model.NumeroPontos.Value > 0)
                     {
                         var lancPontosTsAtual = (await _repository.FindByHql<LancPontosTs>($"From LancPontosTs Where IdReservasFront = {reservaCriada.IdReservasFront}")).FirstOrDefault();
                         if (lancPontosTsAtual == null && reservaOriginal != null)
                         {
-                            // Criar novo lançamento com pontos recalculados
+                            // Criar novo lanÃ§amento com pontos recalculados
                             var novoLancPontos = await EfetuarLancamentoPontosTs(
                                 reservaCriada,
                                 paramTs,
@@ -7007,7 +7007,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                 "S"
                             );
 
-                            // Gravar lançamento financeiro vinculado aos pontos
+                            // Gravar lanÃ§amento financeiro vinculado aos pontos
                             if (vendaXContrato != null)
                             {
                                 await EfetuarLancamentoCriacaoReservaTs(vendaXContrato, novoLancPontos, reservaCriada, paramTs, model, cmUserId, baseSaldoPontos.IdContratoTs, baseSaldoPontos.ValidadeCredito);
@@ -7195,11 +7195,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
         private async Task<ReservaTsModel?> SalvarReservaNoCM(InclusaoReservaInputDto reservaModel)
         {
-            // 🔥 Garantir que TipoUso seja enviado (valor padrão: "UP" - Uso Próprio)
+            // ðŸ”¥ Garantir que TipoUso seja enviado (valor padrÃ£o: "UP" - Uso PrÃ³prio)
             if (string.IsNullOrEmpty(reservaModel.TipoUso))
             {
                 reservaModel.TipoUso = "UP";
-                _logger.LogInformation("TipoUso não informado, definindo valor padrão: UP (Uso Próprio)");
+                _logger.LogInformation("TipoUso nÃ£o informado, definindo valor padrÃ£o: UP (Uso PrÃ³prio)");
             }
 
             if (string.IsNullOrEmpty(reservaModel.TipoUso) && !string.IsNullOrEmpty(reservaModel.TipoDeUso))
@@ -7207,7 +7207,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             else if (string.IsNullOrEmpty(reservaModel.TipoDeUso) && !string.IsNullOrEmpty(reservaModel.TipoUso))
                 reservaModel.TipoDeUso = reservaModel.TipoUso;
 
-            // Buscar dados do usuário logado para preencher LoginPms e LoginSistemaVenda se não foram preenchidos
+            // Buscar dados do usuÃ¡rio logado para preencher LoginPms e LoginSistemaVenda se nÃ£o foram preenchidos
             if (string.IsNullOrEmpty(reservaModel.LoginPms) || string.IsNullOrEmpty(reservaModel.LoginSistemaVenda))
             {
                 var loggedUser = await _repositorySystem.GetLoggedUser();
@@ -7224,7 +7224,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 }
             }
 
-            _logger.LogInformation("📤 Enviando reserva para API Java - TipoUso: {TipoUso}, NumReserva: {NumReserva}, LoginPms: {LoginPms}, LoginSistemaVenda: {LoginSistemaVenda}", 
+            _logger.LogInformation("ðŸ“¤ Enviando reserva para API Java - TipoUso: {TipoUso}, NumReserva: {NumReserva}, LoginPms: {LoginPms}, LoginSistemaVenda: {LoginSistemaVenda}", 
                 reservaModel.TipoUso, reservaModel.Reserva, reservaModel.LoginPms, reservaModel.LoginSistemaVenda);
 
             if (reservaModel.Id == reservaModel.IdReservasFront && reservaModel.NumReserva.GetValueOrDefault(0) > 0)
@@ -7268,7 +7268,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             if (reservaCriada != null)
             { 
-                _logger.LogInformation("✅ Reserva criada/alterada com sucesso - IdReservasFront: {IdReservasFront}, NumReserva: {NumReserva}", reservaCriada.IdReservasFront, reservaCriada.NumReserva);
+                _logger.LogInformation("âœ… Reserva criada/alterada com sucesso - IdReservasFront: {IdReservasFront}, NumReserva: {NumReserva}", reservaCriada.IdReservasFront, reservaCriada.NumReserva);
             }
 
             return reservaCriada;
@@ -7281,10 +7281,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 var pessoa = (await _repository.FindBySql<PessoaModel>($"Select p.IdPessoa, p.Nome From Pessoa p Where p.IdPessoa = {reservaModel.ClienteReservante}")).FirstOrDefault();
                 if (pessoa != null && !string.IsNullOrEmpty(pessoa.Nome))
                 {
-                    var sb = new StringBuilder($@"RESERVA MVC OBSERVAÇÃO\r\n
-                    CLIENTE MABU VACATION CLUB ({pessoa.Nome!.ToUpper()})*CAFÉ* 20% DESCONTO NO\r\n
-                    ALMOÇO E JANTAR DO RESTAURANTE PRINCIPAL*TIROLESA 10% EXTRAS DIRETO\r\n
-                    NO HOTEL TERÁ TODOS OS BENEFÍCIOS MABU VACATION CLUB 30% DE DESCONTO\r\n
+                    var sb = new StringBuilder($@"RESERVA MVC OBSERVAÃ‡ÃƒO\r\n
+                    CLIENTE MABU VACATION CLUB ({pessoa.Nome!.ToUpper()})*CAFÃ‰* 20% DESCONTO NO\r\n
+                    ALMOÃ‡O E JANTAR DO RESTAURANTE PRINCIPAL*TIROLESA 10% EXTRAS DIRETO\r\n
+                    NO HOTEL TERÃ TODOS OS BENEFÃCIOS MABU VACATION CLUB 30% DE DESCONTO\r\n
                     NA ENTRADA DO BLUE PARK");
 
                     reservaModel.Observacao = sb.ToString();
@@ -7491,7 +7491,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             else
             {
                 if (lancPontosTsBase == null)
-                    throw new ArgumentException("Não foi possível reverter os lançamentos de pontos.");
+                    throw new ArgumentException("NÃ£o foi possÃ­vel reverter os lanÃ§amentos de pontos.");
 
                 var lancamentoTs = (await _repository.FindByHql<LancamentoTs>($"From LancamentoTs Where IdLancPontosTs = {lancPontosTsBase.IdLancPontosTs}")).AsList();
                 if (lancamentoTs != null && lancamentoTs.Any())
@@ -7511,7 +7511,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             {
                 paramTs = (await _repository.FindBySql<ParamTs>($"Select p.* From ParamTs p Where p.IdHotel = 3 ")).FirstOrDefault();
                 if (paramTs == null)
-                throw new ArgumentException("Falha na criação de reserva: ParamTs");
+                throw new ArgumentException("Falha na criaÃ§Ã£o de reserva: ParamTs");
             }
 
             return paramTs;
@@ -7533,13 +7533,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     vxc.IdVendaXContrato = {idVendaXContrato}")).FirstOrDefault();
 
             if (atendClienteTs == null)
-                throw new ArgumentException($"Não foi possível encontrar o cliente vinculado com a venda informada: {idVendaXContrato}");
+                throw new ArgumentException($"NÃ£o foi possÃ­vel encontrar o cliente vinculado com a venda informada: {idVendaXContrato}");
             return atendClienteTs;
         }
 
         private async Task GravarLogs(int cmUserId, AtendClienteTs? atendClienteTs, ParamTs? paramTs)
         {
-            var tipoLogTs = (await _repository.FindBySql<TipoLogTs>("Select * From TipoLogTs Where Lower(Descricao) = 'pós-venda'")).FirstOrDefault() ?? new TipoLogTs() { IdTipoLogTs = 2 };
+            var tipoLogTs = (await _repository.FindBySql<TipoLogTs>("Select * From TipoLogTs Where Lower(Descricao) = 'pÃ³s-venda'")).FirstOrDefault() ?? new TipoLogTs() { IdTipoLogTs = 2 };
             if (tipoLogTs != null)
             {
                 var logTs = new LogTs()
@@ -7559,7 +7559,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
         private async Task AjustarFracionamentoReserva(InclusaoReservaInputModel model, int cmUserId, AtendClienteTs? atendClienteTs, ParamTs paramTs, int diasReservaAtual, ReservaTsModel reservaCriada, ReservaTimeSharing reservaTimeSharingHistorico)
         {
             if (atendClienteTs == null)
-                throw new ArgumentException("Deve ser infomado o parâmetro atendClienteTs");
+                throw new ArgumentException("Deve ser infomado o parÃ¢metro atendClienteTs");
 
             List<FracionamentoTsModel> fracionamentos = await GetFracionamentosCorrentes(atendClienteTs!.IdCliente.GetValueOrDefault(), paramTs);
             if (fracionamentos != null && fracionamentos.Any())
@@ -7571,14 +7571,14 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 {
                     var fracionamentoEmAberto =  fracionamentos != null && fracionamentos.Any() ? fracionamentos.FirstOrDefault(a => a.IdFracionamentoTs == model.IdFracionamentoTs) : null;
                     if (fracionamentoEmAberto == null)
-                        throw new ArgumentException($"Não foi encontrado o fracionamento com o Id informado: {model.IdFracionamentoTs}");
+                        throw new ArgumentException($"NÃ£o foi encontrado o fracionamento com o Id informado: {model.IdFracionamentoTs}");
 
                     var qtdeDiasReservaUtilizadas = fracionamentoEmAberto.CheckoutReservasFront1.GetValueOrDefault()
                         .Date.Subtract(fracionamentoEmAberto.CheckinReservasFront1.GetValueOrDefault().Date).Days;
 
                     if ((qtdeDiasReservaUtilizadas + diasReservaAtual) > 7)
                     {
-                        throw new ArgumentException($"A quantidade máxima para o fechamento do fracionamento é de: {(7 - qtdeDiasReservaUtilizadas)} pernoites/diárias.");
+                        throw new ArgumentException($"A quantidade mÃ¡xima para o fechamento do fracionamento Ã© de: {(7 - qtdeDiasReservaUtilizadas)} pernoites/diÃ¡rias.");
                     }
 
                     var aberturaFracionamento = (await _repository.FindByHql<FracionamentoTs>($"From FracionamentoTs Where IdFracionamentoTs = {fracionamentoEmAberto.IdFracionamentoTs}")).FirstOrDefault();
@@ -7725,15 +7725,15 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             {
                 var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, COALESCE(rf.DataChegPrevista,rf.DataChegadaReal) as DataCheckin, rf.* From ReservasFront rf Where rf.NumReserva = {model.ReservaId}")).FirstOrDefault();
                 if (reserva == null)
-                    throw new ArgumentException("Reserva não encontrada");
+                    throw new ArgumentException("Reserva nÃ£o encontrada");
                 if (reserva.DataCheckin.GetValueOrDefault().Date.Subtract(DateTime.Today.Date).Days < 30)
-                    throw new ArgumentException("A reserva não pode ser cancelada, está fora do prazo de cancelamento: (30)");
+                    throw new ArgumentException("A reserva nÃ£o pode ser cancelada, estÃ¡ fora do prazo de cancelamento: (30)");
 
                 var fracionamentoTs = (await _repository.FindByHql<FracionamentoTs>($"From FracionamentoTs fr Where fr.IdReservasFront1 = {reserva.IdReservasFront} or fr.IdReservasFront2 = {reserva.IdReservasFront}")).FirstOrDefault();
                 if (fracionamentoTs != null)
                 {
                     if (reserva.IdReservasFront == fracionamentoTs.IdReservasFront1.GetValueOrDefault() && fracionamentoTs.IdReservasFront2.GetValueOrDefault(0) > 0)
-                        throw new ArgumentException("A reserva de abertura de fracionamento não pode ser cancelada, quando já possuir reserva de fechamento vinculada.");
+                        throw new ArgumentException("A reserva de abertura de fracionamento nÃ£o pode ser cancelada, quando jÃ¡ possuir reserva de fechamento vinculada.");
                 }
 
                 cancelada = await CancelarReservaAPICM(model);
@@ -7746,7 +7746,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             {
                 var reservaTimeSharing = (await _repositorySystem.FindByHql<ReservaTimeSharing>($"From ReservaTimeSharing Where Id = {model.ReservaTimesharingId}")).FirstOrDefault();
                 if (reservaTimeSharing == null)
-                    throw new ArgumentException("Reserva timesharing não encontrada");
+                    throw new ArgumentException("Reserva timesharing nÃ£o encontrada");
 
                 if (reservaTimeSharing.IdReservasFront.GetValueOrDefault(0) > 0 || !string.IsNullOrEmpty(reservaTimeSharing.NumReserva))
                 {
@@ -7773,7 +7773,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     reservaTimeSharing.NumReserva = null;
                     reservaTimeSharing.IdReservasFront = null;
                     reservaTimeSharing.MotivoCancelamentoInfUsu = model.MotivoCancelamentoInfUsu ?? model.ObservacaoCancelamento;
-                    reservaTimeSharing.ClienteNotificadoCancelamento = model.NotificarCliente.GetValueOrDefault(false) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Não;
+                    reservaTimeSharing.ClienteNotificadoCancelamento = model.NotificarCliente.GetValueOrDefault(false) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Nao;
                     await _repositorySystem.Save(reservaTimeSharing);
 
                     cancelada = true;
@@ -7805,7 +7805,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 if (fracionamentoTs != null)
                 {
                     if (fracionamentoTs.IdReservasFront2.GetValueOrDefault(0) > 0)
-                        throw new ArgumentException("A reserva de abertura de fracionamento não pode ser cancelada, quando já possuir reserva de fechamento vinculada.");
+                        throw new ArgumentException("A reserva de abertura de fracionamento nÃ£o pode ser cancelada, quando jÃ¡ possuir reserva de fechamento vinculada.");
 
                     
                     _repository.Remove(fracionamentoTs);
@@ -8246,12 +8246,12 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             var result = await GetReservasGeral(searchModel);
             if (result == null || !result.Value.reservas.Any()) 
             {
-                throw new ArgumentException($"Reserva {numReserva} não foi encontrada para obter os dados do voucher!");            
+                throw new ArgumentException($"Reserva {numReserva} nÃ£o foi encontrada para obter os dados do voucher!");            
             }
 
             var reserva = result.Value.reservas.First();
 
-            // Buscar todos os hóspedes da reserva
+            // Buscar todos os hÃ³spedes da reserva
             var hospedesParams = new List<Parameter>
             {
                 new Parameter("idReservasFront", reserva.IdReservasFront.Value)
@@ -8290,7 +8290,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 });
             }
 
-            // Buscar documento do hóspede principal
+            // Buscar documento do hÃ³spede principal
             var hospedePrincipal = hospedes.FirstOrDefault(h => h.Principal);
             var hospedePrincipalDocumento = hospedePrincipal?.Documento;
 
@@ -8299,8 +8299,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 qtdePorFaixa += reserva.Adultos.GetValueOrDefault(0) > 1 ? $"{reserva.Adultos} Adulto(s); " : $"{reserva.Adultos} Adulto; ";
             if (reserva.Criancas1.GetValueOrDefault(0) > 0 || reserva.Criancas2.GetValueOrDefault(0) > 0)
                 qtdePorFaixa += (reserva.Criancas1.GetValueOrDefault(0) + reserva.Criancas2.GetValueOrDefault(0) > 1) ? 
-                    $"{reserva.Criancas1.GetValueOrDefault(0)+reserva.Criancas2.GetValueOrDefault(0)} Criança(s) " :
-                    $"{reserva.Criancas1.GetValueOrDefault(0) + reserva.Criancas2.GetValueOrDefault(0)} Criança ";
+                    $"{reserva.Criancas1.GetValueOrDefault(0)+reserva.Criancas2.GetValueOrDefault(0)} CrianÃ§a(s) " :
+                    $"{reserva.Criancas1.GetValueOrDefault(0) + reserva.Criancas2.GetValueOrDefault(0)} CrianÃ§a ";
             
 
             // Montar o retorno
@@ -8345,7 +8345,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
             {
                 var reservaTimeSharing = (await _repositorySystem.FindByHql<ReservaTimeSharing>($"From ReservaTimeSharing Where Id = {vincularModel.IdReservaTimeSharing}")).FirstOrDefault();
                 if (reservaTimeSharing == null)
-                    throw new ArgumentException("Reserva Time Sharing não encontrada para vinculação.");
+                    throw new ArgumentException("Reserva Time Sharing nÃ£o encontrada para vinculaÃ§Ã£o.");
 
                 var reservasFront = (await _repository.FindBySql<ReservaTsModel>(@$"Select 
                             COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso,
@@ -8365,10 +8365,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                              rf.NumReserva = {vincularModel.NumReserva}")).FirstOrDefault();
 
                 if (reservasFront == null)
-                    throw new ArgumentException("Reserva não encontrada para vinculação.");
+                    throw new ArgumentException("Reserva nÃ£o encontrada para vinculaÃ§Ã£o.");
 
                 if (reservasFront.IdRoomList.GetValueOrDefault(0) > 0 && !reservasFront.NomeGrupo!.Contains("RCI",StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentException($"A reserva: {reservasFront.NumReserva} está vinculada ao grupo/Evento: '{reservasFront.NomeGrupo}' e não pode ser vinculada com uma utilização RCI.");
+                    throw new ArgumentException($"A reserva: {reservasFront.NumReserva} estÃ¡ vinculada ao grupo/Evento: '{reservasFront.NomeGrupo}' e nÃ£o pode ser vinculada com uma utilizaÃ§Ã£o RCI.");
 
                 var reservaJaVinculada = (await _repository.FindByHql<ReservasTs>("From ReservasRci rc Where rc.IdReservasFront = :idReservasFront",
                     new Parameter("idReservasFront",reservasFront!.IdReservasFront.GetValueOrDefault()))).FirstOrDefault();
@@ -8379,11 +8379,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                         new Parameter("idReservasFront",reservaTimeSharing!.IdReservasFront.GetValueOrDefault()))).FirstOrDefault();
 
                     if (reservaBaixandoPontos != null)
-                            throw new ArgumentException("Não é possível vincular a reserva, pois a reserva informada já está vinculada a baixa de pontos.");
+                            throw new ArgumentException("NÃ£o Ã© possÃ­vel vincular a reserva, pois a reserva informada jÃ¡ estÃ¡ vinculada a baixa de pontos.");
 
                     var parametroSistema = await GetParametroSistema();
                     if (parametroSistema == null)
-                        throw new ArgumentException("Parâmetros do sistema não foram encontrados.");
+                        throw new ArgumentException("ParÃ¢metros do sistema nÃ£o foram encontrados.");
 
                     var vendaXContratoModel = 
                         (await _repository.FindBySql<VendaXContratoTs>($@"Select 
@@ -8394,26 +8394,26 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                                                                             vc.IdVendaXContrato = {reservaTimeSharing.IdVendaXContrato.GetValueOrDefault(0)}")).FirstOrDefault();
 
                     if (vendaXContratoModel == null)
-                        throw new ArgumentException($"Não foi localizado os dados da venda x contrato para o IdVendaXContrato: {reservaTimeSharing.IdVendaXContrato.GetValueOrDefault(0)}");
+                        throw new ArgumentException($"NÃ£o foi localizado os dados da venda x contrato para o IdVendaXContrato: {reservaTimeSharing.IdVendaXContrato.GetValueOrDefault(0)}");
 
                     AtendClienteTs? atendClienteTs = await GetAtendimentoCliente(vendaXContratoModel!.IdVendaXContrato.GetValueOrDefault());
                     if (atendClienteTs == null || atendClienteTs.IdVendaXContrato.GetValueOrDefault(0) == 0)
-                        throw new ArgumentException($"Não foi localizado os dados da venda");
+                        throw new ArgumentException($"NÃ£o foi localizado os dados da venda");
 
                     VendaXContratoTs? vendaXContrato = await GetVendaXContrato(atendClienteTs);
                     if (vendaXContrato == null || vendaXContrato.IdVendaXContrato.GetValueOrDefault(0) == 0)
-                        throw new ArgumentException($"Não foi localizado os dados da venda x contrato para o IdVendaXContrato: {atendClienteTs.IdVendaXContrato.GetValueOrDefault(0)}");
+                        throw new ArgumentException($"NÃ£o foi localizado os dados da venda x contrato para o IdVendaXContrato: {atendClienteTs.IdVendaXContrato.GetValueOrDefault(0)}");
 
                     ContratoTsModel? padraoContrato = await GetPadraoContrato(atendClienteTs);
                     if (padraoContrato == null || padraoContrato.IdHotel.GetValueOrDefault(0) == 0)
-                        throw new ArgumentException("Não foi possível localizar o padrão de contrato para vinculação da reserva RCI.");
+                        throw new ArgumentException("NÃ£o foi possÃ­vel localizar o padrÃ£o de contrato para vinculaÃ§Ã£o da reserva RCI.");
 
                     if (reservasFront.IdHotel.GetValueOrDefault(0) != padraoContrato.IdHotel.GetValueOrDefault(3))
-                        throw new ArgumentException($"A reserva informada não pertence ao hotel: {padraoContrato.IdHotel.GetValueOrDefault(3)}");
+                        throw new ArgumentException($"A reserva informada nÃ£o pertence ao hotel: {padraoContrato.IdHotel.GetValueOrDefault(3)}");
 
                     var paramTs = await GetParamHotel(padraoContrato.IdHotel.GetValueOrDefault(3));
                     if (paramTs == null)
-                        throw new ArgumentException("Parâmetros do hotel não foram encontrados para vinculação da reserva RCI.");
+                        throw new ArgumentException("ParÃ¢metros do hotel nÃ£o foram encontrados para vinculaÃ§Ã£o da reserva RCI.");
 
                     var cmUserId = _configuration.GetValue<int>("CMUserId", 1900693);
 
@@ -8450,7 +8450,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
                 var resultCommit = await _repository.CommitAsync();
                 if (!resultCommit.executed)
-                    throw resultCommit.exception ?? new Exception("Não foi possível concluir a operação de vinculação da reserva RCI.");    
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel concluir a operaÃ§Ã£o de vinculaÃ§Ã£o da reserva RCI.");    
 
                 return true;
             }
@@ -8464,18 +8464,18 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
         public async Task<IList<PeriodoDisponivelResultModel>?> DisponibilidadeParaTroca(SearchDisponibilidadeParaTrocaModel searchModel)
         {
-            // Busca disponibilidade similar ao método Disponibilidade, mas considerando a reserva atual
+            // Busca disponibilidade similar ao mÃ©todo Disponibilidade, mas considerando a reserva atual
             if (searchModel.ReservaId.GetValueOrDefault(0) <= 0)
-                throw new ArgumentException("ReservaId é obrigatório");
+                throw new ArgumentException("ReservaId Ã© obrigatÃ³rio");
 
-            // Busca a reserva atual para obter informações do contrato
+            // Busca a reserva atual para obter informaÃ§Ãµes do contrato
             var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkout, rf.* From ReservasFront rf Where rf.IdReservasFront = {searchModel.ReservaId.GetValueOrDefault()}")).FirstOrDefault();
             if (reserva == null)
-                throw new ArgumentException("Reserva não encontrada");
+                throw new ArgumentException("Reserva nÃ£o encontrada");
 
             var lancPontosTs = (await _repository.FindByHql<LancPontosTs>($"From LancPontosTs Where IdReservasFront = {reserva.IdReservasFront}")).FirstOrDefault();
             if (lancPontosTs == null)
-                throw new ArgumentException("Lançamento de pontos não encontrado");
+                throw new ArgumentException("LanÃ§amento de pontos nÃ£o encontrado");
 
             // Usa o SearchDisponibilidadeModel existente para buscar disponibilidade
             var disponibilidadeModel = new SearchDisponibilidadeModel
@@ -8490,19 +8490,19 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 NumReserva = reserva != null && reserva.NumReserva.GetValueOrDefault(0) > 0 ? reserva.NumReserva.ToString() : null
             };
 
-            // Buscar disponibilidade usando método existente
+            // Buscar disponibilidade usando mÃ©todo existente
             IList<PeriodoDisponivelResultModel> periodosDisponiveis = (await Disponibilidade(disponibilidadeModel)).AsList();
 
             if (periodosDisponiveis == null || !periodosDisponiveis.Any())
                 return periodosDisponiveis;
 
-            // 🔢 AJUSTE: Recalcular PontosNecessario usando quantidade de pessoas da reserva atual
-            // Se o frontend enviou as quantidades, usar essas. Senão, buscar da reserva atual
+            // ðŸ”¢ AJUSTE: Recalcular PontosNecessario usando quantidade de pessoas da reserva atual
+            // Se o frontend enviou as quantidades, usar essas. SenÃ£o, buscar da reserva atual
             int qtdAdultos = searchModel.QuantidadeAdultos ?? reserva.Adultos ?? 2;
             int qtdCriancas1 = searchModel.QuantidadeCriancas1 ?? reserva.Criancas1 ?? 0;
             int qtdCriancas2 = searchModel.QuantidadeCriancas2 ?? reserva.Criancas2 ?? 0;
 
-            _logger.LogInformation("📊 Recalculando pontos para troca de período - Adultos: {Adultos}, Crianças6-11: {Criancas1}, Crianças0-5: {Criancas2}",
+            _logger.LogInformation("ðŸ“Š Recalculando pontos para troca de perÃ­odo - Adultos: {Adultos}, CrianÃ§as6-11: {Criancas1}, CrianÃ§as0-5: {Criancas2}",
                 qtdAdultos, qtdCriancas1, qtdCriancas2);
 
             if (reserva != null)
@@ -8517,7 +8517,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
             }
 
-            // Recalcular pontos para cada período disponível usando a quantidade correta de pessoas
+            // Recalcular pontos para cada perÃ­odo disponÃ­vel usando a quantidade correta de pessoas
             foreach (var periodo in periodosDisponiveis)
             {
                 try
@@ -8544,19 +8544,19 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     // Atualizar com o valor correto
                     periodo.PontosNecessario = pontosCalculados;
                     
-                    // 🔥 AJUSTE: Atualizar PadraoTarifario para refletir o cálculo real aplicado
-                    // Mostra a quantidade de pessoas usada no cálculo para evitar confusão
+                    // ðŸ”¥ AJUSTE: Atualizar PadraoTarifario para refletir o cÃ¡lculo real aplicado
+                    // Mostra a quantidade de pessoas usada no cÃ¡lculo para evitar confusÃ£o
                     int totalPessoas = qtdAdultos + qtdCriancas1 + qtdCriancas2;
                     
-                    // Construir mensagem detalhada do padrão tarifário aplicado
+                    // Construir mensagem detalhada do padrÃ£o tarifÃ¡rio aplicado
                     string descricaoPessoas = "";
                     if (qtdAdultos > 0 && (qtdCriancas1 > 0 || qtdCriancas2 > 0))
                     {
                         descricaoPessoas = $"{qtdAdultos} adulto{(qtdAdultos > 1 ? "s" : "")}";
                         if (qtdCriancas1 > 0)
-                            descricaoPessoas += $", {qtdCriancas1} criança{(qtdCriancas1 > 1 ? "s" : "")} (5-12 anos)";
+                            descricaoPessoas += $", {qtdCriancas1} crianÃ§a{(qtdCriancas1 > 1 ? "s" : "")} (5-12 anos)";
                         if (qtdCriancas2 > 0)
-                            descricaoPessoas += $", {qtdCriancas2} criança{(qtdCriancas2 > 1 ? "s" : "")} (0-4 anos)";
+                            descricaoPessoas += $", {qtdCriancas2} crianÃ§a{(qtdCriancas2 > 1 ? "s" : "")} (0-4 anos)";
                     }
                     else if (qtdAdultos > 0)
                     {
@@ -8569,7 +8569,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     
                     periodo.PadraoTarifario = $"{descricaoPessoas}: {pontosCalculados:N0} pontos";
                     
-                    _logger.LogInformation("✅ Período {Checkin} - {Checkout}: {Pontos} pontos (para {Qtd} pessoas - {Descricao}) - Padrão atualizado",
+                    _logger.LogInformation("âœ… PerÃ­odo {Checkin} - {Checkout}: {Pontos} pontos (para {Qtd} pessoas - {Descricao}) - PadrÃ£o atualizado",
                         periodo.Checkin.Value.ToString("dd/MM/yyyy"),
                         periodo.Checkout.Value.ToString("dd/MM/yyyy"),
                         periodo.PontosNecessario,
@@ -8578,7 +8578,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "⚠️ Erro ao recalcular pontos para período {Checkin} - {Checkout}. Mantendo valor original.",
+                    _logger.LogWarning(ex, "âš ï¸ Erro ao recalcular pontos para perÃ­odo {Checkin} - {Checkout}. Mantendo valor original.",
                         periodo.Checkin?.ToString("dd/MM/yyyy"),
                         periodo.Checkout?.ToString("dd/MM/yyyy"));
                 }
@@ -8598,12 +8598,12 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 // 1. Buscar reserva atual
                 var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Chekout, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.ReservaId}")).FirstOrDefault();
                 if (reserva == null)
-                    throw new ArgumentException("Reserva não encontrada");
+                    throw new ArgumentException("Reserva nÃ£o encontrada");
 
-                // 2. Buscar lançamento de pontos atual
+                // 2. Buscar lanÃ§amento de pontos atual
                 var lancPontosTs = (await _repository.FindByHql<LancPontosTs>($"From LancPontosTs Where IdReservasFront = {reserva.IdReservasFront}")).FirstOrDefault();
                 if (lancPontosTs == null)
-                    throw new ArgumentException("Lançamento de pontos não encontrado");
+                    throw new ArgumentException("LanÃ§amento de pontos nÃ£o encontrado");
 
                 var pontosDebitadosAtual = lancPontosTs.NumeroPontos.GetValueOrDefault(0);
 
@@ -8615,11 +8615,11 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 });
 
                 if (disponibilidade == null)
-                    throw new ArgumentException("Não foi possível buscar saldo de pontos");
+                    throw new ArgumentException("NÃ£o foi possÃ­vel buscar saldo de pontos");
 
                 var saldoAtual = disponibilidade.SaldoPontos.GetValueOrDefault(0);
 
-                // 4. Calcular pontos necessários para o novo período
+                // 4. Calcular pontos necessÃ¡rios para o novo perÃ­odo
                 var disponibilidadeNovoPeriodo = await Disponibilidade(new SearchDisponibilidadeModel
                 {
                     IdVendaXContrato = model.IdVendaXContrato,
@@ -8631,13 +8631,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 });
 
                 if (disponibilidadeNovoPeriodo == null || !disponibilidadeNovoPeriodo.Any())
-                    throw new ArgumentException("Período não disponível para troca");
+                    throw new ArgumentException("PerÃ­odo nÃ£o disponÃ­vel para troca");
 
                 var periodoDisponivel = disponibilidadeNovoPeriodo.FirstOrDefault();
                 if (periodoDisponivel == null)
-                    throw new ArgumentException("Período não encontrado na disponibilidade");
+                    throw new ArgumentException("PerÃ­odo nÃ£o encontrado na disponibilidade");
 
-                // Obter quantidade de hóspedes da reserva original
+                // Obter quantidade de hÃ³spedes da reserva original
                 int totalHospedes = reserva.Adultos.GetValueOrDefault(0) + 
                                    reserva.Criancas1.GetValueOrDefault(0) + 
                                    reserva.Criancas2.GetValueOrDefault(0);
@@ -8645,8 +8645,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 var reservaTimeSharingHistorico = (await _repositorySystem.FindByHql<ReservaTimeSharing>($"From ReservaTimeSharing Where IdReservasFront = {reserva.IdReservasFront}")).FirstOrDefault();
                 var tipoUsoAtual = reservaTimeSharingHistorico?.TipoUtilizacao ?? "UP";
 
-                // Criar modelo temporário simples para cálculo (sem detalhes de hóspedes)
-                // Nota: Para troca de período, mantém-se a mesma quantidade/composição de hóspedes
+                // Criar modelo temporÃ¡rio simples para cÃ¡lculo (sem detalhes de hÃ³spedes)
+                // Nota: Para troca de perÃ­odo, mantÃ©m-se a mesma quantidade/composiÃ§Ã£o de hÃ³spedes
                 var inclusaoReservaModel = new InclusaoReservaInputModel
                 {
                     Reserva = reserva.NumReserva,
@@ -8666,34 +8666,34 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 };
 
                 if (inclusaoReservaModel.IdHotel.GetValueOrDefault(0) <= 0)
-                    throw new ArgumentException("Não foi possível salvar a alteração da reserva no novo período");
+                    throw new ArgumentException("NÃ£o foi possÃ­vel salvar a alteraÃ§Ã£o da reserva no novo perÃ­odo");
 
-                // Usar método centralizado para calcular pontos (ÚNICO LUGAR onde pontos são calculados)
+                // Usar mÃ©todo centralizado para calcular pontos (ÃšNICO LUGAR onde pontos sÃ£o calculados)
                 var pontosNecessariosNovo = CalcularPontosNecessarios(inclusaoReservaModel, periodoDisponivel, inclusaoReservaModel.IdHotel.GetValueOrDefault(0), totalHospedes);
 
                 // 5. Calcular saldo atualizado (devolver pontos da reserva atual)
                 var saldoAtualizado = saldoAtual + pontosDebitadosAtual;
 
-                // 6. Verificar se saldo é suficiente
+                // 6. Verificar se saldo Ã© suficiente
                 if (saldoAtualizado < pontosNecessariosNovo)
-                    throw new ArgumentException($"Saldo de pontos insuficiente. Pontos necessários: {pontosNecessariosNovo}. Saldo disponível: {saldoAtualizado}.");
+                    throw new ArgumentException($"Saldo de pontos insuficiente. Pontos necessÃ¡rios: {pontosNecessariosNovo}. Saldo disponÃ­vel: {saldoAtualizado}.");
 
-                // Buscar hóspedes atuais da reserva para manter
+                // Buscar hÃ³spedes atuais da reserva para manter
                 var hospedesAtuais = await GetHospedesReserva(Convert.ToInt64(reserva.IdReservasFront.GetValueOrDefault()));
                 inclusaoReservaModel.Hospedes = hospedesAtuais;
                 
-                // 8. Ajustar débito de pontos
-                // Primeiro, estornar o lançamento de pontos anterior
+                // 8. Ajustar dÃ©bito de pontos
+                // Primeiro, estornar o lanÃ§amento de pontos anterior
                 var paramTs = await GetParamHotel(inclusaoReservaModel.IdHotel.GetValueOrDefault());
                 var cmUserId = _configuration.GetValue<int>("CMUserId", 1900693);
 
                 AtendClienteTs? atendClienteTs = await GetAtendimentoCliente(model.IdVendaXContrato);
                 if (atendClienteTs == null || atendClienteTs.IdVendaXContrato.GetValueOrDefault(0) == 0)
-                    throw new ArgumentException($"Não foi localizado os dados da venda");
+                    throw new ArgumentException($"NÃ£o foi localizado os dados da venda");
 
                 var reservaAlterada = await AlterarReservaExecute(inclusaoReservaModel, reserva,atendClienteTs);
                 if (reservaAlterada == null)
-                    throw new ArgumentException("Falha ao alterar período na API do VHF");
+                    throw new ArgumentException("Falha ao alterar perÃ­odo na API do VHF");
 
 
                 var diferencaPontos = pontosNecessariosNovo - pontosDebitadosAtual;
@@ -8701,7 +8701,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 await _repository.CommitAsync();
                 await _repositorySystem.CommitAsync();
 
-                // Buscar saldo atualizado após ajuste
+                // Buscar saldo atualizado apÃ³s ajuste
                 var saldoAtualizadoFinal = await GetSaldo(new SearchDisponibilidadeModel()
                 {
                     IdVendaXContrato = model.IdVendaXContrato,
@@ -8738,7 +8738,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 // 1. Buscar reserva atual
                 var reserva = (await _repository.FindBySql<ReservaTsModel>($"Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.* From ReservasFront rf Where rf.IdReservasFront = {model.ReservaId}")).FirstOrDefault();
                 if (reserva == null)
-                    throw new ArgumentException("Reserva não encontrada");
+                    throw new ArgumentException("Reserva nÃ£o encontrada");
 
                 // 2. Alterar tipo de uso na reserva
                 var inclusaoReservaModel = new InclusaoReservaInputModel
@@ -8759,7 +8759,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                     TipoUso = model.NovoTipoUso
                 };
 
-                // Buscar hóspedes atuais
+                // Buscar hÃ³spedes atuais
                 var hospedesAtuais = await GetHospedesReserva(Convert.ToInt64(reserva.IdReservasFront));
                 inclusaoReservaModel.Hospedes = hospedesAtuais;
 
@@ -8787,7 +8787,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
 
         private async Task<List<HospedeInputModel>> GetHospedesReserva(long idReservasFront)
         {
-            // Usar a mesma lógica do método GetHospedes existente
+            // Usar a mesma lÃ³gica do mÃ©todo GetHospedes existente
             var reservaModel = new ReservaTimeSharingCMModel
             {
                 IdReservasFront = (int)idReservasFront
@@ -8806,13 +8806,13 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 {
                     var reservasFront = (await _repository.FindBySql<ReservaTsModel>("Select COALESCE(rf.TipoDeUso,'UP') AS TipoDeUso, rf.DataChegPrevista as Checkin, rf.DataPartPrevista as Checkoutm, rf.* From ReservasFront rf Where rf.NumReserva = :numReserva ", new Parameter("numReserva", request.NumReserva.GetValueOrDefault()))).FirstOrDefault();
                     if (reservasFront == null)
-                        throw new ArgumentException($"Reserva {request.NumReserva} não encontrada");
+                        throw new ArgumentException($"Reserva {request.NumReserva} nÃ£o encontrada");
 
                     request.HotelId = reservasFront.IdHotel.GetValueOrDefault();
                 }
 
 
-                // Buscar disponibilidade para obter informações complementares
+                // Buscar disponibilidade para obter informaÃ§Ãµes complementares
                 var disponibilidade = await Disponibilidade(new SearchDisponibilidadeModel
                 {
                     DataInicial = request.DataInicial,
@@ -8826,10 +8826,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Cm
                 var periodoDisponivel = disponibilidade?.FirstOrDefault();
 
                 if (periodoDisponivel == null)
-                    throw new ArgumentException("Não foi possível encontrar disponibilidade para o período informado");
+                    throw new ArgumentException("NÃ£o foi possÃ­vel encontrar disponibilidade para o perÃ­odo informado");
 
 
-                // Chamar serviço para calcular pontos
+                // Chamar serviÃ§o para calcular pontos
                 var pontosNecessarios = await CalcularPontosNecessariosSimplificado(
                     request.DataInicial,
                     request.DataFinal,

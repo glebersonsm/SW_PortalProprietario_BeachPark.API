@@ -1,4 +1,4 @@
-using Dapper;
+ï»¿using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -46,8 +46,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return BadRequest(new ResultModel<GrupoEmpresaModel>(new GrupoEmpresaModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -57,8 +57,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<GrupoEmpresaModel>(new GrupoEmpresaModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -87,8 +87,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return BadRequest(new ResultModel<GrupoEmpresaModel>(new GrupoEmpresaModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -98,8 +98,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<GrupoEmpresaModel>(new GrupoEmpresaModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o Grupo de Empresa: ({model.Pessoa.RazaoSocial})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -140,8 +140,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 {
                     Data = new List<GrupoEmpresaModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -152,8 +152,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 {
                     Data = new List<GrupoEmpresaModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });

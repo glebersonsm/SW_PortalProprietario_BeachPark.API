@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,10 +22,10 @@ namespace SW_PortalProprietario.Domain.Entities.Core.Geral
                 mensagens.Add("O nome do template deve ser informado.");
 
             if (Active && string.IsNullOrWhiteSpace(ContentHtml))
-                mensagens.Add("O conteúdo HTML do template deve ser informado.");
+                mensagens.Add("O conteÃºdo HTML do template deve ser informado.");
 
             if (Version <= 0)
-                mensagens.Add("A versão deve ser maior que zero.");
+                mensagens.Add("A versÃ£o deve ser maior que zero.");
 
             if (mensagens.Any())
                 await Task.FromException(new ArgumentException(string.Join(Environment.NewLine, mensagens)));

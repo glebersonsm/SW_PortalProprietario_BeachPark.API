@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Entities.Core.Sistema;
+﻿using SW_PortalProprietario.Domain.Entities.Core.Sistema;
 
 namespace SW_PortalProprietario.Application.Models.AuthModels
 {
@@ -9,9 +9,9 @@ namespace SW_PortalProprietario.Application.Models.AuthModels
         public string? CompanyId { get; set; }
         public string? Login { get; set; }
         public string? Token { get; set; }
-        public int? Idioma { get; set; } //0 = Português, 1 = Inglês, 2 = Espanhol
-        public int? PodeInformarConta { get; set; } //0 = Não, 1 = Sim
-        public int? PodeInformarPix { get; set; } //0 = Não, 1 = Sim
+        public int? Idioma { get; set; } //0 = PortuguÃªs, 1 = InglÃªs, 2 = Espanhol
+        public int? PodeInformarConta { get; set; } //0 = NÃ£o, 1 = Sim
+        public int? PodeInformarPix { get; set; } //0 = NÃ£o, 1 = Sim
         public DateTime? FimValidade { get; set; }
         public bool IsAdmin { get; internal set; }
         public bool IsGestorReservasAgendamentos { get; internal set; }
@@ -23,9 +23,9 @@ namespace SW_PortalProprietario.Application.Models.AuthModels
         public string? EmpreendimnentoNome { get; set; }
         public string? PadraoDeCor { get; set; } = "Default";
         public List<ContratoResultModel>? Contratos { get; set; } = new List<ContratoResultModel>();
-        /// <summary> Indica que o login exige validação 2FA; o token JWT só será retornado após ValidateTwoFactor. </summary>
+        /// <summary> Indica que o login exige validaÃ§Ã£o 2FA; o token JWT sÃ³ serÃ¡ retornado apÃ³s ValidateTwoFactor. </summary>
         public bool RequiresTwoFactor { get; set; }
-        /// <summary> Id temporário para a etapa de validação do código 2FA. </summary>
+        /// <summary> Id temporÃ¡rio para a etapa de validaÃ§Ã£o do cÃ³digo 2FA. </summary>
         public Guid? TwoFactorId { get; set; }
 
         public static explicit operator TokenResultModel(Usuario usuario)

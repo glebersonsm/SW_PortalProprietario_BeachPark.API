@@ -1,6 +1,6 @@
--- Script para adicionar as colunas OcupacaoMaxRetDispTS e OcupacaoMaxRetDispMP na tabela ConfigReservaVhf
--- Execute este script no banco de dados antes de executar a aplicação
--- Percentual máximo de ocupação para retorno de disponibilidade (0-100). Se atingido, não retorna disponibilidade.
+﻿-- Script para adicionar as colunas OcupacaoMaxRetDispTS e OcupacaoMaxRetDispMP na tabela ConfigReservaVhf
+-- Execute este script no banco de dados antes de executar a aplicaÃ§Ã£o
+-- Percentual mÃ¡ximo de ocupaÃ§Ã£o para retorno de disponibilidade (0-100). Se atingido, nÃ£o retorna disponibilidade.
 
 -- Adicionar coluna OcupacaoMaxRetDispTS (Timesharing)
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('portalohana.ConfigReservaVhf') AND name = 'OcupacaoMaxRetDispTS')
@@ -10,7 +10,7 @@ BEGIN
 END
 ELSE
 BEGIN
-    PRINT 'Coluna OcupacaoMaxRetDispTS já existe na tabela portalohana.ConfigReservaVhf';
+    PRINT 'Coluna OcupacaoMaxRetDispTS jÃ¡ existe na tabela portalohana.ConfigReservaVhf';
 END
 GO
 
@@ -22,6 +22,6 @@ BEGIN
 END
 ELSE
 BEGIN
-    PRINT 'Coluna OcupacaoMaxRetDispMP já existe na tabela portalohana.ConfigReservaVhf';
+    PRINT 'Coluna OcupacaoMaxRetDispMP jÃ¡ existe na tabela portalohana.ConfigReservaVhf';
 END
 GO

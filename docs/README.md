@@ -1,39 +1,39 @@
-# ?? Documentação de Deploy - SW Portal Proprietário
+ï»¿# ?? DocumentaÃ§Ã£o de Deploy - SW Portal ProprietÃ¡rio
 
-## ?? Índice de Documentação
+## ?? Ãndice de DocumentaÃ§Ã£o
 
 ### ?? Guias Completos
 
 1. **[DEPLOY_LINUX.md](./DEPLOY_LINUX.md)** - Guia Completo de Deploy em Linux
-   - Instalação de todos os componentes
-   - Configuração detalhada de cada serviço
+   - InstalaÃ§Ã£o de todos os componentes
+   - ConfiguraÃ§Ã£o detalhada de cada serviÃ§o
    - Troubleshooting completo
-   - Scripts de manutenção
+   - Scripts de manutenÃ§Ã£o
 
-2. **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - Guia Rápido de Deploy
-   - Início rápido em 3 passos
+2. **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - Guia RÃ¡pido de Deploy
+   - InÃ­cio rÃ¡pido em 3 passos
    - Checklist de deploy
-   - Comandos úteis
-   - Troubleshooting rápido
+   - Comandos Ãºteis
+   - Troubleshooting rÃ¡pido
 
-### ?? Scripts Disponíveis
+### ?? Scripts DisponÃ­veis
 
-Consulte [../scripts/README.md](../scripts/README.md) para documentação detalhada dos scripts.
+Consulte [../scripts/README.md](../scripts/README.md) para documentaÃ§Ã£o detalhada dos scripts.
 
 #### Scripts de Deploy
-- `build-and-publish.sh` - Build e publicação da aplicação
-- `build-and-publish.ps1` - Versão Windows (PowerShell)
+- `build-and-publish.sh` - Build e publicaÃ§Ã£o da aplicaÃ§Ã£o
+- `build-and-publish.ps1` - VersÃ£o Windows (PowerShell)
 - `deploy.sh` - Deploy automatizado para servidor Linux
-- `install-server.sh` - Instalação automatizada de componentes no servidor
+- `install-server.sh` - InstalaÃ§Ã£o automatizada de componentes no servidor
 
-#### Scripts de Manutenção
-- `monitor.sh` - Monitoramento de serviços e recursos
-- `backup.sh` - Backup automático completo
-- `restore.sh` - Restauração de backup
+#### Scripts de ManutenÃ§Ã£o
+- `monitor.sh` - Monitoramento de serviÃ§os e recursos
+- `backup.sh` - Backup automÃ¡tico completo
+- `restore.sh` - RestauraÃ§Ã£o de backup
 
 ---
 
-## ?? Início Rápido
+## ?? InÃ­cio RÃ¡pido
 
 ### Para Deploy pela Primeira Vez
 
@@ -43,7 +43,7 @@ Consulte [../scripts/README.md](../scripts/README.md) para documentação detalhad
    curl -fsSL https://raw.githubusercontent.com/glebersonsm/SW_PortalProprietario_BeachPark.API/master/scripts/install-server.sh | bash
    ```
 
-2. **Configurar ambiente de produção:**
+2. **Configurar ambiente de produÃ§Ã£o:**
    ```bash
    # No seu computador local
    cp .env .env.production
@@ -59,7 +59,7 @@ Consulte [../scripts/README.md](../scripts/README.md) para documentação detalhad
 ### Para Updates/Redeploys
 
 ```bash
-# Fazer alterações, testar, commit
+# Fazer alteraÃ§Ãµes, testar, commit
 git push origin master
 
 # Deploy
@@ -75,7 +75,7 @@ git push origin master
 
 ```
 ???????????????????????????????????????????????????????????????
-?                      Internet / Usuários                      ?
+?                      Internet / UsuÃ¡rios                      ?
 ???????????????????????????????????????????????????????????????
                          ?
                     HTTPS (443)
@@ -107,38 +107,38 @@ git push origin master
 
 ---
 
-## ??? Estrutura de Diretórios
+## ??? Estrutura de DiretÃ³rios
 
 ```
-/var/www/swportal/                    # Aplicação principal
+/var/www/swportal/                    # AplicaÃ§Ã£o principal
 ??? SW_PortalCliente_BeachPark.API.dll
-??? .env                              # Configurações de produção
+??? .env                              # ConfiguraÃ§Ãµes de produÃ§Ã£o
 ??? appsettings.json
 ??? appsettings.Production.json
-??? wwwroot/                          # Arquivos estáticos
+??? wwwroot/                          # Arquivos estÃ¡ticos
 ?   ??? images/
 ?   ?   ??? grupos/
 ?   ??? documents/                    # Documentos gerais
 ?   ??? pdfs/
-?   ?   ??? comunicacoes/             # PDFs de comunicações
+?   ?   ??? comunicacoes/             # PDFs de comunicaÃ§Ãµes
 ?   ?   ??? boletos/                  # PDFs de boletos
 ?   ??? certidoes/
-?       ??? modelos/                  # Templates de certidões
-?       ??? pdf/                      # Certidões geradas
+?       ??? modelos/                  # Templates de certidÃµes
+?       ??? pdf/                      # CertidÃµes geradas
 ?       ??? contratos/                # Contratos SCP
-??? scripts/                          # Scripts de manutenção
+??? scripts/                          # Scripts de manutenÃ§Ã£o
 
 /backup/swportal/                     # Backups
 ??? db_YYYYMMDD_HHMMSS.sql.gz        # Banco de dados
 ??? files_YYYYMMDD_HHMMSS.tar.gz     # Arquivos
-??? config_YYYYMMDD_HHMMSS.tar.gz    # Configurações
+??? config_YYYYMMDD_HHMMSS.tar.gz    # ConfiguraÃ§Ãµes
 ??? backup.log                        # Log de backups
 
 /etc/nginx/sites-available/
-??? swportal-api                      # Configuração Nginx
+??? swportal-api                      # ConfiguraÃ§Ã£o Nginx
 
 /etc/systemd/system/
-??? swportal-api.service              # Serviço systemd
+??? swportal-api.service              # ServiÃ§o systemd
 
 /var/log/nginx/
 ??? swportal-api-access.log           # Logs de acesso
@@ -147,30 +147,30 @@ git push origin master
 
 ---
 
-## ?? Segurança
+## ?? SeguranÃ§a
 
-### Variáveis Sensíveis
+### VariÃ¡veis SensÃ­veis
 
-As seguintes variáveis **NÃO DEVEM** ser commitadas no Git:
+As seguintes variÃ¡veis **NÃƒO DEVEM** ser commitadas no Git:
 - Senhas de banco de dados
 - Chaves JWT
 - Senhas de Redis
 - Credenciais de SMTP
 - Chaves de API de terceiros
 
-Use o arquivo `.env.production` (que está no `.gitignore`).
+Use o arquivo `.env.production` (que estÃ¡ no `.gitignore`).
 
-### Checklist de Segurança
+### Checklist de SeguranÃ§a
 
 - [ ] Firewall configurado (apenas portas 22, 80, 443 abertas)
-- [ ] PostgreSQL aceitando apenas conexões locais
+- [ ] PostgreSQL aceitando apenas conexÃµes locais
 - [ ] Redis com senha configurada
-- [ ] RabbitMQ com usuário não-padrão
-- [ ] JWT com chave forte (mínimo 32 caracteres)
+- [ ] RabbitMQ com usuÃ¡rio nÃ£o-padrÃ£o
+- [ ] JWT com chave forte (mÃ­nimo 32 caracteres)
 - [ ] SSL/TLS configurado (Let's Encrypt)
-- [ ] Usuário não-root para rodar a aplicação (`www-data`)
+- [ ] UsuÃ¡rio nÃ£o-root para rodar a aplicaÃ§Ã£o (`www-data`)
 - [ ] Logs sendo rotacionados
-- [ ] Backups automáticos configurados
+- [ ] Backups automÃ¡ticos configurados
 - [ ] Fail2ban configurado (opcional mas recomendado)
 
 ---
@@ -186,17 +186,17 @@ graph LR
     C --> D[Testes]
     D --> E{Passou?}
     E -->|Sim| F[Deploy]
-    E -->|Não| A
+    E -->|NÃ£o| A
     F --> G[Monitorar]
     G --> H{OK?}
-    H -->|Sim| I[Concluído]
-    H -->|Não| J[Rollback]
+    H -->|Sim| I[ConcluÃ­do]
+    H -->|NÃ£o| J[Rollback]
     J --> A
 ```
 
 ### GitHub Actions (Opcional)
 
-Para automatizar ainda mais, você pode criar um workflow do GitHub Actions:
+Para automatizar ainda mais, vocÃª pode criar um workflow do GitHub Actions:
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -247,20 +247,20 @@ sudo tail -f /var/log/redis/redis-server.log
 sudo rabbitmqctl list_queues
 ```
 
-### Métricas Importantes
+### MÃ©tricas Importantes
 
 - Uso de CPU
-- Uso de memória
-- Espaço em disco
-- Latência de resposta da API
+- Uso de memÃ³ria
+- EspaÃ§o em disco
+- LatÃªncia de resposta da API
 - Taxa de erros
 - Tamanho das filas do RabbitMQ
-- Conexões ativas do banco de dados
+- ConexÃµes ativas do banco de dados
 
 ### Ferramentas Recomendadas (Opcional)
 
-- **Prometheus + Grafana** - Métricas e dashboards
-- **ELK Stack** - Análise de logs
+- **Prometheus + Grafana** - MÃ©tricas e dashboards
+- **ELK Stack** - AnÃ¡lise de logs
 - **Sentry** - Tracking de erros
 - **Uptime Robot** - Monitoramento de disponibilidade
 
@@ -268,10 +268,10 @@ sudo rabbitmqctl list_queues
 
 ## ?? Suporte
 
-### Documentação
+### DocumentaÃ§Ã£o
 
 - [Guia Completo de Deploy](./DEPLOY_LINUX.md)
-- [Guia Rápido](./QUICK_DEPLOY.md)
+- [Guia RÃ¡pido](./QUICK_DEPLOY.md)
 - [Scripts](../scripts/README.md)
 
 ### Contato
@@ -290,17 +290,17 @@ https://github.com/glebersonsm/SW_PortalProprietario_BeachPark.API/issues
 ## ?? Changelog
 
 ### v1.0.0 (2024-01)
-- Documentação completa de deploy
+- DocumentaÃ§Ã£o completa de deploy
 - Scripts automatizados
 - Guias de troubleshooting
 - Sistema de backup/restore
 
 ---
 
-## ?? Licença
+## ?? LicenÃ§a
 
-© 2024 SW Soluções Integradas Ltda. Todos os direitos reservados.
+Â© 2024 SW SoluÃ§Ãµes Integradas Ltda. Todos os direitos reservados.
 
 ---
 
-**Última atualização:** Janeiro 2024
+**Ãšltima atualizaÃ§Ã£o:** Janeiro 2024

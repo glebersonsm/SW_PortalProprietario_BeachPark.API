@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.LogsBackGround;
 using SW_PortalProprietario.Domain.Entities.Core;
 using SW_PortalProprietario.Domain.Enumns;
@@ -22,7 +22,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             "UsuarioAlteracao", "ObjectGuid"
         };
 
-        // Opções de serialização JSON sem escape de caracteres Unicode
+        // OpÃ§Ãµes de serializaÃ§Ã£o JSON sem escape de caracteres Unicode
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -47,14 +47,14 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 var context = GetAuditContext();
 
                 // Para entidades com relacionamentos, garantir que estejam carregadas
-                // Isso é especialmente importante para GrupoImagemHomeTags
+                // Isso Ã© especialmente importante para GrupoImagemHomeTags
                 EnsureRelatedEntitiesLoaded(entity);
 
-                // Gerar mensagem amigável para criação
+                // Gerar mensagem amigÃ¡vel para criaÃ§Ã£o
                 var friendlyMessage = GenerateFriendlyMessageForOperation(entity, EnumAuditAction.Create, null);
 
-                // 🔥 MELHORIA: Incluir dados da entidade criada no ChangesJson
-                // Isso é especialmente importante para entidades relacionadas como PessoaEndereco, PessoaTelefone
+                // ðŸ”¥ MELHORIA: Incluir dados da entidade criada no ChangesJson
+                // Isso Ã© especialmente importante para entidades relacionadas como PessoaEndereco, PessoaTelefone
                 var changes = new Dictionary<string, Dictionary<string, object?>>();
 
                 if (!string.IsNullOrEmpty(friendlyMessage))
@@ -76,7 +76,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     ? JsonSerializer.Serialize(changes, _jsonOptions)
                     : "{}";
 
-                // 🔥 FIX: Obter tipo real removendo sufixo "Proxy"
+                // ðŸ”¥ FIX: Obter tipo real removendo sufixo "Proxy"
                 var entityType = GetRealEntityType(entity.GetType());
 
                 var message = new AuditLogMessageEvent
@@ -97,8 +97,8 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             }
             catch (Exception)
             {
-                // Não lançar exceção para não quebrar a operação principal
-                // Log pode ser feito em outro lugar se necessário
+                // NÃ£o lanÃ§ar exceÃ§Ã£o para nÃ£o quebrar a operaÃ§Ã£o principal
+                // Log pode ser feito em outro lugar se necessÃ¡rio
             }
         }
 
@@ -119,7 +119,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                         var relatedEntity = relationshipProperty.GetValue(entity);
                         if (relatedEntity != null)
                         {
-                            // Acessar propriedades comuns de nome para forçar o carregamento (NHibernate lazy loading)
+                            // Acessar propriedades comuns de nome para forÃ§ar o carregamento (NHibernate lazy loading)
                             var nameProperties = new[] { "Nome", "Name", "Descricao", "Description", "Titulo", "Title" };
                             foreach (var nameProp in nameProperties)
                             {
@@ -146,7 +146,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
             try
             {
-                // Propriedades que não devem ser consideradas como relacionamentos
+                // Propriedades que nÃ£o devem ser consideradas como relacionamentos
                 var excludedPropertyNames = new HashSet<string>
                 {
                     "Id", "UsuarioCriacao", "UsuarioAlteracao", "DataHoraCriacao",
@@ -157,11 +157,11 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
                 foreach (var prop in properties)
                 {
-                    // Ignorar propriedades excluídas
+                    // Ignorar propriedades excluÃ­das
                     if (excludedPropertyNames.Contains(prop.Name))
                         continue;
 
-                    // Verificar se a propriedade é do tipo EntityBaseCore (relacionamento ManyToOne)
+                    // Verificar se a propriedade Ã© do tipo EntityBaseCore (relacionamento ManyToOne)
                     if (typeof(EntityBaseCore).IsAssignableFrom(prop.PropertyType) &&
                         prop.PropertyType != typeof(EntityBaseCore))
                     {
@@ -184,7 +184,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
         {
             try
             {
-                // 🔥 FIX: Obter tipo real removendo sufixo "Proxy"
+                // ðŸ”¥ FIX: Obter tipo real removendo sufixo "Proxy"
                 var entityType = GetRealEntityType(entity.GetType());
                 var entityTypeName = entityType.Name;
                 var entityDisplayName = GetEntityDisplayName(entity);
@@ -192,13 +192,13 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 // Detectar entidade pai (relacionamento)
                 var parentInfo = DetectParentEntity(entity);
 
-                // Casos específicos para entidades de relacionamento com tags (detecção genérica)
+                // Casos especÃ­ficos para entidades de relacionamento com tags (detecÃ§Ã£o genÃ©rica)
                 if (entityTypeName.EndsWith("Tags"))
                 {
                     return GenerateTagOperationMessage(entity, action, changes, parentInfo);
                 }
 
-                // Mensagens genéricas baseadas no tipo de ação
+                // Mensagens genÃ©ricas baseadas no tipo de aÃ§Ã£o
                 switch (action)
                 {
                     case EnumAuditAction.Create:
@@ -250,7 +250,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             }
             catch
             {
-                // Ignorar erros ao gerar mensagem amigável
+                // Ignorar erros ao gerar mensagem amigÃ¡vel
             }
 
             return null;
@@ -289,7 +289,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                              typeof(EntityBaseCore).IsAssignableFrom(prop.PropertyType) &&
                              prop.PropertyType != typeof(EntityBaseCore))
                     {
-                        // Preferir a primeira propriedade que não seja tag/intermediária
+                        // Preferir a primeira propriedade que nÃ£o seja tag/intermediÃ¡ria
                         if (parentProperty == null)
                             parentProperty = prop;
                     }
@@ -305,11 +305,11 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 var parent = parentProperty.GetValue(entity);
                 var dataHoraRemocao = dataHoraRemocaoProperty?.GetValue(entity) as DateTime?;
 
-                // 🔥 MELHORIA: Garantir que o nome da tag seja carregado antes de usar
-                // Forçar carregamento da tag para garantir que o nome esteja disponível
+                // ðŸ”¥ MELHORIA: Garantir que o nome da tag seja carregado antes de usar
+                // ForÃ§ar carregamento da tag para garantir que o nome esteja disponÃ­vel
                 if (tag is EntityBaseCore tagEntity)
                 {
-                    // Forçar acesso ao nome da tag para garantir lazy loading
+                    // ForÃ§ar acesso ao nome da tag para garantir lazy loading
                     var tagNomeProperty = tagEntity.GetType().GetProperty("Nome");
                     if (tagNomeProperty != null)
                     {
@@ -322,14 +322,14 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 var tagNome = GetEntityName(tag, "Nome");
                 var parentTypeName = parentProperty.PropertyType.Name;
 
-                // 🔥 MELHORIA: Para Usuario, usar Login ou Pessoa.Nome como nome
+                // ðŸ”¥ MELHORIA: Para Usuario, usar Login ou Pessoa.Nome como nome
                 string? parentNome = null;
                 if (parentTypeName == "Usuario" && parent is EntityBaseCore usuarioEntity)
                 {
                     // Tentar Login primeiro
                     parentNome = GetEntityName(parent, "Login");
 
-                    // Se não tiver Login, tentar Pessoa.Nome
+                    // Se nÃ£o tiver Login, tentar Pessoa.Nome
                     if (string.IsNullOrEmpty(parentNome))
                     {
                         var pessoaProp = parent.GetType().GetProperty("Pessoa");
@@ -345,11 +345,11 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     parentNome = GetEntityName(parent, "Nome");
                 }
 
-                // 🔥 MELHORIA: Adicionar informações da tag nos changes para facilitar consulta e exibição
+                // ðŸ”¥ MELHORIA: Adicionar informaÃ§Ãµes da tag nos changes para facilitar consulta e exibiÃ§Ã£o
                 if (changes != null && tag is EntityBaseCore tagEntityForChanges)
                 {
-                    // Adicionar informações da tag nos changes se ainda não existir
-                    // Isso garante que o nome da tag esteja sempre disponível nos logs
+                    // Adicionar informaÃ§Ãµes da tag nos changes se ainda nÃ£o existir
+                    // Isso garante que o nome da tag esteja sempre disponÃ­vel nos logs
                     if (!changes.ContainsKey("Tags"))
                     {
                         changes["Tags"] = new Dictionary<string, object?>
@@ -361,7 +361,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     }
                     else
                     {
-                        // Atualizar informações se já existir
+                        // Atualizar informaÃ§Ãµes se jÃ¡ existir
                         if (!changes["Tags"].ContainsKey("tagNome") || string.IsNullOrEmpty(changes["Tags"]["tagNome"]?.ToString()))
                         {
                             changes["Tags"]["tagNome"] = tagNome ?? $"Tag (ID: {tagEntityForChanges.Id})";
@@ -371,16 +371,16 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
                 if (action == EnumAuditAction.Create && dataHoraRemocao == null)
                 {
-                    // 🔥 MELHORIA: Mensagens mais específicas baseadas no tipo de parent
+                    // ðŸ”¥ MELHORIA: Mensagens mais especÃ­ficas baseadas no tipo de parent
                     if (!string.IsNullOrEmpty(tagNome))
                     {
                         if (!string.IsNullOrEmpty(parentNome))
                         {
-                            // Usar nome do parent quando disponível
-                            // Para Usuario, usar "ao usuário", para outros usar "no item"
+                            // Usar nome do parent quando disponÃ­vel
+                            // Para Usuario, usar "ao usuÃ¡rio", para outros usar "no item"
                             if (parentTypeName == "Usuario")
                             {
-                                return $"Adicionada a tag \"{tagNome}\" ao usuário \"{parentNome}\"";
+                                return $"Adicionada a tag \"{tagNome}\" ao usuÃ¡rio \"{parentNome}\"";
                             }
                             else
                             {
@@ -389,10 +389,10 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                         }
                         else if (parent != null && parent is EntityBaseCore parentEntity)
                         {
-                            // Usar ID do parent quando nome não estiver disponível
+                            // Usar ID do parent quando nome nÃ£o estiver disponÃ­vel
                             if (parentTypeName == "Usuario")
                             {
-                                return $"Adicionada a tag \"{tagNome}\" ao usuário (ID: {parentEntity.Id})";
+                                return $"Adicionada a tag \"{tagNome}\" ao usuÃ¡rio (ID: {parentEntity.Id})";
                             }
                             else
                             {
@@ -407,12 +407,12 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     }
                     else if (tag is EntityBaseCore tagEntityFallback)
                     {
-                        // Fallback: usar ID se nome não estiver disponível
+                        // Fallback: usar ID se nome nÃ£o estiver disponÃ­vel
                         if (!string.IsNullOrEmpty(parentNome))
                         {
                             if (parentTypeName == "Usuario")
                             {
-                                return $"Adicionada a tag (ID: {tagEntityFallback.Id}) ao usuário \"{parentNome}\"";
+                                return $"Adicionada a tag (ID: {tagEntityFallback.Id}) ao usuÃ¡rio \"{parentNome}\"";
                             }
                             else
                             {
@@ -440,7 +440,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                         }
                         else if (tag is EntityBaseCore tagEntityFallback)
                         {
-                            // Fallback: usar ID se nome não estiver disponível
+                            // Fallback: usar ID se nome nÃ£o estiver disponÃ­vel
                             return $"Removida a tag (ID: {tagEntityFallback.Id})";
                         }
                     }
@@ -459,21 +459,21 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             if (changes == null || changes.Count == 0)
                 return null;
 
-            // 🔥 FIX: Obter tipo real removendo sufixo "Proxy"
+            // ðŸ”¥ FIX: Obter tipo real removendo sufixo "Proxy"
             var entityType = GetRealEntityType(entity.GetType());
             var entityTypeName = entityType.Name;
             var changedFields = new List<string>();
 
-            // Lista de propriedades que devem gerar mensagens específicas
+            // Lista de propriedades que devem gerar mensagens especÃ­ficas
             var importantFields = new Dictionary<string, string>
             {
                 { "Nome", "Nome" },
                 { "Name", "Nome" },
-                { "Descricao", "Descrição" },
+                { "Descricao", "DescriÃ§Ã£o" },
                 { "IsActive", "Status" },
                 { "Ativo", "Status" },
-                { "DataHoraRemocao", "Remoção" },
-                { "UsuarioRemocao", "Usuário de Remoção" }
+                { "DataHoraRemocao", "RemoÃ§Ã£o" },
+                { "UsuarioRemocao", "UsuÃ¡rio de RemoÃ§Ã£o" }
             };
 
             foreach (var change in changes)
@@ -485,12 +485,12 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 var oldValue = change.Value.ContainsKey("oldValue") ? change.Value["oldValue"]?.ToString() : null;
                 var newValue = change.Value.ContainsKey("newValue") ? change.Value["newValue"]?.ToString() : null;
 
-                // 🔥 FIX: Ignorar campos onde oldValue e newValue são iguais (após normalização)
-                // Isso evita registrar campos que não mudaram realmente
+                // ðŸ”¥ FIX: Ignorar campos onde oldValue e newValue sÃ£o iguais (apÃ³s normalizaÃ§Ã£o)
+                // Isso evita registrar campos que nÃ£o mudaram realmente
                 if (AreEqualStringValues(oldValue, newValue))
                     continue;
 
-                // Verificar se é internalChanges (mudanças em entidade relacionada)
+                // Verificar se Ã© internalChanges (mudanÃ§as em entidade relacionada)
                 if (change.Value.ContainsKey("internalChanges") && change.Value["internalChanges"] is Dictionary<string, Dictionary<string, object?>> internalChanges)
                 {
                     // Processar apenas os campos internos que realmente mudaram
@@ -499,7 +499,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                         var internalOldValue = internalChange.Value.ContainsKey("oldValue") ? internalChange.Value["oldValue"]?.ToString() : null;
                         var internalNewValue = internalChange.Value.ContainsKey("newValue") ? internalChange.Value["newValue"]?.ToString() : null;
 
-                        // Ignorar se os valores são iguais
+                        // Ignorar se os valores sÃ£o iguais
                         if (AreEqualStringValues(internalOldValue, internalNewValue))
                             continue;
 
@@ -530,7 +530,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     {
                         if (newValue != null && oldValue == null)
                         {
-                            changedFields.Add("marcado para remoção");
+                            changedFields.Add("marcado para remoÃ§Ã£o");
                         }
                     }
                     else if (!string.IsNullOrEmpty(newValue))
@@ -540,7 +540,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 }
                 else
                 {
-                    // Campo genérico
+                    // Campo genÃ©rico
                     changedFields.Add($"{propertyName} alterado");
                 }
             }
@@ -549,7 +549,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             {
                 var changesText = string.Join(", ", changedFields);
 
-                // Incluir informação do pai se disponível
+                // Incluir informaÃ§Ã£o do pai se disponÃ­vel
                 string parentContext = "";
                 if (parentInfo.HasValue)
                 {
@@ -573,7 +573,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             if (entity == null)
                 return null;
 
-            // Tentar encontrar propriedades comuns de nome/descrição
+            // Tentar encontrar propriedades comuns de nome/descriÃ§Ã£o
             var nameProperties = new[] { "Nome", "Name", "Descricao", "Description", "Titulo", "Title" };
 
             foreach (var propName in nameProperties)
@@ -610,14 +610,14 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 var entityType = entity.GetType();
                 var properties = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-                // Propriedades que não devem ser consideradas como relacionamentos pai
+                // Propriedades que nÃ£o devem ser consideradas como relacionamentos pai
                 var excludedPropertyNames = new HashSet<string>
                 {
                     "Id", "UsuarioCriacao", "UsuarioAlteracao", "DataHoraCriacao",
                     "DataHoraAlteracao", "ObjectGuid", "DataHoraRemocao", "UsuarioRemocao"
                 };
 
-                // Propriedades que indicam entidades intermediárias (não são o pai principal)
+                // Propriedades que indicam entidades intermediÃ¡rias (nÃ£o sÃ£o o pai principal)
                 var intermediateEntityNames = new HashSet<string>
                 {
                     "Tags", "Pessoa", "Empresa", "Usuario"
@@ -629,25 +629,25 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
                 foreach (var prop in properties)
                 {
-                    // Ignorar propriedades excluídas
+                    // Ignorar propriedades excluÃ­das
                     if (excludedPropertyNames.Contains(prop.Name))
                         continue;
 
-                    // Verificar se a propriedade é do tipo EntityBaseCore
+                    // Verificar se a propriedade Ã© do tipo EntityBaseCore
                     if (typeof(EntityBaseCore).IsAssignableFrom(prop.PropertyType) &&
                         prop.PropertyType != typeof(EntityBaseCore))
                     {
                         var propValue = prop.GetValue(entity);
                         if (propValue is EntityBaseCore relatedEntity && relatedEntity.Id > 0)
                         {
-                            // 🔥 FIX: Obter tipo real removendo sufixo "Proxy"
+                            // ðŸ”¥ FIX: Obter tipo real removendo sufixo "Proxy"
                             var relatedEntityType = GetRealEntityType(relatedEntity.GetType());
 
-                            // Se for uma entidade intermediária (Tags, Pessoa, etc.), pular
+                            // Se for uma entidade intermediÃ¡ria (Tags, Pessoa, etc.), pular
                             if (intermediateEntityNames.Contains(relatedEntityType.Name))
                                 continue;
 
-                            // Preferir a entidade pai com nome mais longo (geralmente é a principal)
+                            // Preferir a entidade pai com nome mais longo (geralmente Ã© a principal)
                             var parentName = GetEntityName(relatedEntity, "Nome");
                             var nameLength = parentName?.Length ?? 0;
 
@@ -663,7 +663,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
                 if (parentEntity != null)
                 {
-                    // 🔥 FIX: Obter tipo real removendo sufixo "Proxy"
+                    // ðŸ”¥ FIX: Obter tipo real removendo sufixo "Proxy"
                     var parentEntityType = GetRealEntityType(parentEntity.GetType());
                     var parentName = GetEntityName(parentEntity, "Nome");
                     return (parentEntityType.Name, parentEntity.Id, parentName);
@@ -692,7 +692,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     return value?.ToString();
                 }
 
-                // 🔥 MELHORIA: Para Usuario, tentar propriedades alternativas se "Nome" não existir
+                // ðŸ”¥ MELHORIA: Para Usuario, tentar propriedades alternativas se "Nome" nÃ£o existir
                 if (entity.GetType().Name == "Usuario")
                 {
                     // Tentar propriedades comuns de nome para Usuario
@@ -728,16 +728,16 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
                 var changes = CompareEntities(oldEntity, newEntity);
                 if (changes.Count == 0)
-                    return; // Nenhuma mudança relevante
+                    return; // Nenhuma mudanÃ§a relevante
 
-                // 🔥 MELHORIA: Garantir que entidades relacionadas (especialmente Tags) estejam carregadas
-                // Isso é importante para capturar nomes de tags em operações de adição/remoção
+                // ðŸ”¥ MELHORIA: Garantir que entidades relacionadas (especialmente Tags) estejam carregadas
+                // Isso Ã© importante para capturar nomes de tags em operaÃ§Ãµes de adiÃ§Ã£o/remoÃ§Ã£o
                 EnsureRelatedEntitiesLoaded(newEntity);
 
-                // Gerar mensagem amigável para atualização
+                // Gerar mensagem amigÃ¡vel para atualizaÃ§Ã£o
                 var friendlyMessage = GenerateFriendlyMessageForOperation(newEntity, EnumAuditAction.Update, changes);
 
-                // Adicionar mensagem amigável geral se disponível
+                // Adicionar mensagem amigÃ¡vel geral se disponÃ­vel
                 if (!string.IsNullOrEmpty(friendlyMessage))
                 {
                     if (!changes.ContainsKey("_operation"))
@@ -749,7 +749,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     }
                 }
 
-                // 🔥 FIX: Obter tipo real removendo sufixo "Proxy"
+                // ðŸ”¥ FIX: Obter tipo real removendo sufixo "Proxy"
                 var entityType = GetRealEntityType(newEntity.GetType());
 
                 var context = GetAuditContext();
@@ -770,7 +770,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             }
             catch (Exception)
             {
-                // Não lançar exceção para não quebrar a operação principal
+                // NÃ£o lanÃ§ar exceÃ§Ã£o para nÃ£o quebrar a operaÃ§Ã£o principal
             }
         }
 
@@ -780,7 +780,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             {
                 var context = GetAuditContext();
 
-                // 🔥 FIX: Tentar capturar UserId da entidade primeiro (UsuarioRemocao > UsuarioAlteracao > UsuarioCriacao > HTTP Context)
+                // ðŸ”¥ FIX: Tentar capturar UserId da entidade primeiro (UsuarioRemocao > UsuarioAlteracao > UsuarioCriacao > HTTP Context)
                 int? userId = null;
 
                 // 1. Verificar se a entidade tem UsuarioRemocao (soft delete)
@@ -806,16 +806,16 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 }
 
 
-                // 3. Por último, usar o contexto HTTP
+                // 3. Por Ãºltimo, usar o contexto HTTP
                 if (!userId.HasValue || userId.Value == 0)
                 {
                     userId = context.UserId;
                 }
 
-                // Gerar mensagem amigável para exclusão
+                // Gerar mensagem amigÃ¡vel para exclusÃ£o
                 var friendlyMessage = GenerateFriendlyMessageForOperation(entity, EnumAuditAction.Delete, null);
 
-                // 🔥 MELHORIA: Para entidades Tags, capturar informações detalhadas para o ChangesJson
+                // ðŸ”¥ MELHORIA: Para entidades Tags, capturar informaÃ§Ãµes detalhadas para o ChangesJson
                 var changes = new Dictionary<string, Dictionary<string, object?>>();
 
                 if (!string.IsNullOrEmpty(friendlyMessage))
@@ -826,13 +826,13 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     };
                 }
 
-                // 🔥 FIX: Obter tipo real removendo sufixo "Proxy"
+                // ðŸ”¥ FIX: Obter tipo real removendo sufixo "Proxy"
                 var entityType = GetRealEntityType(entity.GetType());
 
-                // Para entidades de Tags, capturar informações detalhadas
+                // Para entidades de Tags, capturar informaÃ§Ãµes detalhadas
                 if (entityType.Name.EndsWith("Tags"))
                 {
-                    // Para DELETE, estruturar dados como informações da operação, não como mudanças
+                    // Para DELETE, estruturar dados como informaÃ§Ãµes da operaÃ§Ã£o, nÃ£o como mudanÃ§as
                     var operationData = new Dictionary<string, object?>();
 
                     // Adicionar dados da entidade removida
@@ -842,7 +842,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                         operationData["DadosRemovidos"] = entityData;
                     }
 
-                    // Capturar informações adicionais (hierárquicas)
+                    // Capturar informaÃ§Ãµes adicionais (hierÃ¡rquicas)
                     var detailedInfo = CaptureTagDeletionDetails(entity);
                     if (detailedInfo != null && detailedInfo.Count > 0)
                     {
@@ -852,7 +852,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                         }
                     }
 
-                    // Estruturar como dados da operação, não como mudanças
+                    // Estruturar como dados da operaÃ§Ã£o, nÃ£o como mudanÃ§as
                     if (operationData.Count > 0)
                     {
                         if (!changes.ContainsKey("_operation"))
@@ -886,7 +886,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             }
             catch (Exception)
             {
-                // Não lançar exceção para não quebrar a operação principal
+                // NÃ£o lanÃ§ar exceÃ§Ã£o para nÃ£o quebrar a operaÃ§Ã£o principal
             }
         }
 
@@ -894,7 +894,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
         {
             var changes = new Dictionary<string, Dictionary<string, object?>>();
 
-            // 🔥 FIX: Use GetType() para obter o tipo REAL da instância, não o tipo genérico T
+            // ðŸ”¥ FIX: Use GetType() para obter o tipo REAL da instÃ¢ncia, nÃ£o o tipo genÃ©rico T
             var actualType = newEntity.GetType();
             var properties = GetProperties(actualType);
 
@@ -908,7 +908,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     var oldValue = prop.GetValue(oldEntity);
                     var newValue = prop.GetValue(newEntity);
 
-                    // Verificar se é uma coleção
+                    // Verificar se Ã© uma coleÃ§Ã£o
                     if (IsCollection(prop.PropertyType))
                     {
                         var collectionChanges = CompareCollections(oldValue, newValue, prop.Name);
@@ -919,14 +919,14 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     }
                     else
                     {
-                        // Verificar se é uma entidade relacionada (ManyToOne)
+                        // Verificar se Ã© uma entidade relacionada (ManyToOne)
                         if (oldValue is EntityBaseCore oldRelatedEntity && newValue is EntityBaseCore newRelatedEntity)
                         {
-                            // 🔥 FIX: Obter tipos reais removendo sufixo "Proxy"
+                            // ðŸ”¥ FIX: Obter tipos reais removendo sufixo "Proxy"
                             var oldEntityType = GetRealEntityType(oldRelatedEntity.GetType());
                             var newEntityType = GetRealEntityType(newRelatedEntity.GetType());
 
-                            // Se os IDs são diferentes ou tipos diferentes, é uma mudança na referência
+                            // Se os IDs sÃ£o diferentes ou tipos diferentes, Ã© uma mudanÃ§a na referÃªncia
                             if (oldRelatedEntity.Id != newRelatedEntity.Id || oldEntityType != newEntityType)
                             {
                                 var changeDict = new Dictionary<string, object?>
@@ -949,11 +949,11 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                                 if (!string.IsNullOrEmpty(newEntityName))
                                     changeDict["newEntityName"] = newEntityName;
 
-                                // 🔥 MELHORIA: Se for uma propriedade de Tag, adicionar informações detalhadas
+                                // ðŸ”¥ MELHORIA: Se for uma propriedade de Tag, adicionar informaÃ§Ãµes detalhadas
                                 var propNameLower = prop.Name.ToLower();
                                 if (propNameLower.Contains("tag") || oldEntityType.Name.ToLower().Contains("tag") || newEntityType.Name.ToLower().Contains("tag"))
                                 {
-                                    // Adicionar informações específicas da tag
+                                    // Adicionar informaÃ§Ãµes especÃ­ficas da tag
                                     if (!string.IsNullOrEmpty(oldEntityName))
                                         changeDict["oldTagNome"] = oldEntityName;
                                     if (!string.IsNullOrEmpty(newEntityName))
@@ -962,24 +962,24 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
                                 changes[prop.Name] = changeDict;
                             }
-                            // 🔥 FIX: Se os IDs são iguais, NÃO fazer comparação profunda
+                            // ðŸ”¥ FIX: Se os IDs sÃ£o iguais, NÃƒO fazer comparaÃ§Ã£o profunda
                             // Isso evita falsos positivos causados por lazy loading do NHibernate
-                            // Se o ID é o mesmo, significa que é a mesma entidade, então não houve mudança na referência
-                            // Mudanças internas em entidades relacionadas devem ser capturadas salvando a entidade relacionada diretamente
+                            // Se o ID Ã© o mesmo, significa que Ã© a mesma entidade, entÃ£o nÃ£o houve mudanÃ§a na referÃªncia
+                            // MudanÃ§as internas em entidades relacionadas devem ser capturadas salvando a entidade relacionada diretamente
                             // else if (oldRelatedEntity.GetType() == newRelatedEntity.GetType())
                             // {
-                            //     // REMOVIDO: Comparação profunda de propriedades quando IDs são iguais
-                            //     // Isso causava falsos positivos porque campos podem não estar carregados (lazy loading)
+                            //     // REMOVIDO: ComparaÃ§Ã£o profunda de propriedades quando IDs sÃ£o iguais
+                            //     // Isso causava falsos positivos porque campos podem nÃ£o estar carregados (lazy loading)
                             // }
                         }
-                        // Para outros tipos, usar comparação normal
+                        // Para outros tipos, usar comparaÃ§Ã£o normal
                         else if (!AreEqual(oldValue, newValue))
                         {
                             var formattedOldValue = FormatValue(oldValue);
                             var formattedNewValue = FormatValue(newValue);
 
-                            // 🔥 FIX: Para strings, distinguir entre null e string vazia
-                            // null e "" devem ser tratados como diferentes (mudança real)
+                            // ðŸ”¥ FIX: Para strings, distinguir entre null e string vazia
+                            // null e "" devem ser tratados como diferentes (mudanÃ§a real)
                             bool isStringChange = oldValue is string || newValue is string;
                             bool shouldLogChange = false;
 
@@ -989,18 +989,18 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                                 var oldStr = oldValue?.ToString();
                                 var newStr = newValue?.ToString();
 
-                                // null e string vazia são diferentes
+                                // null e string vazia sÃ£o diferentes
                                 if (oldStr == null && newStr == "")
                                     shouldLogChange = true;
                                 else if (oldStr == "" && newStr == null)
                                     shouldLogChange = true;
-                                // Para outros casos, usar comparação normalizada (trim)
+                                // Para outros casos, usar comparaÃ§Ã£o normalizada (trim)
                                 else if (!AreEqualStringValues(formattedOldValue, formattedNewValue))
                                     shouldLogChange = true;
                             }
                             else
                             {
-                                // Para não-strings, usar comparação normalizada
+                                // Para nÃ£o-strings, usar comparaÃ§Ã£o normalizada
                                 shouldLogChange = !AreEqualStringValues(formattedOldValue, formattedNewValue);
                             }
 
@@ -1028,8 +1028,8 @@ namespace SW_PortalProprietario.Infra.Data.Audit
         }
 
         /// <summary>
-        /// Compara as propriedades de uma entidade relacionada (não apenas EntityBaseCore)
-        /// Retorna um dicionário com as propriedades que mudaram
+        /// Compara as propriedades de uma entidade relacionada (nÃ£o apenas EntityBaseCore)
+        /// Retorna um dicionÃ¡rio com as propriedades que mudaram
         /// </summary>
         private Dictionary<string, Dictionary<string, object?>> CompareRelatedEntityProperties(EntityBaseCore oldEntity, EntityBaseCore newEntity)
         {
@@ -1038,7 +1038,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             if (oldEntity.GetType() != newEntity.GetType())
                 return changes;
 
-            // Obter TODAS as propriedades do tipo específico (incluindo herdadas, não apenas EntityBaseCore)
+            // Obter TODAS as propriedades do tipo especÃ­fico (incluindo herdadas, nÃ£o apenas EntityBaseCore)
             // Usar FlattenHierarchy para incluir propriedades da classe base
             var entityType = oldEntity.GetType();
             var properties = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)
@@ -1047,16 +1047,16 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
             foreach (var prop in properties)
             {
-                // Ignorar propriedades excluídas (campos de auditoria da EntityBaseCore)
+                // Ignorar propriedades excluÃ­das (campos de auditoria da EntityBaseCore)
                 if (_excludedProperties.Contains(prop.Name))
                     continue;
 
-                // Ignorar propriedades que são outras entidades relacionadas (ManyToOne)
-                // Isso evita recursão infinita e compara apenas propriedades primitivas/strings da entidade relacionada
+                // Ignorar propriedades que sÃ£o outras entidades relacionadas (ManyToOne)
+                // Isso evita recursÃ£o infinita e compara apenas propriedades primitivas/strings da entidade relacionada
                 if (typeof(EntityBaseCore).IsAssignableFrom(prop.PropertyType) && prop.PropertyType != typeof(EntityBaseCore))
                     continue;
 
-                // Ignorar coleções (OneToMany)
+                // Ignorar coleÃ§Ãµes (OneToMany)
                 if (IsCollection(prop.PropertyType))
                     continue;
 
@@ -1065,14 +1065,14 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     var oldValue = prop.GetValue(oldEntity);
                     var newValue = prop.GetValue(newEntity);
 
-                    // Verificar se realmente há mudança
+                    // Verificar se realmente hÃ¡ mudanÃ§a
                     if (!AreEqual(oldValue, newValue))
                     {
                         var formattedOldValue = FormatValue(oldValue);
                         var formattedNewValue = FormatValue(newValue);
 
-                        // 🔥 FIX: Para strings, distinguir entre null e string vazia
-                        // null e "" devem ser tratados como diferentes (mudança real)
+                        // ðŸ”¥ FIX: Para strings, distinguir entre null e string vazia
+                        // null e "" devem ser tratados como diferentes (mudanÃ§a real)
                         bool isStringChange = oldValue is string || newValue is string;
                         bool shouldLogChange = false;
 
@@ -1082,18 +1082,18 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                             var oldStr = oldValue?.ToString();
                             var newStr = newValue?.ToString();
 
-                            // null e string vazia são diferentes
+                            // null e string vazia sÃ£o diferentes
                             if (oldStr == null && newStr == "")
                                 shouldLogChange = true;
                             else if (oldStr == "" && newStr == null)
                                 shouldLogChange = true;
-                            // Para outros casos, usar comparação normalizada (trim)
+                            // Para outros casos, usar comparaÃ§Ã£o normalizada (trim)
                             else if (!AreEqualStringValues(formattedOldValue, formattedNewValue))
                                 shouldLogChange = true;
                         }
                         else
                         {
-                            // Para não-strings, usar comparação normalizada
+                            // Para nÃ£o-strings, usar comparaÃ§Ã£o normalizada
                             shouldLogChange = !AreEqualStringValues(formattedOldValue, formattedNewValue);
                         }
 
@@ -1130,11 +1130,11 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             var oldList = oldCollection as IEnumerable;
             var newList = newCollection as IEnumerable;
 
-            // Se ambos são null, não há mudança
+            // Se ambos sÃ£o null, nÃ£o hÃ¡ mudanÃ§a
             if (oldList == null && newList == null)
                 return null;
 
-            // Se um é null e outro não, há mudança
+            // Se um Ã© null e outro nÃ£o, hÃ¡ mudanÃ§a
             if (oldList == null || newList == null)
             {
                 return new Dictionary<string, object?>
@@ -1144,11 +1144,11 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 };
             }
 
-            // Comparar coleções
+            // Comparar coleÃ§Ãµes
             var oldItems = GetCollectionItems(oldList);
             var newItems = GetCollectionItems(newList);
 
-            // Se os IDs são diferentes, há mudança
+            // Se os IDs sÃ£o diferentes, hÃ¡ mudanÃ§a
             if (!oldItems.SequenceEqual(newItems))
             {
                 return new Dictionary<string, object?>
@@ -1169,10 +1169,10 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 if (item == null)
                     continue;
 
-                // Se o item é uma entidade com ID, usar o ID
+                // Se o item Ã© uma entidade com ID, usar o ID
                 if (item is EntityBaseCore entity)
                 {
-                    // 🔥 FIX: Obter o tipo real da entidade, removendo sufixo "Proxy" do NHibernate
+                    // ðŸ”¥ FIX: Obter o tipo real da entidade, removendo sufixo "Proxy" do NHibernate
                     var entityType = GetRealEntityType(item.GetType());
                     items.Add($"{entityType.Name}[Id:{entity.Id}]");
                 }
@@ -1197,10 +1197,10 @@ namespace SW_PortalProprietario.Infra.Data.Audit
 
             if (value is EntityBaseCore entity)
             {
-                // 🔥 FIX: Obter o tipo real da entidade, removendo sufixo "Proxy" do NHibernate
+                // ðŸ”¥ FIX: Obter o tipo real da entidade, removendo sufixo "Proxy" do NHibernate
                 var entityType = GetRealEntityType(value.GetType());
 
-                // 🔥 FIX: Tentar obter nome da entidade para exibir junto com ID
+                // ðŸ”¥ FIX: Tentar obter nome da entidade para exibir junto com ID
                 var entityName = GetEntityDisplayName(entity);
                 if (!string.IsNullOrEmpty(entityName))
                 {
@@ -1210,7 +1210,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 return $"{entityType.Name}[Id:{entity.Id}]";
             }
 
-            // 🔥 FIX: Formatar datas sempre no padrão dd/MM/yyyy sem horário e sem UTC
+            // ðŸ”¥ FIX: Formatar datas sempre no padrÃ£o dd/MM/yyyy sem horÃ¡rio e sem UTC
             if (value is DateTime dateTime)
             {
                 return dateTime.ToString("dd/MM/yyyy");
@@ -1231,22 +1231,22 @@ namespace SW_PortalProprietario.Infra.Data.Audit
         }
 
         /// <summary>
-        /// Obtém o tipo real da entidade, removendo o sufixo "Proxy" do NHibernate
+        /// ObtÃ©m o tipo real da entidade, removendo o sufixo "Proxy" do NHibernate
         /// </summary>
         private Type GetRealEntityType(Type type)
         {
             // Se o nome do tipo termina com "Proxy", obter o tipo base real
             if (type.Name.EndsWith("Proxy", StringComparison.OrdinalIgnoreCase))
             {
-                // Obter a cadeia de tipos base até encontrar um que não seja Proxy
+                // Obter a cadeia de tipos base atÃ© encontrar um que nÃ£o seja Proxy
                 var baseType = type.BaseType;
                 while (baseType != null)
                 {
                     // Parar se encontrar Object ou EntityBaseCore como base direta
                     if (baseType == typeof(object) || baseType == typeof(EntityBaseCore))
                     {
-                        // Neste caso, o tipo base é muito genérico
-                        // Retornar o último tipo concreto antes de EntityBaseCore
+                        // Neste caso, o tipo base Ã© muito genÃ©rico
+                        // Retornar o Ãºltimo tipo concreto antes de EntityBaseCore
                         var currentType = type;
                         while (currentType.BaseType != null &&
                                currentType.BaseType != typeof(EntityBaseCore) &&
@@ -1264,7 +1264,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                         break;
                     }
 
-                    // Se encontrou um tipo base que não termina com "Proxy" e não é Object/EntityBaseCore
+                    // Se encontrou um tipo base que nÃ£o termina com "Proxy" e nÃ£o Ã© Object/EntityBaseCore
                     if (!baseType.Name.EndsWith("Proxy", StringComparison.OrdinalIgnoreCase) &&
                         typeof(EntityBaseCore).IsAssignableFrom(baseType) &&
                         baseType != typeof(EntityBaseCore))
@@ -1280,7 +1280,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
         }
 
         /// <summary>
-        /// Compara dois valores de string após normalização (trim e tratamento de null/vazio)
+        /// Compara dois valores de string apÃ³s normalizaÃ§Ã£o (trim e tratamento de null/vazio)
         /// </summary>
         private bool AreEqualStringValues(string? value1, string? value2)
         {
@@ -1303,17 +1303,17 @@ namespace SW_PortalProprietario.Infra.Data.Audit
         }
 
         /// <summary>
-        /// Verifica se um tipo de propriedade é suportado para auditoria.
-        /// Suporta tipos primitivos, strings, tipos de valor, enums, nullable, coleções e entidades.
-        /// 🔥 MELHORIA: Versão genérica que captura todas as propriedades relevantes automaticamente.
+        /// Verifica se um tipo de propriedade Ã© suportado para auditoria.
+        /// Suporta tipos primitivos, strings, tipos de valor, enums, nullable, coleÃ§Ãµes e entidades.
+        /// ðŸ”¥ MELHORIA: VersÃ£o genÃ©rica que captura todas as propriedades relevantes automaticamente.
         /// </summary>
         private bool IsPropertyTypeSupported(Type propertyType)
         {
-            // 🔥 MELHORIA: Tratar tipos nullable primeiro para simplificar a lógica
+            // ðŸ”¥ MELHORIA: Tratar tipos nullable primeiro para simplificar a lÃ³gica
             var underlyingType = Nullable.GetUnderlyingType(propertyType);
             if (underlyingType != null)
             {
-                // Se é nullable, verificar o tipo subjacente
+                // Se Ã© nullable, verificar o tipo subjacente
                 return IsPropertyTypeSupported(underlyingType);
             }
 
@@ -1325,20 +1325,20 @@ namespace SW_PortalProprietario.Infra.Data.Audit
             if (propertyType == typeof(string))
                 return true;
 
-            // 🔥 MELHORIA: Aceitar qualquer tipo de valor (struct) de forma genérica
+            // ðŸ”¥ MELHORIA: Aceitar qualquer tipo de valor (struct) de forma genÃ©rica
             // Isso inclui: DateTime, Guid, TimeSpan, DateOnly, TimeOnly, Decimal, e qualquer outro struct
             if (propertyType.IsValueType)
             {
-                // Excluir apenas tipos que não queremos (como ponteiros)
+                // Excluir apenas tipos que nÃ£o queremos (como ponteiros)
                 if (!propertyType.IsPointer && !propertyType.IsByRef)
                     return true;
             }
 
-            // 🔥 MELHORIA: Aceitar qualquer enum de forma genérica (não apenas os específicos)
+            // ðŸ”¥ MELHORIA: Aceitar qualquer enum de forma genÃ©rica (nÃ£o apenas os especÃ­ficos)
             if (propertyType.IsEnum)
                 return true;
 
-            // Coleções (IEnumerable, List, Array, etc.) - exceto string e byte[]
+            // ColeÃ§Ãµes (IEnumerable, List, Array, etc.) - exceto string e byte[]
             if (IsCollection(propertyType))
                 return true;
 
@@ -1363,14 +1363,14 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 return entity1.Id == entity2.Id && entity1.GetType() == entity2.GetType();
             }
 
-            // Para strings, fazer comparação normalizada (trim e case-sensitive)
+            // Para strings, fazer comparaÃ§Ã£o normalizada (trim e case-sensitive)
             if (value1 is string str1 && value2 is string str2)
             {
-                // Comparar strings normalizadas (trim para remover espaços extras)
+                // Comparar strings normalizadas (trim para remover espaÃ§os extras)
                 return string.Equals(str1?.Trim(), str2?.Trim(), StringComparison.Ordinal);
             }
 
-            // 🔥 FIX: Para DateTime, comparar apenas a data (ignorar horário e UTC)
+            // ðŸ”¥ FIX: Para DateTime, comparar apenas a data (ignorar horÃ¡rio e UTC)
             if (value1 is DateTime dt1 && value2 is DateTime dt2)
             {
                 return dt1.Date == dt2.Date;
@@ -1420,7 +1420,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 }
             }
 
-            // Fallback para Equals padrão
+            // Fallback para Equals padrÃ£o
             return value1.Equals(value2);
         }
 
@@ -1448,8 +1448,8 @@ namespace SW_PortalProprietario.Infra.Data.Audit
         }
 
         /// <summary>
-        /// Serializa os dados da entidade para incluir no ChangesJson durante criação
-        /// Inclui apenas propriedades relevantes (não relacionamentos complexos)
+        /// Serializa os dados da entidade para incluir no ChangesJson durante criaÃ§Ã£o
+        /// Inclui apenas propriedades relevantes (nÃ£o relacionamentos complexos)
         /// </summary>
         private Dictionary<string, object?>? SerializeEntityDataForChanges<T>(T entity) where T : EntityBaseCore
         {
@@ -1468,10 +1468,10 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     {
                         var value = prop.GetValue(entity);
 
-                        // Para entidades relacionadas (ManyToOne), incluir apenas ID e nome se disponível
+                        // Para entidades relacionadas (ManyToOne), incluir apenas ID e nome se disponÃ­vel
                         if (value is EntityBaseCore relatedEntity)
                         {
-                            // 🔥 FIX: Obter tipo real removendo sufixo "Proxy"
+                            // ðŸ”¥ FIX: Obter tipo real removendo sufixo "Proxy"
                             var relatedEntityType = GetRealEntityType(relatedEntity.GetType());
 
                             var relatedData = new Dictionary<string, object?>
@@ -1516,7 +1516,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                         {
                             data[prop.Name] = FormatValue(value);
                         }
-                        // Ignorar coleções e outros tipos complexos
+                        // Ignorar coleÃ§Ãµes e outros tipos complexos
                     }
                     catch
                     {
@@ -1548,7 +1548,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     var propName = prop.Name.ToLower();
 
                     // Detectar propriedade pai principal (ImagemGrupoImagem, GrupoImagem, etc.)
-                    // Ignorar Tags pois já está nos DadosRemovidos
+                    // Ignorar Tags pois jÃ¡ estÃ¡ nos DadosRemovidos
                     if ((propName.Contains("imagem") || propName.Contains("grupo")) &&
                         !propName.Contains("tag") &&
                         typeof(EntityBaseCore).IsAssignableFrom(prop.PropertyType))
@@ -1558,7 +1558,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     }
                 }
 
-                // Capturar apenas informações hierárquicas relevantes
+                // Capturar apenas informaÃ§Ãµes hierÃ¡rquicas relevantes
                 if (parentProperty != null)
                 {
                     var parent = parentProperty.GetValue(entity);
@@ -1566,7 +1566,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                     {
                         var hasAdditionalInfo = false;
 
-                        // Para imagens, capturar informações do grupo (se disponível e diferente)
+                        // Para imagens, capturar informaÃ§Ãµes do grupo (se disponÃ­vel e diferente)
                         if (parentProperty.PropertyType.Name.Contains("Imagem"))
                         {
                             var grupoProperty = parentEntity.GetType().GetProperties()
@@ -1606,7 +1606,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                                 }
                             }
                         }
-                        // Para grupos, capturar empresa diretamente (se disponível)
+                        // Para grupos, capturar empresa diretamente (se disponÃ­vel)
                         else if (parentProperty.PropertyType.Name.Contains("Grupo"))
                         {
                             var empresaPropGrupo = parentEntity.GetType().GetProperties()
@@ -1628,15 +1628,15 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                             }
                         }
 
-                        // Só adicionar contexto se temos informações realmente úteis
+                        // SÃ³ adicionar contexto se temos informaÃ§Ãµes realmente Ãºteis
                         if (hasAdditionalInfo)
                         {
-                            details["OperacaoInfo"] = $"Vínculo removido em {DateTime.Now:dd/MM/yyyy HH:mm:ss}";
+                            details["OperacaoInfo"] = $"VÃ­nculo removido em {DateTime.Now:dd/MM/yyyy HH:mm:ss}";
                         }
                     }
                 }
 
-                // Retornar apenas se há informações contextuais úteis
+                // Retornar apenas se hÃ¡ informaÃ§Ãµes contextuais Ãºteis
                 return details.Count > 0 ? details : null;
             }
             catch (Exception)
@@ -1663,7 +1663,7 @@ namespace SW_PortalProprietario.Infra.Data.Audit
                 userAgent = httpContext.Items["AuditUserAgent"]?.ToString()
                     ?? httpContext.Request.Headers["User-Agent"].FirstOrDefault();
 
-                // User ID (se disponível no contexto)
+                // User ID (se disponÃ­vel no contexto)
                 if (httpContext.Items.ContainsKey("AuditUserId"))
                 {
                     var userIdStr = httpContext.Items["AuditUserId"]?.ToString();

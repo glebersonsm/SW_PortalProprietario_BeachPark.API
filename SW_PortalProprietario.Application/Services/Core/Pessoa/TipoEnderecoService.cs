@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -35,7 +35,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var tipoEndereco = await _repository.FindById<TipoEndereco>(id);
                 if (tipoEndereco is null)
                 {
-                    throw new FileNotFoundException($"Não foi encontrado o tipo de endereco com Id: {id}!");
+                    throw new FileNotFoundException($"NÃ£o foi encontrado o tipo de endereco com Id: {id}!");
                 }
 
 
@@ -49,7 +49,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -58,7 +58,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o Tipo de Endereço: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o Tipo de EndereÃ§o: {id}");
                 throw;
 
             }
@@ -76,18 +76,18 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                 {
-                    _logger.LogInformation($"Endereço: ({result.Id} - {tipoEndereco.Nome}) salvo com sucesso!");
+                    _logger.LogInformation($"EndereÃ§o: ({result.Id} - {tipoEndereco.Nome}) salvo com sucesso!");
 
                     if (result != null)
                         return (TipoEnderecoModel)result;
 
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar o tipo Endereço: ({tipoEndereco.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o tipo EndereÃ§o: ({tipoEndereco.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o tipo Endereço: ({tipoEndereco.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o tipo EndereÃ§o: ({tipoEndereco.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -134,14 +134,14 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             try
             {
                 var tipoendereco = (await _repository.FindByHql<TipoEndereco>("From TipoEndereco ge Where ge.Id = :id", session: null, new Parameter[]
-                { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o Tipo Endereço: {model.Id}");
+                { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"NÃ£o foi encontrado o Tipo EndereÃ§o: {model.Id}");
 
                 tipoendereco.Nome = model.Nome ?? tipoendereco.Nome;
                 await _repository.Save(tipoendereco);
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                     return (TipoEnderecoModel)tipoendereco;
-                else throw exception ?? new Exception("Erro na operação");
+                else throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception)
             {

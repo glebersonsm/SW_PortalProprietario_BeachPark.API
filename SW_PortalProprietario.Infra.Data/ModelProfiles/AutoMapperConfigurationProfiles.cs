@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using SW_PortalProprietario.Application.Models.AuditModels;
 using SW_PortalProprietario.Application.Models.DocumentTemplates;
 using SW_PortalProprietario.Application.Models.FrameworkModels;
@@ -70,7 +70,7 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
 
             #endregion
 
-            #region Pessoa endereço
+            #region Pessoa endereÃ§o
 
             CreateMap<PessoaEndereco, PessoaEnderecoModel>()
                 .ForPath(dest => dest.PessoaId, opt => opt.MapFrom(src => src.Pessoa.Id))
@@ -319,7 +319,7 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
             #region AuditLog
 
             CreateMap<AuditLog, AuditLogModel>()
-                .ForMember(dest => dest.Changes, opt => opt.Ignore()); // Changes são deserializados manualmente no service
+                .ForMember(dest => dest.Changes, opt => opt.Ignore()); // Changes sÃ£o deserializados manualmente no service
 
             #endregion
 
@@ -415,7 +415,7 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
 
             #region Pessoa
 
-            #region Pessoa física
+            #region Pessoa fÃ­sica
 
             CreateMap<PessoaFisicaInputModel, Pessoa>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -431,7 +431,7 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
 
             #endregion
 
-            #region Pessoa jurídica
+            #region Pessoa jurÃ­dica
 
             CreateMap<PessoaJuridicaInputModel, Pessoa>()
                .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -470,7 +470,7 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
 
             #endregion
 
-            #region Pessoa endereço
+            #region Pessoa endereÃ§o
 
             CreateMap<PessoaEnderecoInputModel, PessoaEndereco>()
                .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -499,7 +499,7 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
 
             #endregion
 
-            #region Pessoa endereço
+            #region Pessoa endereÃ§o
 
             CreateMap<PessoaTelefoneInputModel, PessoaTelefone>()
               .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -855,7 +855,7 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
                 .ForMember(dest => dest.UsuarioCriacao, opt => opt.Ignore())
                 .ForMember(dest => dest.UsuarioAlteracao, opt => opt.Ignore())
                 .ForMember(dest => dest.Nome, opt => opt.MapFrom(src => src.Name))
-                .ForMember(dest => dest.Imagem, opt => opt.Ignore()) // Será preenchido manualmente no service
+                .ForMember(dest => dest.Imagem, opt => opt.Ignore()) // SerÃ¡ preenchido manualmente no service
                 .ForMember(dest => dest.GrupoImagem, opt =>
                 {
                     opt.MapFrom(src => src.ImageGroupId.GetValueOrDefault(0) > 0 ?
@@ -902,7 +902,7 @@ namespace SW_PortalProprietario.Infra.Data.ModelProfiles
                 {
                     opt.MapFrom(src => src.Name);
                 })
-                .ForMember(dest => dest.Imagem, opt => opt.Ignore()) // Será tratado manualmente no service
+                .ForMember(dest => dest.Imagem, opt => opt.Ignore()) // SerÃ¡ tratado manualmente no service
                 .ForAllMembers(opt =>
             opt.Condition((src, dest, srcMember) => srcMember != null));
 

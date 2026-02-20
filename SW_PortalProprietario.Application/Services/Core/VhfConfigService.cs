@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.FrameworkModels;
 using SW_PortalProprietario.Application.Models.SystemModels;
@@ -32,23 +32,23 @@ namespace SW_PortalProprietario.Application.Services.Core
             
             var result = new VhfConfigOpcoesModel();
 
-            // 1. Tipo de utilização (fixo). "Todos os negócios" = configuração vale para todos os tipos.
+            // 1. Tipo de utilizaÃ§Ã£o (fixo). "Todos os negÃ³cios" = configuraÃ§Ã£o vale para todos os tipos.
             result.TipoNegocio = new List<VhfConfigOpcaoItem>
             {
-                new() { Value = "Todos os negócios", Label = "Todos os negócios" },
+                new() { Value = "Todos os negÃ³cios", Label = "Todos os negÃ³cios" },
                 new() { Value = "Timesharing", Label = "Timesharing" },
                 new() { Value = "Multipropriedade", Label = "Multipropriedade" }
             };
 
-            // 1. Tipo de utilização (fixo). "Todas" = configuração vale para todos os tipos.
+            // 1. Tipo de utilizaÃ§Ã£o (fixo). "Todas" = configuraÃ§Ã£o vale para todos os tipos.
             result.TipoUtilizacao = new List<VhfConfigOpcaoItem>
             {
                 new() { Value = "Todos", Label = "Todos" },
-                new() { Value = "Uso próprio", Label = "Uso próprio" },
+                new() { Value = "Uso prÃ³prio", Label = "Uso prÃ³prio" },
                 new() { Value = "Uso convidado", Label = "Uso convidado" }
             };
 
-            // 2. Hotéis (CM): unidades do cadastro de Empresas
+            // 2. HotÃ©is (CM): unidades do cadastro de Empresas
             try
             {
                 result.Hoteis = (await _repositoryCM.FindBySql<HotelModel>(@$"Select 
@@ -80,7 +80,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 result.Hoteis = new List<HotelModel>();
             }
 
-            // 3. Tipo de Hóspede (CM): categorias padrão
+            // 3. Tipo de HÃ³spede (CM): categorias padrÃ£o
             try
             {
                 result.TiposHospede = (await _repositoryCM.FindBySql<TipoHospedeModel>(@$"Select 
@@ -115,7 +115,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 result.Origens = new List<OrigemReservaModel>();
             }
 
-            // 5. Tarifa Hotel (CM): códigos de tarifa base
+            // 5. Tarifa Hotel (CM): cÃ³digos de tarifa base
             try
             {
                 result.TarifasHotel = (await _repositoryCM.FindBySql<TarifaHotelModel>(@$"SELECT 
@@ -134,7 +134,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 result.TarifasHotel = new List<TarifaHotelModel>();
             }
 
-            // 6. Segmento (CM): códigos de segmento base
+            // 6. Segmento (CM): cÃ³digos de segmento base
             try
             {
                 result.SegmentoReserva = (await _repositoryCM.FindBySql<SegmentoReservaModel>(@$"SELECT
@@ -152,13 +152,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                 result.SegmentoReserva = new List<SegmentoReservaModel>();
             }
 
-            // 7. Código de Pensão Padrão: regimes de alimentação
+            // 7. CÃ³digo de PensÃ£o PadrÃ£o: regimes de alimentaÃ§Ã£o
             result.CodigosPensao = new List<VhfConfigOpcaoItem>
             {
-                new() { Value = "N", Label = "Sem alimentação (N)" },
-                new() { Value = "C", Label = "Café da Manhã (C)" },
-                new() { Value = "M", Label = "Meia pensão - Café e Almoço (M)" },
-                new() { Value = "J", Label = "Meia pensão - Café e Jantar (J)" }
+                new() { Value = "N", Label = "Sem alimentaÃ§Ã£o (N)" },
+                new() { Value = "C", Label = "CafÃ© da ManhÃ£ (C)" },
+                new() { Value = "M", Label = "Meia pensÃ£o - CafÃ© e AlmoÃ§o (M)" },
+                new() { Value = "J", Label = "Meia pensÃ£o - CafÃ© e Jantar (J)" }
             };
 
             await _cacheStore.AddAsync("Opcoes_Configuracoes_", result, DateTimeOffset.Now.AddMinutes(10), 2, _repository.CancellationToken);
@@ -243,7 +243,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     "From ConfigReservaVhf c Where c.Id = :id", session: null, new SW_Utils.Auxiliar.Parameter("id", model.Id));
                 var config = configs.FirstOrDefault();
                 if (config == null)
-                    throw new ArgumentException($"Configuração com ID {model.Id} não encontrada");
+                    throw new ArgumentException($"ConfiguraÃ§Ã£o com ID {model.Id} nÃ£o encontrada");
 
                 var loggedUser = await _repository.GetLoggedUser();
                 var alteracaoUserId = (loggedUser.HasValue && !string.IsNullOrEmpty(loggedUser.Value.userId) && int.TryParse(loggedUser.Value.userId, out var uidAlt))
@@ -289,7 +289,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     "From ConfigReservaVhf c Where c.Id = :id", session: null, new SW_Utils.Auxiliar.Parameter("id", id));
                 var config = configs.FirstOrDefault();
                 if (config == null)
-                    throw new ArgumentException($"Configuração com ID {id} não encontrada");
+                    throw new ArgumentException($"ConfiguraÃ§Ã£o com ID {id} nÃ£o encontrada");
 
                 await _repository.Remove(config);
                 await _repository.CommitAsync();
@@ -305,11 +305,11 @@ namespace SW_PortalProprietario.Application.Services.Core
         private static void ValidateInput(VhfConfigInputModel model)
         {
             if (string.IsNullOrWhiteSpace(model.TipoUtilizacao))
-                throw new ArgumentException("Tipo de utilização deve ser informado");
+                throw new ArgumentException("Tipo de utilizaÃ§Ã£o deve ser informado");
             if (string.IsNullOrWhiteSpace(model.TipoNegocio))
-                throw new ArgumentException("Tipo de negócio deve ser informado");
+                throw new ArgumentException("Tipo de negÃ³cio deve ser informado");
             if (string.IsNullOrWhiteSpace(model.TipoHospede))
-                throw new ArgumentException("Tipo de hóspede deve ser informado");
+                throw new ArgumentException("Tipo de hÃ³spede deve ser informado");
             if (string.IsNullOrWhiteSpace(model.Origem))
                 throw new ArgumentException("Origem deve ser informada");
             if (string.IsNullOrWhiteSpace(model.TarifaHotel))
@@ -317,7 +317,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             if (string.IsNullOrWhiteSpace(model.Segmento))
                 throw new ArgumentException("Segmento deve ser informado");
             if (string.IsNullOrWhiteSpace(model.CodigoPensao))
-                throw new ArgumentException("Código de pensão deve ser informado");
+                throw new ArgumentException("CÃ³digo de pensÃ£o deve ser informado");
         }
 
         private static VhfConfigModel MapToModel(ConfigReservaVhf c, Dictionary<int, string> empresaLookup)

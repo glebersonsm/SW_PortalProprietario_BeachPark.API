@@ -1,4 +1,4 @@
-using Dapper;
+Ôªøusing Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -65,8 +65,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new List<ContaPendenteModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -76,8 +76,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new List<ContaPendenteModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -115,8 +115,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new List<CardTokenizedModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -126,8 +126,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new List<CardTokenizedModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -179,8 +179,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new CardTokenizedModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -190,8 +190,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new CardTokenizedModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -217,7 +217,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 else return BadRequest(new ResultModel<CardTokenizedModel>()
                 {
                     Data = new CardTokenizedModel(),
-                    Errors = new List<string>() { $"N„o foi possÌvel remover o cart„o de id: {model.Tokenizedcard}" },
+                    Errors = new List<string>() { $"N√£o foi poss√≠vel remover o cart√£o de id: {model.Tokenizedcard}" },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -295,8 +295,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new TransactionCardResultModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Success = false,
                     Status = StatusCodes.Status400BadRequest,
                 });
@@ -307,8 +307,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new TransactionCardResultModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -362,8 +362,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new TransactionPixResultModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -373,8 +373,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new TransactionPixResultModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -391,8 +391,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 if (result == null || !result.Any())
                     return NotFound(new DeleteResultModel()
                     {
-                        Result = "N„o foi possÌvel gerar certid„o de situaÁ„o financeira",
-                        Errors = new List<string>() { "Nenhuma certid„o foi gerada" },
+                        Result = "N√£o foi poss√≠vel gerar certid√£o de situa√ß√£o financeira",
+                        Errors = new List<string>() { "Nenhuma certid√£o foi gerada" },
                         Status = StatusCodes.Status404NotFound,
                     });
 
@@ -412,8 +412,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                         }
                         else return NotFound(new DeleteResultModel()
                         {
-                            Result = "N„o foi possÌvel gerar certid„o de situaÁ„o financeira",
-                            Errors = new List<string>() { "Nenhuma certid„o foi gerada" },
+                            Result = "N√£o foi poss√≠vel gerar certid√£o de situa√ß√£o financeira",
+                            Errors = new List<string>() { "Nenhuma certid√£o foi gerada" },
                             Status = StatusCodes.Status404NotFound,
                         });
                     }
@@ -427,7 +427,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
             {
                 return NotFound(new DeleteResultModel()
                 {
-                    Result = "N„o gerada",
+                    Result = "N√£o gerada",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -438,7 +438,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
             {
                 return BadRequest(new DeleteResultModel()
                 {
-                    Result = "N„o gerada",
+                    Result = "N√£o gerada",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -449,7 +449,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new DeleteResultModel()
                 {
-                    Result = "N„o gerada",
+                    Result = "N√£o gerada",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -490,8 +490,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new CertidaoViewModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -501,8 +501,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new CertidaoViewModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -521,7 +521,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     var ext = SW_PortalProprietario.Application.Functions.FileUtils.ObterTipoMIMEPorExtensao(string.Concat(".", result.Path.Split("\\").Last().Split(".").Last()));
                     if (string.IsNullOrEmpty(ext))
-                        throw new Exception($"Tipo de arquivo: ({result.Path.Split("\\").Last().Split(".").Last()}) n„o suportado.");
+                        throw new Exception($"Tipo de arquivo: ({result.Path.Split("\\").Last().Split(".").Last()}) n√£o suportado.");
 
                     var memory = new MemoryStream();
                     using var stream = new FileStream(result.Path, FileMode.Open);
@@ -534,8 +534,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     return NotFound(new DownloadResultModel()
                     {
-                        Result = "N„o baixado",
-                        Errors = new List<string>() { "Boleto n„o encontrado" },
+                        Result = "N√£o baixado",
+                        Errors = new List<string>() { "Boleto n√£o encontrado" },
                         Status = StatusCodes.Status404NotFound,
                     });
 
@@ -546,7 +546,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
             {
                 return NotFound(new DownloadResultModel()
                 {
-                    Result = "N„o baixado",
+                    Result = "N√£o baixado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -557,7 +557,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
             {
                 return BadRequest(new DownloadResultModel()
                 {
-                    Result = "N„o baixado",
+                    Result = "N√£o baixado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -568,7 +568,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new DownloadResultModel()
                 {
-                    Result = "N„o baixado",
+                    Result = "N√£o baixado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -597,7 +597,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 else return StatusCode(500, new SW_PortalProprietario.Application.Models.ResultModel<ClienteContaBancariaViewModel>()
                 {
                     Data = new ClienteContaBancariaViewModel(),
-                    Errors = new List<string>() { $"N„o foi possÌvel salvar a conta banc·ria" },
+                    Errors = new List<string>() { $"N√£o foi poss√≠vel salvar a conta banc√°ria" },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -607,8 +607,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -618,8 +618,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new ClienteContaBancariaViewModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -656,8 +656,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new List<ClienteContaBancariaViewModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -667,8 +667,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Financeiro
                 {
                     Data = new List<ClienteContaBancariaViewModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"N„o foi possÌvel retornar os dados", err.Message },
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"N√£o foi poss√≠vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }

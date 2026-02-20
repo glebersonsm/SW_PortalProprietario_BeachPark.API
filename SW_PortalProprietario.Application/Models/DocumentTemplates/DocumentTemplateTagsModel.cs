@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Application.Models.GeralModels;
+﻿using SW_PortalProprietario.Application.Models.GeralModels;
 
 namespace SW_PortalProprietario.Application.Models.DocumentTemplates;
 

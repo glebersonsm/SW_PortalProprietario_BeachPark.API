@@ -1,4 +1,4 @@
-using Dapper;
+ï»¿using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -48,8 +48,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Geral
                 return BadRequest(new ResultModel<HtmlTemplateModel>(new HtmlTemplateModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o HtmlTemplate", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o HtmlTemplate", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o HtmlTemplate", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o HtmlTemplate", err.Message },
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -58,8 +58,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Geral
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<HtmlTemplateModel>(new HtmlTemplateModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar o HtmlTemplate", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar o HtmlTemplate", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o HtmlTemplate", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar o HtmlTemplate", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -98,8 +98,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Geral
                 {
                     Data = new List<HtmlTemplateModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -109,8 +109,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Geral
                 {
                     Data = new List<HtmlTemplateModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -139,8 +139,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Geral
                 return BadRequest(new ResultModel<HtmlTemplateResultModel>(new HtmlTemplateResultModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados do HtmlTemplate: ({model.TemplateId})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados do HtmlTemplate: ({model.TemplateId})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados do HtmlTemplate: ({model.TemplateId})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados do HtmlTemplate: ({model.TemplateId})", err.Message },
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -149,8 +149,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Geral
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<HtmlTemplateModel>(new HtmlTemplateModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados do HtmlTemplate: ( {model.TemplateId})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados do HtmlTemplate: ( {model.TemplateId})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados do HtmlTemplate: ( {model.TemplateId})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados do HtmlTemplate: ( {model.TemplateId})", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -190,8 +190,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Geral
                 {
                     Data = new List<KeyValueModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                 });
             }
@@ -201,8 +201,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.Geral
                 {
                     Data = new List<KeyValueModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }

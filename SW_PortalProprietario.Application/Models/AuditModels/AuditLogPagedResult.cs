@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Application.Models.AuditModels
+﻿namespace SW_PortalProprietario.Application.Models.AuditModels
 {
     public class AuditLogPagedResult
     {

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+ï»¿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.TimeSharing;
@@ -7,7 +7,7 @@ using SW_PortalProprietario.Application.Services.Core.Interfaces;
 namespace SW_PortalCliente_BeachPark.API.src.Controllers.TimeSharing
 {
     /// <summary>
-    /// Controller de exemplo mostrando uso do serviço com Saga
+    /// Controller de exemplo mostrando uso do serviÃ§o com Saga
     /// SUBSTITUIR o TimeSharingUsuarioController por este quando estiver pronto
     /// </summary>
     [Authorize]
@@ -28,8 +28,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.TimeSharing
         }
 
         /// <summary>
-        /// Criar reserva - USA SAGA POR PADRÃO
-        /// O controller não precisa saber sobre transações distribuídas!
+        /// Criar reserva - USA SAGA POR PADRÃƒO
+        /// O controller nÃ£o precisa saber sobre transaÃ§Ãµes distribuÃ­das!
         /// </summary>
         [HttpPost("salvarReserva")]
         [Authorize(Roles = "Administrador, Usuario")]
@@ -40,8 +40,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.TimeSharing
         {
             try
             {
-                // ?? SIMPLES! O serviço cuida de tudo
-                // Por padrão usa Saga (usarSaga = true)
+                // ?? SIMPLES! O serviÃ§o cuida de tudo
+                // Por padrÃ£o usa Saga (usarSaga = true)
                 var resultado = await _reservaService.CriarReservaAsync(model);
 
                 if (resultado.Success)
@@ -73,8 +73,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.TimeSharing
         }
 
         /// <summary>
-        /// Criar reserva SEM SAGA (método tradicional)
-        /// Útil para debug ou situações específicas
+        /// Criar reserva SEM SAGA (mÃ©todo tradicional)
+        /// Ãštil para debug ou situaÃ§Ãµes especÃ­ficas
         /// </summary>
         [HttpPost("salvarReservaSemSaga")]
         [Authorize(Roles = "Administrador")]
@@ -116,7 +116,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.TimeSharing
                     ReservaId = numReserva
                 };
 
-                // ?? SIMPLES! Saga é transparente
+                // ?? SIMPLES! Saga Ã© transparente
                 var resultado = await _reservaService.CancelarReservaAsync(cancelarModel);
 
                 if (resultado.Success)

@@ -1,4 +1,4 @@
-using EsolutionPortalDomain.Portal;
+ï»¿using EsolutionPortalDomain.Portal;
 using EsolutionPortalDomain.ReservasApiModels.Hotel;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.Empreendimento;
@@ -6,7 +6,7 @@ using SW_PortalProprietario.Application.Models.Empreendimento;
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces
 {
     /// <summary>
-    /// Interface para serviço de Multipropriedade com suporte a transações distribuídas
+    /// Interface para serviÃ§o de Multipropriedade com suporte a transaÃ§Ãµes distribuÃ­das
     /// </summary>
     public interface IMultipropriedadeService
     {
@@ -22,7 +22,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Interfaces
         /// <summary>
         /// Libera semana para pool
         /// </summary>
-        /// <param name="model">Dados da liberação</param>
+        /// <param name="model">Dados da liberaÃ§Ã£o</param>
         /// <param name="usarSaga">Se true, usa Saga Pattern</param>
         Task<ResultModel<bool>> LiberarMinhaSemanaPoolAsync(
             LiberacaoMeuAgendamentoInputModel model, 

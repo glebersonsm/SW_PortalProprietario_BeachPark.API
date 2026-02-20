@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -24,13 +24,13 @@ namespace SW_PortalProprietario.Test.Controllers
             _controller = new AuthController(_authServiceMock.Object, _loggerMock.Object);
         }
 
-        [Fact(DisplayName = "Register - Deve retornar 200 OK quando usuário é registrado com sucesso")]
+        [Fact(DisplayName = "Register - Deve retornar 200 OK quando usuÃ¡rio Ã© registrado com sucesso")]
         public async Task Register_DeveRetornar200Ok_QuandoUsuarioRegistradoComSucesso()
         {
             // Arrange
             var inputModel = new UserRegisterInputModel
             {
-                FullName = "João Silva",
+                FullName = "JoÃ£o Silva",
                 Email = "joao@example.com",
                 Password = "Senha123!",
                 PasswordConfirmation = "Senha123!"
@@ -60,13 +60,13 @@ namespace SW_PortalProprietario.Test.Controllers
             resultModel.Errors.Should().BeEmpty();
         }
 
-        [Fact(DisplayName = "Register - Deve retornar 400 BadRequest quando ArgumentException é lançada")]
+        [Fact(DisplayName = "Register - Deve retornar 400 BadRequest quando ArgumentException Ã© lanÃ§ada")]
         public async Task Register_DeveRetornar400BadRequest_QuandoArgumentExceptionLancada()
         {
             // Arrange
             var inputModel = new UserRegisterInputModel
             {
-                FullName = "João Silva",
+                FullName = "JoÃ£o Silva",
                 Email = "joao@example.com",
                 Password = "Senha123!",
                 PasswordConfirmation = "Senha123!"
@@ -74,7 +74,7 @@ namespace SW_PortalProprietario.Test.Controllers
 
             _authServiceMock
                 .Setup(x => x.Register(It.IsAny<UserRegisterInputModel>()))
-                .ThrowsAsync(new ArgumentException("Email já está em uso"));
+                .ThrowsAsync(new ArgumentException("Email jÃ¡ estÃ¡ em uso"));
 
             // Act
             var result = await _controller.Register(inputModel);
@@ -86,10 +86,10 @@ namespace SW_PortalProprietario.Test.Controllers
             resultModel.Success.Should().BeFalse();
             resultModel.Status.Should().Be(400);
             resultModel.Errors.Should().NotBeEmpty();
-            resultModel.Errors.Should().Contain("Não foi possível registrar o usuário: (João Silva)");
+            resultModel.Errors.Should().Contain("NÃ£o foi possÃ­vel registrar o usuÃ¡rio: (JoÃ£o Silva)");
         }
 
-        [Fact(DisplayName = "Login - Deve retornar 200 OK quando login é bem-sucedido")]
+        [Fact(DisplayName = "Login - Deve retornar 200 OK quando login Ã© bem-sucedido")]
         public async Task Login_DeveRetornar200Ok_QuandoLoginBemSucedido()
         {
             // Arrange
@@ -126,7 +126,7 @@ namespace SW_PortalProprietario.Test.Controllers
             loginModel.Senha.Should().BeEmpty();
         }
 
-        [Fact(DisplayName = "Login - Deve retornar 404 NotFound quando FileNotFoundException é lançada")]
+        [Fact(DisplayName = "Login - Deve retornar 404 NotFound quando FileNotFoundException Ã© lanÃ§ada")]
         public async Task Login_DeveRetornar404NotFound_QuandoFileNotFoundExceptionLancada()
         {
             // Arrange
@@ -138,7 +138,7 @@ namespace SW_PortalProprietario.Test.Controllers
 
             _authServiceMock
                 .Setup(x => x.Login(It.IsAny<LoginInputModel>()))
-                .ThrowsAsync(new FileNotFoundException("Usuário não encontrado"));
+                .ThrowsAsync(new FileNotFoundException("UsuÃ¡rio nÃ£o encontrado"));
 
             // Act
             var result = await _controller.Login(loginModel);
@@ -150,10 +150,10 @@ namespace SW_PortalProprietario.Test.Controllers
             resultModel.Success.Should().BeFalse();
             resultModel.Status.Should().Be(404);
             resultModel.Errors.Should().NotBeEmpty();
-            resultModel.Errors.Should().Contain("Usuário não encontrado");
+            resultModel.Errors.Should().Contain("UsuÃ¡rio nÃ£o encontrado");
         }
 
-        [Fact(DisplayName = "Login - Deve retornar 400 BadRequest quando ArgumentException é lançada")]
+        [Fact(DisplayName = "Login - Deve retornar 400 BadRequest quando ArgumentException Ã© lanÃ§ada")]
         public async Task Login_DeveRetornar400BadRequest_QuandoArgumentExceptionLancada()
         {
             // Arrange

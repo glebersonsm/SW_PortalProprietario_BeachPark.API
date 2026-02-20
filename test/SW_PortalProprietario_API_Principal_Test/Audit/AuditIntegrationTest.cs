@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -14,11 +14,11 @@ using Xunit;
 namespace SW_PortalProprietario.Test.Audit
 {
     /// <summary>
-    /// Testes de integração que validam o fluxo completo de auditoria
+    /// Testes de integraÃ§Ã£o que validam o fluxo completo de auditoria
     /// </summary>
     public class AuditIntegrationTest
     {
-        [Fact(DisplayName = "Fluxo Completo - Deve capturar contexto HTTP e gerar log de criação")]
+        [Fact(DisplayName = "Fluxo Completo - Deve capturar contexto HTTP e gerar log de criaÃ§Ã£o")]
         public async Task FluxoCompleto_DeveCapturarContextoHTTP_EGerarLogDeCriacao()
         {
             // Arrange
@@ -64,7 +64,7 @@ namespace SW_PortalProprietario.Test.Audit
             capturedMessage.ObjectGuid.Should().Be(cidade.ObjectGuid);
         }
 
-        [Fact(DisplayName = "Fluxo Completo - Deve detectar mudanças e gerar log de atualização")]
+        [Fact(DisplayName = "Fluxo Completo - Deve detectar mudanÃ§as e gerar log de atualizaÃ§Ã£o")]
         public async Task FluxoCompleto_DeveDetectarMudancas_EGerarLogDeAtualizacao()
         {
             // Arrange
@@ -82,14 +82,14 @@ namespace SW_PortalProprietario.Test.Audit
             var oldCidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo",
+                Nome = "SÃ£o Paulo",
                 CodigoIbge = "3550308"
             };
 
             var newCidade = new Cidade
             {
                 Id = 1,
-                Nome = "São Paulo - Capital",
+                Nome = "SÃ£o Paulo - Capital",
                 CodigoIbge = "3550308",
                 UsuarioAlteracao = 1,
                 DataHoraAlteracao = DateTime.Now
@@ -111,11 +111,11 @@ namespace SW_PortalProprietario.Test.Audit
             var changes = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object?>>>(capturedMessage.ChangesJson);
             changes.Should().NotBeNull();
             changes!.Should().ContainKey("Nome");
-            changes["Nome"]["oldValue"].ToString().Should().Be("São Paulo");
-            changes["Nome"]["newValue"].ToString().Should().Be("São Paulo - Capital");
+            changes["Nome"]["oldValue"].ToString().Should().Be("SÃ£o Paulo");
+            changes["Nome"]["newValue"].ToString().Should().Be("SÃ£o Paulo - Capital");
         }
 
-        [Fact(DisplayName = "Fluxo Completo - Deve gerar mensagem amigável para operação de tag")]
+        [Fact(DisplayName = "Fluxo Completo - Deve gerar mensagem amigÃ¡vel para operaÃ§Ã£o de tag")]
         public async Task FluxoCompleto_DeveGerarMensagemAmigavel_ParaOperacaoDeTag()
         {
             // Arrange
@@ -194,7 +194,7 @@ namespace SW_PortalProprietario.Test.Audit
             context.Items["AuditUserId"].Should().Be("99");
         }
 
-        [Fact(DisplayName = "Fluxo Completo - Deve processar múltiplas operações sem interferência")]
+        [Fact(DisplayName = "Fluxo Completo - Deve processar mÃºltiplas operaÃ§Ãµes sem interferÃªncia")]
         public async Task FluxoCompleto_DeveProcessarMultiplasOperacoes_SemInterferencia()
         {
             // Arrange
@@ -215,7 +215,7 @@ namespace SW_PortalProprietario.Test.Audit
                 .Callback<AuditLogMessageEvent>(msg => messages.Add(msg))
                 .Returns(Task.CompletedTask);
 
-            // Act - Criar múltiplas entidades
+            // Act - Criar mÃºltiplas entidades
             var cidade1 = new Cidade { Id = 1, Nome = "Cidade 1", UsuarioCriacao = 1, DataHoraCriacao = DateTime.Now };
             var cidade2 = new Cidade { Id = 2, Nome = "Cidade 2", UsuarioCriacao = 1, DataHoraCriacao = DateTime.Now };
             var cidade3 = new Cidade { Id = 3, Nome = "Cidade 3", UsuarioCriacao = 1, DataHoraCriacao = DateTime.Now };

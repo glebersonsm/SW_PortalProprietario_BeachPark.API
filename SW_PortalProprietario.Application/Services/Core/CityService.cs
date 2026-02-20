@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -42,7 +42,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             try
             {
-                var city = await _repository.FindById<Cidade>(id) ?? throw new ArgumentException($"Não foi encontrado a cidade com Id: {id}!");
+                var city = await _repository.FindById<Cidade>(id) ?? throw new ArgumentException($"NÃ£o foi encontrado a cidade com Id: {id}!");
                 _repository.BeginTransaction();
                 await _repository.Remove(city);
 
@@ -54,7 +54,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw exception ?? new Exception("Não foi possível realizar a operação");
+                    throw exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -63,7 +63,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o País: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o PaÃ­s: {id}");
                 throw;
             }
         }
@@ -91,11 +91,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     if (result != null)
                         return _mapper.Map(result, new CidadeModel());
                 }
-                throw exception ?? new Exception("Erro na operação");
+                throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a Cidade: ({city.CodigoIbge} - {city.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a Cidade: ({city.CodigoIbge} - {city.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -236,7 +236,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 var city = (await _repository.FindByHql<Cidade>($"From Cidade c Inner Join Fetch c.Estado e Inner Join Fetch e.Pais p Where c.Id = {model.Id}")).FirstOrDefault();
                 if (city == null)
-                    throw new ArgumentException($"Não foi encontrada a Cidade com Id: {model.Id.GetValueOrDefault(0)}");
+                    throw new ArgumentException($"NÃ£o foi encontrada a Cidade com Id: {model.Id.GetValueOrDefault(0)}");
 
                 var objOld = await _serviceBase.GetObjectOld<Cidade>(model.Id.GetValueOrDefault());
 
@@ -244,7 +244,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
                     var estadoModel = (await _repository.FindByHql<Estado>($"From Estado e Inner Join Fetch e.Pais p Where e.Id = {model.EstadoId.GetValueOrDefault()}")).FirstOrDefault();
                     if (estadoModel == null)
-                        throw new ArgumentException($"Não foi encontrado o Estado com Id: {model.EstadoId.GetValueOrDefault()}");
+                        throw new ArgumentException($"NÃ£o foi encontrado o Estado com Id: {model.EstadoId.GetValueOrDefault()}");
 
                     city.Estado = estadoModel;
                 }
@@ -261,7 +261,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         return result.Value.cidades.First();
                 }
 
-                throw exception ?? new Exception("Erro na operação");
+                throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception)
             {
@@ -276,13 +276,13 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 if (string.IsNullOrWhiteSpace(cep))
                 {
-                    throw new ArgumentException("CEP é obrigatório");
+                    throw new ArgumentException("CEP Ã© obrigatÃ³rio");
                 }
 
                 var sanitizedCep = System.Text.RegularExpressions.Regex.Replace(cep, @"\D", "");
                 if (sanitizedCep.Length != 8)
                 {
-                    throw new ArgumentException("CEP deve conter 8 dígitos");
+                    throw new ArgumentException("CEP deve conter 8 dÃ­gitos");
                 }
 
                 using (HttpClient client = new HttpClient())
@@ -292,16 +292,16 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        _logger.LogError($"Não foi possível consultar o CEP: {sanitizedCep}. Status: {response.StatusCode}");
-                        throw new Exception("Não foi possível consultar o CEP");
+                        _logger.LogError($"NÃ£o foi possÃ­vel consultar o CEP: {sanitizedCep}. Status: {response.StatusCode}");
+                        throw new Exception("NÃ£o foi possÃ­vel consultar o CEP");
                     }
 
                     var cepData = await response.Content.ReadFromJsonAsync<CepResponseModel>();
 
                     if (cepData == null || cepData.erro == true)
                     {
-                        _logger.LogWarning($"CEP não encontrado: {sanitizedCep}");
-                        throw new ArgumentException("CEP não encontrado");
+                        _logger.LogWarning($"CEP nÃ£o encontrado: {sanitizedCep}");
+                        throw new ArgumentException("CEP nÃ£o encontrado");
                     }
 
                     _logger.LogInformation($"CEP consultado com sucesso: {sanitizedCep}");

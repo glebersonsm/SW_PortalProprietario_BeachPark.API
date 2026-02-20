@@ -1,12 +1,12 @@
-using SW_PortalProprietario.Application.Models.SystemModels;
+﻿using SW_PortalProprietario.Application.Models.SystemModels;
 
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces
 {
     public interface IVhfConfigService
     {
         /// <summary>
-        /// Retorna todas as opções disponíveis para configuração de reservas VHF (PMS).
-        /// Inclui: Tipo de utilização, Hotéis, Tipo de Hóspede, Origem, Tarifa Hotel, Código de Pensão.
+        /// Retorna todas as opÃ§Ãµes disponÃ­veis para configuraÃ§Ã£o de reservas VHF (PMS).
+        /// Inclui: Tipo de utilizaÃ§Ã£o, HotÃ©is, Tipo de HÃ³spede, Origem, Tarifa Hotel, CÃ³digo de PensÃ£o.
         /// </summary>
         Task<VhfConfigOpcoesModel> GetOpcoesAsync();
 

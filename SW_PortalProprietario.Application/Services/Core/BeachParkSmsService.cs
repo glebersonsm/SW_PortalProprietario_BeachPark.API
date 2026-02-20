@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace SW_PortalProprietario.Application.Services.Core
     /// <summary>
     /// Cliente de SMS do canal Beach Park (CXF REST).
     /// Endpoint: GET .../rest/enviar/?numero=...&amp;msg=...
-    /// URL configurável em appsettings (TwoFactorSms:BaseUrl). Ex.: http://sbox2.bpark.com.br:8181/cxf/sms/rest/enviar
+    /// URL configurÃ¡vel em appsettings (TwoFactorSms:BaseUrl). Ex.: http://sbox2.bpark.com.br:8181/cxf/sms/rest/enviar
     /// </summary>
     public class BeachParkSmsService : ISmsProvider
     {
@@ -35,17 +35,17 @@ namespace SW_PortalProprietario.Application.Services.Core
             var url = (baseUrl ?? _configuration.GetValue<string>(ConfigBaseUrl))?.Trim();
             if (string.IsNullOrEmpty(url))
             {
-                _logger.LogError("Endpoint de envio SMS 2FA não configurado. Configure em ParametroSistema (Endpoint de envio SMS 2FA) ou em appsettings (TwoFactorSms:BaseUrl).");
-                throw new InvalidOperationException("Endpoint de envio de SMS não configurado. Configure o endpoint nas configurações do sistema ou em appsettings.");
+                _logger.LogError("Endpoint de envio SMS 2FA nÃ£o configurado. Configure em ParametroSistema (Endpoint de envio SMS 2FA) ou em appsettings (TwoFactorSms:BaseUrl).");
+                throw new InvalidOperationException("Endpoint de envio de SMS nÃ£o configurado. Configure o endpoint nas configuraÃ§Ãµes do sistema ou em appsettings.");
             }
             var baseUrlNormalized = url.TrimEnd('/');
             if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(message))
             {
-                _logger.LogWarning("SMS ignorado: número ou mensagem vazios.");
+                _logger.LogWarning("SMS ignorado: nÃºmero ou mensagem vazios.");
                 return;
             }
 
-            // Redirecionar SMS para número permitido em ambiente de homologação
+            // Redirecionar SMS para nÃºmero permitido em ambiente de homologaÃ§Ã£o
             var enviarSmsApenasParaNumeroPermitido = _configuration.GetValue<bool>("EnviarSmsApenasParaNumeroPermitido", false);
             if (enviarSmsApenasParaNumeroPermitido)
             {
@@ -53,28 +53,28 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (!string.IsNullOrWhiteSpace(numeroPermitido))
                 {
                     var numeroOriginal = phoneNumber;
-                    // Normalizar número permitido: remover caracteres não numéricos
+                    // Normalizar nÃºmero permitido: remover caracteres nÃ£o numÃ©ricos
                     var apenasNumerosPermitido = new string(numeroPermitido.Trim().Where(char.IsDigit).ToArray());
-                    // Garantir formato correto (com código do país se necessário)
+                    // Garantir formato correto (com cÃ³digo do paÃ­s se necessÃ¡rio)
                     if (apenasNumerosPermitido.Length == 10 || apenasNumerosPermitido.Length == 11)
                     {
                         phoneNumber = "55" + apenasNumerosPermitido;
                     }
                     else if (apenasNumerosPermitido.Length == 12 || apenasNumerosPermitido.Length == 13)
                     {
-                        // Já tem código do país, usar como está
+                        // JÃ¡ tem cÃ³digo do paÃ­s, usar como estÃ¡
                         phoneNumber = apenasNumerosPermitido;
                     }
                     else
                     {
-                        // Usar como está se não corresponder aos formatos esperados
+                        // Usar como estÃ¡ se nÃ£o corresponder aos formatos esperados
                         phoneNumber = apenasNumerosPermitido;
                     }
-                    _logger.LogInformation("SMS redirecionado em homologação: de {NumeroOriginal} para {NumeroPermitido}", MaskPhone(numeroOriginal), MaskPhone(phoneNumber));
+                    _logger.LogInformation("SMS redirecionado em homologaÃ§Ã£o: de {NumeroOriginal} para {NumeroPermitido}", MaskPhone(numeroOriginal), MaskPhone(phoneNumber));
                 }
             }
 
-            // Remover código do país se o número tiver 13 dígitos (55 + 11 dígitos)
+            // Remover cÃ³digo do paÃ­s se o nÃºmero tiver 13 dÃ­gitos (55 + 11 dÃ­gitos)
             if (phoneNumber.Length == 13)
                 phoneNumber = phoneNumber.Substring(2);
 
@@ -88,7 +88,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
                     var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                     _logger.LogWarning("SMS retornou status {StatusCode} para {Phone}. Response: {Body}", response.StatusCode, MaskPhone(phoneNumber), body);
-                    throw new InvalidOperationException($"Falha ao enviar SMS: o serviço retornou {response.StatusCode}. Verifique a configuração (TwoFactorSms:BaseUrl) e o contrato da API.");
+                    throw new InvalidOperationException($"Falha ao enviar SMS: o serviÃ§o retornou {response.StatusCode}. Verifique a configuraÃ§Ã£o (TwoFactorSms:BaseUrl) e o contrato da API.");
                 }
             }
             catch (Exception ex) when (ex is not InvalidOperationException)

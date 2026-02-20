@@ -1,14 +1,14 @@
-using System;
+Ôªøusing System;
 
 namespace SW_PortalProprietario.Application.Models.TimeSharing
 {
     /// <summary>
-    /// Modelo de response para c·lculo simplificado de pontos necess·rios
+    /// Modelo de response para c√°lculo simplificado de pontos necess√°rios
     /// </summary>
     public class CalcularPontosResponseModel
     {
         /// <summary>
-        /// Pontos necess·rios para o perÌodo solicitado
+        /// Pontos necess√°rios para o per√≠odo solicitado
         /// </summary>
         public decimal PontosNecessarios { get; set; }
 
@@ -23,12 +23,12 @@ namespace SW_PortalProprietario.Application.Models.TimeSharing
         public DateTime DataFinal { get; set; }
 
         /// <summary>
-        /// Quantidade de di·rias
+        /// Quantidade de di√°rias
         /// </summary>
         public int Diarias { get; set; }
 
         /// <summary>
-        /// Total de hÛspedes
+        /// Total de h√≥spedes
         /// </summary>
         public int TotalHospedes { get; set; }
 
@@ -38,12 +38,12 @@ namespace SW_PortalProprietario.Application.Models.TimeSharing
         public int QuantidadeAdultos { get; set; }
 
         /// <summary>
-        /// Quantidade de crianÁas de 6 a 11 anos
+        /// Quantidade de crian√ßas de 6 a 11 anos
         /// </summary>
         public int QuantidadeCriancas1 { get; set; }
 
         /// <summary>
-        /// Quantidade de crianÁas de 0 a 5 anos
+        /// Quantidade de crian√ßas de 0 a 5 anos
         /// </summary>
         public int QuantidadeCriancas2 { get; set; }
 
@@ -63,12 +63,12 @@ namespace SW_PortalProprietario.Application.Models.TimeSharing
         public string? TipoApartamento { get; set; }
 
         /// <summary>
-        /// Padr„o tarif·rio aplicado
+        /// Padr√£o tarif√°rio aplicado
         /// </summary>
         public string? PadraoTarifario { get; set; }
 
         /// <summary>
-        /// N˙mero do contrato
+        /// N√∫mero do contrato
         /// </summary>
         public string? NumeroContrato { get; set; }
     }

@@ -1,4 +1,4 @@
-using AccessCenterDomain;
+﻿using AccessCenterDomain;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -62,7 +62,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 objEntity.UsuarioRemocaoId = usuario?.UserId;
                 sessionToUse.DeleteAsync(entity, CancellationToken);
             }
-            else throw new ArgumentException($"Objeto: {entity} não herda da EntityBaseCore");
+            else throw new ArgumentException($"Objeto: {entity} nÃ£o herda da EntityBaseCore");
         }
 
         public async void RemoveRange<T>(IList<T> entities, IStatelessSession? session = null)
@@ -238,7 +238,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                                 return (true, null);
                             }
                         }
-                        return (false, new Exception("A transação não estava ativa"));
+                        return (false, new Exception("A transaÃ§Ã£o nÃ£o estava ativa"));
                     }
                     catch (Exception err)
                     {
@@ -288,7 +288,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
 
             var usuario = await _authenticatedBaseHostedService.GetLoggedUserAsync(false);
             if (usuario != null && usuario.UserId.GetValueOrDefault(0) > 0)
-                throw new Exception("O ForcedSave só pode ser utilizado quando não existir um usuário logado!");
+                throw new Exception("O ForcedSave sÃ³ pode ser utilizado quando nÃ£o existir um usuÃ¡rio logado!");
 
             if (entity is EntityBaseCore objEntity)
             {
@@ -350,11 +350,11 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
         /// </summary>
         private string AddSchemaToTables(string sql)
         {
-            // Só aplica para PostgreSQL
+            // SÃ³ aplica para PostgreSQL
             if (DataBaseType != EnumDataBaseType.PostgreSql)
                 return sql;
 
-            // Obtém o schema da configuração ou usa o padrão
+            // ObtÃ©m o schema da configuraÃ§Ã£o ou usa o padrÃ£o
             var schemaName = GetSchemaName();
             if (string.IsNullOrEmpty(schemaName))
                 return sql;
@@ -362,9 +362,9 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
             // Lista de palavras-chave SQL que precedem nomes de tabelas
             var tableKeywords = new[] { "FROM", "JOIN", "INTO", "UPDATE", "TABLE" };
 
-            // Padrão para identificar tabelas sem schema
-            // Captura: palavra-chave SQL + espaço + nome_da_tabela (sem schema)
-            // Não captura se já tiver schema (formato: schema.tabela)
+            // PadrÃ£o para identificar tabelas sem schema
+            // Captura: palavra-chave SQL + espaÃ§o + nome_da_tabela (sem schema)
+            // NÃ£o captura se jÃ¡ tiver schema (formato: schema.tabela)
             var pattern = @"\b(" + string.Join("|", tableKeywords) + @")\s+(?!(?:[a-zA-Z_][a-zA-Z0-9_]*\.))([a-zA-Z_][a-zA-Z0-9_]*)";
 
             var result = System.Text.RegularExpressions.Regex.Replace(
@@ -375,7 +375,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                     var keyword = match.Groups[1].Value;
                     var tableName = match.Groups[2].Value;
 
-                    // Ignora subqueries com parênteses ou aliases comuns
+                    // Ignora subqueries com parÃªnteses ou aliases comuns
                     if (tableName.Equals("SELECT", StringComparison.OrdinalIgnoreCase) ||
                         tableName.Equals("VALUES", StringComparison.OrdinalIgnoreCase) ||
                         tableName.Equals("DUAL", StringComparison.OrdinalIgnoreCase))
@@ -392,19 +392,19 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
         }
 
         /// <summary>
-        /// Obtém o schema name da configuração
+        /// ObtÃ©m o schema name da configuraÃ§Ã£o
         /// </summary>
         private string GetSchemaName()
         {
             try
             {
-                // Tenta obter do arquivo de configuração
+                // Tenta obter do arquivo de configuraÃ§Ã£o
                 var schemaName = System.Environment.GetEnvironmentVariable("DEFAULT_SCHEMA");
 
                 if (!string.IsNullOrEmpty(schemaName))
                     return schemaName;
 
-                // Valor padrão para o projeto
+                // Valor padrÃ£o para o projeto
                 return "portalohana";
             }
             catch (Exception ex)
@@ -525,7 +525,7 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
         {
             var empresas = (await FindByHql<Empresa>("From Empresa e Inner Join Fetch e.Pessoa p")).AsList();
             if (empresas.Count() > 1 || empresas.Count() == 0)
-                throw new ArgumentException($"Não foi possível salvar os parâmetros do sistema empCount = {empresas.Count()}");
+                throw new ArgumentException($"NÃ£o foi possÃ­vel salvar os parÃ¢metros do sistema empCount = {empresas.Count()}");
 
             var empFirst = empresas.First();
 
@@ -606,8 +606,8 @@ namespace SW_PortalProprietario.Infra.Data.Repositories.Core
                 return parametroSistema;
 
             parametroSistema.HabilitarPagamentosOnLine =
-                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim ||
-                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Não;
+                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim ||
+                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Nao;
 
 
             return parametroSistema;

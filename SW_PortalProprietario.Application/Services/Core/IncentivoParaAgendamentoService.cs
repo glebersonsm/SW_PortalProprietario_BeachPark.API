@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -45,12 +45,12 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
         var dadosIncentivo = await ObterDadosIncentivoAsync(contratoId, anoReferencia);
         if (dadosIncentivo == null)
         {
-            throw new InvalidOperationException("Não foi possível obter os dados do contrato para geração do incentivo.");
+            throw new InvalidOperationException("NÃ£o foi possÃ­vel obter os dados do contrato para geraÃ§Ã£o do incentivo.");
         }
 
         var placeholders = BuildPlaceholderDictionary(dadosIncentivo);
 
-        _logger.LogInformation("Iniciando geração do documento de incentivo para contrato {ContratoId}, ano {AnoReferencia}", contratoId, anoReferencia);
+        _logger.LogInformation("Iniciando geraÃ§Ã£o do documento de incentivo para contrato {ContratoId}, ano {AnoReferencia}", contratoId, anoReferencia);
 
         var populatedHtml = PopulateHtmlTemplate(templateHtml, placeholders);
         var renderedHtml = ApplyQuillLayout(populatedHtml);
@@ -71,7 +71,7 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
         try
         {
             // TODO: Implementar busca real dos dados do contrato
-            // Por enquanto, retornando dados mock para demonstração
+            // Por enquanto, retornando dados mock para demonstraÃ§Ã£o
             var dados = new DadosIncentivoAgendamentoModel
             {
                 // Dados do Cliente/Contrato - estes devem ser buscados do banco
@@ -81,7 +81,7 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
                 EmailCliente = "cliente@exemplo.com",
                 TelefoneCliente = "(11) 99999-9999",
 
-                // Dados do Período de Agendamento
+                // Dados do PerÃ­odo de Agendamento
                 DataInicioAgendamento = new DateTime(anoReferencia, 1, 1),
                 DataFinalAgendamento = new DateTime(anoReferencia, 12, 31),
                 PeriodoAgendamentoFormatado = $"01/01/{anoReferencia} a 31/12/{anoReferencia}",
@@ -99,13 +99,13 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
                 ContatoSuporte = _configuration.GetValue<string>("ContatoSuporte", "suporte@exemplo.com"),
 
                 // Dados de incentivo
-                MensagemIncentivo = "Aproveite suas semanas disponíveis e faça suas reservas!",
+                MensagemIncentivo = "Aproveite suas semanas disponÃ­veis e faÃ§a suas reservas!",
                 DataLimiteAgendamento = new DateTime(anoReferencia, 11, 30),
                 BeneficiosAgendamento = new List<string>
                 {
-                    "Acesso prioritário a melhores acomodações",
-                    "Descontos em serviços do resort",
-                    "Upgrades gratuitos quando disponíveis"
+                    "Acesso prioritÃ¡rio a melhores acomodaÃ§Ãµes",
+                    "Descontos em serviÃ§os do resort",
+                    "Upgrades gratuitos quando disponÃ­veis"
                 }
             };
 
@@ -145,7 +145,7 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
             ["{{EmailCliente}}"] = dados.EmailCliente,
             ["{{TelefoneCliente}}"] = dados.TelefoneCliente,
 
-            // Dados do Período de Agendamento
+            // Dados do PerÃ­odo de Agendamento
             ["{{DataInicioAgendamento}}"] = dados.DataInicioAgendamento.ToString("dd/MM/yyyy"),
             ["{{DataFinalAgendamento}}"] = dados.DataFinalAgendamento.ToString("dd/MM/yyyy"),
             ["{{PeriodoAgendamentoFormatado}}"] = dados.PeriodoAgendamentoFormatado,
@@ -163,7 +163,7 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
 
             // Dados de Incentivo
             ["{{MensagemIncentivo}}"] = dados.MensagemIncentivo,
-            ["{{DataLimiteAgendamento}}"] = dados.DataLimiteAgendamento?.ToString("dd/MM/yyyy") ?? "Não definida",
+            ["{{DataLimiteAgendamento}}"] = dados.DataLimiteAgendamento?.ToString("dd/MM/yyyy") ?? "NÃ£o definida",
             ["{{BeneficiosAgendamento}}"] = FormatarBeneficios(dados.BeneficiosAgendamento),
 
             // Dados do Sistema
@@ -180,7 +180,7 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
 
         foreach (var semana in semanas)
         {
-            sb.AppendLine($"<li><strong>Ano {semana.Ano}:</strong> {semana.SemanasDisponiveis} semanas disponíveis de {semana.SemanasDireito} totais ({semana.PercentualUtilizacao:F1}% utilizado)</li>");
+            sb.AppendLine($"<li><strong>Ano {semana.Ano}:</strong> {semana.SemanasDisponiveis} semanas disponÃ­veis de {semana.SemanasDireito} totais ({semana.PercentualUtilizacao:F1}% utilizado)</li>");
         }
 
         sb.AppendLine("</ul>");
@@ -190,7 +190,7 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
     private static string FormatarBeneficios(List<string> beneficios)
     {
         if (!beneficios.Any())
-            return "Nenhum benefício específico configurado.";
+            return "Nenhum benefÃ­cio especÃ­fico configurado.";
 
         var sb = new StringBuilder();
         sb.AppendLine("<ul>");
@@ -212,8 +212,8 @@ public class IncentivoParaAgendamentoService : IIncentivoParaAgendamentoDocument
         sb.AppendLine("<th style='border: 1px solid #ddd; padding: 8px; text-align: left;'>Ano</th>");
         sb.AppendLine("<th style='border: 1px solid #ddd; padding: 8px; text-align: center;'>Direito</th>");
         sb.AppendLine("<th style='border: 1px solid #ddd; padding: 8px; text-align: center;'>Agendadas</th>");
-        sb.AppendLine("<th style='border: 1px solid #ddd; padding: 8px; text-align: center;'>Disponíveis</th>");
-        sb.AppendLine("<th style='border: 1px solid #ddd; padding: 8px; text-align: center;'>% Utilização</th>");
+        sb.AppendLine("<th style='border: 1px solid #ddd; padding: 8px; text-align: center;'>DisponÃ­veis</th>");
+        sb.AppendLine("<th style='border: 1px solid #ddd; padding: 8px; text-align: center;'>% UtilizaÃ§Ã£o</th>");
         sb.AppendLine("</tr>");
 
         foreach (var semana in semanas)

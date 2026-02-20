@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.AuthModels;
@@ -12,8 +12,8 @@ using Xunit;
 namespace SW_PortalProprietario.Test.Regression
 {
     /// <summary>
-    /// Testes de regressão - Garantem que funcionalidades existentes continuam funcionando
-    /// Estes testes devem passar sempre para garantir que mudanças não quebram funcionalidades existentes
+    /// Testes de regressÃ£o - Garantem que funcionalidades existentes continuam funcionando
+    /// Estes testes devem passar sempre para garantir que mudanÃ§as nÃ£o quebram funcionalidades existentes
     /// </summary>
     public class AuthRegressionTests : IntegrationTestBase, IClassFixture<IntegrationTestBase>
     {
@@ -24,7 +24,7 @@ namespace SW_PortalProprietario.Test.Regression
             _client = CreateClient();
         }
 
-        [Fact(DisplayName = "REGRESSÃO: Endpoints devem sempre retornar JSON válido")]
+        [Fact(DisplayName = "REGRESSÃƒO: Endpoints devem sempre retornar JSON vÃ¡lido")]
         public async Task Regressao_EndpointsDevemRetornarJsonValido()
         {
             // Arrange
@@ -54,24 +54,24 @@ namespace SW_PortalProprietario.Test.Regression
                     response = await _client.GetAsync(endpoint);
                 }
                 
-                // Aceita 500 se for erro de banco de dados não configurado, mas valida que é JSON válido
+                // Aceita 500 se for erro de banco de dados nÃ£o configurado, mas valida que Ã© JSON vÃ¡lido
                 var content = await response.Content.ReadAsStringAsync();
                 
-                // Valida que é JSON válido (mesmo em caso de erro)
+                // Valida que Ã© JSON vÃ¡lido (mesmo em caso de erro)
                 Action parseJson = () => JsonSerializer.Deserialize<object>(content);
-                parseJson.Should().NotThrow($"Endpoint {endpoint} deve retornar JSON válido, mesmo em caso de erro");
+                parseJson.Should().NotThrow($"Endpoint {endpoint} deve retornar JSON vÃ¡lido, mesmo em caso de erro");
                 
-                // Se não for 500, valida que está nos status codes esperados
+                // Se nÃ£o for 500, valida que estÃ¡ nos status codes esperados
                 if (response.StatusCode != HttpStatusCode.InternalServerError)
                 {
                     response.StatusCode.Should().BeOneOf(
                         new[] { HttpStatusCode.OK, HttpStatusCode.NotFound, HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized, HttpStatusCode.Conflict },
-                        $"Endpoint {endpoint} deve retornar status code válido");
+                        $"Endpoint {endpoint} deve retornar status code vÃ¡lido");
                 }
             }
         }
 
-        [Fact(DisplayName = "REGRESSÃO: Status codes devem seguir padrão estabelecido")]
+        [Fact(DisplayName = "REGRESSÃƒO: Status codes devem seguir padrÃ£o estabelecido")]
         public async Task Regressao_StatusCodesDevemSeguirPadrao()
         {
             // Arrange
@@ -95,14 +95,14 @@ namespace SW_PortalProprietario.Test.Regression
                     response = await _client.GetAsync(endpoint);
                 }
                 
-                // Aceita 500 se for erro de banco de dados não configurado
-                // Caso contrário, valida que está nos status codes esperados
+                // Aceita 500 se for erro de banco de dados nÃ£o configurado
+                // Caso contrÃ¡rio, valida que estÃ¡ nos status codes esperados
                 if (response.StatusCode == HttpStatusCode.InternalServerError)
                 {
-                    // Em caso de erro de banco, apenas valida que a resposta é JSON válido
+                    // Em caso de erro de banco, apenas valida que a resposta Ã© JSON vÃ¡lido
                     var content = await response.Content.ReadAsStringAsync();
                     Action parseJson = () => JsonSerializer.Deserialize<object>(content);
-                    parseJson.Should().NotThrow($"Endpoint {endpoint} deve retornar JSON válido mesmo em caso de erro");
+                    parseJson.Should().NotThrow($"Endpoint {endpoint} deve retornar JSON vÃ¡lido mesmo em caso de erro");
                 }
                 else
                 {
@@ -112,7 +112,7 @@ namespace SW_PortalProprietario.Test.Regression
             }
         }
 
-        [Fact(DisplayName = "REGRESSÃO: Mensagens de erro devem sempre ter formato consistente")]
+        [Fact(DisplayName = "REGRESSÃƒO: Mensagens de erro devem sempre ter formato consistente")]
         public async Task Regressao_MensagensErroDevemTerFormatoConsistente()
         {
             // Arrange
@@ -125,7 +125,7 @@ namespace SW_PortalProprietario.Test.Regression
             // Act
             var response = await _client.PostAsJsonAsync("/Auth/login", loginModel);
 
-            // Assert - Garante que mensagens de erro têm formato consistente
+            // Assert - Garante que mensagens de erro tÃªm formato consistente
             if (response.StatusCode == HttpStatusCode.BadRequest || 
                 response.StatusCode == HttpStatusCode.InternalServerError ||
                 response.StatusCode == HttpStatusCode.NotFound ||
@@ -136,7 +136,7 @@ namespace SW_PortalProprietario.Test.Regression
                     content, 
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 
-                // Validações críticas que não podem mudar
+                // ValidaÃ§Ãµes crÃ­ticas que nÃ£o podem mudar
                 result.Should().NotBeNull("Resposta de erro deve ser um ResultModel");
                 typeof(ResultModel<TokenResultModel>).GetProperty("Success").Should().NotBeNull("Resposta de erro deve ter propriedade Success");
                 typeof(ResultModel<TokenResultModel>).GetProperty("Message").Should().NotBeNull("Resposta de erro deve ter propriedade Message");

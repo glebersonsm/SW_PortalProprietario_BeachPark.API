@@ -1,4 +1,4 @@
-using CMDomain.Models.AuthModels;
+﻿using CMDomain.Models.AuthModels;
 using Dapper;
 using EsolutionPortalDomain.ReservasApiModels;
 using Microsoft.Extensions.Configuration;
@@ -139,7 +139,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         UserId = user?.Id,
                         Login = user?.Login!.TrimEnd().RemoveAccents()
                     };
-                else throw exception ?? new Exception("Erro na operação");
+                else throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception err)
             {
@@ -182,7 +182,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             user = (await _repository.FindByHql<Usuario>(sb.ToString())).FirstOrDefault();
 
             if (user != null)
-                throw new Exception($"Já existe um usuário cadastrado com o login: {userInputModel.CpfCnpj} ou eMail: {userInputModel.Email}");
+                throw new Exception($"JÃ¡ existe um usuÃ¡rio cadastrado com o login: {userInputModel.CpfCnpj} ou eMail: {userInputModel.Email}");
 
             user = await RegistrarUsuarioExecute(userInputModel);
             return user;
@@ -222,7 +222,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             user = (await _repository.FindByHql<Usuario>(sb.ToString())).FirstOrDefault();
 
 
-            bool adm = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            bool adm = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
 
             var avr = !adm ? await _communicationProvider.ValidateAccess(userInputModel.CpfCnpj, userInputModel.Password!) : null;
             bool novoUsuario = false;
@@ -252,7 +252,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                 Email = avr.LoginResult.dadosCliente.Email,
                                 Password = userInputModel.Password,
                                 PasswordConfirmation = userInputModel.PasswordConfirmation,
-                                Administrator = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Não)
+                                Administrator = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao)
                             });
                             pessoaLegadoId = avr.LoginResult.dadosCliente.PessoaId;
                         }
@@ -292,7 +292,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         }
 
                         if (string.IsNullOrEmpty(user.Login))
-                            throw new Exception($"Não foi possível criar o usuário, pois não foi possível setar o campo login do usuário!");
+                            throw new Exception($"NÃ£o foi possÃ­vel criar o usuÃ¡rio, pois nÃ£o foi possÃ­vel setar o campo login do usuÃ¡rio!");
 
                         await _repository.Save(user);
 
@@ -334,7 +334,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             else
             {
-                throw new Exception("Não foi possível logar no sistema");
+                throw new Exception("NÃ£o foi possÃ­vel logar no sistema");
             }
 
 
@@ -378,13 +378,13 @@ namespace SW_PortalProprietario.Application.Services.Core
         private async Task OrganizarTagsDoUsuario(Usuario user, IAccessValidateResultModel? avr, VinculoAccessXPortalBase? vinculo)
         {
             if (user == null)
-                throw new ArgumentException("Usuário não encontado.");
+                throw new ArgumentException("UsuÃ¡rio nÃ£o encontado.");
 
             if (avr == null)
-                throw new ArgumentException("Vínculo do usuário com empreendimento não encontrado.");
+                throw new ArgumentException("VÃ­nculo do usuÃ¡rio com empreendimento nÃ£o encontrado.");
 
             if (vinculo == null)
-                throw new ArgumentException("Vínculo do usuário com empreendimento não encontrado.");
+                throw new ArgumentException("VÃ­nculo do usuÃ¡rio com empreendimento nÃ£o encontrado.");
 
             //"TagHomesId": 3,
             //"TagTropicalId": 2,
@@ -393,7 +393,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             if (tagHomes == null || tagTropical == null)
             {
-                throw new ArgumentException("Não foi possível criar as tags 'Homes' e ou 'Tropical'!");
+                throw new ArgumentException("NÃ£o foi possÃ­vel criar as tags 'Homes' e ou 'Tropical'!");
             }
 
             if (!string.IsNullOrEmpty(vinculo.AcEmpreendimentoNome) && vinculo.EmpreendimentoId.GetValueOrDefault(0) > 0)
@@ -512,7 +512,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             user = (await _repository.FindByHql<Usuario>(sb.ToString())).FirstOrDefault();
 
 
-            bool adm = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            bool adm = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
 
             var avr = !adm && !criarUsuario ? await _communicationProvider.ValidateAccess(userInputModel.Login, userInputModel.Password!) : null;
             bool novoUsuario = criarUsuario;
@@ -549,7 +549,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                             if (avr != null)
                             {
                                 if (string.IsNullOrEmpty(userInputModel.FullName) || (string.IsNullOrEmpty(avr.LoginResult?.dadosCliente?.Cpf) && string.IsNullOrEmpty(avr.LoginResult?.dadosCliente?.Cnpj)) || string.IsNullOrEmpty(userInputModel.Email) || !userInputModel.Email.Contains("@"))
-                                    throw new ArgumentException("Não foi possível criar o usuário (DATALS)");
+                                    throw new ArgumentException("NÃ£o foi possÃ­vel criar o usuÃ¡rio (DATALS)");
 
                                 user = await RegistrarUsuarioExecute(new UserRegisterInputModel()
                                 {
@@ -558,14 +558,14 @@ namespace SW_PortalProprietario.Application.Services.Core
                                     Email = avr.LoginResult.dadosCliente.Email,
                                     Password = userInputModel.Password,
                                     PasswordConfirmation = userInputModel.PasswordConfirmation,
-                                    Administrator = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Não)
+                                    Administrator = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao)
                                 });
                                 pessoaLegadoId = avr.LoginResult.dadosCliente.PessoaId;
                             }
                             else
                             {
                                 if (string.IsNullOrEmpty(userInputModel.FullName) || string.IsNullOrEmpty(userInputModel.Email) || !userInputModel.Email.Contains("@"))
-                                    throw new ArgumentException("Não foi possível criar o usuário (DATALS)");
+                                    throw new ArgumentException("NÃ£o foi possÃ­vel criar o usuÃ¡rio (DATALS)");
 
                                 user = await RegistrarUsuarioExecute(new UserRegisterInputModel()
                                 {
@@ -574,7 +574,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                     Email = userInputModel.Email,
                                     Password = userInputModel.Password,
                                     PasswordConfirmation = userInputModel.PasswordConfirmation,
-                                    Administrator = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Não)
+                                    Administrator = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao)
                                 });
                                 pessoaLegadoId = result?.PessoaLegadoId;
                             }
@@ -614,7 +614,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         }
 
                         if (string.IsNullOrEmpty(user.Login))
-                            throw new Exception($"Não foi possível criar o usuário, pois não foi possível setar o campo login do usuário!");
+                            throw new Exception($"NÃ£o foi possÃ­vel criar o usuÃ¡rio, pois nÃ£o foi possÃ­vel setar o campo login do usuÃ¡rio!");
 
                         await _repository.Save(user);
 
@@ -685,7 +685,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             else
             {
-                throw new Exception("Não foi possível logar no sistema");
+                throw new Exception("NÃ£o foi possÃ­vel logar no sistema");
             }
 
             if (!adm && loginByAccessCenter && novoUsuario && user != null && !string.IsNullOrEmpty(user.Login))
@@ -701,13 +701,13 @@ namespace SW_PortalProprietario.Application.Services.Core
             ArgumentNullException.ThrowIfNull(userInputModel, nameof(userInputModel));
 
             if (string.IsNullOrEmpty(userInputModel.FullName))
-                throw new Exception("Deve ser informado o nome completo do usuário (Nome e sobrenome)");
+                throw new Exception("Deve ser informado o nome completo do usuÃ¡rio (Nome e sobrenome)");
 
             if (userInputModel.FullName.Split(' ').Length < 2)
-                throw new Exception("Deve ser informado o nome completo do usuário (Nome e sobrenome)");
+                throw new Exception("Deve ser informado o nome completo do usuÃ¡rio (Nome e sobrenome)");
 
             if (string.IsNullOrEmpty(userInputModel.Email) || !userInputModel.Email.Contains("@"))
-                throw new Exception("Deve ser informado o nome email do usuário");
+                throw new Exception("Deve ser informado o nome email do usuÃ¡rio");
 
             UsuarioValidateResultModel dadosLegado = await _communicationProvider.GerUserFromLegado(userInputModel);
 
@@ -718,11 +718,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
                     if (dadosLegado.Estrangeiro != "S")
                     {
-                        throw new ArgumentException("Deve ser informado o CPF/CNPJ email do usuário (VERIF-STR)");
+                        throw new ArgumentException("Deve ser informado o CPF/CNPJ email do usuÃ¡rio (VERIF-STR)");
                     }
                     
                 }
-                else throw new ArgumentException("Não foi encontrado.");
+                else throw new ArgumentException("NÃ£o foi encontrado.");
                 
             }
             else
@@ -732,21 +732,21 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (apenasNumeros.Length <= 11)
                 {
                     var isCpf = Helper.IsCpf(apenasNumeros);
-                    if (!isCpf) throw new ArgumentException("O CPF informado no usuário é inválido");
+                    if (!isCpf) throw new ArgumentException("O CPF informado no usuÃ¡rio Ã© invÃ¡lido");
                 }
                 else if (apenasNumeros.Length > 11)
                 {
                     var isCnpj = Helper.IsCnpj(apenasNumeros);
-                    if (!isCnpj) throw new ArgumentException("O CNPJ informado no usuário é inválido");
+                    if (!isCnpj) throw new ArgumentException("O CNPJ informado no usuÃ¡rio Ã© invÃ¡lido");
                 }
             }
 
 
             if (string.IsNullOrEmpty(userInputModel.Password) || string.IsNullOrEmpty(userInputModel.PasswordConfirmation) || userInputModel.PasswordConfirmation != userInputModel.Password)
-                throw new Exception("Os valores dos campos Senha e Confirmação devem ser iguais");
+                throw new Exception("Os valores dos campos Senha e ConfirmaÃ§Ã£o devem ser iguais");
 
-            if (_configuration.GetValue<bool>("BloquearCriacaoAdmForaDebugMode", false) && !Debugger.IsAttached && userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
-                throw new Exception("O campo 'Administrator' só pode ser utilizado em Debug Mode apenas pelos desenvolvedores!");
+            if (_configuration.GetValue<bool>("BloquearCriacaoAdmForaDebugMode", false) && !Debugger.IsAttached && userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
+                throw new Exception("O campo 'Administrator' sÃ³ pode ser utilizado em Debug Mode apenas pelos desenvolvedores!");
 
             return dadosLegado;
 
@@ -813,7 +813,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     await _repository.ForcedSave(userGroupOfUser);
                 }
             }
-            else throw new Exception($"Deve ser setado o parâmetro de inicialiação: 'AdmGroupDefaultName' para criação de usuário com o valor: 'Administrator=true'");
+            else throw new Exception($"Deve ser setado o parÃ¢metro de inicialiaÃ§Ã£o: 'AdmGroupDefaultName' para criaÃ§Ã£o de usuÃ¡rio com o valor: 'Administrator=true'");
         }
 
         private async Task<Usuario?> RegistrarUsuarioExecute(UserRegisterInputModel userInputModel)
@@ -852,7 +852,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(userInputModel?.Password),
                 DataHoraCriacao = DateTime.Now,
                 Status = EnumStatus.Ativo,
-                Administrador = userInputModel != null ? userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Não) : EnumSimNao.Não
+                Administrador = userInputModel != null ? userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao) : EnumSimNao.Nao
             };
 
 
@@ -860,7 +860,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Login = '{usu.Login}' and u.DataHoraRemocao is null and coalesce(u.Removido,0) = 0")).FirstOrDefault();
 
             if (exists != null)
-                throw new Exception($"Já existe um usuário com o login: '{usu.Login}'");
+                throw new Exception($"JÃ¡ existe um usuÃ¡rio com o login: '{usu.Login}'");
 
             if (pessoa != null)
             {
@@ -931,19 +931,19 @@ namespace SW_PortalProprietario.Application.Services.Core
                 userLoginInputModel.Login = userLoginInputModel.Login.TrimEnd().RemoveAccents().Replace(" ","");
             }
 
-            // Valida CPF ou CNPJ quando o login contiver 11 ou 14 caracteres numéricos
+            // Valida CPF ou CNPJ quando o login contiver 11 ou 14 caracteres numÃ©ricos
             var loginNumerico = Helper.ApenasNumeros(userLoginInputModel?.Login);
             if (!string.IsNullOrEmpty(loginNumerico))
             {
                 if (loginNumerico.Length == 11)
                 {
                     if (!Helper.IsCpf(loginNumerico))
-                        throw new ArgumentException("CPF inválido.");
+                        throw new ArgumentException("CPF invÃ¡lido.");
                 }
                 else if (loginNumerico.Length == 14)
                 {
                     if (!Helper.IsCnpj(loginNumerico))
-                        throw new ArgumentException("CNPJ inválido.");
+                        throw new ArgumentException("CNPJ invÃ¡lido.");
                 }
             }
 
@@ -993,7 +993,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
 
                 if (usuarioManter != null && usuarioManter.Status != EnumStatus.Ativo)
-                    throw new ArgumentException("Usuário inativo");
+                    throw new ArgumentException("UsuÃ¡rio inativo");
 
                 if (usuarioManter != null)
                 {
@@ -1034,14 +1034,14 @@ namespace SW_PortalProprietario.Application.Services.Core
                     {
                         if ((!BCrypt.Net.BCrypt.Verify(senha, usuarioManter.PasswordHash) && !byPassPasswordValidation))
                         {
-                            throw new ArgumentException("Senha inválida");
+                            throw new ArgumentException("Senha invÃ¡lida");
                         }
 
                         await VincularEmpresasAoUsuario(usuarioManter, true);
 
-                        if (usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim ||
-                            usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim ||
-                            usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                        if (usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim ||
+                            usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim ||
+                            usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                         {
                             if (BCrypt.Net.BCrypt.Verify(senha, usuarioManter.PasswordHash) || byPassPasswordValidation)
                             {
@@ -1052,16 +1052,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                                 await GenerateToken(userReturn, usuarioManter, usuarioManter.ProviderChaveUsuario);
                                 await _cache.AddAsync(usuarioManter.Id.ToString(), userReturn, new DateTimeOffset(userReturn.FimValidade.GetValueOrDefault()), 0, CancellationToken);
                                 _serviceBase.UsuarioId = usuarioManter.Id;
-                                userReturn.IsAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                                userReturn.IsGestorFinanceiro = usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                                userReturn.IsGestorReservasAgendamentos = usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                                userReturn.IsAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                                userReturn.IsGestorFinanceiro = usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                                userReturn.IsGestorReservasAgendamentos = usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
                             }
                         }
                         else
                         {
                             var res = await _serviceBase.GetPessoaProviderVinculadaPessoaSistema($"{usuarioManter.Pessoa?.Id}", _communicationProvider.CommunicationProviderName);
                             if (res == null || !res.Any())
-                                throw new Exception("Não foi possível logar no sistema, não foi encontrado o vínculo do usuário com o sistema legado.");
+                                throw new Exception("NÃ£o foi possÃ­vel logar no sistema, nÃ£o foi encontrado o vÃ­nculo do usuÃ¡rio com o sistema legado.");
                             pessoasLegado = res.AsList();
 
                             vinculo = await _communicationProvider.GetOutrosDadosPessoaProvider(pessoasLegado.First().PessoaProvider!);
@@ -1077,8 +1077,8 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                     }
 
-                    if (usuarioManter == null || (usuarioManter != null && (usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Não &&
-                        usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Não && usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Não)))
+                    if (usuarioManter == null || (usuarioManter != null && (usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Nao &&
+                        usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Nao && usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Nao)))
                     {
                         avr = await _communicationProvider.ValidateAccess(userLoginInputModel.Login, userLoginInputModel.Senha, pessoaProviderId);
                         if (avr.Erros != null && avr.Erros.Any())
@@ -1086,7 +1086,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                             if (vinculo == null)
                             {
                                 avr.Erros = new List<string>();
-                                avr.Erros.Add("Usuário não encontrado / contrato NE");
+                                avr.Erros.Add("UsuÃ¡rio nÃ£o encontrado / contrato NE");
                             }
 
                             throw new ArgumentException(avr.Erros.First());
@@ -1120,7 +1120,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                         Email = avr.LoginResult.dadosCliente.Email,
                                         Password = userLoginInputModel.Senha,
                                         PasswordConfirmation = userLoginInputModel.Senha,
-                                        Administrator = EnumSimNao.Não
+                                        Administrator = EnumSimNao.Nao
                                     });
 
                                     usuarioManter!.Login = userLoginInputModel.Login.RemoveAccents();
@@ -1154,7 +1154,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                         var status = await _communicationProvider.GetContratos(new List<int>() { int.Parse(psxpp.PessoaProvider) });
                                         if (status != null && !status.Any(b => b.Status == "A"))
                                         {
-                                            throw new ArgumentException("Não foi encontrado nanhum contrato ativo no sistema");
+                                            throw new ArgumentException("NÃ£o foi encontrado nanhum contrato ativo no sistema");
                                         }
                                     }
 
@@ -1164,9 +1164,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                                 userReturn.FimValidade = DateTime.Now.AddDays(1);
                                 await GenerateToken(userReturn, usuarioManter, usuarioManter.ProviderChaveUsuario, vinculo);
                                 await _cache.AddAsync(usuarioManter.Id.ToString(), userReturn, new DateTimeOffset(userReturn.FimValidade.GetValueOrDefault()), 0, CancellationToken);
-                                userReturn.IsAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                                userReturn.IsGestorFinanceiro = usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                                userReturn.IsGestorReservasAgendamentos = usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                                userReturn.IsAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                                userReturn.IsGestorFinanceiro = usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                                userReturn.IsGestorReservasAgendamentos = usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
 
                                 if (vinculo != null && !string.IsNullOrEmpty(vinculo.PadraoDeCor) && !vinculo.PadraoDeCor.Contains("default", StringComparison.InvariantCultureIgnoreCase) && userReturn != null)
                                     userReturn.PadraoDeCor = vinculo.PadraoDeCor;
@@ -1207,9 +1207,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                         userReturn.FimValidade = DateTime.Now.AddDays(1);
                         await GenerateToken(userReturn, usuarioManter, usuarioManter.ProviderChaveUsuario, vinculo);
                         await _cache.AddAsync(usuarioManter.Id.ToString(), userReturn, new DateTimeOffset(userReturn.FimValidade.GetValueOrDefault()), 0, CancellationToken);
-                        userReturn.IsAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                        userReturn.IsGestorFinanceiro = usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                        userReturn.IsGestorReservasAgendamentos = usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                        userReturn.IsAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                        userReturn.IsGestorFinanceiro = usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                        userReturn.IsGestorReservasAgendamentos = usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
                         if (vinculo != null && !string.IsNullOrEmpty(vinculo.PadraoDeCor) && !vinculo.PadraoDeCor.Contains("default", StringComparison.InvariantCultureIgnoreCase) && userReturn != null)
                             userReturn.PadraoDeCor = vinculo.PadraoDeCor;
 
@@ -1250,22 +1250,22 @@ namespace SW_PortalProprietario.Application.Services.Core
                     }
 
                     if (usuarioManter == null || usuarioManter.Status != EnumStatus.Ativo)
-                        throw new FileNotFoundException("Usuário não encontrado");
+                        throw new FileNotFoundException("UsuÃ¡rio nÃ£o encontrado");
 
                     DadosContratoModel? frAtendimentoVendaModel = null;
 
 
-                    if (!(await _communicationProvider.IsDefault()) && (usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) != EnumSimNao.Sim &&
-                        usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) != EnumSimNao.Sim &&
-                        usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) != EnumSimNao.Sim))
+                    if (!(await _communicationProvider.IsDefault()) && (usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Nao) != EnumSimNao.Sim &&
+                        usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) != EnumSimNao.Sim &&
+                        usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) != EnumSimNao.Sim))
                     {
                         //var cpfOuCnpjCliente = (await _repository.FindByHql<PessoaDocumento>($"From PessoaDocumento pd Inner Join Fetch pd.Pessoa p Inner Join Fetch pd.TipoDocumento td Where p.Id = {usuarioManter?.Pessoa?.Id} and Lower(td.Nome) in ('cpf','cnpj') and pd.ValorNumerico is not null")).FirstOrDefault();
                         //if (cpfOuCnpjCliente == null)
-                        //    throw new Exception($"Deve ser informado pelo menos um dos seguintes documentos do usuário antes de efetuar o login:{Environment.NewLine}'CPF' se pessoa física ou {Environment.NewLine}'CNPJ' se pessoa jurídica.");
+                        //    throw new Exception($"Deve ser informado pelo menos um dos seguintes documentos do usuÃ¡rio antes de efetuar o login:{Environment.NewLine}'CPF' se pessoa fÃ­sica ou {Environment.NewLine}'CNPJ' se pessoa jurÃ­dica.");
 
                         //avr = await _communicationProvider.ValidateAccess(cpfOuCnpjCliente.ValorNumerico!, userLoginInputModel.Senha);
                         //if (avr.Erros != null && avr.Erros.Any())
-                        //    throw new Exception($"Não foi possível logar no sistema, devido a seguinte falha:{Environment.NewLine}Provider: {_communicationProvider.CommunicationProviderName}{Environment.NewLine}Erros:{string.Join($"{Environment.NewLine}", avr.Erros)}");
+                        //    throw new Exception($"NÃ£o foi possÃ­vel logar no sistema, devido a seguinte falha:{Environment.NewLine}Provider: {_communicationProvider.CommunicationProviderName}{Environment.NewLine}Erros:{string.Join($"{Environment.NewLine}", avr.Erros)}");
 
                         var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(usuarioManter!.Id, _communicationProvider.CommunicationProviderName);
 
@@ -1276,7 +1276,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                 var contratos = await _communicationProvider.GetContratos(new List<int>() { int.Parse(pessoaProvider.First().PessoaProvider) });
                                 if (contratos != null && !contratos.Any(b => b.Status == "A"))
                                 {
-                                    throw new ArgumentException("Não foi encontrado nanhum contrato ativo no sistema");
+                                    throw new ArgumentException("NÃ£o foi encontrado nanhum contrato ativo no sistema");
                                 }
                                 frAtendimentoVendaModel = contratos != null && contratos.Any() ? contratos.FirstOrDefault(b => b.Status == "A") : null;
                             }
@@ -1293,9 +1293,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                         await GenerateToken(userReturn, usuarioManter, usuarioManter.ProviderChaveUsuario);
                         await _cache.AddAsync(usuarioManter.Id.ToString(), userReturn, new DateTimeOffset(userReturn.FimValidade.GetValueOrDefault()), 0, CancellationToken);
                         _serviceBase.UsuarioId = usuarioManter.Id;
-                        userReturn.IsAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                        userReturn.IsGestorFinanceiro = usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                        userReturn.IsGestorReservasAgendamentos = usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                        userReturn.IsAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                        userReturn.IsGestorFinanceiro = usuarioManter.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                        userReturn.IsGestorReservasAgendamentos = usuarioManter.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
                         if (_communicationProvider.CommunicationProviderName.Contains("esolution", StringComparison.InvariantCultureIgnoreCase))
                         {
                             await SetarOutrosDadosDoUsuario(userReturn);
@@ -1325,16 +1325,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
                     var userProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(userReturn.UserId.GetValueOrDefault());
                     if (userProvider == null)
-                        throw new Exception("Não foi possível validar o acesso do usuário no sistema, entre em contato com a Central de Atendimento ao Cliente.");
+                        throw new Exception("NÃ£o foi possÃ­vel validar o acesso do usuÃ¡rio no sistema, entre em contato com a Central de Atendimento ao Cliente.");
 
                     //var dadosCLienteLegado = await _communicationProvider.ValidateAccess(userReturn.Login!,userLoginInputModel.Senha!, userProvider.PessoaProvider!);
                     //if (dadosCLienteLegado == null || dadosCLienteLegado.LoginResult == null || dadosCLienteLegado.LoginResult.dadosCliente == null)
-                    //    throw new ArgumentException("Não foi encontrado nanhum contrato ativo no sistema");
+                    //    throw new ArgumentException("NÃ£o foi encontrado nanhum contrato ativo no sistema");
                 }
 
                 var commitResult = await _repository.CommitAsync();
                 if (!commitResult.executed)
-                    throw commitResult.exception ?? new Exception("Erro na operação");
+                    throw commitResult.exception ?? new Exception("Erro na operaÃ§Ã£o");
 
                 return userReturn;
 
@@ -1360,42 +1360,42 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             login = login.Trim().RemoveAccents().Replace(" ", "");
 
-            // Valida CPF ou CNPJ quando o login contiver 11 ou 14 caracteres numéricos (antes de pedir a senha)
+            // Valida CPF ou CNPJ quando o login contiver 11 ou 14 caracteres numÃ©ricos (antes de pedir a senha)
             var loginNumerico = Helper.ApenasNumeros(login);
             if (!string.IsNullOrEmpty(loginNumerico))
             {
                 if (loginNumerico.Length == 11)
                 {
                     if (!Helper.IsCpf(loginNumerico))
-                        throw new ArgumentException("CPF inválido.");
+                        throw new ArgumentException("CPF invÃ¡lido.");
                 }
                 else if (loginNumerico.Length == 14)
                 {
                     if (!Helper.IsCnpj(loginNumerico))
-                        throw new ArgumentException("CNPJ inválido.");
+                        throw new ArgumentException("CNPJ invÃ¡lido.");
                 }
             }
 
-            // Verifica se o usuário existe antes de pedir a senha
+            // Verifica se o usuÃ¡rio existe antes de pedir a senha
             var usuarios = await GetUsuario(new LoginInputModel { Login = login });
             Usuario? usuario = usuarios?.OrderByDescending(a => a.Id).FirstOrDefault();
             if (usuario == null)
-                throw new FileNotFoundException("Usuário não encontrado.");
+                throw new FileNotFoundException("UsuÃ¡rio nÃ£o encontrado.");
             if (usuario.Status != EnumStatus.Ativo)
-                throw new ArgumentException("Usuário inativo.");
-            bool isAdmin = usuario.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                throw new ArgumentException("UsuÃ¡rio inativo.");
+            bool isAdmin = usuario.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
             result.UserType = isAdmin ? "Administrador" : "Cliente";
             ParametroSistemaViewModel? param = null;
-            try { param = await _repository.GetParametroSistemaViewModel(); } catch { /* sem empresa/sessão */ }
+            try { param = await _repository.GetParametroSistemaViewModel(); } catch { /* sem empresa/sessÃ£o */ }
             if (param == null) return result;
             bool twoFAForProfile = isAdmin
-                ? (param.Habilitar2FAParaAdministrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
-                : (param.Habilitar2FAParaCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim);
+                ? (param.Habilitar2FAParaAdministrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
+                : (param.Habilitar2FAParaCliente.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim);
             if (!twoFAForProfile) return result;
             result.RequiresTwoFactor = true;
-            if (param.Habilitar2FAPorEmail.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim && !string.IsNullOrEmpty(usuario.Pessoa?.EmailPreferencial) && usuario.Pessoa.EmailPreferencial.Contains("@"))
+            if (param.Habilitar2FAPorEmail.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim && !string.IsNullOrEmpty(usuario.Pessoa?.EmailPreferencial) && usuario.Pessoa.EmailPreferencial.Contains("@"))
                 result.Channels.Add(new Login2FAChannelModel { Type = "email", Display = MaskEmail(usuario.Pessoa.EmailPreferencial) });
-            if (param.Habilitar2FAPorSms.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+            if (param.Habilitar2FAPorSms.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
             {
                 var celular = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
                 if (!string.IsNullOrEmpty(celular))
@@ -1411,17 +1411,17 @@ namespace SW_PortalProprietario.Application.Services.Core
             var login = model.Login.Trim().RemoveAccents().Replace(" ", "");
             var options = await GetLogin2FAOptionsAsync(login);
             if (!options.RequiresTwoFactor || options.Channels == null || !options.Channels.Any())
-                throw new ArgumentException("Este usuário não está configurado para login em duas etapas.");
+                throw new ArgumentException("Este usuÃ¡rio nÃ£o estÃ¡ configurado para login em duas etapas.");
             var channel = model.TwoFactorChannel?.Trim().ToLowerInvariant();
             if (string.IsNullOrEmpty(channel) || (channel != "email" && channel != "sms"))
-                throw new ArgumentException("Para sua segurança, informe o canal (e-mail ou SMS) para receber o código de verificação.");
+                throw new ArgumentException("Para sua seguranÃ§a, informe o canal (e-mail ou SMS) para receber o cÃ³digo de verificaÃ§Ã£o.");
             var channelAllowed = options.Channels.Any(c => string.Equals(c.Type, channel, StringComparison.OrdinalIgnoreCase));
             if (!channelAllowed)
-                throw new ArgumentException("Canal não disponível para este usuário.");
+                throw new ArgumentException("Canal nÃ£o disponÃ­vel para este usuÃ¡rio.");
             var usuarios = await GetUsuario(new LoginInputModel { Login = login });
             var usuario = usuarios?.OrderByDescending(a => a.Id).FirstOrDefault();
             if (usuario == null || usuario.Status != EnumStatus.Ativo)
-                throw new FileNotFoundException("Usuário não encontrado.");
+                throw new FileNotFoundException("UsuÃ¡rio nÃ£o encontrado.");
             return await MaybeRequire2FAAsync(usuario, channel);
         }
 
@@ -1442,9 +1442,9 @@ namespace SW_PortalProprietario.Application.Services.Core
             userReturn.FimValidade = DateTime.Now.AddDays(1);
             await GenerateToken(userReturn, usuario, usuario.ProviderChaveUsuario);
             await _cache.AddAsync(usuario.Id.ToString(), userReturn, new DateTimeOffset(userReturn.FimValidade.GetValueOrDefault()), 0, CancellationToken);
-            userReturn.IsAdmin = usuario.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-            userReturn.IsGestorFinanceiro = usuario.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-            userReturn.IsGestorReservasAgendamentos = usuario.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            userReturn.IsAdmin = usuario.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+            userReturn.IsGestorFinanceiro = usuario.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+            userReturn.IsGestorReservasAgendamentos = usuario.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
             return userReturn;
         }
 
@@ -1453,14 +1453,14 @@ namespace SW_PortalProprietario.Application.Services.Core
             ParametroSistemaViewModel? param = null;
             try { param = await _repository.GetParametroSistemaViewModel(); } catch { return null; }
             if (param == null) return null;
-            bool isAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+            bool isAdmin = usuarioManter.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
             bool twoFAForProfile = isAdmin
-                ? (param.Habilitar2FAParaAdministrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
-                : (param.Habilitar2FAParaCliente.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim);
+                ? (param.Habilitar2FAParaAdministrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
+                : (param.Habilitar2FAParaCliente.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim);
             if (!twoFAForProfile) return null;
             var channel = twoFactorChannel?.Trim().ToLowerInvariant();
             if (string.IsNullOrEmpty(channel) || (channel != "email" && channel != "sms"))
-                throw new ArgumentException("Para sua segurança, informe o canal (e-mail ou SMS) para receber o código de verificação.");
+                throw new ArgumentException("Para sua seguranÃ§a, informe o canal (e-mail ou SMS) para receber o cÃ³digo de verificaÃ§Ã£o.");
             var twoFactorId = Guid.NewGuid();
             var code = Generate2FACode();
             var payload = new TwoFactorCachePayload { Code = code, UserId = usuarioManter.Id };
@@ -1504,23 +1504,23 @@ namespace SW_PortalProprietario.Application.Services.Core
         }
 
         /// <summary>
-        /// Determina o email correto para envio baseado no ambiente e perfil do usuário.
-        /// Para 2FA, sempre usa o usuário logado como referência de perfil.
+        /// Determina o email correto para envio baseado no ambiente e perfil do usuÃ¡rio.
+        /// Para 2FA, sempre usa o usuÃ¡rio logado como referÃªncia de perfil.
         /// </summary>
         private async Task<string> GetEmailDestinatarioAsync(Usuario usuarioDestino, string? emailOriginal)
         {
             var tipoAmbiente = _configuration.GetValue<string>("TipoAmbiente", "PRD")?.ToUpper();
             
-            // Se for PRD, sempre enviar para o próprio usuário destino
+            // Se for PRD, sempre enviar para o prÃ³prio usuÃ¡rio destino
             if (tipoAmbiente == "PRD")
             {
                 return emailOriginal ?? usuarioDestino.Pessoa?.EmailPreferencial ?? "";
             }
             
-            // Se for HML, aplicar regras específicas
+            // Se for HML, aplicar regras especÃ­ficas
             if (tipoAmbiente == "HML")
             {
-                // Para 2FA, sempre usar o usuário logado como referência
+                // Para 2FA, sempre usar o usuÃ¡rio logado como referÃªncia
                 var loggedUser = await _repository.GetLoggedUser();
                 Usuario? usuarioParaVerificarPerfil = null;
                 
@@ -1529,16 +1529,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                     usuarioParaVerificarPerfil = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                 }
                 
-                // Se não há usuário logado, usar o próprio usuário destino (fallback)
+                // Se nÃ£o hÃ¡ usuÃ¡rio logado, usar o prÃ³prio usuÃ¡rio destino (fallback)
                 usuarioParaVerificarPerfil = usuarioParaVerificarPerfil ?? usuarioDestino;
                 
                 if (usuarioParaVerificarPerfil != null)
                 {
-                    var isAdmin = usuarioParaVerificarPerfil.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                    var isAdministrativeUser = usuarioParaVerificarPerfil.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isAdmin = usuarioParaVerificarPerfil.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                    var isAdministrativeUser = usuarioParaVerificarPerfil.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
                     var isCliente = !isAdmin && !isAdministrativeUser;
                     
-                    // Se o usuário (logado ou destino) for Admin ou Admin User, enviar para o próprio email dele
+                    // Se o usuÃ¡rio (logado ou destino) for Admin ou Admin User, enviar para o prÃ³prio email dele
                     if (isAdmin || isAdministrativeUser)
                     {
                         return usuarioParaVerificarPerfil.Pessoa?.EmailPreferencial ?? "";
@@ -1558,23 +1558,23 @@ namespace SW_PortalProprietario.Application.Services.Core
         }
 
         /// <summary>
-        /// Determina o telefone correto para envio baseado no ambiente e perfil do usuário.
-        /// Para 2FA, sempre usa o usuário logado como referência de perfil.
+        /// Determina o telefone correto para envio baseado no ambiente e perfil do usuÃ¡rio.
+        /// Para 2FA, sempre usa o usuÃ¡rio logado como referÃªncia de perfil.
         /// </summary>
         private async Task<string> GetTelefoneDestinatarioAsync(Usuario usuarioDestino, string? telefoneOriginal)
         {
             var tipoAmbiente = _configuration.GetValue<string>("TipoAmbiente", "PRD")?.ToUpper();
             
-            // Se for PRD, sempre enviar para o próprio usuário destino
+            // Se for PRD, sempre enviar para o prÃ³prio usuÃ¡rio destino
             if (tipoAmbiente == "PRD")
             {
                 return telefoneOriginal ?? "";
             }
             
-            // Se for HML, aplicar regras específicas
+            // Se for HML, aplicar regras especÃ­ficas
             if (tipoAmbiente == "HML")
             {
-                // Para 2FA, sempre usar o usuário logado como referência
+                // Para 2FA, sempre usar o usuÃ¡rio logado como referÃªncia
                 var loggedUser = await _repository.GetLoggedUser();
                 Usuario? usuarioParaVerificarPerfil = null;
                 
@@ -1583,16 +1583,16 @@ namespace SW_PortalProprietario.Application.Services.Core
                     usuarioParaVerificarPerfil = (await _repository.FindByHql<Usuario>($"From Usuario u Inner Join Fetch u.Pessoa p Where u.Id = {loggedUser.Value.userId}")).FirstOrDefault();
                 }
                 
-                // Se não há usuário logado, usar o próprio usuário destino (fallback)
+                // Se nÃ£o hÃ¡ usuÃ¡rio logado, usar o prÃ³prio usuÃ¡rio destino (fallback)
                 usuarioParaVerificarPerfil = usuarioParaVerificarPerfil ?? usuarioDestino;
                 
                 if (usuarioParaVerificarPerfil != null)
                 {
-                    var isAdmin = usuarioParaVerificarPerfil.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                    var isAdministrativeUser = usuarioParaVerificarPerfil.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                    var isAdmin = usuarioParaVerificarPerfil.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                    var isAdministrativeUser = usuarioParaVerificarPerfil.UsuarioAdministrativo.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
                     var isCliente = !isAdmin && !isAdministrativeUser;
                     
-                    // Se o usuário (logado ou destino) for Admin ou Admin User, enviar para o próprio telefone dele
+                    // Se o usuÃ¡rio (logado ou destino) for Admin ou Admin User, enviar para o prÃ³prio telefone dele
                     if (isAdmin || isAdministrativeUser)
                     {
                         var celularUsuario = await GetFirstCelularForPessoa(usuarioParaVerificarPerfil.Pessoa?.Id ?? 0);
@@ -1635,8 +1635,8 @@ namespace SW_PortalProprietario.Application.Services.Core
             
             var usuarioSistemaId = _configuration.GetValue<int>("UsuarioSistemaId", 1);
             var empresaId = _configuration.GetValue<int>("EmpresaSwPortalId", 0);
-            var assunto = "Código de verificação - Login em duas etapas";
-            var conteudoEmail = $"Olá, {usuario.Pessoa?.Nome}! Seu código de acesso é: <b>{code}</b>. Válido por {TwoFactorCodeExpirationMinutes} minutos.";
+            var assunto = "CÃ³digo de verificaÃ§Ã£o - Login em duas etapas";
+            var conteudoEmail = $"OlÃ¡, {usuario.Pessoa?.Nome}! Seu cÃ³digo de acesso Ã©: <b>{code}</b>. VÃ¡lido por {TwoFactorCodeExpirationMinutes} minutos.";
             var emailModel = await _emailService.SaveInternal(new EmailInputInternalModel
             {
                 UsuarioCriacao = usuario.UsuarioCriacao ?? usuarioSistemaId,
@@ -1667,35 +1667,35 @@ namespace SW_PortalProprietario.Application.Services.Core
             var celularOriginal = await GetFirstCelularForPessoa(usuario.Pessoa?.Id ?? 0);
             if (string.IsNullOrEmpty(celularOriginal))
             {
-                _logger.LogWarning("2FA SMS: usuário {UserId} sem número de celular cadastrado.", usuario.Id);
-                throw new ArgumentException("Não foi possível enviar o SMS: nenhum número de celular cadastrado para este usuário. Cadastre um celular ou use o canal e-mail.");
+                _logger.LogWarning("2FA SMS: usuÃ¡rio {UserId} sem nÃºmero de celular cadastrado.", usuario.Id);
+                throw new ArgumentException("NÃ£o foi possÃ­vel enviar o SMS: nenhum nÃºmero de celular cadastrado para este usuÃ¡rio. Cadastre um celular ou use o canal e-mail.");
             }
             
             // Determinar telefone correto baseado em ambiente e perfil
             var telefoneDestinatario = await GetTelefoneDestinatarioAsync(usuario, celularOriginal);
             if (string.IsNullOrEmpty(telefoneDestinatario))
             {
-                _logger.LogWarning("2FA SMS: não foi possível determinar telefone destinatário para usuário {UserId}.", usuario.Id);
-                throw new ArgumentException("Não foi possível enviar o SMS: número de telefone não disponível.");
+                _logger.LogWarning("2FA SMS: nÃ£o foi possÃ­vel determinar telefone destinatÃ¡rio para usuÃ¡rio {UserId}.", usuario.Id);
+                throw new ArgumentException("NÃ£o foi possÃ­vel enviar o SMS: nÃºmero de telefone nÃ£o disponÃ­vel.");
             }
             
             var apenasNumeros = new string(telefoneDestinatario.Where(char.IsDigit).ToArray());
             if (apenasNumeros.Length < 10)
             {
-                _logger.LogWarning("2FA SMS: número inválido para usuário {UserId} (menos de 10 dígitos).", usuario.Id);
-                throw new ArgumentException("Não foi possível enviar o SMS: número de celular inválido (cadastre DDD + número com 10 ou 11 dígitos).");
+                _logger.LogWarning("2FA SMS: nÃºmero invÃ¡lido para usuÃ¡rio {UserId} (menos de 10 dÃ­gitos).", usuario.Id);
+                throw new ArgumentException("NÃ£o foi possÃ­vel enviar o SMS: nÃºmero de celular invÃ¡lido (cadastre DDD + nÃºmero com 10 ou 11 dÃ­gitos).");
             }
             var numeroParaEnvio = apenasNumeros.Length == 10 || apenasNumeros.Length == 11
                 ? apenasNumeros
                 : apenasNumeros;
-            var textoMensagem = $"Seu código de acesso é: {code}. Válido por {TwoFactorCodeExpirationMinutes} min.";
+            var textoMensagem = $"Seu cÃ³digo de acesso Ã©: {code}. VÃ¡lido por {TwoFactorCodeExpirationMinutes} min.";
             await _smsProvider.SendSmsAsync(numeroParaEnvio, textoMensagem, endpointSms, CancellationToken);
             // Registrar com telefone original para auditoria, mas enviar para telefoneDestinatario
             await RegistrarComunicacaoTokenEnviadaAsync(usuario, "sms", celularOriginal, textoMensagem, twoFactorId, null);
         }
 
         /// <summary>
-        /// Grava o registro de comunicação de token 2FA enviada para auditoria e gerenciamento de volume.
+        /// Grava o registro de comunicaÃ§Ã£o de token 2FA enviada para auditoria e gerenciamento de volume.
         /// </summary>
         private async Task RegistrarComunicacaoTokenEnviadaAsync(Usuario usuario, string canal, string destinatario, string textoEnviado, Guid twoFactorId, int? emailId)
         {
@@ -1718,7 +1718,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Falha ao registrar comunicação de token enviada (UsuarioId: {UserId}, Canal: {Canal}).", usuario.Id, canal);
+                _logger.LogWarning(ex, "Falha ao registrar comunicaÃ§Ã£o de token enviada (UsuarioId: {UserId}, Canal: {Canal}).", usuario.Id, canal);
             }
         }
 
@@ -1951,7 +1951,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (model.CompanyId.GetValueOrDefault(0) == 0)
                     throw new ArgumentException($"Deve ser informada o campo CompanyId!");
 
-                var loggedUser = await _repository.GetLoggedUser() ?? throw new ArgumentException("Usuário não encontrado");
+                var loggedUser = await _repository.GetLoggedUser() ?? throw new ArgumentException("UsuÃ¡rio nÃ£o encontrado");
 
                 var user = (await _repository.FindByHql<Usuario>(@$"From Usuario us 
                                                                 Inner Join Fetch us.Pessoa p 
@@ -1960,7 +1960,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                                             new Parameter("usuarioId",loggedUser.userId)})).FirstOrDefault();
 
                 if (user == null || user.Status != EnumStatus.Ativo)
-                    throw new FileNotFoundException("Usuário não encontrado");
+                    throw new FileNotFoundException("UsuÃ¡rio nÃ£o encontrado");
 
 
                 var userCompanies = (await _repository.FindBySql<Models.SystemModels.EmpresaUsuarioModel>($@"Select 
@@ -1972,7 +1972,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 Where empu.Usuario = {user.Id} and emp.Id = {model.CompanyId}")).FirstOrDefault();
 
                 if (userCompanies == null || userCompanies.Id == 0)
-                    throw new ArgumentException($"O acesso à empresa: {model.CompanyId} não está liberado para o usuário!");
+                    throw new ArgumentException($"O acesso Ã  empresa: {model.CompanyId} nÃ£o estÃ¡ liberado para o usuÃ¡rio!");
 
                 IAccessValidateResultModel? accessValidateResult = null;
 
@@ -1981,9 +1981,9 @@ namespace SW_PortalProprietario.Application.Services.Core
                 userReturn.CompanyId = $"{model.CompanyId}";
                 await GenerateToken(userReturn, user, user.ProviderChaveUsuario);
                 await _cache.AddAsync(user.Id.ToString(), userReturn, new DateTimeOffset(userReturn.FimValidade.GetValueOrDefault()), 0, CancellationToken);
-                userReturn.IsGestorFinanceiro = user.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                userReturn.IsAdmin = user.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
-                userReturn.IsGestorReservasAgendamentos = user.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim;
+                userReturn.IsGestorFinanceiro = user.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                userReturn.IsAdmin = user.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
+                userReturn.IsGestorReservasAgendamentos = user.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim;
                 _serviceBase.UsuarioId = user.Id;
                 return userReturn;
 
@@ -2001,10 +2001,10 @@ namespace SW_PortalProprietario.Application.Services.Core
             var empresaCMId = _configuration.GetValue<int>("EmpresaCMId");
 
             if (string.IsNullOrEmpty(tokenResultModel.Login))
-                throw new Exception("Deve ser informado o login do usuário para geração do token de acesso");
+                throw new Exception("Deve ser informado o login do usuÃ¡rio para geraÃ§Ã£o do token de acesso");
 
             if (tokenResultModel.UserId.GetValueOrDefault(0) == 0)
-                throw new Exception("Deve ser informado o id do usuário para geração do token de acesso");
+                throw new Exception("Deve ser informado o id do usuÃ¡rio para geraÃ§Ã£o do token de acesso");
 
             var tokenkey = _configuration.GetValue<string>("Jwt:Key")!;
             var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(tokenkey));
@@ -2024,7 +2024,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 documentos = string.Join(";", documentosUsuario.Select(b => $"{b.TipoDocumento!.Nome}|{b.Numero}"));
             }
 
-            var userpermissions = user.Administrador.GetValueOrDefault(EnumSimNao.Não) != EnumSimNao.Sim ? (await _repository.FindBySql<UserRoleModel>($@"Select
+            var userpermissions = user.Administrador.GetValueOrDefault(EnumSimNao.Nao) != EnumSimNao.Sim ? (await _repository.FindBySql<UserRoleModel>($@"Select
                                             Distinct
                                             m.NomeInterno as ModuleInternalName,
                                             p.TipoPermissao as PermissionType
@@ -2087,40 +2087,40 @@ namespace SW_PortalProprietario.Application.Services.Core
                     claims.Add(new Claim("CotaPortalPessoaProprietarioNome", $"{vinculoPortal.EsolPessoaProprietarioNome}"));
             }
 
-            if (user.Administrador.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+            if (user.Administrador.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
             {
                 claims.Add(new Claim(ClaimTypes.Role, "Administrador"));
                 claims.Add(new Claim(ClaimTypes.Role, "portalproprietariosw"));
 
 
-                if (user.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                if (user.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, "GestorFinanceiro"));
                 }
 
-                if (user.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                if (user.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, "GestorReservasAgendamentos"));
                 }
 
             }
-            else if (user.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+            else if (user.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
             {
                 claims.Add(new Claim(ClaimTypes.Role, "GestorFinanceiro"));
                 claims.Add(new Claim(ClaimTypes.Role, "portalproprietariosw"));
 
-                if (user.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                if (user.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, "GestorReservasAgendamentos"));
 
                 }
             }
-            else if (user.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+            else if (user.GestorReservasAgendamentos.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
             {
                 claims.Add(new Claim(ClaimTypes.Role, "GestorReservasAgendamentos"));
                 claims.Add(new Claim(ClaimTypes.Role, "portalproprietariosw"));
 
-                if (user.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+                if (user.GestorFinanceiro.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, "GestorFinanceiro"));
                 }
@@ -2172,10 +2172,10 @@ namespace SW_PortalProprietario.Application.Services.Core
             var empresaCMId = _configuration.GetValue<int>("EmpresaCMId");
 
             if (string.IsNullOrEmpty(tokenResultModel.Login))
-                throw new Exception("Deve ser informado o login do usuário para geração do token de acesso");
+                throw new Exception("Deve ser informado o login do usuÃ¡rio para geraÃ§Ã£o do token de acesso");
 
             if (tokenResultModel.UserId.GetValueOrDefault(0) == 0 && (user == null || user?.Id == 0))
-                throw new Exception("Deve ser informado o id do usuário para geração do token de acesso");
+                throw new Exception("Deve ser informado o id do usuÃ¡rio para geraÃ§Ã£o do token de acesso");
 
             if (tokenResultModel.UserId.GetValueOrDefault(0) == 0)
                 tokenResultModel.UserId = user?.Id;
@@ -2340,7 +2340,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     Email = $"{userInputModel.FullName.Replace(" ", "").ToLower()}@gmail.com",
                     Password = userInputModel.Password,
                     PasswordConfirmation = userInputModel.PasswordConfirmation,
-                    Administrator = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Não)
+                    Administrator = userInputModel.Administrator.GetValueOrDefault(EnumSimNao.Nao)
                 });
                 pessoaLegadoId = userInputModel.PessoaId;
 

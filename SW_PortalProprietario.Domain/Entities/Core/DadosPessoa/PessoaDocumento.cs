@@ -26,13 +26,13 @@ namespace SW_PortalProprietario.Domain.Entities.Core.DadosPessoa
             if (string.IsNullOrEmpty(Numero))
                 mensagens.Add($"O Número do documento deve ser informado");
 
-            if (string.IsNullOrEmpty(OrgaoEmissor) && TipoDocumento?.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+            if (string.IsNullOrEmpty(OrgaoEmissor) && TipoDocumento?.ExigeOrgaoEmissor.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 mensagens.Add($"Deve ser informado o Orgão emissor no Documento");
 
-            if (DataEmissao.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue && TipoDocumento?.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+            if (DataEmissao.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue && TipoDocumento?.ExigeDataEmissao.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 mensagens.Add($"Deve ser informada a Data de Emissão no Documento");
 
-            if (DataValidade.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue && TipoDocumento?.ExigeDataValidade.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim)
+            if (DataValidade.GetValueOrDefault(DateTime.MinValue) == DateTime.MinValue && TipoDocumento?.ExigeDataValidade.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim)
                 mensagens.Add($"Deve ser informada a Data de Validade no Documento");
 
 

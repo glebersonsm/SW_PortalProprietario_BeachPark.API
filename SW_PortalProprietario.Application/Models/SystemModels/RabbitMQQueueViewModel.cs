@@ -1,4 +1,4 @@
-using SW_PortalProprietario.Domain.Enumns;
+﻿using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Models.SystemModels
 {
@@ -15,7 +15,7 @@ namespace SW_PortalProprietario.Application.Models.SystemModels
         public int? ConsumerConcurrency { get; set; }
         public int? RetryAttempts { get; set; }
         public int? RetryDelaySeconds { get; set; }
-        // Estatísticas da fila
+        // EstatÃ­sticas da fila
         public int? ItensPendentes { get; set; }
         public int? ItensProcessados { get; set; }
     }

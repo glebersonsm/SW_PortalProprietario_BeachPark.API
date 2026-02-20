@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.AuditModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
@@ -39,7 +39,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     return cached;
                 }
 
-                // Se não encontrou no cache, buscar do banco
+                // Se nÃ£o encontrou no cache, buscar do banco
                 var result = await fetchFunc();
 
                 // Armazenar no cache
@@ -74,7 +74,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     return cached;
                 }
 
-                // Se não encontrou no cache, buscar do banco
+                // Se nÃ£o encontrou no cache, buscar do banco
                 var result = await fetchFunc();
 
                 // Armazenar no cache
@@ -90,7 +90,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar/armazenar cache de histórico de entidade: EntityType={EntityType}, EntityId={EntityId}", 
+                _logger.LogError(ex, "Erro ao buscar/armazenar cache de histÃ³rico de entidade: EntityType={EntityType}, EntityId={EntityId}", 
                     entityType, entityId);
                 // Em caso de erro no cache, buscar diretamente do banco
                 return await fetchFunc();
@@ -104,10 +104,10 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var cacheKey = $"audit:entity:{entityType}:{entityId}";
                 await _cache.DeleteByKey(cacheKey);
 
-                // Também invalidar cache de listas que podem conter esta entidade
-                // (buscar todas as chaves que começam com "audit:logs:" e deletar)
-                // Por simplicidade, vamos invalidar apenas o cache específico da entidade
-                // O cache de listas será invalidado automaticamente pelo TTL
+                // TambÃ©m invalidar cache de listas que podem conter esta entidade
+                // (buscar todas as chaves que comeÃ§am com "audit:logs:" e deletar)
+                // Por simplicidade, vamos invalidar apenas o cache especÃ­fico da entidade
+                // O cache de listas serÃ¡ invalidado automaticamente pelo TTL
             }
             catch (Exception ex)
             {

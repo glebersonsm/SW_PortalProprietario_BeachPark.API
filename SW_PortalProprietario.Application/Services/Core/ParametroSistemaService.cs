@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -46,17 +46,17 @@ namespace SW_PortalProprietario.Application.Services.Core
                 _repository.BeginTransaction();
                 var empresas = (await _repository.FindByHql<Empresa>("From Empresa e Inner Join Fetch e.Pessoa p")).AsList();
                 if (empresas.Count() > 1 || empresas.Count() == 0)
-                    throw new ArgumentException($"Não foi possível salvar os parâmetros do sistema empCount = {empresas.Count()}");
+                    throw new ArgumentException($"NÃ£o foi possÃ­vel salvar os parÃ¢metros do sistema empCount = {empresas.Count()}");
 
                 var empFirst = empresas.First();
 
                 var httpContext = _httpContextAccessor?.HttpContext?.Request;
                 if (httpContext is null)
-                    throw new Exception("Não foi possível identificar a URL do servidor");
+                    throw new Exception("NÃ£o foi possÃ­vel identificar a URL do servidor");
 
                 var loggedUser = await _repository.GetLoggedUser();
                 if (loggedUser == null)
-                    throw new Exception("Não foi possível identificar o usuário logado");
+                    throw new Exception("NÃ£o foi possÃ­vel identificar o usuÃ¡rio logado");
 
                 ParametroSistema psBd = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}")).FirstOrDefault();
 
@@ -72,20 +72,20 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 if (!model.PermitirUsuarioAlterarSeuDoc.HasValue)
                 {
-                    model.PermitirUsuarioAlterarSeuDoc = psBd != null ? psBd.PermitirUsuarioAlterarSeuDoc : Domain.Enumns.EnumSimNao.Não;
+                    model.PermitirUsuarioAlterarSeuDoc = psBd != null ? psBd.PermitirUsuarioAlterarSeuDoc : Domain.Enumns.EnumSimNao.Nao;
                 }
 
                 if (!model.PermitirUsuarioAlterarSeuEmail.HasValue)
                 {
-                    model.PermitirUsuarioAlterarSeuEmail = psBd != null ? psBd.PermitirUsuarioAlterarSeuEmail : Domain.Enumns.EnumSimNao.Não;
+                    model.PermitirUsuarioAlterarSeuEmail = psBd != null ? psBd.PermitirUsuarioAlterarSeuEmail : Domain.Enumns.EnumSimNao.Nao;
                 }
 
-                if (model.AgruparCertidaoPorCliente.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não && model.EmitirCertidaoPorUnidCliente.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
+                if (model.AgruparCertidaoPorCliente.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Nao && model.EmitirCertidaoPorUnidCliente.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Nao)
                     model.AgruparCertidaoPorCliente = Domain.Enumns.EnumSimNao.Sim;
 
-                if (model.IntegradoComMultiPropriedade.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não && model.IntegradoComTimeSharing.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Não)
+                if (model.IntegradoComMultiPropriedade.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Nao && model.IntegradoComTimeSharing.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Nao)
                 {
-                    if (psBd != null && (psBd.IntegradoComTimeSharing.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) != Domain.Enumns.EnumSimNao.Não || psBd.IntegradoComMultiPropriedade.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) != Domain.Enumns.EnumSimNao.Não))
+                    if (psBd != null && (psBd.IntegradoComTimeSharing.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) != Domain.Enumns.EnumSimNao.Nao || psBd.IntegradoComMultiPropriedade.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) != Domain.Enumns.EnumSimNao.Nao))
                     {
                         model.IntegradoComMultiPropriedade = psBd.IntegradoComMultiPropriedade;
                         model.IntegradoComTimeSharing = psBd.IntegradoComTimeSharing;
@@ -93,7 +93,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     else
                     {
                         model.IntegradoComMultiPropriedade = Domain.Enumns.EnumSimNao.Sim;
-                        model.IntegradoComTimeSharing = Domain.Enumns.EnumSimNao.Não;
+                        model.IntegradoComTimeSharing = Domain.Enumns.EnumSimNao.Nao;
                     }
                 }
 
@@ -139,24 +139,24 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 if (!model.PermiteReservaRciApenasClientesComContratoRci.HasValue)
                 {
-                    model.PermiteReservaRciApenasClientesComContratoRci = psBd != null ? psBd.PermiteReservaRciApenasClientesComContratoRci : Domain.Enumns.EnumSimNao.Não;
+                    model.PermiteReservaRciApenasClientesComContratoRci = psBd != null ? psBd.PermiteReservaRciApenasClientesComContratoRci : Domain.Enumns.EnumSimNao.Nao;
                 }
 
                 if (!model.Habilitar2FAPorEmail.HasValue)
                 {
-                    model.Habilitar2FAPorEmail = psBd != null ? psBd.Habilitar2FAPorEmail : Domain.Enumns.EnumSimNao.Não;
+                    model.Habilitar2FAPorEmail = psBd != null ? psBd.Habilitar2FAPorEmail : Domain.Enumns.EnumSimNao.Nao;
                 }
                 if (!model.Habilitar2FAPorSms.HasValue)
                 {
-                    model.Habilitar2FAPorSms = psBd != null ? psBd.Habilitar2FAPorSms : Domain.Enumns.EnumSimNao.Não;
+                    model.Habilitar2FAPorSms = psBd != null ? psBd.Habilitar2FAPorSms : Domain.Enumns.EnumSimNao.Nao;
                 }
                 if (!model.Habilitar2FAParaCliente.HasValue)
                 {
-                    model.Habilitar2FAParaCliente = psBd != null ? psBd.Habilitar2FAParaCliente : Domain.Enumns.EnumSimNao.Não;
+                    model.Habilitar2FAParaCliente = psBd != null ? psBd.Habilitar2FAParaCliente : Domain.Enumns.EnumSimNao.Nao;
                 }
                 if (!model.Habilitar2FAParaAdministrador.HasValue)
                 {
-                    model.Habilitar2FAParaAdministrador = psBd != null ? psBd.Habilitar2FAParaAdministrador : Domain.Enumns.EnumSimNao.Não;
+                    model.Habilitar2FAParaAdministrador = psBd != null ? psBd.Habilitar2FAParaAdministrador : Domain.Enumns.EnumSimNao.Nao;
                 }
 
                 if (string.IsNullOrEmpty(model.EndpointEnvioSms2FA) || model.EndpointEnvioSms2FA.Equals("string", StringComparison.InvariantCultureIgnoreCase))
@@ -169,7 +169,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (!model.SmtpPort.HasValue || model.SmtpPort == 0)
                     model.SmtpPort = psBd != null ? psBd.SmtpPort : null;
                 if (!model.SmtpUseSsl.HasValue)
-                    model.SmtpUseSsl = psBd != null ? psBd.SmtpUseSsl : Domain.Enumns.EnumSimNao.Não;
+                    model.SmtpUseSsl = psBd != null ? psBd.SmtpUseSsl : Domain.Enumns.EnumSimNao.Nao;
                 if (string.IsNullOrEmpty(model.SmtpIamUser) || model.SmtpIamUser.Equals("string", StringComparison.InvariantCultureIgnoreCase))
                     model.SmtpIamUser = psBd != null ? psBd.SmtpIamUser : null;
                 if (string.IsNullOrEmpty(model.SmtpUser) || model.SmtpUser.Equals("string", StringComparison.InvariantCultureIgnoreCase))
@@ -184,15 +184,15 @@ namespace SW_PortalProprietario.Application.Services.Core
                     model.EmailTrackingBaseUrl = psBd != null ? psBd.EmailTrackingBaseUrl : null;
 
                 if (!model.CriarUsuariosLegado.HasValue)
-                    model.CriarUsuariosLegado = psBd != null ? psBd.CriarUsuariosLegado : Domain.Enumns.EnumSimNao.Não;
+                    model.CriarUsuariosLegado = psBd != null ? psBd.CriarUsuariosLegado : Domain.Enumns.EnumSimNao.Nao;
                 if (!model.CriarUsuariosClientesLegado.HasValue)
-                    model.CriarUsuariosClientesLegado = psBd != null ? psBd.CriarUsuariosClientesLegado : Domain.Enumns.EnumSimNao.Não;
+                    model.CriarUsuariosClientesLegado = psBd != null ? psBd.CriarUsuariosClientesLegado : Domain.Enumns.EnumSimNao.Nao;
 
                 var outroParametroMesmaEmpresa = (await _repository.FindByHql<ParametroSistema>($"From ParametroSistema ps Inner Join Fetch ps.Empresa emp Where emp.Id = {empFirst.Id}")).FirstOrDefault();
                 if (psBd?.Id == 0 && (outroParametroMesmaEmpresa != null && outroParametroMesmaEmpresa.Id > 0))
                     psBd.Id = outroParametroMesmaEmpresa.Id;
                 else if (psBd?.Id > 0 && outroParametroMesmaEmpresa != null && outroParametroMesmaEmpresa.Id != psBd?.Id)
-                    throw new Exception($"Só pode existir um parâmetro na empresa: {empFirst.Id}");
+                    throw new Exception($"SÃ³ pode existir um parÃ¢metro na empresa: {empFirst.Id}");
 
                 var wwwrootconfigpath = _configuration.GetValue<string>("WwwRootImagePath", "C:\\inetpub\\wwwroot\\Imagens");
                 var virtualdirectoryname = _configuration.GetValue<string>("NomeDiretorioVirtualImagens", "portalproprietario");
@@ -425,25 +425,25 @@ namespace SW_PortalProprietario.Application.Services.Core
                 #endregion
 
                 parametroSistema.HabilitarPagamentosOnLine =
-                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim ||
-                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Não;
+                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim ||
+                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Nao;
 
                 await _repository.Save(parametroSistema);
 
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                 {
-                    _logger.LogInformation($"Parâmetro de sistema: ({parametroSistema.Id} - {parametroSistema.Empresa.Id}) salvo com sucesso!");
+                    _logger.LogInformation($"ParÃ¢metro de sistema: ({parametroSistema.Id} - {parametroSistema.Empresa.Id}) salvo com sucesso!");
 
                     var searchResult = (await GetParameters());
                     return searchResult;
 
                 }
-                throw exception ?? new Exception($"Não foi possível salvar o parâmetro");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o parÃ¢metro");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o parâmetro");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o parÃ¢metro");
                 _repository.Rollback();
                 throw;
             }
@@ -474,7 +474,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             {
                 var pathConfigAtual = listItensPathTranslate.FirstOrDefault(b => b.key.Equals($"{item}", StringComparison.CurrentCultureIgnoreCase));
                 if (string.IsNullOrEmpty(pathConfigAtual.path))
-                    throw new ArgumentException($"Não foi encontrada a configuração de direcionamento de path com a key: '{item}'");
+                    throw new ArgumentException($"NÃ£o foi encontrada a configuraÃ§Ã£o de direcionamento de path com a key: '{item}'");
 
                 paths.Add(pathConfigAtual.path);
             }
@@ -489,18 +489,18 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             var httpContext = _httpContextAccessor?.HttpContext?.Request;
             if (httpContext is null)
-                throw new Exception("Não foi possível identificar a URL do servidor");
+                throw new Exception("NÃ£o foi possÃ­vel identificar a URL do servidor");
 
             var complemento = _configuration.GetValue<string>("ComplementoUrlApi", string.Empty);
             var complementoUrlApiComplementoParaHttps = _configuration.GetValue<string>("ComplementoUrlApiComplementoParaHttps", string.Empty);
 
             var loggedUser = await _repository.GetLoggedUser();
             if (loggedUser == null)
-                throw new Exception("Não foi possível identificar o usuário logado");
+                throw new Exception("NÃ£o foi possÃ­vel identificar o usuÃ¡rio logado");
 
             var empresas = (await _repository.FindByHql<Empresa>("From Empresa e Inner Join Fetch e.Pessoa p")).AsList();
             if (empresas.Count() > 1 || empresas.Count() == 0)
-                throw new ArgumentException($"Não foi possível salvar os parâmetros do sistema empCount = {empresas.Count()}");
+                throw new ArgumentException($"NÃ£o foi possÃ­vel salvar os parÃ¢metros do sistema empCount = {empresas.Count()}");
 
             var empFirst = empresas.First();
 
@@ -508,20 +508,20 @@ namespace SW_PortalProprietario.Application.Services.Core
 
             if (parametroSistema == null)
             {
-                throw new ArgumentException($"Não foi possível encontrar o parâmetro do sistema para a empresa: {empFirst.Id}");
+                throw new ArgumentException($"NÃ£o foi possÃ­vel encontrar o parÃ¢metro do sistema para a empresa: {empFirst.Id}");
             }
 
             parametroSistema.HabilitarPagamentosOnLine =
-                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim ||
-                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Não) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Não;
+                (parametroSistema.HabilitarPagamentoEmPix.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim ||
+                parametroSistema.HabilitarPagamentoEmCartao.GetValueOrDefault(Domain.Enumns.EnumSimNao.Nao) == Domain.Enumns.EnumSimNao.Sim) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Nao;
 
             
 
             var integradoWith = _configuration.GetValue<string>("IntegradoCom","eSolution");
             if (!string.IsNullOrEmpty(integradoWith))
             {
-                parametroSistema.IntegradoComMultiPropriedade = integradoWith.Contains("eSolution", StringComparison.InvariantCultureIgnoreCase) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Não;
-                parametroSistema.IntegradoComTimeSharing = !integradoWith.Contains("eSolution", StringComparison.InvariantCultureIgnoreCase) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Não;
+                parametroSistema.IntegradoComMultiPropriedade = integradoWith.Contains("eSolution", StringComparison.InvariantCultureIgnoreCase) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Nao;
+                parametroSistema.IntegradoComTimeSharing = !integradoWith.Contains("eSolution", StringComparison.InvariantCultureIgnoreCase) ? Domain.Enumns.EnumSimNao.Sim : Domain.Enumns.EnumSimNao.Nao;
             }
 
 
@@ -541,7 +541,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (empresas.Count == 0 || empresas.Count > 1)
                 {
                     _repository.Rollback();
-                    _logger.LogWarning("UpdateTipoEnvioEmailOnly: não foi possível identificar a empresa (count={Count}).", empresas.Count);
+                    _logger.LogWarning("UpdateTipoEnvioEmailOnly: nÃ£o foi possÃ­vel identificar a empresa (count={Count}).", empresas.Count);
                     return;
                 }
                 var empFirst = empresas.First();
@@ -550,7 +550,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (psBd == null)
                 {
                     _repository.Rollback();
-                    _logger.LogWarning("UpdateTipoEnvioEmailOnly: ParametroSistema não encontrado para a empresa Id={EmpresaId}.", empFirst.Id);
+                    _logger.LogWarning("UpdateTipoEnvioEmailOnly: ParametroSistema nÃ£o encontrado para a empresa Id={EmpresaId}.", empFirst.Id);
                     return;
                 }
                 psBd.TipoEnvioEmail = tipoEnvioEmail;
@@ -567,7 +567,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception ex)
             {
                 _repository.Rollback();
-                _logger.LogError(ex, "UpdateTipoEnvioEmailOnly: exceção ao atualizar TipoEnvioEmail.");
+                _logger.LogError(ex, "UpdateTipoEnvioEmailOnly: exceÃ§Ã£o ao atualizar TipoEnvioEmail.");
             }
         }
     }

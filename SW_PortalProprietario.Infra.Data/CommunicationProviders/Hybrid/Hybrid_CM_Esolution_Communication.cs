@@ -1,4 +1,4 @@
-using AccessCenterDomain.AccessCenter;
+﻿using AccessCenterDomain.AccessCenter;
 using AccessCenterDomain.AccessCenter.Fractional;
 using CMDomain.Entities;
 using CMDomain.Models.Empresa;
@@ -62,10 +62,10 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         private readonly ICacheStore _cacheStore;
         private readonly IRepositoryNH _repositorySystem;
 
-        // Dependências CM
+        // DependÃªncias CM
         private readonly IRepositoryNHCm _repositoryCm;
 
-        // Dependências Esolution
+        // DependÃªncias Esolution
         private readonly IRepositoryNHAccessCenter _repositoryAccessCenter;
         private readonly IRepositoryNHEsolPortal _repositoryPortalEsol;
         private readonly ITokenBodyService _tokenBodyService;
@@ -73,7 +73,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
 
         public string CommunicationProviderName => "Hybrid_CM_Esolution";
 
-        // Implementação da propriedade da interface base, qual retornar? Talvez irrelevante se não usado, ou concatenado.
+        // ImplementaÃ§Ã£o da propriedade da interface base, qual retornar? Talvez irrelevante se nÃ£o usado, ou concatenado.
         public string PrefixoTransacaoFinanceira => PREFIXO_TRANSACOES_FINANCEIRAS_CM;
 
         public Hybrid_CM_Esolution_Communication(
@@ -97,8 +97,8 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         }
 
         // =================================================================================================
-        // IMPLEMENTAÇÕES DA INTERFACE BASE (ICommunicationProvider)
-        // OBS: Estes métodos lançam exceção pois a intenção é usar os métodos sufixados específicos (_Cm ou _Esol).
+        // IMPLEMENTAÃ‡Ã•ES DA INTERFACE BASE (ICommunicationProvider)
+        // OBS: Estes mÃ©todos lanÃ§am exceÃ§Ã£o pois a intenÃ§Ã£o Ã© usar os mÃ©todos sufixados especÃ­ficos (_Cm ou _Esol).
         // =================================================================================================
 
         public async Task<IAccessValidateResultModel> ValidateAccess(string login, string senha, string pessoaProviderId = "", string providerName = "esolution")
@@ -234,7 +234,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
 
         public bool? ShouldSendEmailForReserva_Cm(ReservaInfo reserva, AutomaticCommunicationConfigModel config, List<DadosContratoModel>? contratos, List<ClientesInadimplentes>? inadimplentes)
         {
-            //To-do implementar validão inadimplência e status CRC
+            //To-do implementar validÃ£o inadimplÃªncia e status CRC
             return true;
         }
 
@@ -244,7 +244,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         }
 
         // =================================================================================================
-        // IMPLEMENTAÇÕES CM (_Cm)
+        // IMPLEMENTAÃ‡Ã•ES CM (_Cm)
         // =================================================================================================
 
         public async Task<IAccessValidateResultModel> ValidateAccess_Cm(string login, string senha, string pessoaProviderId = "")
@@ -989,7 +989,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         public Task<(int pageNumber, int lastPageNumber, List<ReservaGeralTsModel> reservas)?> GetMinhasReservasGeral_Cm(SearchMinhasReservasGeralModel searchModel) => throw new NotImplementedException();
 
         // =================================================================================================
-        // IMPLEMENTAÇÕES ESOLUTION (_Esol)
+        // IMPLEMENTAÃ‡Ã•ES ESOLUTION (_Esol)
         // =================================================================================================
 
         public async Task<IAccessValidateResultModel> ValidateAccess_Esol(string login, string senha, string pessoaProviderId = "")
@@ -1039,18 +1039,18 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                 _repositoryAccessCenter.BeginTransaction();
                 var empresaId = _configuration.GetValue<int>("Empresa", 0);
                 if (empresaId == 0)
-                    throw new ArgumentException("Empresa não configurada");
+                    throw new ArgumentException("Empresa nÃ£o configurada");
 
                 var empresa = (await _repositoryAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Empresa>($"From Empresa emp Where emp.id = {empresaId}")).FirstOrDefault();
                 if (empresa == null)
-                    throw new ArgumentException($"Não foi encontrada empresa com Id: {empresaId}");
+                    throw new ArgumentException($"NÃ£o foi encontrada empresa com Id: {empresaId}");
 
 
                 var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
 
                 var emprendimento = (await _repositoryAccessCenter.FindBySql<Empreendimento>($"Select e.* From Empreendimento e Where e.Id in ({empreendimentoId})")).FirstOrDefault();
                 if (emprendimento == null)
-                    throw new ArgumentException($"Não foi encontrado empreendimento com Id: {empreendimentoId}");
+                    throw new ArgumentException($"NÃ£o foi encontrado empreendimento com Id: {empreendimentoId}");
 
                 var cliente = (await _repositoryAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Cliente>($"From Cliente cli Where cli.Pessoa = {pessoaProviderId} and cli.Empresa = {empresaId}")).FirstOrDefault();
                 if (cliente != null)
@@ -1081,18 +1081,18 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                 _repositoryAccessCenter.BeginTransaction();
                 var empresaId = _configuration.GetValue<int>("Empresa", 0);
                 if (empresaId == 0)
-                    throw new ArgumentException("Empresa não configurada");
+                    throw new ArgumentException("Empresa nÃ£o configurada");
 
                 var empresa = (await _repositoryAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Empresa>($"From Empresa emp Where emp.id = {empresaId}")).FirstOrDefault();
                 if (empresa == null)
-                    throw new ArgumentException($"Não foi encontrada empresa com Id: {empresaId}");
+                    throw new ArgumentException($"NÃ£o foi encontrada empresa com Id: {empresaId}");
 
 
                 var empreendimentoId = _configuration.GetValue<string>("EmpreendimentoId", "1,21");
 
                 var emprendimento = (await _repositoryAccessCenter.FindBySql<Empreendimento>($"Select e.* From Empreendimento e Where e.Id in ({empreendimentoId})")).FirstOrDefault();
                 if (emprendimento == null)
-                    throw new ArgumentException($"Não foi encontrado empreendimento com Id: {empreendimentoId}");
+                    throw new ArgumentException($"NÃ£o foi encontrado empreendimento com Id: {empreendimentoId}");
 
                 var cliente = (await _repositoryAccessCenter.FindByHql<AccessCenterDomain.AccessCenter.Cliente>($"From Cliente cli Where cli.Pessoa = {pessoaProviderId} and cli.Empresa = {empresaId}")).FirstOrDefault();
                 if (cliente != null)
@@ -1873,14 +1873,14 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         public async Task<List<ClientesInadimplentes>> Inadimplentes_Esol(List<int>? pessoasPesquisar = null)
         {
             // Implementation placeholder
-            // Atenção: Este método não existia explicitamente no EsolutionProvider original com a mesma assinatura?
-            // Conferir: ESolutionCommunicationProvider.cs não implementa Inadimplentes?
+            // AtenÃ§Ã£o: Este mÃ©todo nÃ£o existia explicitamente no EsolutionProvider original com a mesma assinatura?
+            // Conferir: ESolutionCommunicationProvider.cs nÃ£o implementa Inadimplentes?
             // A interface original ICommunicationProvider TIHNA Inadimplentes.
-            // No arquivo original do ESolutionProvider: Inadimplentes não aparece na busca do grep ou leitura parcial?
+            // No arquivo original do ESolutionProvider: Inadimplentes nÃ£o aparece na busca do grep ou leitura parcial?
             // Ah, na interface ICommunicationProvider (lida no passo 21) tem Inadimplentes.
             // Se ESolutionProvider implementa ICommunicationProvider, ele TEM que ter Inadimplentes.
-            // Vou verificar se ele lança exceção ou implementa no código original.
-            // Se não tiver implementation, lanço exceção aqui também.
+            // Vou verificar se ele lanÃ§a exceÃ§Ã£o ou implementa no cÃ³digo original.
+            // Se nÃ£o tiver implementation, lanÃ§o exceÃ§Ã£o aqui tambÃ©m.
             return new List<ClientesInadimplentes>();
         }
 
@@ -1908,7 +1908,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
         }
 
         // =================================================================================================
-        // MÉTODOS PRIVADOS AUXILIARES (Copiados e renomeados se houver conflito)
+        // MÃ‰TODOS PRIVADOS AUXILIARES (Copiados e renomeados se houver conflito)
         // =================================================================================================
 
         private async Task<LoginResult> ValidarLoginAccessCenter(string login, string senha, string pessoaPoviderId = "")
@@ -1919,7 +1919,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
 
             var emprendimento = (await _repositoryAccessCenter.FindBySql<Empreendimento>($"Select e.* From Empreendimento e Where e.Id in ({empreendimentoId})")).AsList();
             if (emprendimento == null || emprendimento.Count() == 0)
-                throw new ArgumentException($"Não foi encontrado empreendimento com Id's: {empreendimentoId}");
+                throw new ArgumentException($"NÃ£o foi encontrado empreendimento com Id's: {empreendimentoId}");
 
             var ignorarValidacaoLogin = _configuration.GetValue<bool>("IgnorarValidacaoLogin");
 
@@ -1942,12 +1942,12 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                 if (apensasNumeros.Length > 11)
                 {
                     if (!Helper.IsCnpj(apensasNumeros))
-                        loginResult.message = $"O CNPJ informado: {login} não é válido";
+                        loginResult.message = $"O CNPJ informado: {login} nÃ£o Ã© vÃ¡lido";
                 }
                 else if (apensasNumeros.Length <= 11)
                 {
                     if (!Helper.IsCpf(apensasNumeros))
-                        loginResult.message = $"O CPF informado: {login} não é válido";
+                        loginResult.message = $"O CPF informado: {login} nÃ£o Ã© vÃ¡lido";
                 }
             }
 
@@ -2009,7 +2009,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                         }
                     }
 
-                    loginResult.message = $"Usuário não encontrado";
+                    loginResult.message = $"UsuÃ¡rio nÃ£o encontrado";
                     return await Task.FromResult(loginResult);
                 }
             }
@@ -2054,7 +2054,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
 
             if (pessoaEsolution == null)
             {
-                loginResult.message = "Usuário não encontrado";
+                loginResult.message = "UsuÃ¡rio nÃ£o encontrado";
                 return await Task.FromResult(loginResult);
             }
 
@@ -2074,7 +2074,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
 
             if (cotas.Count == 0 && pessoaEsolution == null)
             {
-                loginResult.message = "Usuário ou senha inválidos";
+                loginResult.message = "UsuÃ¡rio ou senha invÃ¡lidos";
             }
 
             if (!aplicarPadraoBlack && cotas.Any())
@@ -2174,7 +2174,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
             var ignorarValidacaoLogin = _configuration.GetValue<bool>("IgnorarValidacaoLogin");
             var empresaId = _configuration.GetValue<int>("Empresa", 0);
             if (empresaId == 0)
-                throw new ArgumentException("Empresa não configurada");
+                throw new ArgumentException("Empresa nÃ£o configurada");
 
             if (request != null && !string.IsNullOrEmpty(request.usuario) && request.usuario.Contains(".") && !request.usuario.Contains("@"))
                 request.usuario = Helper.RemoverAcentuacaoCpfCnpj(request.usuario);
@@ -2257,7 +2257,7 @@ namespace SW_PortalProprietario.Infra.Data.CommunicationProviders.Hybrid
                     {
                         code = 401,
                         token = null,
-                        message = "Usuário não encontrado"
+                        message = "UsuÃ¡rio nÃ£o encontrado"
                     };
                 }
 

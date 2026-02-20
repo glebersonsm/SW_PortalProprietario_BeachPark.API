@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using Dapper;
 using Microsoft.Extensions.Configuration;
@@ -57,11 +57,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     _logger.LogInformation($"Fila RabbitMQ: ({queue.Id} - {queue.Nome}) salva com sucesso!");
                     return _mapper.Map<RabbitMQQueueViewModel>(queue);
                 }
-                throw exception ?? new Exception($"Não foi possível salvar a fila");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar a fila");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a fila RabbitMQ");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a fila RabbitMQ");
                 _repository.Rollback();
                 throw;
             }
@@ -82,14 +82,14 @@ namespace SW_PortalProprietario.Application.Services.Core
                     .Select(q => _mapper.Map<RabbitMQQueueViewModel>(q))
                     .ToList();
 
-                // Buscar estatísticas das filas do RabbitMQ
+                // Buscar estatÃ­sticas das filas do RabbitMQ
                 await EnrichQueuesWithStatistics(queueViewModels);
 
                 return queueViewModels;
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Não foi possível buscar as filas de processamento assíncrono");
+                _logger.LogError(err, "NÃ£o foi possÃ­vel buscar as filas de processamento assÃ­ncrono");
                 throw;
             }
         }
@@ -106,7 +106,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 if (string.IsNullOrWhiteSpace(host) || port == 0)
                 {
-                    _logger.LogWarning("Configurações do RabbitMQ não encontradas, sincronizando apenas filas configuradas");
+                    _logger.LogWarning("ConfiguraÃ§Ãµes do RabbitMQ nÃ£o encontradas, sincronizando apenas filas configuradas");
                     await SyncConfiguredQueues();
                     return;
                 }
@@ -121,7 +121,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var retryAttempts = Environment.GetEnvironmentVariable("RABBITMQ_RETRY_ATTEMPTS") ?? "3";
                 var retryDelaySeconds = Environment.GetEnvironmentVariable("RABBITMQ_RETRY_DELAY_SECONDS") ?? "30";
 
-                // Lista de filas conhecidas com suas configurações
+                // Lista de filas conhecidas com suas configuraÃ§Ãµes
                 var knownQueues = new Dictionary<string, (string tipo, string descricao, int? consumerConcurrency, int? retryAttempts, int? retryDelaySeconds)>
                 {
                     {
@@ -152,10 +152,10 @@ namespace SW_PortalProprietario.Application.Services.Core
                 if (allDiscoveredQueues.Count > 0)
                     _logger.LogInformation($"Filtrando filas por PROGRAM_ID '{programId}': {discoveredQueues.Count} de {allDiscoveredQueues.Count} filas");
 
-                // Se Management API não retornou filas, fallback: tentar filas conhecidas via AMQP
+                // Se Management API nÃ£o retornou filas, fallback: tentar filas conhecidas via AMQP
                 if (discoveredQueues.Count == 0)
                 {
-                    _logger.LogInformation("Management API não disponível ou sem filas, tentando descobrir filas conhecidas via AMQP");
+                    _logger.LogInformation("Management API nÃ£o disponÃ­vel ou sem filas, tentando descobrir filas conhecidas via AMQP");
                     try
                     {
                         var factory = new ConnectionFactory
@@ -189,13 +189,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogDebug(ex, $"Fila não encontrada no RabbitMQ: {queueNameExact}");
+                                _logger.LogDebug(ex, $"Fila nÃ£o encontrada no RabbitMQ: {queueNameExact}");
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Não foi possível conectar ao RabbitMQ para listar filas, usando apenas configurações");
+                        _logger.LogWarning(ex, "NÃ£o foi possÃ­vel conectar ao RabbitMQ para listar filas, usando apenas configuraÃ§Ãµes");
                         await SyncConfiguredQueues();
                         _repository.Rollback();
                         return;
@@ -216,7 +216,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     var existingQueuesDict = existingQueuesInDb.GroupBy(q => q.Nome.ToLower())
                         .ToDictionary(g => g.Key, g => g.First());
 
-                    _logger.LogInformation($"Iniciando sincronização de {discoveredQueues.Count} filas descobertas no RabbitMQ");
+                    _logger.LogInformation($"Iniciando sincronizaÃ§Ã£o de {discoveredQueues.Count} filas descobertas no RabbitMQ");
 
                     // Sincronizar filas descobertas
                     var syncCount = 0;
@@ -231,7 +231,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                         if (existingQueuesDict.TryGetValue(queueNameLower, out var existingQueue))
                         {
-                            // Atualizar se necessário
+                            // Atualizar se necessÃ¡rio
                             var needsUpdate = false;
                             if (existingQueue.TipoFila != queueInfo.tipo)
                             {
@@ -266,7 +266,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                             }
                             else
                             {
-                                _logger.LogDebug($"Fila {queueName} já está atualizada");
+                                _logger.LogDebug($"Fila {queueName} jÃ¡ estÃ¡ atualizada");
                             }
                         }
                         else
@@ -294,7 +294,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    _logger.LogInformation("Nenhuma fila encontrada, executando sincronização de filas configuradas");
+                    _logger.LogInformation("Nenhuma fila encontrada, executando sincronizaÃ§Ã£o de filas configuradas");
                     _repository.Rollback();
                     await SyncConfiguredQueues();
                     return;
@@ -303,7 +303,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                 {
-                    _logger.LogInformation("Sincronização de filas concluída com sucesso");
+                    _logger.LogInformation("SincronizaÃ§Ã£o de filas concluÃ­da com sucesso");
                 }
                 else if (exception != null)
                 {
@@ -313,7 +313,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception err)
             {
-                _logger.LogWarning(err, "Erro ao sincronizar filas do RabbitMQ, tentando apenas configurações...");
+                _logger.LogWarning(err, "Erro ao sincronizar filas do RabbitMQ, tentando apenas configuraÃ§Ãµes...");
                 _repository.Rollback();
                 // Fallback: tentar sincronizar apenas filas configuradas
                 try
@@ -322,15 +322,15 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 catch (Exception fallbackErr)
                 {
-                    _logger.LogError(fallbackErr, "Erro também no fallback de sincronização");
+                    _logger.LogError(fallbackErr, "Erro tambÃ©m no fallback de sincronizaÃ§Ã£o");
                 }
             }
         }
 
         /// <summary>
-        /// Obtém todas as filas do RabbitMQ via Management API (HTTP).
+        /// ObtÃ©m todas as filas do RabbitMQ via Management API (HTTP).
         /// Requer o plugin rabbitmq_management habilitado no broker (porta 15672).
-        /// Retorna lista vazia se Management API não estiver disponível.
+        /// Retorna lista vazia se Management API nÃ£o estiver disponÃ­vel.
         /// </summary>
         private async Task<List<string>> GetQueuesFromManagementApi(string host, string? user, string? pass)
         {
@@ -374,7 +374,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "Não foi possível obter filas via Management API em {Url}", url);
+                _logger.LogDebug(ex, "NÃ£o foi possÃ­vel obter filas via Management API em {Url}", url);
                 return new List<string>();
             }
         }
@@ -427,7 +427,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     )
                 };
 
-                _logger.LogInformation($"Iniciando sincronização de {configuredQueues.Count} filas configuradas");
+                _logger.LogInformation($"Iniciando sincronizaÃ§Ã£o de {configuredQueues.Count} filas configuradas");
 
                 var existingQueuesInDb = (await _repository.FindByHql<RabbitMQQueue>("From RabbitMQQueue q")).ToList();
                 _logger.LogInformation($"Encontradas {existingQueuesInDb.Count} filas existentes no banco de dados");
@@ -452,7 +452,7 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                     if (existingQueuesDict.TryGetValue(fullQueueNameLower, out var existingQueue))
                     {
-                        // Atualizar configurações se necessário (sem alterar o status manual)
+                        // Atualizar configuraÃ§Ãµes se necessÃ¡rio (sem alterar o status manual)
                         var needsUpdate = false;
                         if (existingQueue.TipoFila != configQueue.tipo)
                         {
@@ -483,11 +483,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                         if (needsUpdate)
                         {
                             await _repository.Save(existingQueue);
-                            _logger.LogInformation($"Fila de processamento assíncrono atualizada: {fullQueueName}");
+                            _logger.LogInformation($"Fila de processamento assÃ­ncrono atualizada: {fullQueueName}");
                         }
                         else
                         {
-                            _logger.LogDebug($"Fila {fullQueueName} já está atualizada, nenhuma alteração necessária");
+                            _logger.LogDebug($"Fila {fullQueueName} jÃ¡ estÃ¡ atualizada, nenhuma alteraÃ§Ã£o necessÃ¡ria");
                         }
                     }
                     else
@@ -505,7 +505,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         };
 
                         await _repository.Save(newQueue);
-                        _logger.LogInformation($"Fila de processamento assíncrono criada: {fullQueueName} (tipo: {configQueue.tipo})");
+                        _logger.LogInformation($"Fila de processamento assÃ­ncrono criada: {fullQueueName} (tipo: {configQueue.tipo})");
                     }
                     
                     processedCount++;
@@ -516,7 +516,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                 {
-                    _logger.LogInformation($"Sincronização de filas configuradas concluída com sucesso. {processedCount} filas processadas.");
+                    _logger.LogInformation($"SincronizaÃ§Ã£o de filas configuradas concluÃ­da com sucesso. {processedCount} filas processadas.");
                 }
                 else if (exception != null)
                 {
@@ -543,12 +543,12 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 if (string.IsNullOrWhiteSpace(host) || port == 0)
                 {
-                    _logger.LogWarning("Configurações do RabbitMQ não encontradas, não é possível buscar estatísticas");
+                    _logger.LogWarning("ConfiguraÃ§Ãµes do RabbitMQ nÃ£o encontradas, nÃ£o Ã© possÃ­vel buscar estatÃ­sticas");
                     return;
                 }
 
-                // Tentar buscar estatísticas via Management API (se disponível)
-                // Por enquanto, vamos usar a conexão direta para obter informações básicas
+                // Tentar buscar estatÃ­sticas via Management API (se disponÃ­vel)
+                // Por enquanto, vamos usar a conexÃ£o direta para obter informaÃ§Ãµes bÃ¡sicas
                 try
                 {
                     var factory = new ConnectionFactory
@@ -567,26 +567,26 @@ namespace SW_PortalProprietario.Application.Services.Core
                         try
                         {
                             var queueDeclareResult = await channel.QueueDeclarePassiveAsync(queue.Nome);
-                            // Itens pendentes = mensagens não consumidas
+                            // Itens pendentes = mensagens nÃ£o consumidas
                             queue.ItensPendentes = (int)queueDeclareResult.MessageCount;
-                            // Itens processados não está disponível diretamente via API básica
-                            // Seria necessário usar Management API ou manter contadores próprios
+                            // Itens processados nÃ£o estÃ¡ disponÃ­vel diretamente via API bÃ¡sica
+                            // Seria necessÃ¡rio usar Management API ou manter contadores prÃ³prios
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogDebug(ex, $"Não foi possível obter estatísticas da fila {queue.Nome}");
-                            // Fila pode não existir ainda ou estar inativa
+                            _logger.LogDebug(ex, $"NÃ£o foi possÃ­vel obter estatÃ­sticas da fila {queue.Nome}");
+                            // Fila pode nÃ£o existir ainda ou estar inativa
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Não foi possível conectar ao RabbitMQ para buscar estatísticas");
+                    _logger.LogWarning(ex, "NÃ£o foi possÃ­vel conectar ao RabbitMQ para buscar estatÃ­sticas");
                 }
             }
             catch (Exception err)
             {
-                _logger.LogWarning(err, "Erro ao enriquecer filas com estatísticas");
+                _logger.LogWarning(err, "Erro ao enriquecer filas com estatÃ­sticas");
             }
         }
 
@@ -599,14 +599,14 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível buscar a fila RabbitMQ com id {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel buscar a fila RabbitMQ com id {id}");
                 throw;
             }
         }
 
         /// <summary>
         /// Busca uma fila pelo nome (apenas leitura no banco, sem sincronizar com RabbitMQ).
-        /// Usado pelos consumers para verificar se a fila está ativa antes de iniciar.
+        /// Usado pelos consumers para verificar se a fila estÃ¡ ativa antes de iniciar.
         /// </summary>
         public async Task<RabbitMQQueueViewModel?> GetQueueByNome(string nome)
         {
@@ -629,7 +629,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         }
 
         /// <summary>
-        /// Indica se a fila está ativa no banco (Ativo = Sim). Usado pelos HostedServices para iniciar/parar consumers.
+        /// Indica se a fila estÃ¡ ativa no banco (Ativo = Sim). Usado pelos HostedServices para iniciar/parar consumers.
         /// </summary>
         public async Task<bool> IsQueueActiveByNome(string nome)
         {
@@ -645,21 +645,21 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var queue = (await _repository.FindByHql<RabbitMQQueue>($"From RabbitMQQueue q Where q.Id = {id}")).FirstOrDefault();
                 if (queue == null)
-                    throw new ArgumentException($"Fila com id {id} não encontrada");
+                    throw new ArgumentException($"Fila com id {id} nÃ£o encontrada");
 
                 await _repository.Remove(queue);
 
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                 {
-                    _logger.LogInformation($"Fila RabbitMQ: ({queue.Id} - {queue.Nome}) excluída com sucesso!");
+                    _logger.LogInformation($"Fila RabbitMQ: ({queue.Id} - {queue.Nome}) excluÃ­da com sucesso!");
                     return true;
                 }
-                throw exception ?? new Exception($"Não foi possível excluir a fila");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel excluir a fila");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível excluir a fila RabbitMQ com id {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel excluir a fila RabbitMQ com id {id}");
                 _repository.Rollback();
                 throw;
             }
@@ -673,9 +673,9 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var queue = (await _repository.FindByHql<RabbitMQQueue>($"From RabbitMQQueue q Where q.Id = {id}")).FirstOrDefault();
                 if (queue == null)
-                    throw new ArgumentException($"Fila com id {id} não encontrada");
+                    throw new ArgumentException($"Fila com id {id} nÃ£o encontrada");
 
-                queue.Ativo = queue.Ativo == EnumSimNao.Sim ? EnumSimNao.Não : EnumSimNao.Sim;
+                queue.Ativo = queue.Ativo == EnumSimNao.Sim ? EnumSimNao.Nao : EnumSimNao.Sim;
                 await _repository.Save(queue);
 
                 var (executed, exception) = await _repository.CommitAsync();
@@ -684,11 +684,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     _logger.LogInformation($"Status da fila RabbitMQ: ({queue.Id} - {queue.Nome}) alterado para {(queue.Ativo == EnumSimNao.Sim ? "Ativo" : "Inativo")}");
                     return _mapper.Map<RabbitMQQueueViewModel>(queue);
                 }
-                throw exception ?? new Exception($"Não foi possível alterar o status da fila");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel alterar o status da fila");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível alterar o status da fila RabbitMQ com id {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel alterar o status da fila RabbitMQ com id {id}");
                 _repository.Rollback();
                 throw;
             }

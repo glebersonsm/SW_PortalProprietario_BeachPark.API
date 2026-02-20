@@ -1,20 +1,20 @@
-using NHibernate;
+Ôªøusing NHibernate;
 using SW_PortalProprietario.Application.Models.GeralModels;
 
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces;
 
 /// <summary>
-/// Interface para serviÁo de processamento autom·tico de incentivo para agendamento
+/// Interface para servi√ßo de processamento autom√°tico de incentivo para agendamento
 /// </summary>
 public interface IAutomaticIncentivoAgendamentoService
 {
     /// <summary>
-    /// Processa contratos elegÌveis para incentivo de agendamento - Multipropriedade
+    /// Processa contratos eleg√≠veis para incentivo de agendamento - Multipropriedade
     /// </summary>
     Task ProcessarContratosMultiPropriedade(IStatelessSession session, AutomaticCommunicationConfigModel config, int? qtdeEnviar = null);
 
     /// <summary>
-    /// Processa contratos elegÌveis para incentivo de agendamento - Timesharing
+    /// Processa contratos eleg√≠veis para incentivo de agendamento - Timesharing
     /// </summary>
     Task ProcessarContratosTimesharing(IStatelessSession session, AutomaticCommunicationConfigModel config, int? qtdeEnviar = null);
 }

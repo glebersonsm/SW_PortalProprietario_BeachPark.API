@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NHibernate;
@@ -30,7 +30,7 @@ namespace SW_PortalProprietario.Test.Audit
                 _sessionFactoryMock.Object);
         }
 
-        [Fact(DisplayName = "SaveAuditLogAsync - Deve criar sessão isolada para persistência")]
+        [Fact(DisplayName = "SaveAuditLogAsync - Deve criar sessÃ£o isolada para persistÃªncia")]
         public async Task SaveAuditLogAsync_DeveCriarSessaoIsolada_ParaPersistencia()
         {
             // Arrange
@@ -217,7 +217,7 @@ namespace SW_PortalProprietario.Test.Audit
             capturedAuditLog.DataHoraCriacao.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(5));
         }
 
-        [Fact(DisplayName = "SaveAuditLogAsync - Não deve lançar exceção mesmo em caso de erro")]
+        [Fact(DisplayName = "SaveAuditLogAsync - NÃ£o deve lanÃ§ar exceÃ§Ã£o mesmo em caso de erro")]
         public async Task SaveAuditLogAsync_NaoDeveLancarExcecao_MesmoEmCasoDeErro()
         {
             // Arrange
@@ -236,7 +236,7 @@ namespace SW_PortalProprietario.Test.Audit
             // Act & Assert
             var exception = await Record.ExceptionAsync(async () => await _auditService.SaveAuditLogAsync(message));
             
-            // Não deve lançar exceção (tratamento interno)
+            // NÃ£o deve lanÃ§ar exceÃ§Ã£o (tratamento interno)
             exception.Should().BeNull();
         }
     }

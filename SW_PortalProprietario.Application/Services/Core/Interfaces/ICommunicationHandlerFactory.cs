@@ -1,19 +1,19 @@
-using SW_PortalProprietario.Domain.Enumns;
+ï»¿using SW_PortalProprietario.Domain.Enumns;
 
 namespace SW_PortalProprietario.Application.Services.Core.Interfaces;
 
 /// <summary>
-/// Factory para resolver handlers de comunicação baseado no tipo
+/// Factory para resolver handlers de comunicaÃ§Ã£o baseado no tipo
 /// </summary>
 public interface ICommunicationHandlerFactory
 {
     /// <summary>
-    /// Obtém o handler apropriado para o tipo de comunicação
+    /// ObtÃ©m o handler apropriado para o tipo de comunicaÃ§Ã£o
     /// </summary>
     ICommunicationHandler? GetHandler(EnumDocumentTemplateType communicationType);
 
     /// <summary>
-    /// Verifica se existe um handler registrado para o tipo de comunicação
+    /// Verifica se existe um handler registrado para o tipo de comunicaÃ§Ã£o
     /// </summary>
     bool HasHandler(EnumDocumentTemplateType communicationType);
 }

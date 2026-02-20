@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+ï»¿using Microsoft.Extensions.Logging;
 using Moq;
 using SW_PortalProprietario.Application.Services.Core;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
@@ -7,8 +7,8 @@ using Xunit;
 namespace SW_PortalProprietario.Test.Services.Core
 {
     /// <summary>
-    /// Testes específicos para validar comportamento de Two-Phase Commit
-    /// Garante propriedades ACID em transações distribuídas
+    /// Testes especÃ­ficos para validar comportamento de Two-Phase Commit
+    /// Garante propriedades ACID em transaÃ§Ãµes distribuÃ­das
     /// </summary>
     public class TwoPhaseCommitTests
     {
@@ -88,12 +88,12 @@ namespace SW_PortalProprietario.Test.Services.Core
 
         #endregion
 
-        #region Propriedade: Consistência
+        #region Propriedade: ConsistÃªncia
 
         [Fact]
         public async Task TwoPhaseCommit_Consistencia_EstadoFinalValido()
         {
-            // Arrange - Simular transferência bancária distribuída
+            // Arrange - Simular transferÃªncia bancÃ¡ria distribuÃ­da
             var saldos = new Dictionary<string, decimal>
             {
                 { "ContaOrigem", 1000m },
@@ -112,7 +112,7 @@ namespace SW_PortalProprietario.Test.Services.Core
                 saldos["ContaDestino"] += 100m; // Credita
             });
 
-            // Compensação: estornar débito
+            // CompensaÃ§Ã£o: estornar dÃ©bito
             Mock.Get(stepDebito).Setup(s => s.CompensateAsync(It.IsAny<object>()))
                 .Callback(() => saldos["ContaOrigem"] += 100m) // Estorna
                 .ReturnsAsync(true);
@@ -122,7 +122,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             // Act
             var (success, _) = await _orchestrator.ExecuteAsync(steps, Guid.NewGuid().ToString());
 
-            // Assert - Consistência
+            // Assert - ConsistÃªncia
             Assert.False(success);
             
             // Saldos devem voltar ao estado original (consistente)
@@ -154,7 +154,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             await _orchestrator.ExecuteAsync(steps, Guid.NewGuid().ToString());
 
             // Assert
-            // Deve haver compensação para cada operação executada
+            // Deve haver compensaÃ§Ã£o para cada operaÃ§Ã£o executada
             Assert.Contains("Op1-EXEC", operacoes);
             Assert.Contains("Op2-EXEC", operacoes);
             Assert.Contains("Op1-ROLLBACK", operacoes);
@@ -171,18 +171,18 @@ namespace SW_PortalProprietario.Test.Services.Core
         [Fact]
         public async Task TwoPhaseCommit_Isolamento_OperacoesIndependentes()
         {
-            // Arrange - 2 operações simultâneas
+            // Arrange - 2 operaÃ§Ãµes simultÃ¢neas
             var recursoCompartilhado = 0;
             var lock1 = new object();
             var lock2 = new object();
 
-            // Operação 1
+            // OperaÃ§Ã£o 1
             var step1Op1 = CreateMockStepWithCallback("Op1-Step1", 1, true, () =>
             {
                 lock (lock1) { recursoCompartilhado++; }
             });
 
-            // Operação 2
+            // OperaÃ§Ã£o 2
             var step1Op2 = CreateMockStepWithCallback("Op2-Step1", 1, true, () =>
             {
                 lock (lock2) { recursoCompartilhado++; }
@@ -211,13 +211,13 @@ namespace SW_PortalProprietario.Test.Services.Core
             var op1Data = new Dictionary<string, int> { { "Value", 0 } };
             var op2Data = new Dictionary<string, int> { { "Value", 0 } };
 
-            // Operação 1 - Sucesso
+            // OperaÃ§Ã£o 1 - Sucesso
             var step1 = CreateMockStepWithCallback("Op1", 1, true, () => op1Data["Value"] = 100);
             Mock.Get(step1).Setup(s => s.CompensateAsync(It.IsAny<object>()))
                 .Callback(() => op1Data["Value"] = 0)
                 .ReturnsAsync(true);
 
-            // Operação 2 - Falha
+            // OperaÃ§Ã£o 2 - Falha
             var step2 = CreateMockStepWithCallback("Op2", 1, false, () => op2Data["Value"] = 200);
 
             var steps1 = new List<IDistributedTransactionStep> { step1 };
@@ -231,7 +231,7 @@ namespace SW_PortalProprietario.Test.Services.Core
             Assert.True(success1);
             Assert.False(success2);
             
-            // Op1 não deve ser afetada por falha de Op2
+            // Op1 nÃ£o deve ser afetada por falha de Op2
             Assert.Equal(100, op1Data["Value"]);
             Assert.Equal(0, op2Data["Value"]);
         }
@@ -243,7 +243,7 @@ namespace SW_PortalProprietario.Test.Services.Core
         [Fact]
         public async Task TwoPhaseCommit_Durabilidade_DadosPersistidos()
         {
-            // Arrange - Simular persistência
+            // Arrange - Simular persistÃªncia
             var persistedData = new List<string>();
 
             var step1 = CreateMockStepWithCallback("Persist1", 1, true, () =>
@@ -297,7 +297,7 @@ namespace SW_PortalProprietario.Test.Services.Core
 
         #endregion
 
-        #region Cenários Complexos
+        #region CenÃ¡rios Complexos
 
         [Fact]
         public async Task TwoPhaseCommit_CenarioComplexo_MultiplosBancosEApis()
@@ -340,11 +340,11 @@ namespace SW_PortalProprietario.Test.Services.Core
         [Fact]
         public async Task TwoPhaseCommit_CenarioComplexo_CompensacaoParcialFalhando()
         {
-            // Arrange - Cenário onde algumas compensações falham
+            // Arrange - CenÃ¡rio onde algumas compensaÃ§Ãµes falham
             var compensationResults = new Dictionary<string, bool>();
 
             var step1 = CreateResourceStepWithCompensationResult("Step1", 1, true, compensationResults, true);
-            var step2 = CreateResourceStepWithCompensationResult("Step2", 2, true, compensationResults, false); // Falha compensação
+            var step2 = CreateResourceStepWithCompensationResult("Step2", 2, true, compensationResults, false); // Falha compensaÃ§Ã£o
             var step3 = CreateResourceStepWithCompensationResult("Step3", 3, true, compensationResults, true);
             var step4 = CreateResourceStepWithCompensationResult("Step4", 4, false, compensationResults, true);
 
@@ -356,11 +356,11 @@ namespace SW_PortalProprietario.Test.Services.Core
             // Assert
             Assert.False(success);
             
-            // Todas as compensações devem ter sido tentadas
+            // Todas as compensaÃ§Ãµes devem ter sido tentadas
             Assert.True(compensationResults["Step1"]);
             Assert.False(compensationResults["Step2"]); // Falhou
             Assert.True(compensationResults["Step3"]);
-            Assert.False(compensationResults.ContainsKey("Step4")); // Não foi compensado (falhou)
+            Assert.False(compensationResults.ContainsKey("Step4")); // NÃ£o foi compensado (falhou)
         }
 
         #endregion

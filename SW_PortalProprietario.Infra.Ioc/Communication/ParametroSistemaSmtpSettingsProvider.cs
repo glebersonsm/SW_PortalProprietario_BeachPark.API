@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
@@ -8,9 +8,9 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Infra.Ioc.Communication
 {
     /// <summary>
-    /// Obtém configurações SMTP a partir de ParametroSistema (banco).
-    /// Usa IRepositoryNH (mesmo repositório que grava os parâmetros na tela Configurações) para garantir
-    /// que o envio use os dados salvos pelo usuário; fallback para IRepositoryHosted se NH não estiver disponível no escopo.
+    /// ObtÃ©m configuraÃ§Ãµes SMTP a partir de ParametroSistema (banco).
+    /// Usa IRepositoryNH (mesmo repositÃ³rio que grava os parÃ¢metros na tela ConfiguraÃ§Ãµes) para garantir
+    /// que o envio use os dados salvos pelo usuÃ¡rio; fallback para IRepositoryHosted se NH nÃ£o estiver disponÃ­vel no escopo.
     /// Se a senha estiver vazia em ParametroSistema, usa a senha do .env/appsettings (SmtpPass ou SmptPass).
     /// </summary>
     public class ParametroSistemaSmtpSettingsProvider : ISmtpSettingsProvider
@@ -29,7 +29,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             _configuration = configuration;
         }
 
-        /// <summary>Lê senha SMTP do .env/appsettings (IConfiguration); aceita "SmtpPass" ou o typo "SmptPass".</summary>
+        /// <summary>LÃª senha SMTP do .env/appsettings (IConfiguration); aceita "SmtpPass" ou o typo "SmptPass".</summary>
         private string? GetSmtpPassFromConfig()
         {
             var pass = _configuration.GetValue<string>("SmtpPass");
@@ -38,7 +38,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             return string.IsNullOrWhiteSpace(pass) ? null : pass.Trim();
         }
 
-        /// <summary>Host e porta padrão para AWS SES SMTP (região sa-east-1).</summary>
+        /// <summary>Host e porta padrÃ£o para AWS SES SMTP (regiÃ£o sa-east-1).</summary>
         private const string AwsSesSmtpHostDefault = "email-smtp.sa-east-1.amazonaws.com";
         private const int AwsSesSmtpPortDefault = 587;
 
@@ -69,13 +69,13 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     Port = port,
                     User = isAws ? param.SmtpIamUser! : param.SmtpUser.Trim(),
                     Pass = pass,
-                    UseSsl = isAws || param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
+                    UseSsl = isAws || param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim,
                     FromName = isAws ? param.SmtpIamUser : string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Não foi possível obter configurações SMTP de ParametroSistema. Será usado fallback (.env / appsettings).");
+                _logger.LogWarning(ex, "NÃ£o foi possÃ­vel obter configuraÃ§Ãµes SMTP de ParametroSistema. SerÃ¡ usado fallback (.env / appsettings).");
                 return null;
             }
         }
@@ -111,21 +111,21 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                     Port = port,
                     User = param.SmtpUser.Trim(),
                     Pass = pass,
-                    UseSsl = isAws || param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Não) == EnumSimNao.Sim,
+                    UseSsl = isAws || param.SmtpUseSsl.GetValueOrDefault(EnumSimNao.Nao) == EnumSimNao.Sim,
                     FromName = isAws ? param.SmtpIamUser : string.IsNullOrWhiteSpace(param.SmtpFromName) ? null : param.SmtpFromName.Trim()
                 };
                 return ctx;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Não foi possível obter contexto SMTP de ParametroSistema. Será usado fallback (.env / appsettings) e ClienteEmailDireto.");
+                _logger.LogWarning(ex, "NÃ£o foi possÃ­vel obter contexto SMTP de ParametroSistema. SerÃ¡ usado fallback (.env / appsettings) e ClienteEmailDireto.");
                 return ctx;
             }
         }
 
         /// <summary>
-        /// Obtém ParametroSistema: tenta IRepositoryNH primeiro (mesma fonte que a tela Configurações),
-        /// depois IRepositoryHosted para cenários de hosted service.
+        /// ObtÃ©m ParametroSistema: tenta IRepositoryNH primeiro (mesma fonte que a tela ConfiguraÃ§Ãµes),
+        /// depois IRepositoryHosted para cenÃ¡rios de hosted service.
         /// </summary>
         private static async Task<ParametroSistemaViewModel?> GetParametroSistemaFromRepositoryAsync(IServiceProvider serviceProvider)
         {

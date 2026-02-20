@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -39,7 +39,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var tags = await _repository.FindById<Pais>(id);
                 if (tags is null)
                 {
-                    throw new Exception($"Não foi encontrada a tag com Id: {id}!");
+                    throw new Exception($"NÃ£o foi encontrada a tag com Id: {id}!");
                 }
 
 
@@ -53,7 +53,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -62,7 +62,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar a tag: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar a tag: {id}");
                 throw;
 
             }
@@ -86,7 +86,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 {
                     var tagParent = (await _repository.FindBySql<TagsModel>($"Select t.Id From Tags t Where t.Id = {tags.TagsParentId.GetValueOrDefault()}")).FirstOrDefault();
                     if (tagParent == null)
-                        throw new ArgumentException($"Não foi encontrada uma Tag com o Id indicado no campo TagsParentId: {tags.TagsParentId.GetValueOrDefault()}");
+                        throw new ArgumentException($"NÃ£o foi encontrada uma Tag com o Id indicado no campo TagsParentId: {tags.TagsParentId.GetValueOrDefault()}");
                 }
 
                 var result = await _repository.Save(exist);
@@ -99,18 +99,18 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                 {
-                    _logger.LogInformation($"País: ({result.Id} - {exist.Id} - {exist.Nome}) salvo com sucesso!");
+                    _logger.LogInformation($"PaÃ­s: ({result.Id} - {exist.Id} - {exist.Nome}) salvo com sucesso!");
 
                     if (result != null)
                         return _mapper.Map(result, new TagsModel());
 
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar a Tag: ({tags.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar a Tag: ({tags.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar a Tag: ({tags.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar a Tag: ({tags.Nome})");
                 _repository.Rollback();
                 throw;
             }

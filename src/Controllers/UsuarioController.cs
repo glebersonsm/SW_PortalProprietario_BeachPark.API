@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -46,8 +46,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return BadRequest(new ResultModel<UserRegisterResultModel>(new UserRegisterResultModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.Login})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.Login})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.Login})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.Login})", err.Message },
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -56,8 +56,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<UserRegisterResultModel>(new UserRegisterResultModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.Login})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.Login})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.Login})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.Login})", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -86,8 +86,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return BadRequest(new ResultModel<UserRegisterResultModel>(new UserRegisterResultModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.Login})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.Login})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.Login})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.Login})", err.Message },
                     Status = StatusCodes.Status400BadRequest
                 });
             }
@@ -96,8 +96,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<UserRegisterResultModel>(new UserRegisterResultModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.Login})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível registrar o usuário: ({model.Login})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.Login})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel registrar o usuÃ¡rio: ({model.Login})", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -128,8 +128,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                     Data = new ChangePasswordResultModel(),
                     Status = StatusCodes.Status400BadRequest,
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível alterar a senha", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível alterar a senha", err.Message }
+                    new List<string>() { $"NÃ£o foi possÃ­vel alterar a senha", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel alterar a senha", err.Message }
                 });
             }
             catch (Exception err)
@@ -138,8 +138,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 {
                     Data = new ChangePasswordResultModel(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível alterar a senha", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível alterar a senha", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel alterar a senha", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel alterar a senha", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }
@@ -200,8 +200,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                     Data = err.Message,
                     Status = StatusCodes.Status404NotFound,
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível resetar a senha", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível resetar a senha", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel resetar a senha", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel resetar a senha", err.Message },
                     Success = false
                 });
             }
@@ -212,8 +212,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                     Data = err.Message,
                     Status = StatusCodes.Status400BadRequest,
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível resetar a senha", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível resetar a senha", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel resetar a senha", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel resetar a senha", err.Message },
                     Success = false
                 });
             }
@@ -223,8 +223,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 {
                     Data = err.Message,
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível resetar a senha", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível resetar a senha", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel resetar a senha", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel resetar a senha", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -415,8 +415,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 {
                     Data = new List<UsuarioModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -427,8 +427,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers
                 {
                     Data = new List<UsuarioModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });

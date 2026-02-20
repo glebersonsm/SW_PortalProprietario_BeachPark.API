@@ -1,4 +1,4 @@
-using NHibernate.Mapping;
+﻿using NHibernate.Mapping;
 using System.Linq;
 using SW_PortalProprietario.Application.Models;
 using Dapper;

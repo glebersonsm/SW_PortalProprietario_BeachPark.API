@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace SW_PortalCliente_BeachPark.API.Helpers
 {
@@ -18,11 +18,11 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
         }
 
         /// <summary>
-        /// Obtém um valor de configuração priorizando variável de ambiente (.env) sobre appsettings.json
+        /// ObtÃ©m um valor de configuraÃ§Ã£o priorizando variÃ¡vel de ambiente (.env) sobre appsettings.json
         /// </summary>
         public static string? GetConfigValue(IConfiguration configuration, string configKey, string? envKey = null, string? defaultValue = null)
         {
-            // 1. Tentar obter da variável de ambiente (se envKey foi fornecida)
+            // 1. Tentar obter da variÃ¡vel de ambiente (se envKey foi fornecida)
             if (!string.IsNullOrWhiteSpace(envKey))
             {
                 var envValue = Environment.GetEnvironmentVariable(envKey);
@@ -39,12 +39,12 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
                 return configValue;
             }
 
-            // 3. Retornar valor padrão
+            // 3. Retornar valor padrÃ£o
             return defaultValue;
         }
 
         /// <summary>
-        /// Obtém um valor de configuração tipado priorizando variável de ambiente (.env) sobre appsettings.json
+        /// ObtÃ©m um valor de configuraÃ§Ã£o tipado priorizando variÃ¡vel de ambiente (.env) sobre appsettings.json
         /// </summary>
         public static T? GetConfigValue<T>(IConfiguration configuration, string configKey, string? envKey = null, T? defaultValue = default)
         {
@@ -108,7 +108,7 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             OverrideIfNotEmpty(configuration, "ReservasCMApiConfig:TelReservanteRci", "RESERVAS_CM_API_TEL_RESERVANTE_RCI");
             OverrideIfNotEmpty(configuration, "ReservasCMApiConfig:IdHospedeBulkBank", "RESERVAS_CM_API_ID_HOSPEDE_BULK_BANK");
 
-            // SMTP: configuração movida para o sistema (ParametroSistema). Não sobrescrever por .env.
+            // SMTP: configuraÃ§Ã£o movida para o sistema (ParametroSistema). NÃ£o sobrescrever por .env.
 
             // Paths
             OverrideIfNotEmpty(configuration, "WwwRootPath", "WWWROOT_PATH");
@@ -165,7 +165,7 @@ namespace SW_PortalCliente_BeachPark.API.Helpers
             OverrideIfNotEmpty(configuration, "TimeWaitInSecondsSearchPixResult", "WAIT_SEARCH_PIX");
             OverrideIfNotEmpty(configuration, "TimeWaitInSecondsFinalizeCartaoResult", "WAIT_FINALIZE_CARTAO");
 
-            // Specific Certidões Config
+            // Specific CertidÃµes Config
             OverrideIfNotEmpty(configuration, "CertidoesConfig:PositivaConfigPorUnidade", "CERTIDOES_POSITIVA_UNIDADE");
             OverrideIfNotEmpty(configuration, "CertidoesConfig:NegativaConfigPorUnidade", "CERTIDOES_NEGATIVA_UNIDADE");
             OverrideIfNotEmpty(configuration, "CertidoesConfig:PositivaConfigPorCliente", "CERTIDOES_POSITIVA_CLIENTE");

@@ -1,4 +1,4 @@
-using SW_Utils.Models;
+﻿using SW_Utils.Models;
 
 namespace SW_PortalProprietario.Application.Interfaces.ProgramacaoParalela.LogsBackGround
 {

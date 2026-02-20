@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models;
@@ -41,8 +41,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree
                 return BadRequest(new ResultModel<RegraPaxFreeModel>(new RegraPaxFreeModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar a RegraPaxFree: ({model.Nome})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar a RegraPaxFree: ({model.Nome})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -52,8 +52,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RegraPaxFreeModel>(new RegraPaxFreeModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar a RegraPaxFree: ({model.Nome})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar a RegraPaxFree: ({model.Nome})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -81,8 +81,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree
                 return BadRequest(new ResultModel<RegraPaxFreeModel>(new RegraPaxFreeModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar a RegraPaxFree: ({model.Nome})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar a RegraPaxFree: ({model.Nome})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -92,8 +92,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultModel<RegraPaxFreeModel>(new RegraPaxFreeModel())
                 {
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível salvar a RegraPaxFree: ({model.Nome})", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível salvar a RegraPaxFree: ({model.Nome})", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel salvar a RegraPaxFree: ({model.Nome})", err.Message },
                     Status = StatusCodes.Status500InternalServerError,
                     Success = false
                 });
@@ -120,7 +120,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree
             {
                 return BadRequest(new DeleteResultModel()
                 {
-                    Result = "Não deletado",
+                    Result = "NÃ£o deletado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -131,7 +131,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new DeleteResultModel()
                 {
-                    Result = "Não deletado",
+                    Result = "NÃ£o deletado",
                     Errors = err.InnerException != null ?
                     new List<string>() { err.Message, err.InnerException.Message } :
                     new List<string>() { err.Message },
@@ -171,8 +171,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree
                 {
                     Data = new List<RegraPaxFreeModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status400BadRequest,
                     Success = false
                 });
@@ -183,8 +183,8 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.RegraPaxFree
                 {
                     Data = new List<RegraPaxFreeModel>(),
                     Errors = err.InnerException != null ?
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message, err.InnerException.Message } :
-                    new List<string>() { $"Não foi possível retornar os dados", err.Message },
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message, err.InnerException.Message } :
+                    new List<string>() { $"NÃ£o foi possÃ­vel retornar os dados", err.Message },
                     Status = StatusCodes.Status500InternalServerError
                 });
             }

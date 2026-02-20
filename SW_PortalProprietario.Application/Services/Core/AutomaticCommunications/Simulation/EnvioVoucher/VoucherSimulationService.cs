@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+Ôªøusing Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -14,8 +14,8 @@ using System.Collections.Generic;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Simulation.EnvioVoucher;
 
 /// <summary>
-/// ServiÁo auxiliar para simulaÁ„o de emails de voucher
-/// ? USA O MESMO C”DIGO DO PROCESSAMENTO AUTOM¡TICO via VoucherGenerationService
+/// Servi√ßo auxiliar para simula√ß√£o de emails de voucher
+/// ? USA O MESMO C√ìDIGO DO PROCESSAMENTO AUTOM√ÅTICO via VoucherGenerationService
 /// </summary>
 public class VoucherSimulationService
 {
@@ -46,7 +46,7 @@ public class VoucherSimulationService
     {
         List<EmailInputInternalModel> emailListResult = new List<EmailInputInternalModel>();
 
-        _logger.LogInformation("=== INÕCIO SIMULA«√O VOUCHER ===");
+        _logger.LogInformation("=== IN√çCIO SIMULA√á√ÉO VOUCHER ===");
         
         var contratos = await _serviceBase.GetContratos(new List<int>());
         var inadimplentes = await _communicationProvider.Inadimplentes();
@@ -61,22 +61,22 @@ public class VoucherSimulationService
         var reservas = await GetReservasElegiveisAsync((EnumProjetoType)config.ProjetoType, config,true);
 
         if (reservas == null || !reservas.Any())
-            throw new ArgumentException($"Nenhuma reserva compatÌvel encontrada para simulaÁ„o (check-in: {targetDate:dd/MM/yyyy}, {string.Join(",", config.DaysBeforeCheckIn ?? new List<int>())} dias)");
+            throw new ArgumentException($"Nenhuma reserva compat√≠vel encontrada para simula√ß√£o (check-in: {targetDate:dd/MM/yyyy}, {string.Join(",", config.DaysBeforeCheckIn ?? new List<int>())} dias)");
 
-        _logger.LogInformation("Encontradas {Count} reservas para an·lise", reservas.Count);
+        _logger.LogInformation("Encontradas {Count} reservas para an√°lise", reservas.Count);
 
-        // Buscar o primeiro registro compatÌvel que atenda aos filtros
+        // Buscar o primeiro registro compat√≠vel que atenda aos filtros
         var resultItens = await FindCompatibleReservaAsync(reservas, config, contratos, inadimplentes);
         if (resultItens.reserva == null)
-            throw new ArgumentException("Nenhuma reserva compatÌvel encontrada que atenda aos filtros configurados");
+            throw new ArgumentException("Nenhuma reserva compat√≠vel encontrada que atenda aos filtros configurados");
 
         if (resultItens.reserva == null || !resultItens.agendamentoId.HasValue)
-            throw new ArgumentException("Nenhuma reserva compatÌvel encontrada que atenda aos filtros configurados");
+            throw new ArgumentException("Nenhuma reserva compat√≠vel encontrada que atenda aos filtros configurados");
 
         _logger.LogInformation("Reserva selecionada: AgendamentoId={AgendamentoId}, ReservaId={ReservaId}", 
             resultItens.agendamentoId, resultItens.reserva.ReservaId);
 
-        // ? USAR SERVI«O COMPARTILHADO - MESMA L”GICA DO PROCESSAMENTO AUTOM¡TICO
+        // ? USAR SERVI√áO COMPARTILHADO - MESMA L√ìGICA DO PROCESSAMENTO AUTOM√ÅTICO
         var isTimesharing = (EnumProjetoType)config.ProjetoType == EnumProjetoType.Timesharing;
         var voucherData = await _voucherGenerationService.GerarVoucherCompletoAsync(
             resultItens.agendamentoId.Value, 
@@ -85,18 +85,18 @@ public class VoucherSimulationService
             contratos);
 
         if (voucherData == null)
-            throw new ArgumentException("N„o foi possÌvel gerar voucher para simulaÁ„o");
+            throw new ArgumentException("N√£o foi poss√≠vel gerar voucher para simula√ß√£o");
 
         _logger.LogInformation("Voucher gerado com sucesso");
 
-        // ? SUBSTITUIR PLACEHOLDERS USANDO SERVI«O COMPARTILHADO
+        // ? SUBSTITUIR PLACEHOLDERS USANDO SERVI√áO COMPARTILHADO
         var subject = _voucherGenerationService.SubstituirPlaceholders(
             config.Subject ?? "Voucher da Reserva", 
             voucherData.DadosReserva);
 
         _logger.LogInformation("Assunto processado: {Subject}", subject);
 
-        // ? GERAR HTML USANDO SERVI«O COMPARTILHADO
+        // ? GERAR HTML USANDO SERVI√áO COMPARTILHADO
         var emailBody = _voucherGenerationService.GerarCorpoEmailHtml(
             voucherData.DadosReserva, 
             daysBefore);
@@ -105,7 +105,7 @@ public class VoucherSimulationService
 
         var result = new EmailInputInternalModel
         {
-            Assunto = $"[SIMULA«√O] {subject}",
+            Assunto = $"[SIMULA√á√ÉO] {subject}",
             Destinatario = userEmail,
             ConteudoEmail = config.TemplateSendMode != EnumTemplateSendMode.AttachmentOnly ? voucherData.VoucherHtml : emailBody,
             EmpresaId = 1,
@@ -121,7 +121,7 @@ public class VoucherSimulationService
             } : null
         };
 
-        _logger.LogInformation("=== FIM SIMULA«√O VOUCHER ===");
+        _logger.LogInformation("=== FIM SIMULA√á√ÉO VOUCHER ===");
 
         emailListResult.Add(result);
 
@@ -129,14 +129,14 @@ public class VoucherSimulationService
         return emailListResult;
     }
 
-    #region MÈtodos Auxiliares (Filtros e ValidaÁıes)
+    #region M√©todos Auxiliares (Filtros e Valida√ß√µes)
 
     private async Task<List<(ReservaInfo reserva, int intervalo)>?> GetReservasElegiveisAsync(EnumProjetoType projetoType, AutomaticCommunicationConfigModel config, bool simulacao = false)
     {
         List<(ReservaInfo reserva, int intervalo)> reservasElegiveis = new List<(ReservaInfo reserva, int intervalo)>();
 
         if (config == null || config.DaysBeforeCheckIn == null || !config.DaysBeforeCheckIn.Any())
-            throw new ArgumentException("ConfiguraÁ„o inv·lida: Dias antes do check-in n„o especificados");
+            throw new ArgumentException("Configura√ß√£o inv√°lida: Dias antes do check-in n√£o especificados");
 
         if (projetoType == EnumProjetoType.Multipropriedade)
         {
@@ -221,7 +221,7 @@ public class VoucherSimulationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao verificar filtros para reserva {ReservaId}. Considerando compatÌvel para simulaÁ„o.", 
+            _logger.LogError(ex, "Erro ao verificar filtros para reserva {ReservaId}. Considerando compat√≠vel para simula√ß√£o.", 
                 reserva.ReservaId);
             return true;
         }

@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -58,12 +58,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var company = (await _repository.FindBySql<EmpresaModel>("Select e.Id From Empresa e Order by e.Id")).FirstOrDefault();
                 if (company == null)
                 {
-                    throw new ArgumentException("Não foi possível identificar a empresa padrão do sistema");
+                    throw new ArgumentException("NÃ£o foi possÃ­vel identificar a empresa padrÃ£o do sistema");
                 }
 
                 grupoImagem.Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = company!.Id.GetValueOrDefault() };
 
-                // Definir Ordem padrão se for um novo grupo e Ordem não foi informada
+                // Definir Ordem padrÃ£o se for um novo grupo e Ordem nÃ£o foi informada
                 if (grupoImagemOriginal == null && (model.Ordem == null || model.Ordem == 0))
                 {
                     var maxOrdem = await _repository.CountTotalEntry("Select Max(gd.Ordem) as Ordem From GrupoImagem gd", session: null, parameters: Array.Empty<Parameter>());
@@ -86,11 +86,11 @@ namespace SW_PortalProprietario.Application.Services.Core
                     }
 
                 }
-                throw exception ?? new Exception($"Não foi possível salvar o Grupo de imagem: ({grupoImagem.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o Grupo de imagem: ({grupoImagem.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o Grupo de imagem: ({model.Name})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o Grupo de imagem: ({model.Name})");
                 _repository.Rollback();
                 throw;
             }
@@ -118,7 +118,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    // Remover apenas tags que não estão na lista - usar Inner Join Fetch para carregar Tags, GrupoImagem e Empresa com nomes
+                    // Remover apenas tags que nÃ£o estÃ£o na lista - usar Inner Join Fetch para carregar Tags, GrupoImagem e Empresa com nomes
                     tagsParaRemover = (await _repository.FindByHql<GrupoImagemTags>(
                         @$"From GrupoImagemTags gita 
                                 Inner Join Fetch gita.Tags t 
@@ -134,8 +134,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var usuario = await _repository.GetLoggedUser();
                 foreach (var tagParaRemover in tagsParaRemover)
                 {
-                    // Log detalhado da remoção da tag
-                    _logger.LogInformation($"[REMOÇÃO TAG] Removendo vínculo de tag do grupo da galeria | " +
+                    // Log detalhado da remoÃ§Ã£o da tag
+                    _logger.LogInformation($"[REMOÃ‡ÃƒO TAG] Removendo vÃ­nculo de tag do grupo da galeria | " +
                                           $"GrupoImagemID: {tagParaRemover.GrupoImagem?.Id} | " +
                                           $"GrupoImagemNome: {tagParaRemover.GrupoImagem?.Nome} | " +
                                           $"TagID: {tagParaRemover.Tags?.Id} | " +
@@ -143,7 +143,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"UsuarioID: {usuario?.userId ?? "Sistema"} | " +
                                           $"DataHora: {DateTime.Now:yyyy-MM-dd HH:mm:ss} | " +
                                           $"EmpresaID: {tagParaRemover.GrupoImagem?.Empresa?.Id} | " +
-                                          $"TipoRemocao: Sincronização");
+                                          $"TipoRemocao: SincronizaÃ§Ã£o");
 
                     await _repository.Remove(tagParaRemover);
                 }
@@ -155,7 +155,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var tagsInexistentes = listTags.Where(c => !allTags.Any(b => b.Id == c)).AsList();
                 if (tagsInexistentes.Count > 0)
                 {
-                    throw new ArgumentException($"Tags não encontradas: {string.Join(",", tagsInexistentes)}");
+                    throw new ArgumentException($"Tags nÃ£o encontradas: {string.Join(",", tagsInexistentes)}");
                 }
 
                 // Buscar tags com seus nomes para garantir que estejam carregadas no log
@@ -163,7 +163,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     @$"From Tags t Where t.Id in ({string.Join(",", listTags)}) and 
                     Not Exists(Select dc.Tags From GrupoImagemTags dc Where dc.GrupoImagem = {grupoImagem.Id} and dc.Tags = t.Id and dc.UsuarioRemocao is null and dc.DataHoraRemocao is null)")).ToList();
 
-                // Buscar grupo com nome carregado usando HQL para garantir que o nome esteja disponível
+                // Buscar grupo com nome carregado usando HQL para garantir que o nome esteja disponÃ­vel
                 var grupoComNome = (await _repository.FindByHql<GrupoImagem>(
                     $"From GrupoImagem g Where g.Id = {grupoImagem.Id}")).FirstOrDefault() ?? grupoImagem;
 
@@ -191,7 +191,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var grupoImagem = await _repository.FindById<GrupoImagem>(id);
                 if (grupoImagem is null)
                 {
-                    throw new ArgumentException($"Não foi encontrado o grupo de imagem com Id: {id}!");
+                    throw new ArgumentException($"NÃ£o foi encontrado o grupo de imagem com Id: {id}!");
                 }
 
                 _repository.BeginTransaction();
@@ -210,8 +210,8 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var usuario = await _repository.GetLoggedUser();
                 foreach (var tagRelacionada in tagsRelacionadas)
                 {
-                    // Log detalhado da remoção da tag durante exclusão do grupo
-                    _logger.LogInformation($"[REMOÇÃO TAG - EXCLUSÃO GRUPO] Removendo vínculo de tag por exclusão do grupo da galeria | " +
+                    // Log detalhado da remoÃ§Ã£o da tag durante exclusÃ£o do grupo
+                    _logger.LogInformation($"[REMOÃ‡ÃƒO TAG - EXCLUSÃƒO GRUPO] Removendo vÃ­nculo de tag por exclusÃ£o do grupo da galeria | " +
                                           $"GrupoImagemID: {tagRelacionada.GrupoImagem?.Id} | " +
                                           $"GrupoImagemNome: {tagRelacionada.GrupoImagem?.Nome} | " +
                                           $"TagID: {tagRelacionada.Tags?.Id} | " +
@@ -219,7 +219,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                                           $"UsuarioID: {usuario?.userId ?? "Sistema"} | " +
                                           $"DataHora: {DateTime.Now:yyyy-MM-dd HH:mm:ss} | " +
                                           $"EmpresaID: {tagRelacionada.GrupoImagem?.Empresa?.Id} | " +
-                                          $"TipoRemocao: Exclusão do grupo");
+                                          $"TipoRemocao: ExclusÃ£o do grupo");
 
                     await _repository.Remove(tagRelacionada);
                 }
@@ -233,7 +233,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -242,7 +242,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o grupo de imagem: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o grupo de imagem: {id}");
                 throw;
             }
         }
@@ -252,25 +252,25 @@ namespace SW_PortalProprietario.Application.Services.Core
             var httpContext = _contextAccessor?.HttpContext?.Request;
 
             if (httpContext == null)
-                throw new Exception("Não foi possível identifica a URL do servidor!");
+                throw new Exception("NÃ£o foi possÃ­vel identifica a URL do servidor!");
 
             var complemento = _configuration.GetValue<string>("ComplementoUrlApi", string.Empty);
             var complementoUrlApiComplementoParaHttps = _configuration.GetValue<string>("ComplementoUrlApiComplementoParaHttps", string.Empty);
 
             var loggedUser = await _repository.GetLoggedUser();
-            if (!loggedUser.HasValue) throw new ArgumentException("Não foi possível carregar os grupos de imagem da geleria.");
+            if (!loggedUser.HasValue) throw new ArgumentException("NÃ£o foi possÃ­vel carregar os grupos de imagem da geleria.");
 
             if (!loggedUser.Value.isAdm)
             {
                 if (loggedUser == null || string.IsNullOrEmpty(loggedUser.Value.providerKeyUser) || !loggedUser.Value.providerKeyUser.Contains("PessoaId", StringComparison.InvariantCultureIgnoreCase))
-                    throw new ArgumentNullException("Não foi possível identificar o usuário para comunicação com o eSolution!");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o usuÃ¡rio para comunicaÃ§Ã£o com o eSolution!");
 
                 if (string.IsNullOrEmpty(loggedUser.Value.userId) || !Helper.IsNumeric(loggedUser.Value.userId))
-                    throw new ArgumentNullException("Não foi possível identificar o id do usuário logado.");
+                    throw new ArgumentNullException("NÃ£o foi possÃ­vel identificar o id do usuÃ¡rio logado.");
 
                 var pessoaProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(Convert.ToInt32(loggedUser.Value.userId), _communicationProvider.CommunicationProviderName);
                 if (pessoaProvider == null || !pessoaProvider.Any() || pessoaProvider.Any(a => string.IsNullOrEmpty(a.PessoaProvider)))
-                    throw new ArgumentNullException($"Não foi possível encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
+                    throw new ArgumentNullException($"NÃ£o foi possÃ­vel encontrar a pessoa do provider: {_communicationProvider.CommunicationProviderName} vinculada a pessoa: {loggedUser.Value.providerKeyUser}");
 
             }
 

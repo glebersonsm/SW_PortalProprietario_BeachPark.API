@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.AuthModels;
@@ -12,7 +12,7 @@ using Xunit;
 namespace SW_PortalProprietario.Test.Integration.Controllers
 {
     /// <summary>
-    /// Testes de integração para AuthController
+    /// Testes de integraÃ§Ã£o para AuthController
     /// Estes testes garantem que o comportamento atual do sistema continue funcionando
     /// </summary>
     public class AuthControllerIntegrationTest : IntegrationTestBase, IClassFixture<IntegrationTestBase>
@@ -30,7 +30,7 @@ namespace SW_PortalProprietario.Test.Integration.Controllers
             // Arrange
             var inputModel = new UserRegisterInputModel
             {
-                FullName = "Teste Integração",
+                FullName = "Teste IntegraÃ§Ã£o",
                 Email = "teste.integracao@example.com",
                 Password = "Senha123!",
                 PasswordConfirmation = "Senha123!"
@@ -42,11 +42,11 @@ namespace SW_PortalProprietario.Test.Integration.Controllers
             // Assert
             var content = await response.Content.ReadAsStringAsync();
             
-            // Valida que é JSON válido
+            // Valida que Ã© JSON vÃ¡lido
             Action parseJson = () => JsonSerializer.Deserialize<object>(content);
-            parseJson.Should().NotThrow("A resposta deve ser JSON válido");
+            parseJson.Should().NotThrow("A resposta deve ser JSON vÃ¡lido");
             
-            // Se não for erro de servidor, valida estrutura
+            // Se nÃ£o for erro de servidor, valida estrutura
             if (response.StatusCode != HttpStatusCode.InternalServerError)
             {
                 response.StatusCode.Should().BeOneOf(
@@ -79,11 +79,11 @@ namespace SW_PortalProprietario.Test.Integration.Controllers
             // Assert
             var content = await response.Content.ReadAsStringAsync();
             
-            // Valida que é JSON válido
+            // Valida que Ã© JSON vÃ¡lido
             Action parseJson = () => JsonSerializer.Deserialize<object>(content);
-            parseJson.Should().NotThrow("A resposta deve ser JSON válido");
+            parseJson.Should().NotThrow("A resposta deve ser JSON vÃ¡lido");
             
-            // Se não for erro de servidor, valida estrutura
+            // Se nÃ£o for erro de servidor, valida estrutura
             if (response.StatusCode != HttpStatusCode.InternalServerError)
             {
                 response.StatusCode.Should().BeOneOf(
@@ -101,7 +101,7 @@ namespace SW_PortalProprietario.Test.Integration.Controllers
             }
         }
 
-        [Fact(DisplayName = "POST /Auth/login - Deve retornar 401 quando não autenticado")]
+        [Fact(DisplayName = "POST /Auth/login - Deve retornar 401 quando nÃ£o autenticado")]
         public async Task Login_DeveRetornar401QuandoNaoAutenticado()
         {
             // Arrange
@@ -115,14 +115,14 @@ namespace SW_PortalProprietario.Test.Integration.Controllers
             var response = await _client.PostAsJsonAsync("/Auth/login", loginModel);
 
             // Assert
-            // Pode retornar 401, 404 ou 400 dependendo da implementação
+            // Pode retornar 401, 404 ou 400 dependendo da implementaÃ§Ã£o
             response.StatusCode.Should().BeOneOf(
                 HttpStatusCode.Unauthorized,
                 HttpStatusCode.NotFound,
                 HttpStatusCode.BadRequest);
         }
 
-        [Fact(DisplayName = "Validação de regressão - Endpoints devem manter estrutura de resposta")]
+        [Fact(DisplayName = "ValidaÃ§Ã£o de regressÃ£o - Endpoints devem manter estrutura de resposta")]
         public async Task ValidacaoRegressao_EndpointsDevemManterEstruturaResposta()
         {
             // Arrange
@@ -135,14 +135,14 @@ namespace SW_PortalProprietario.Test.Integration.Controllers
             // Act
             var response = await _client.PostAsJsonAsync("/Auth/login", loginModel);
 
-            // Assert - Valida que a estrutura de resposta mantém o formato esperado
+            // Assert - Valida que a estrutura de resposta mantÃ©m o formato esperado
             var content = await response.Content.ReadAsStringAsync();
             
-            // Valida que é JSON válido
+            // Valida que Ã© JSON vÃ¡lido
             Action parseJson = () => JsonSerializer.Deserialize<object>(content);
-            parseJson.Should().NotThrow("A resposta deve ser JSON válido");
+            parseJson.Should().NotThrow("A resposta deve ser JSON vÃ¡lido");
             
-            // Se não for erro de servidor, valida estrutura
+            // Se nÃ£o for erro de servidor, valida estrutura
             if (response.StatusCode != HttpStatusCode.InternalServerError)
             {
                 content.Should().Contain("\"success\"");

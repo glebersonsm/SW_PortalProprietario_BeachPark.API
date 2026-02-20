@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+Ôªøusing Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Services.Core.AutomaticCommunications.Handlers.Default;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
 using SW_PortalProprietario.Domain.Enumns;
@@ -6,7 +6,7 @@ using SW_PortalProprietario.Domain.Enumns;
 namespace SW_PortalProprietario.Application.Services.Core.AutomaticCommunications;
 
 /// <summary>
-/// Factory para resolver handlers de comunicaÁ„o baseado no tipo
+/// Factory para resolver handlers de comunica√ß√£o baseado no tipo
 /// </summary>
 public class CommunicationHandlerFactory : ICommunicationHandlerFactory
 {
@@ -33,9 +33,9 @@ public class CommunicationHandlerFactory : ICommunicationHandlerFactory
         
         if (handler == null)
         {
-            _logger.LogWarning("Nenhum handler especÌfico encontrado para {CommunicationType}. Usando handler padr„o.", communicationType);
+            _logger.LogWarning("Nenhum handler espec√≠fico encontrado para {CommunicationType}. Usando handler padr√£o.", communicationType);
             
-            // Retorna um handler padr„o para tipos n„o implementados
+            // Retorna um handler padr√£o para tipos n√£o implementados
             var defaultLogger = _loggerFactory.CreateLogger<DefaultCommunicationHandler>();
             return new DefaultCommunicationHandler(communicationType, defaultLogger, _documentTemplateService);
         }

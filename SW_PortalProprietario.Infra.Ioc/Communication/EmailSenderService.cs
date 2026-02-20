@@ -1,4 +1,4 @@
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -38,13 +38,13 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
         public async Task Send(EmailModel model)
         {
             if (string.IsNullOrEmpty(model.Destinatario) || !model.Destinatario.Contains("@"))
-                throw new ArgumentException("Deve ser informado o destinatário do email.");
+                throw new ArgumentException("Deve ser informado o destinatÃ¡rio do email.");
 
             if (string.IsNullOrEmpty(model.Assunto))
                 throw new ArgumentException("Deve ser informado o assunto do email.");
 
             if (string.IsNullOrEmpty(model.ConteudoEmail))
-                throw new ArgumentException("Deve ser informado o conteúdo do email (EmailContent).");
+                throw new ArgumentException("Deve ser informado o conteÃºdo do email (EmailContent).");
 
             if (model.Id.GetValueOrDefault() == 0)
                 throw new ArgumentException("O Email deve ser persistido no banco de dados antes de ser enviado ao cliente.");
@@ -77,7 +77,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 //    destinatario = "glebersonsm@gmail.com";
 
                 if (string.IsNullOrEmpty(destinatario) || !destinatario.Contains("@"))
-                    throw new ArgumentException("Deve ser informado o destinatário do email.");
+                    throw new ArgumentException("Deve ser informado o destinatÃ¡rio do email.");
 
                 var ctx = await _smtpSettingsProvider.GetSmtpContextAsync();
                 string host;
@@ -106,15 +106,15 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 }
 
                 if (string.IsNullOrEmpty(host))
-                    throw new ArgumentException("Deve ser informado o host para envio do email (Parâmetro: 'SmtpHost' ou configuração do sistema).");
+                    throw new ArgumentException("Deve ser informado o host para envio do email (ParÃ¢metro: 'SmtpHost' ou configuraÃ§Ã£o do sistema).");
                 if (string.IsNullOrEmpty(remetente))
-                    throw new ArgumentException("Deve ser informado o remetente do email (Parâmetro: 'SmtpUser' ou configuração do sistema).");
+                    throw new ArgumentException("Deve ser informado o remetente do email (ParÃ¢metro: 'SmtpUser' ou configuraÃ§Ã£o do sistema).");
                 if (string.IsNullOrEmpty(pass))
-                    throw new ArgumentException("Deve ser informada a senha do remetente do email (Parâmetro: 'SmtpPass' ou configuração do sistema).");
+                    throw new ArgumentException("Deve ser informada a senha do remetente do email (ParÃ¢metro: 'SmtpPass' ou configuraÃ§Ã£o do sistema).");
                 if (porta == 0)
-                    throw new ArgumentException("Deve ser informada a porta de saída do email (Parâmetro: 'SmtpPort' ou configuração do sistema).");
+                    throw new ArgumentException("Deve ser informada a porta de saÃ­da do email (ParÃ¢metro: 'SmtpPort' ou configuraÃ§Ã£o do sistema).");
 
-                // AWS SES: envio direto via MailKit sem fallback (credenciais específicas da AWS)
+                // AWS SES: envio direto via MailKit sem fallback (credenciais especÃ­ficas da AWS)
                 if (ctx.TipoEnvioEmail == EnumTipoEnvioEmail.AwsSes)
                 {
                     _logger.LogInformation("Enviando email via AWS SES SMTP. Host: {Host}, Porta: {Porta}, User: {User}, Assunto: {Assunto}", host, porta, remetente, assunto);
@@ -125,7 +125,7 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 var preferSystemNetMail = ctx.TipoEnvioEmail == EnumTipoEnvioEmail.ClienteEmailApp;
                 Exception? firstException = null;
 
-                // Tentativa pelo método configurado
+                // Tentativa pelo mÃ©todo configurado
                 try
                 {
                     if (preferSystemNetMail)
@@ -137,18 +137,18 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                 catch (Exception ex)
                 {
                     firstException = ex;
-                    _logger.LogWarning(ex, "Falha no envio por {Metodo}. Tentando método alternativo.", preferSystemNetMail ? "System.Net.Mail" : "MailKit");
+                    _logger.LogWarning(ex, "Falha no envio por {Metodo}. Tentando mÃ©todo alternativo.", preferSystemNetMail ? "System.Net.Mail" : "MailKit");
                 }
 
-                // Fallback: tentar pelo outro método
+                // Fallback: tentar pelo outro mÃ©todo
                 try
                 {
                     if (preferSystemNetMail)
                         await SendViaMailKitAsync(destinatario, assunto, html, host, porta, useSsl, remetente, pass, fromName);
                     else
                         await _emailSenderHostedService.SendViaSystemNetMailStaticAsync(destinatario, assunto, html, null, host, porta, useSsl, remetente, pass, fromName);
-                    _logger.LogInformation("Email enviado com sucesso pelo método alternativo (assunto: {Assunto}).", assunto);
-                    // Só atualizar parâmetro se o tipo atual for MailKit ou System.Net.Mail (nunca sobrescrever AwsSes)
+                    _logger.LogInformation("Email enviado com sucesso pelo mÃ©todo alternativo (assunto: {Assunto}).", assunto);
+                    // SÃ³ atualizar parÃ¢metro se o tipo atual for MailKit ou System.Net.Mail (nunca sobrescrever AwsSes)
                     if (ctx.Settings != null && ctx.TipoEnvioEmail != EnumTipoEnvioEmail.AwsSes)
                     {
                         var tipoQueFuncionou = preferSystemNetMail ? EnumTipoEnvioEmail.ClienteEmailDireto : EnumTipoEnvioEmail.ClienteEmailApp;
@@ -158,21 +158,21 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning(ex, "Não foi possível atualizar TipoEnvioEmail nos parâmetros do sistema.");
+                            _logger.LogWarning(ex, "NÃ£o foi possÃ­vel atualizar TipoEnvioEmail nos parÃ¢metros do sistema.");
                         }
                     }
                 }
                 catch (Exception ex2)
                 {
-                    _logger.LogError(ex2, "Falha também no método alternativo (assunto: {Assunto}).", assunto);
+                    _logger.LogError(ex2, "Falha tambÃ©m no mÃ©todo alternativo (assunto: {Assunto}).", assunto);
                     throw firstException != null
-                        ? new InvalidOperationException("Envio falhou pelo método configurado e pelo método alternativo.", new AggregateException(firstException, ex2))
+                        ? new InvalidOperationException("Envio falhou pelo mÃ©todo configurado e pelo mÃ©todo alternativo.", new AggregateException(firstException, ex2))
                         : ex2;
                 }
             }
             catch (Exception err)
             {
-                _logger.LogError(err, "Não foi possível enviar o email com o assunto: {Assunto}", assunto);
+                _logger.LogError(err, "NÃ£o foi possÃ­vel enviar o email com o assunto: {Assunto}", assunto);
                 throw;
             }
         }
@@ -197,17 +197,17 @@ namespace SW_PortalProprietario.Infra.Ioc.Communication
             email.Subject = assunto;
             email.Body = new TextPart(TextFormat.Html) { Text = html };
 
-            // Porta 465 = SSL implícito. Porta 587 (ex.: Gmail) = STARTTLS.
+            // Porta 465 = SSL implÃ­cito. Porta 587 (ex.: Gmail) = STARTTLS.
             var secureOption = (porta == 465) ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
             
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
             
             try
             {
-                _logger.LogInformation("Conectando ao servidor SMTP {Host}:{Porta} com segurança {SecureOption}", host, porta, secureOption);
+                _logger.LogInformation("Conectando ao servidor SMTP {Host}:{Porta} com seguranÃ§a {SecureOption}", host, porta, secureOption);
                 await smtp.ConnectAsync(host, porta, secureOption);
                 
-                _logger.LogInformation("Autenticando com usuário: {User}", remetente);
+                _logger.LogInformation("Autenticando com usuÃ¡rio: {User}", remetente);
                 await smtp.AuthenticateAsync(remetente, pass);
                 
                 _logger.LogInformation("Enviando email para: {Destinatario}", destinatario);

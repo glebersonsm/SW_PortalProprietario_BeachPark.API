@@ -1,4 +1,4 @@
-namespace SW_PortalProprietario.Application.Models.DocumentTemplates;
+﻿namespace SW_PortalProprietario.Application.Models.DocumentTemplates;
 
 public class IncentivoAgendamentoDocumentResultModel
 {

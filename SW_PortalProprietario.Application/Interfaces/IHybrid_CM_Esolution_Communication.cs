@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SW_PortalProprietario.Application.Interfaces;
@@ -18,7 +18,7 @@ namespace SW_PortalProprietario.Application.Interfaces
 {
     public interface IHybrid_CM_Esolution_Communication : ICommunicationProvider
     {
-        // Métodos CM com sufixo _Cm
+        // MÃ©todos CM com sufixo _Cm
         Task<IAccessValidateResultModel> ValidateAccess_Cm(string login, string senha, string pessoaProviderId = "");
         Task GravarVinculoUsuario_Cm(IAccessValidateResultModel result, Usuario usuario);
         Task<bool> IsDefault_Cm();
@@ -53,7 +53,7 @@ namespace SW_PortalProprietario.Application.Interfaces
         bool? ShouldSendEmailForReserva_Cm(ReservaInfo reserva, AutomaticCommunicationConfigModel config, List<DadosContratoModel>? contratos, List<ClientesInadimplentes>? inadimplentes);
 
 
-        // Métodos Esolution com sufixo _Esol
+        // MÃ©todos Esolution com sufixo _Esol
         Task<IAccessValidateResultModel> ValidateAccess_Esol(string login, string senha, string pessoaProviderId = "");
         Task GravarVinculoUsuario_Esol(IAccessValidateResultModel result, Usuario usuario);
         Task<bool> IsDefault_Esol();

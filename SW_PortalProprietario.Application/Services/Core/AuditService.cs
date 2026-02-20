@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NHibernate;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.AuditModels;
@@ -33,13 +33,13 @@ namespace SW_PortalProprietario.Application.Services.Core
 
         public async Task SaveAuditLogAsync(AuditLogMessageEvent message)
         {
-            // Usar uma sessão isolada para não interferir com a transação principal
+            // Usar uma sessÃ£o isolada para nÃ£o interferir com a transaÃ§Ã£o principal
             IStatelessSession? isolatedSession = null;
             ITransaction? isolatedTransaction = null;
             
             try
             {
-                // Criar uma sessão stateless isolada
+                // Criar uma sessÃ£o stateless isolada
                 isolatedSession = _sessionFactory.OpenStatelessSession();
                 isolatedTransaction = isolatedSession.BeginTransaction();
 
@@ -60,7 +60,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     UsuarioCriacao = message.UserId
                 };
 
-                // Inserir usando a sessão isolada com CancellationToken
+                // Inserir usando a sessÃ£o isolada com CancellationToken
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                 await isolatedSession.InsertAsync(auditLog, cts.Token);
                 await isolatedTransaction.CommitAsync(cts.Token);
@@ -77,12 +77,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 catch (Exception rollbackEx)
                 {
-                    _logger.LogError(rollbackEx, "Erro ao fazer rollback da transação isolada de auditoria");
+                    _logger.LogError(rollbackEx, "Erro ao fazer rollback da transaÃ§Ã£o isolada de auditoria");
                 }
 
                 _logger.LogError(ex, "Erro ao salvar log de auditoria: EntityType={EntityType}, EntityId={EntityId}", 
                     message.EntityType, message.EntityId);
-                // Não relançar a exceção para não quebrar a operação principal
+                // NÃ£o relanÃ§ar a exceÃ§Ã£o para nÃ£o quebrar a operaÃ§Ã£o principal
             }
             finally
             {
@@ -93,7 +93,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 }
                 catch (Exception disposeEx)
                 {
-                    _logger.LogError(disposeEx, "Erro ao liberar recursos da sessão isolada de auditoria");
+                    _logger.LogError(disposeEx, "Erro ao liberar recursos da sessÃ£o isolada de auditoria");
                 }
             }
         }
@@ -166,11 +166,11 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 var sql = sqlBase + whereClause + " Order By a.Timestamp Desc";
 
-                // 🔥 MELHORIA: Calcular total de registros para paginação usando CountTotalEntry
+                // ðŸ”¥ MELHORIA: Calcular total de registros para paginaÃ§Ã£o usando CountTotalEntry
                 var countSql = "Select * From AuditLog a Where 1=1" + whereClause;
                 var totalRecords = await _repository.CountTotalEntry(countSql, session: null, parameters.ToArray());
 
-                // Calcular última página
+                // Calcular Ãºltima pÃ¡gina
                 var lastPageNumber = totalRecords > 0 
                     ? (int)Math.Ceiling((double)totalRecords / filter.PageSize) 
                     : 1;
@@ -202,13 +202,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                         UsuarioCriacao = log.UsuarioCriacao
                     };
                     
-                    // Buscar nome do usuário se não estiver disponível
+                    // Buscar nome do usuÃ¡rio se nÃ£o estiver disponÃ­vel
                     if (string.IsNullOrEmpty(model.UserName) && model.UserId.HasValue)
                     {
                         model.UserName = await GetUserNameByIdAsync(model.UserId.Value);
                     }
                     
-                    // Deserializar ChangesJson para lista de mudanças
+                    // Deserializar ChangesJson para lista de mudanÃ§as
                     if (!string.IsNullOrEmpty(log.ChangesJson))
                     {
                         try
@@ -227,7 +227,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         }
                         catch
                         {
-                            // Ignorar erros de deserialização
+                            // Ignorar erros de deserializaÃ§Ã£o
                         }
                     }
 
@@ -298,7 +298,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         UsuarioCriacao = log.UsuarioCriacao
                     };
                     
-                    // Buscar nome do usuário se não estiver disponível
+                    // Buscar nome do usuÃ¡rio se nÃ£o estiver disponÃ­vel
                     if (string.IsNullOrEmpty(model.UserName) && model.UserId.HasValue)
                     {
                         model.UserName = await GetUserNameByIdAsync(model.UserId.Value);
@@ -323,7 +323,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                         }
                         catch
                         {
-                            // Ignorar erros de deserialização
+                            // Ignorar erros de deserializaÃ§Ã£o
                         }
                     }
 
@@ -334,7 +334,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar histórico de auditoria: EntityType={EntityType}, EntityId={EntityId}", 
+                _logger.LogError(ex, "Erro ao buscar histÃ³rico de auditoria: EntityType={EntityType}, EntityId={EntityId}", 
                     entityType, entityId);
                 throw;
             }
@@ -387,7 +387,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     UsuarioCriacao = log.UsuarioCriacao
                 };
                 
-                // Buscar nome do usuário se não estiver disponível
+                // Buscar nome do usuÃ¡rio se nÃ£o estiver disponÃ­vel
                 if (string.IsNullOrEmpty(model.UserName) && model.UserId.HasValue)
                 {
                     model.UserName = await GetUserNameByIdAsync(model.UserId.Value);
@@ -412,7 +412,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     }
                     catch
                     {
-                        // Ignorar erros de deserialização
+                        // Ignorar erros de deserializaÃ§Ã£o
                     }
                 }
 
@@ -429,7 +429,7 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             try
             {
-                // Buscar nome do usuário usando SQL com model especializado
+                // Buscar nome do usuÃ¡rio usando SQL com model especializado
                 var usuarios = await _repository.FindBySql<UsuarioPessoaModel>(
                     "Select u.Id as UsuarioId, p.Id as PessoaId, p.Nome as NomePessoa, u.Login " +
                     "From Usuario u " +
@@ -442,7 +442,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Erro ao buscar nome do usuário: UserId={UserId}", userId);
+                _logger.LogWarning(ex, "Erro ao buscar nome do usuÃ¡rio: UserId={UserId}", userId);
                 return null;
             }
         }

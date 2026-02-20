@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models.GeralModels;
 using SW_PortalProprietario.Application.Services.Core.Interfaces;
@@ -65,7 +65,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Erro ao buscar configuração de comunicação automática: {communicationType}, projetoType: {projetoType}");
+                _logger.LogError(ex, $"Erro ao buscar configuraÃ§Ã£o de comunicaÃ§Ã£o automÃ¡tica: {communicationType}, projetoType: {projetoType}");
                 throw;
             }
         }
@@ -102,7 +102,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Erro ao buscar todas as configurações de comunicação automática. ProjetoType: {projetoType}");
+                _logger.LogError(ex, $"Erro ao buscar todas as configuraÃ§Ãµes de comunicaÃ§Ã£o automÃ¡tica. ProjetoType: {projetoType}");
                 throw;
             }
         }
@@ -121,13 +121,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                     throw new ArgumentException("O assunto do email deve ser informado");
 
                 if (string.IsNullOrEmpty(model.CommunicationType))
-                    throw new ArgumentException("O tipo de comunicação deve ser informado");
+                    throw new ArgumentException("O tipo de comunicaÃ§Ã£o deve ser informado");
 
                 if (!Enum.TryParse<EnumDocumentTemplateType>(model.CommunicationType, out var communicationTypeEnum))
-                    throw new ArgumentException($"Tipo de comunicação inválido: {model.CommunicationType}");
+                    throw new ArgumentException($"Tipo de comunicaÃ§Ã£o invÃ¡lido: {model.CommunicationType}");
 
                 if (!Enum.IsDefined(typeof(EnumProjetoType), model.ProjetoType))
-                    throw new ArgumentException("Tipo de projeto inválido");
+                    throw new ArgumentException("Tipo de projeto invÃ¡lido");
 
                 if (model.DaysBeforeCheckIn == null || model.DaysBeforeCheckIn.Count == 0)
                     throw new ArgumentException("Pelo menos um dia deve ser informado");
@@ -138,7 +138,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     $"From DocumentTemplate a Where a.Id = :templateId", session: null, new SW_Utils.Auxiliar.Parameter("templateId", model.TemplateId.Value))).FirstOrDefault();
 
                 if (documentTemplate == null)
-                    throw new ArgumentException($"Template com ID {model.TemplateId} não encontrado");
+                    throw new ArgumentException($"Template com ID {model.TemplateId} nÃ£o encontrado");
 
                 var loggedUser = await _repository.GetLoggedUser();
 
@@ -181,7 +181,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception ex)
             {
                 _repository.Rollback();
-                _logger.LogError(ex, $"Erro ao salvar configuração de comunicação automática: {model.CommunicationType}");
+                _logger.LogError(ex, $"Erro ao salvar configuraÃ§Ã£o de comunicaÃ§Ã£o automÃ¡tica: {model.CommunicationType}");
                 throw;
             }
         }
@@ -197,7 +197,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var config = existingConfigs.FirstOrDefault();
 
                 if (config == null)
-                    throw new ArgumentException($"Configuração com ID {id} não encontrada");
+                    throw new ArgumentException($"ConfiguraÃ§Ã£o com ID {id} nÃ£o encontrada");
 
                 if (model.TemplateId == null || model.TemplateId <= 0)
                     throw new ArgumentException("O template deve ser informado");
@@ -206,13 +206,13 @@ namespace SW_PortalProprietario.Application.Services.Core
                     throw new ArgumentException("O assunto do email deve ser informado");
 
                 if (string.IsNullOrEmpty(model.CommunicationType))
-                    throw new ArgumentException("O tipo de comunicação deve ser informado");
+                    throw new ArgumentException("O tipo de comunicaÃ§Ã£o deve ser informado");
 
                 if (!Enum.TryParse<EnumDocumentTemplateType>(model.CommunicationType, out var communicationTypeEnum))
-                    throw new ArgumentException($"Tipo de comunicação inválido: {model.CommunicationType}");
+                    throw new ArgumentException($"Tipo de comunicaÃ§Ã£o invÃ¡lido: {model.CommunicationType}");
 
                 if (!Enum.IsDefined(typeof(EnumProjetoType), model.ProjetoType))
-                    throw new ArgumentException("Tipo de projeto inválido");
+                    throw new ArgumentException("Tipo de projeto invÃ¡lido");
 
                 if ((model.DaysBeforeCheckIn == null || model.DaysBeforeCheckIn.Count == 0) && model.Enabled)
                     throw new ArgumentException("Pelo menos um dia deve ser informado");
@@ -222,7 +222,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                     $"From DocumentTemplate a Where a.Id = :templateId", session: null, new SW_Utils.Auxiliar.Parameter("templateId", model.TemplateId.Value))).FirstOrDefault();
 
                 if (documentTemplate == null)
-                    throw new ArgumentException($"Template com ID {model.TemplateId} não encontrado");
+                    throw new ArgumentException($"Template com ID {model.TemplateId} nÃ£o encontrado");
 
                 var loggedUser = await _repository.GetLoggedUser();
 
@@ -262,7 +262,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception ex)
             {
                 _repository.Rollback();
-                _logger.LogError(ex, $"Erro ao atualizar configuração de comunicação automática: {id}");
+                _logger.LogError(ex, $"Erro ao atualizar configuraÃ§Ã£o de comunicaÃ§Ã£o automÃ¡tica: {id}");
                 throw;
             }
         }
@@ -278,7 +278,7 @@ namespace SW_PortalProprietario.Application.Services.Core
                 var config = existingConfigs.FirstOrDefault();
 
                 if (config == null)
-                    throw new ArgumentException($"Configuração com ID {id} não encontrada");
+                    throw new ArgumentException($"ConfiguraÃ§Ã£o com ID {id} nÃ£o encontrada");
 
                 await _repository.Remove(config);
                 await _repository.CommitAsync();
@@ -288,7 +288,7 @@ namespace SW_PortalProprietario.Application.Services.Core
             catch (Exception ex)
             {
                 _repository.Rollback();
-                _logger.LogError(ex, $"Erro ao deletar configuração de comunicação automática: {id}");
+                _logger.LogError(ex, $"Erro ao deletar configuraÃ§Ã£o de comunicaÃ§Ã£o automÃ¡tica: {id}");
                 throw;
             }
         }
@@ -297,27 +297,27 @@ namespace SW_PortalProprietario.Application.Services.Core
         {
             try
             {
-                // Buscar configuração pelo ID
+                // Buscar configuraÃ§Ã£o pelo ID
                 var configs = await _repository.FindByHql<AutomaticCommunicationConfig>(
                     $"From AutomaticCommunicationConfig a Where a.Id = {configId}");
                 var config = configs.FirstOrDefault();
 
                 if (config == null)
-                    throw new ArgumentException($"Configuração com ID {configId} não encontrada");
+                    throw new ArgumentException($"ConfiguraÃ§Ã£o com ID {configId} nÃ£o encontrada");
 
-                // Validar se a configuração está ativa
+                // Validar se a configuraÃ§Ã£o estÃ¡ ativa
                 if (!config.Enabled)
-                    throw new ArgumentException("A configuração não está ativa");
+                    throw new ArgumentException("A configuraÃ§Ã£o nÃ£o estÃ¡ ativa");
 
                 if (config.TemplateId == null || config.TemplateId <= 0)
-                    throw new ArgumentException("O template não está configurado");
+                    throw new ArgumentException("O template nÃ£o estÃ¡ configurado");
 
                 if (string.IsNullOrEmpty(config.Subject))
-                    throw new ArgumentException("O assunto do email não está configurado");
+                    throw new ArgumentException("O assunto do email nÃ£o estÃ¡ configurado");
 
                 var daysBeforeCheckIn = config.GetDaysBeforeCheckIn();
                 if (daysBeforeCheckIn == null || daysBeforeCheckIn.Count == 0)
-                    throw new ArgumentException("Nenhum dia configurado para simulação");
+                    throw new ArgumentException("Nenhum dia configurado para simulaÃ§Ã£o");
 
                 var configModel = _mapper.Map<AutomaticCommunicationConfigModel>(config);
                 configModel.DaysBeforeCheckIn = daysBeforeCheckIn;
@@ -325,12 +325,12 @@ namespace SW_PortalProprietario.Application.Services.Core
                 configModel.EmpresaIds = config.GetEmpresaIds();
                 configModel.TemplateSendMode = config.TemplateSendMode;
 
-                // Obter o handler apropriado para o tipo de comunicação
+                // Obter o handler apropriado para o tipo de comunicaÃ§Ã£o
                 var handler = _handlerFactory.GetHandler(config.CommunicationType);
                 if (handler == null)
                 {
-                    _logger.LogWarning("Nenhum handler encontrado para tipo de comunicação {CommunicationType}", config.CommunicationType);
-                    throw new ArgumentException($"Tipo de comunicação {config.CommunicationType} não suportado");
+                    _logger.LogWarning("Nenhum handler encontrado para tipo de comunicaÃ§Ã£o {CommunicationType}", config.CommunicationType);
+                    throw new ArgumentException($"Tipo de comunicaÃ§Ã£o {config.CommunicationType} nÃ£o suportado");
                 }
 
                 var loggedUser = await _repository.GetLoggedUser();
@@ -338,16 +338,16 @@ namespace SW_PortalProprietario.Application.Services.Core
 
                 foreach (var item in emailModel)
                 {
-                    // Salvar email (que será enviado pela fila)
+                    // Salvar email (que serÃ¡ enviado pela fila)
                     var emailSaved = await _emailService.SaveInternal(item);
-                    _logger.LogInformation($"Email de simulação enviado para {item.Destinatario} (Config ID: {configId}, Tipo: {config.CommunicationType})");
+                    _logger.LogInformation($"Email de simulaÃ§Ã£o enviado para {item.Destinatario} (Config ID: {configId}, Tipo: {config.CommunicationType})");
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Erro ao simular envio de email para configuração {configId}");
+                _logger.LogError(ex, $"Erro ao simular envio de email para configuraÃ§Ã£o {configId}");
                 throw;
             }
         }

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using System.Net;
 
 namespace SW_PortalProprietario.Infra.Data.Middleware
@@ -28,7 +28,7 @@ namespace SW_PortalProprietario.Infra.Data.Middleware
                 context.Items["AuditUserAgent"] = userAgent;
             }
 
-            // Capturar User ID se disponível
+            // Capturar User ID se disponÃ­vel
             if (context.User?.Identity?.IsAuthenticated == true)
             {
                 var userIdClaim = context.User.Claims.FirstOrDefault(c => 
@@ -44,7 +44,7 @@ namespace SW_PortalProprietario.Infra.Data.Middleware
 
         private string? GetClientIpAddress(HttpContext context)
         {
-            // Verificar se há IP no header (proxies/load balancers)
+            // Verificar se hÃ¡ IP no header (proxies/load balancers)
             var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
             if (!string.IsNullOrEmpty(forwardedFor))
             {
@@ -64,7 +64,7 @@ namespace SW_PortalProprietario.Infra.Data.Middleware
                 return realIp;
             }
 
-            // Usar IP da conexão direta
+            // Usar IP da conexÃ£o direta
             return context.Connection.RemoteIpAddress?.ToString();
         }
     }

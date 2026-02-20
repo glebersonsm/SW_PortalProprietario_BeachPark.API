@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using SW_PortalProprietario.Application.Interfaces;
 using SW_PortalProprietario.Application.Models;
@@ -35,7 +35,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var tipoTelefone = await _repository.FindById<TipoTelefone>(id);
                 if (tipoTelefone is null)
                 {
-                    throw new FileNotFoundException($"Não foi encontrado tipo de telefone com Id: {id}!");
+                    throw new FileNotFoundException($"NÃ£o foi encontrado tipo de telefone com Id: {id}!");
                 }
 
 
@@ -49,7 +49,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 }
                 else
                 {
-                    throw resultCommit.exception ?? new Exception("Não foi possível realizar a operação");
+                    throw resultCommit.exception ?? new Exception("NÃ£o foi possÃ­vel realizar a operaÃ§Ã£o");
                 }
 
                 return result;
@@ -58,7 +58,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             catch (Exception err)
             {
                 _repository.Rollback();
-                _logger.LogError(err, $"Não foi possível deletar o Tipo de Telefone: {id}");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel deletar o Tipo de Telefone: {id}");
                 throw;
             }
         }
@@ -82,11 +82,11 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
 
                 }
 
-                throw exception ?? new Exception($"Não foi possível salvar o tipo telefone: ({tipoTelefone.Nome})");
+                throw exception ?? new Exception($"NÃ£o foi possÃ­vel salvar o tipo telefone: ({tipoTelefone.Nome})");
             }
             catch (Exception err)
             {
-                _logger.LogError(err, $"Não foi possível salvar o tipo telefone: ({tipoTelefone.Nome})");
+                _logger.LogError(err, $"NÃ£o foi possÃ­vel salvar o tipo telefone: ({tipoTelefone.Nome})");
                 _repository.Rollback();
                 throw;
             }
@@ -133,7 +133,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
             try
             {
                 var tipotelefone = (await _repository.FindByHql<TipoTelefone>("From TipoTelefone ge Where ge.Id = :id", session: null, new Parameter[]
-                { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"Não foi encontrado o Tipo Telefone: {model.Id}");
+                { new Parameter("id", model.Id) })).FirstOrDefault() ?? throw new Exception($"NÃ£o foi encontrado o Tipo Telefone: {model.Id}");
 
                 tipotelefone.Nome = model.Nome ?? tipotelefone.Nome;
                 tipotelefone.Mascara = model.Mascara ?? tipotelefone.Mascara;
@@ -141,7 +141,7 @@ namespace SW_PortalProprietario.Application.Services.Core.Pessoa
                 var (executed, exception) = await _repository.CommitAsync();
                 if (executed)
                     return (TipoTelefoneModel)tipotelefone;
-                else throw exception ?? new Exception("Erro na operação");
+                else throw exception ?? new Exception("Erro na operaÃ§Ã£o");
             }
             catch (Exception)
             {
