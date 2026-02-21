@@ -28,6 +28,7 @@ namespace CMDomain.Mappings
             Map(b => b.TrgDtInclusao);
             Map(b => b.TrgUserInclusao);
 
+            Schema("cm");
             Table("Artigo");
         }
     }

@@ -1,4 +1,4 @@
-﻿using CMDomain.Entities;
+using CMDomain.Entities;
 using FluentNHibernate.Mapping;
 
 namespace CMDomain.Mappings
@@ -38,6 +38,7 @@ namespace CMDomain.Mappings
             Map(b => b.TrgUserInclusao);
 
             Table("MotivoTs");
+            Schema("cm");
         }
     }
 }

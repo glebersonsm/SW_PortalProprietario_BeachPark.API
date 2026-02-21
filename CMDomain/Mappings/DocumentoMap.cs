@@ -61,6 +61,7 @@ namespace CMDomain.Mappings
             Map(p => p.TrgDtAlteracao);
             Map(p => p.TrgUserAlteracao);
 
+            Schema("cm");
             Table("Documento");
         }
     }

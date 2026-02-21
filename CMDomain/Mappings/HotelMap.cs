@@ -22,6 +22,7 @@ namespace CMDomain.Mappings
             Map(p => p.FlgTimeSharing).Nullable();
             Map(p => p.FlgSpa).Nullable();
 
+            Schema("cm");
             Table("Hotel");
         }
     }

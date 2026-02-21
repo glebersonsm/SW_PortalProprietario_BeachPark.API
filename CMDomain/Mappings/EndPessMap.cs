@@ -28,6 +28,7 @@ namespace CMDomain.Mappings
             Map(b => b.TrgDtAlteracao);
             Map(b => b.TrgUserAlteracao);
 
+            Schema("cm");
             Table("EndPess");
         }
     }

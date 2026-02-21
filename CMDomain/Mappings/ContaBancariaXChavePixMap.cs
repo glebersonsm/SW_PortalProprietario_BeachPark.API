@@ -15,6 +15,7 @@ namespace CMDomain.Mappings
             Map(p => p.FlgChavePref);
             Map(p => p.IdTipoChave);
 
+            Schema("cm");
             Table("ContaBancariaXChavePix");
         }
     }

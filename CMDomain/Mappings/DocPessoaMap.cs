@@ -22,6 +22,7 @@ namespace CMDomain.Mappings
             Map(p => p.TrgDtAlteracao);
 
 
+            Schema("cm");
             Table("DocPessoa");
         }
     }

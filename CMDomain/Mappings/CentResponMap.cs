@@ -15,6 +15,7 @@ namespace CMDomain.Mappings
             Map(p => p.AnaliticoSintet);
             Map(p => p.Ativo);
 
+            Schema("cm");
             Table("CentRespon");
         }
     }

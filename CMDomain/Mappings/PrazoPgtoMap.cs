@@ -1,4 +1,4 @@
-﻿using CMDomain.Entities;
+using CMDomain.Entities;
 using FluentNHibernate.Mapping;
 
 namespace CMDomain.Mappings
@@ -23,6 +23,7 @@ namespace CMDomain.Mappings
             Map(p => p.TrgUserInclusao);
 
             Table("PrazoPgto");
+            Schema("cm");
         }
     }
 }

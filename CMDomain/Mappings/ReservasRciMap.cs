@@ -1,4 +1,4 @@
-﻿using CMDomain.Entities;
+using CMDomain.Entities;
 using FluentNHibernate.Mapping;
 
 namespace CMDomain.Mappings
@@ -17,6 +17,7 @@ namespace CMDomain.Mappings
             Map(p => p.TrgDtInclusao);
 
             Table("ReservasRci");
+            Schema("cm");
         }
     }
 }

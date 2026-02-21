@@ -28,6 +28,7 @@ namespace CMDomain.Mappings
             Map(p => p.TrgDtInclusao).Nullable();
             Map(p => p.TrgUserInclusao).Nullable();
 
+            Schema("cm");
             Table("ItemEntr");
         }
     }

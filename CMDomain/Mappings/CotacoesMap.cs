@@ -31,6 +31,7 @@ namespace CMDomain.Mappings
             Map(p => p.TrgUserInclusao);
             Map(p => p.TrgDtInclusao);
 
+            Schema("cm");
             Table("Cotacoes");
         }
     }
