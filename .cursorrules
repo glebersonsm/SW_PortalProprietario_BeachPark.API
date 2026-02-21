@@ -120,3 +120,12 @@
 - Todos os ajustes de schema são processados automaticamente pelo NHibernate
 - Alterações em entidades e mapeamentos (FluentNHibernate) são suficientes
 
+## Restrições de Projetos
+
+### Projeto SwReservaApiMain
+- **NUNCA modificar ou alterar arquivos do projeto SwReservaApiMain**
+- O projeto SwReservaApiMain está localizado em: `C:\SW_Solucoes\Projetos\SW_Reserva.API\SwReservaApiMain`
+- Todas as alterações devem ser feitas APENAS no projeto atual: `SW_PortalProprietario_BeachPark.API`
+- Não criar, modificar ou deletar qualquer arquivo em caminhos relacionados ao SwReservaApiMain
+- Se for necessário fazer referência ao SwReservaApiMain, usar apenas para leitura/informação, nunca para escrita
+

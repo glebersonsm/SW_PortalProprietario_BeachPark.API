@@ -3080,34 +3080,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                 try
                 {
 
-                    var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                    var consultarReservaUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:ConsultarDisponibilidadeCompativel");
-                    var fullUrl = $"{baseUrl}{consultarReservaUrl}?{searchModel.ToQueryString()}";
-                    var token = await _serviceBase.getToken();
-
-                    using (HttpClient client = new HttpClient())
-                    {
-                        client.BaseAddress = new Uri(fullUrl);
-                        client.DefaultRequestHeaders.Clear();
-                        client.DefaultRequestHeaders.Add("accept", "application/json");
-                        client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                        HttpResponseMessage responseResult = await client.GetAsync(fullUrl);
-
-                        string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                        if (responseResult.IsSuccessStatusCode)
-                        {
-                            result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<List<SemanaDisponibilidadeModel>>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                            if (result != null)
-                                result.Status = (int)HttpStatusCode.OK;
-                        }
-                        else
-                        {
-                            result.Status = (int)HttpStatusCode.NotFound;
-                            result.Errors = new List<string>() { $"Erro: {responseResult}" };
-
-                        }
-                    }
+                    
 
                 }
                 catch (HttpRequestException err)
