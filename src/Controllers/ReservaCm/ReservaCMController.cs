@@ -1,3 +1,4 @@
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SW_PortalProprietario.Application.Models.ReservaCm;
 using SW_PortalProprietario.Application.Services.ReservaCm;
@@ -6,6 +7,7 @@ namespace SW_PortalCliente_BeachPark.API.src.Controllers.ReservaCm;
 
 [ApiController]
 [Route("ReservaCM/v1")]
+[Route("Reserva/v1")] // Rota original do SW_CMApi - compatibilidade para remoção do projeto
 public class ReservaCMController : ControllerBase
 {
     private readonly IReservaCMService _reservaService;
@@ -15,7 +17,7 @@ public class ReservaCMController : ControllerBase
         _reservaService = reservaService;
     }
 
-    [HttpPost("efetuarReserva")]
+    [HttpPost("efetuarReserva"), Authorize(Roles = "Administrador, Usuario")]
     public async Task<IActionResult> CriarReserva([FromBody] ReservaRequestDto reservaDto)
     {
         try
@@ -30,7 +32,7 @@ public class ReservaCMController : ControllerBase
         }
     }
 
-    [HttpPost("cancelarReserva")]
+    [HttpPost("cancelarReserva"), Authorize(Roles = "Administrador, Usuario")]
     public async Task<IActionResult> CancelarReserva([FromBody] ReservaCancelarRequestDto reservaCancelar)
     {
         try
