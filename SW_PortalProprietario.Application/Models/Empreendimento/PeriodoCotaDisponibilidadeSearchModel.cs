@@ -1,6 +1,9 @@
 namespace SW_PortalProprietario.Application.Models.Empreendimento
 {
-    public class ReservasMultiPropriedadeSearchModel : PaginatedSearchModel
+    /// <summary>
+    /// Modelo de busca para consulta geral de semanas - migrado do SwReservaApiMain.
+    /// </summary>
+    public class PeriodoCotaDisponibilidadeSearchModel : PaginatedSearchModel
     {
         public int? CotaProprietarioId { get; set; }
         public int? PeriodoCotaDisponibilidadeId { get; set; }
@@ -8,21 +11,17 @@ namespace SW_PortalProprietario.Application.Models.Empreendimento
         public string? NomeProprietario { get; set; }
         public string? NumeroApartamento { get; set; }
         public int? Ano { get; set; }
-        public DateTime? DataUtilizacaoInicial { get; set; }
-        public DateTime? DataUtilizacaoFinal { get; set; }
-        public string? ComReservas { get; set; }
-        public string? NomeCota { get; set; }
-        public int? Reserva { get; set; }
-        public bool? ApenasInadimplentes { get; set; }
-        public bool? NaoConsiderarParcelasCondominio { get; set; }
-        public bool? NaoConsiderarParcelasContrato { get; set; }
-        public List<int>? StatusCrcIds { get; set; }
-        public List<string>? NumeroApartamentos { get; set; }
-        public List<string>? NomeCotas { get; set; }
         public DateTime? CheckinInicial { get; set; }
         public DateTime? CheckinFinal { get; set; }
         public DateTime? CheckoutInicial { get; set; }
         public DateTime? CheckoutFinal { get; set; }
+        public DateTime? DataUtilizacaoInicial { get; set; }
+        public DateTime? DataUtilizacaoFinal { get; set; }
+        public int? Reserva { get; set; }
+        public string? ComReservas { get; set; }
+        public string? NomeCota { get; set; }
         public DateTime? DataAquisicaoContrato { get; set; }
+        public List<string>? NumeroApartamentos { get; set; }
+        public List<string>? NomeCotas { get; set; }
     }
 }

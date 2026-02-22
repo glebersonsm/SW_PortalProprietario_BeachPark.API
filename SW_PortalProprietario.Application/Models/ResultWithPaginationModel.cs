@@ -1,4 +1,4 @@
-﻿namespace SW_PortalProprietario.Application.Models
+namespace SW_PortalProprietario.Application.Models
 {
     public class ResultWithPaginationModel<T>
         : ResultModel<T> where T : class
@@ -13,6 +13,7 @@
         }
         public int PageNumber { get; set; }
         public int LastPageNumber { get; set; }
+        public int NumberRecords { get; set; }
     }
 
 

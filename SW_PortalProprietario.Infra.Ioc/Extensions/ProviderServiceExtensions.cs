@@ -2,8 +2,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SW_PortalProprietario.Application.Interfaces;
+using SW_PortalProprietario.Application.Interfaces.Esol;
 using SW_PortalProprietario.Application.Interfaces.ReservasApi;
 using SW_PortalProprietario.Application.Interfaces.ReservaCm;
+using SW_PortalProprietario.Application.Services.Esol;
 using SW_PortalProprietario.Application.Services.Providers.Cm;
 using SW_PortalProprietario.Application.Services.Providers.Hybrid;
 using SW_PortalProprietario.Application.Services.Providers.Esolution;
@@ -53,6 +55,13 @@ namespace SW_PortalProprietario.Infra.Ioc.Extensions
             services.TryAddScoped<IReservaCMRepository, ReservaCMRepository>();
             services.TryAddScoped<IParametroHotelCMRepository, ParametroHotelCMRepository>();
             services.TryAddScoped<IReservaCMService, ReservaCMService>();
+
+            // Esol - migrado do SwReservaApiMain
+            services.TryAddScoped<IGeralEsolService, GeralEsolService>();
+            services.TryAddScoped<IGeralAccessCenterEsolService, GeralAccessCenterEsolService>();
+            services.TryAddScoped<IReservaEsolService, ReservaEsolService>();
+            services.TryAddScoped<ICondominioEsolService, CondominioEsolService>();
+            services.TryAddScoped<IReservaEsolInternalService, ReservaEsolInternalService>();
 
             return services;
         }

@@ -16,6 +16,7 @@ using NHibernate.Dialect.Schema;
 using NHibernate.Util;
 using PuppeteerSharp;
 using SW_PortalProprietario.Application.Interfaces;
+using SW_PortalProprietario.Application.Interfaces.Esol;
 using SW_PortalProprietario.Application.Models;
 using SW_PortalProprietario.Application.Models.Empreendimento;
 using SW_PortalProprietario.Application.Models.Financeiro;
@@ -56,6 +57,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
         private readonly IServiceBase _serviceBase;
         private readonly IEmailService _emailService;
         private readonly ICacheStore _cacheStore;
+        private readonly IReservaEsolInternalService _reservaEsolInternalService;
 
         // CM Dependencies
         private readonly ICommunicationProvider _communicationProvider;
@@ -72,7 +74,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             IFinanceiroHybridProviderService financeiroService,
             ICacheStore cache,
             ICommunicationProvider communicationProvider,
-            IRepositoryNHCm repositoryCM)
+            IRepositoryNHCm repositoryCM,
+            IReservaEsolInternalService reservaEsolInternalService)
         {
             _logger = logger;
             _configuration = configuration;
@@ -85,6 +88,7 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             _cacheStore = cache;
             _communicationProvider = communicationProvider;
             _repositoryCM = repositoryCM;
+            _reservaEsolInternalService = reservaEsolInternalService;
         }
 
         public string ProviderName
@@ -841,7 +845,6 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         public async Task<ResultModel<int>?> SalvarReservaEmAgendamento_Esol(CriacaoReservaAgendamentoInputModel modelReserva)
         {
-
             var loggedUser = await _repositorySystem.GetLoggedUser();
             if (!loggedUser.Value.isAdm)
             {
@@ -854,12 +857,6 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                 }
             }
 
-
-            var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-            var criarReservaAgendamentoUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:CriarReservaAgendamentoUrl");
-            var fullUrl = baseUrl + criarReservaAgendamentoUrl;
-            var token = await _serviceBase.getToken();
-
             if (modelReserva.Hospedes != null && modelReserva.Hospedes.Any())
             {
                 foreach (var item in modelReserva.Hospedes.Where(b => !string.IsNullOrEmpty(b.CPF)))
@@ -869,48 +866,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                 }
             }
 
-            var modelEnvio = (CriacaoReservaAgendamentoModel)modelReserva;
-
-            if (modelEnvio.TipoTarifacao != EsolutionPortalDomain.Enums.EnumTipoTarifacao.DiaDia &&
-                modelEnvio.TipoTarifacao != EsolutionPortalDomain.Enums.EnumTipoTarifacao.Tarifario &&
-                modelEnvio.TipoTarifacao != EsolutionPortalDomain.Enums.EnumTipoTarifacao.Fixa)
-                modelEnvio.TipoTarifacao = EsolutionPortalDomain.Enums.EnumTipoTarifacao.DiaDia;
-
-            using (HttpClient client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(fullUrl);
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Add("accept", "application/json");
-                client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, modelEnvio);
-
-                string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                _logger.LogInformation(resultMessage);
-                if (responseResult.StatusCode == HttpStatusCode.OK || responseResult.StatusCode == HttpStatusCode.Created)
-                {
-                    var resultModel = System.Text.Json.JsonSerializer.Deserialize<ResultModel<int>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                    if (resultModel != null)
-                    {
-                        resultModel.Success = true;
-                        resultModel.Status = (int)HttpStatusCode.OK;
-                    }
-                    return resultModel;
-                }
-                else
-                {
-                    var resultModel = System.Text.Json.JsonSerializer.Deserialize<ResultModel<ReservaModel>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                    var result = new ResultModel<int>(-1)
-                    {
-                        Errors = new List<string>() { resultModel.Message },
-                        Success = resultModel.Success,
-                        Status = resultModel.Status
-                    };
-
-                    return result;
-                }
-
-            }
+            _logger.LogInformation("Salvando reserva em agendamento via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.SalvarReservaEmAgendamento(modelReserva);
         }
 
         public async Task<ResultWithPaginationModel<List<Models.Empreendimento.SemanaModel>>?> ConsultarAgendamentosGerais_Esol(ReservasMultiPropriedadeSearchModel model)
@@ -1004,39 +961,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         private async Task<ResultWithPaginationModel<List<Models.Empreendimento.SemanaModel>>?> ConsultarDadosApiReserva(ReservasMultiPropriedadeSearchModel model, ResultWithPaginationModel<List<Models.Empreendimento.SemanaModel>>? result)
         {
-            var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-            var consultarReservaUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:ConsultaReservasAgendamentoUrl");
-            var fullUrl = $"{baseUrl}{consultarReservaUrl}";//?{model.ToQueryString()}";
-            var token = await _serviceBase.getToken();
-
-            using (HttpClient client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(fullUrl);
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Add("accept", "application/json");
-                client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, model);
-
-                string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                if (responseResult.IsSuccessStatusCode)
-                {
-                    result = System.Text.Json.JsonSerializer.Deserialize<ResultWithPaginationModel<List<Models.Empreendimento.SemanaModel>>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                    if (result != null)
-                        result.Status = (int)HttpStatusCode.OK;
-                }
-                else
-                {
-                    if (result != null)
-                    {
-                        result.Status = (int)HttpStatusCode.NotFound;
-                        result.Errors = new List<string>() { $"Erro: {responseResult}" };
-
-                    }
-                }
-            }
-
-            return result;
+            _logger.LogInformation("Consultando agendamentos via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.GetAgendamentosGerais(model);
         }
 
         private ResultWithPaginationModel<List<Models.Empreendimento.SemanaModel>>? FiltrarRetorno(ReservasMultiPropriedadeSearchModel model,
@@ -1062,7 +988,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                             if ((!string.IsNullOrEmpty(item.PessoaTitular1CPF) && item.PessoaTitular1CPF.Length > 5) ||
                                 (!string.IsNullOrEmpty(item.PessoaTitualar1CNPJ) && item.PessoaTitualar1CNPJ.Length > 5))
                             {
-                                var cpfCnpj = Int64.Parse(Helper.ApenasNumeros(item.PessoaTitualar1CNPJ));
+                                var doc = item.PessoaTitular1CPF ?? item.PessoaTitualar1CNPJ ?? "";
+                                var cpfCnpj = Int64.Parse(Helper.ApenasNumeros(doc));
                                 var ehInadimplente = inadimplentes.FirstOrDefault(b => b.CpfCnpj.HasValue &&
                                 cpfCnpj == b.CpfCnpj);
 
@@ -1281,78 +1208,33 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                 model.Ano = $"{DateTime.Today.Year:yyyy}";
 
 
-            _logger.LogInformation($"{DateTime.Now} - Buscando reservas da API");
-            var result = new ResultWithPaginationModel<List<Models.Empreendimento.SemanaModel>>();
-            try
+            _logger.LogInformation($"{DateTime.Now} - Buscando reservas via ReservaEsolInternalService (modo local)");
+            var result = await _reservaEsolInternalService.GetConsultarMeusAgendamentos(model);
+            if (result?.Data != null && result.Data.Any() && contratosDoCliente != null && contratosDoCliente.Any())
             {
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var consultarReservaUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:ConsultaMinhasReservasAgendamentoUrl");
-                var fullUrl = $"{baseUrl}{consultarReservaUrl}?{model.ToQueryString()}";
-
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
+                foreach (var item in result.Data.Cast<Models.Empreendimento.SemanaModel>().GroupBy(b => b.CotaId))
                 {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.GetAsync(fullUrl);
+                    var fstCota = item.First();
+                    var contratoVinculado =
+                        contratosDoCliente.FirstOrDefault(a => !string.IsNullOrEmpty(a.GrupoCotaTipoCotaNome) &&
+                        !string.IsNullOrEmpty(fstCota.CotaNome) &&
+                        fstCota.CotaNome.Contains(a.GrupoCotaTipoCotaNome, StringComparison.InvariantCultureIgnoreCase));
 
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    if (responseResult.IsSuccessStatusCode)
+                    if (contratoVinculado != null)
                     {
-                        result = System.Text.Json.JsonSerializer.Deserialize<ResultWithPaginationModel<List<Models.Empreendimento.SemanaModel>>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result?.Data != null && result.Data.Any())
+                        foreach (var itemSemana in item)
                         {
-                            foreach (var item in result.Data.Cast<Models.Empreendimento.SemanaModel>().GroupBy(b => b.CotaId))
-                            {
-                                var fstCota = item.First();
-                                var contratoVinculado =
-                                    contratosDoCliente.FirstOrDefault(a => !string.IsNullOrEmpty(a.GrupoCotaTipoCotaNome) &&
-                                    !string.IsNullOrEmpty(fstCota.CotaNome) &&
-                                    !string.IsNullOrEmpty(fstCota.CotaNome) &&
-                                    fstCota.CotaNome.Contains(a.GrupoCotaTipoCotaNome, StringComparison.InvariantCultureIgnoreCase));
+                            itemSemana.IdIntercambiadora = contratoVinculado.IdIntercambiadora;
+                            itemSemana.PessoaTitular1Tipo = contratoVinculado.PessoaTitular1Tipo;
+                            itemSemana.PessoaTitular1CPF = contratoVinculado.PessoaTitular1CPF;
+                            itemSemana.PessoaTitualar1CNPJ = contratoVinculado.PessoaTitualar1CNPJ;
+                            if (!string.IsNullOrEmpty(contratoVinculado.PadraoDeCor))
+                                itemSemana.PadraoDeCor = contratoVinculado.PadraoDeCor;
 
-                                if (contratoVinculado != null)
-                                {
-                                    foreach (var itemSemana in item)
-                                    {
-                                        itemSemana.IdIntercambiadora = contratoVinculado.IdIntercambiadora;
-                                        itemSemana.PessoaTitular1Tipo = contratoVinculado.PessoaTitular1Tipo;
-                                        itemSemana.PessoaTitular1CPF = contratoVinculado.PessoaTitular1CPF;
-                                        itemSemana.PessoaTitualar1CNPJ = contratoVinculado.PessoaTitualar1CNPJ;
-                                        if (!string.IsNullOrEmpty(contratoVinculado.PadraoDeCor))
-                                            itemSemana.PadraoDeCor = contratoVinculado.PadraoDeCor;
-
-                                        if (!aplicarPadraoBlack)
-                                            itemSemana.PadraoDeCor = "Default";
-                                    }
-                                }
-                            }
+                            if (!aplicarPadraoBlack)
+                                itemSemana.PadraoDeCor = "Default";
                         }
-                        if (result == null) return default;
-
-                        result!.Status = (int)HttpStatusCode.OK;
                     }
-                    else
-                    {
-                        result.Status = (int)HttpStatusCode.NotFound;
-                        result.Errors = new List<string>() { $"Erro: {responseResult}" };
-
-                    }
-                }
-
-            }
-            catch (HttpRequestException err)
-            {
-                _logger.LogError(err, err.Message);
-                if (result != null)
-                {
-                    result.Errors.Add($"Erro: {err.Message}");
-                    result.Status = (int)HttpStatusCode.InternalServerError;
                 }
             }
 
@@ -1456,280 +1338,44 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
         {
             if (string.IsNullOrEmpty(agendamento))
                 throw new ArgumentException("O agendamentoId deve ser informado.");
-
-            _logger.LogInformation($"{DateTime.Now} - Buscando reservas da API");
-            var result = new ResultModel<List<ReservaModel>>();
-            try
-            {
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var consultarReservaUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:ConsultaReservaByAgendamentoIdUrl");
-                if (!string.IsNullOrEmpty(consultarReservaUrl))
-                {
-                    var fullUrl = $"{baseUrl}{consultarReservaUrl}{agendamento}";
-                    var token = await _serviceBase.getToken();
-
-                    using (HttpClient client = new HttpClient())
-                    {
-                        client.BaseAddress = new Uri(fullUrl);
-                        client.DefaultRequestHeaders.Clear();
-                        client.DefaultRequestHeaders.Add("accept", "application/json");
-                        client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                        HttpResponseMessage responseResult = await client.GetAsync(fullUrl);
-
-                        string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                        if (responseResult.IsSuccessStatusCode)
-                        {
-                            result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<List<ReservaModel>>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                            if (result != null)
-                                result.Status = (int)HttpStatusCode.OK;
-                        }
-                        else
-                        {
-                            result.Status = (int)HttpStatusCode.NotFound;
-                            result.Errors = new List<string>() { $"Erro: {responseResult}" };
-
-                        }
-                    }
-                }
-                else throw new ArgumentException($"Não foi encontrada a configuração de url: 'ConsultaReservaByAgendamentoIdUrl'");
-
-            }
-            catch (HttpRequestException err)
-            {
-                _logger.LogError(err, err.Message);
-                if (result != null)
-                {
-                    result.Errors.Add($"Erro: {err.Message}");
-                    result.Status = (int)HttpStatusCode.InternalServerError;
-                }
-            }
-            catch (Exception err)
-            {
-                _logger.LogError(err, err.Message);
-                if (result != null)
-                {
-                    result.Errors.Add($"Erro: {err.Message}");
-                    result.Status = (int)HttpStatusCode.InternalServerError;
-                }
-            }
-
-            return result;
+            _logger.LogInformation($"{DateTime.Now} - Buscando reservas via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.ConsultarReservaByAgendamentoId(agendamento);
         }
 
         public async Task<ResultModel<List<ReservaModel>>?> ConsultarMinhasReservaByAgendamentoId_Esol(string agendamento)
         {
             if (string.IsNullOrEmpty(agendamento))
                 throw new ArgumentException("O agendamentoId deve ser informado.");
-
-            _logger.LogInformation($"{DateTime.Now} - Buscando reservas da API");
-            var result = new ResultModel<List<ReservaModel>>();
-
-            try
-            {
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var consultarReservaUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:ConsultaMinhasReservaByAgendamentoIdUrl");
-                var fullUrl = $"{baseUrl}{consultarReservaUrl}{agendamento}";
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.GetAsync(fullUrl);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<List<ReservaModel>>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result != null)
-                            result.Status = (int)HttpStatusCode.OK;
-                    }
-                    else
-                    {
-                        result.Status = (int)HttpStatusCode.NotFound;
-                        result.Errors = new List<string>() { $"Erro: {responseResult}" };
-
-                    }
-                }
-
-            }
-            catch (HttpRequestException err)
-            {
-                _logger.LogError(err, err.Message);
-                if (result != null)
-                {
-                    result.Errors.Add($"Erro: {err.Message}");
-                    result.Status = (int)HttpStatusCode.InternalServerError;
-                }
-            }
-
-            return result;
+            _logger.LogInformation($"{DateTime.Now} - Buscando reservas via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.ConsultarMinhasReservaByAgendamentoId(agendamento);
         }
 
         public async Task<ResultModel<bool>?> CancelarReservaAgendamento_Esol(CancelamentoReservaAgendamentoModel model)
         {
-            var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-            var criarReservaAgendamentoUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:CancelarReservaAgendamentoUrl");
-            var fullUrl = baseUrl + criarReservaAgendamentoUrl;
-            var token = await _serviceBase.getToken();
-
-            using (HttpClient client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(fullUrl);
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Add("accept", "application/json");
-                client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, model);
-
-                string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                _logger.LogInformation(resultMessage);
-                var resultModel = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-
-                return resultModel;
-            }
+            _logger.LogInformation("Cancelando reserva via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.CancelarReservaAgendamento(model);
         }
 
         public async Task<ResultModel<bool>?> CancelarMinhaReservaAgendamento_Esol(CancelamentoReservaAgendamentoModel model)
         {
-            var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-            var criarReservaAgendamentoUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:CancelarMinhaReservaAgendamentoUrl");
-            var fullUrl = baseUrl + criarReservaAgendamentoUrl;
-            var token = await _serviceBase.getToken();
-
-
-            using (HttpClient client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(fullUrl);
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Add("accept", "application/json");
-                client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, model);
-
-                string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                _logger.LogInformation(resultMessage);
-                var resultModel = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-
-                return resultModel;
-            }
+            _logger.LogInformation("Cancelando minha reserva via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.CancelarMinhaReservaAgendamento(model);
         }
 
         public async Task<ResultModel<ReservaForEditModel>?> EditarMinhaReserva_Esol(int id)
         {
             if (id == 0)
                 throw new ArgumentException("O id da reserva deve ser informado.");
-
-            _logger.LogInformation($"{DateTime.Now} - Buscando reserva da API");
-            var result = new ResultModel<ReservaForEditModel>();
-
-            try
-            {
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var consultarReservaUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:EditarMinhaReservaAgendamentoUrl");
-                var fullUrl = $"{baseUrl}{consultarReservaUrl}{id}";
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.GetAsync(fullUrl);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<ReservaForEditModel>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result != null)
-                        {
-                            result.Status = (int)HttpStatusCode.OK;
-                            result.Success = true;
-                        }
-
-                    }
-                    else
-                    {
-                        result.Status = (int)HttpStatusCode.NotFound;
-                        result.Errors = new List<string>() { $"Erro: {responseResult}" };
-                    }
-                }
-
-            }
-            catch (HttpRequestException err)
-            {
-                _logger.LogError(err, err.Message);
-                if (result != null)
-                {
-                    result.Errors.Add($"Erro: {err.Message}");
-                    result.Status = (int)HttpStatusCode.InternalServerError;
-                }
-            }
-
-            return result;
+            _logger.LogInformation($"{DateTime.Now} - Buscando reserva via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.EditarMinhaReserva(id);
         }
 
         public async Task<ResultModel<ReservaForEditModel>?> EditarReserva_Esol(int id)
         {
             if (id == 0)
                 throw new ArgumentException("O id da reserva deve ser informado.");
-
-            _logger.LogInformation($"{DateTime.Now} - Buscando reserva da API");
-            var result = new ResultModel<ReservaForEditModel>();
-
-            try
-            {
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var consultarReservaUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:EditarReservaAgendamentoUrl");
-                var fullUrl = $"{baseUrl}{consultarReservaUrl}{id}";
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.GetAsync(fullUrl);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<ReservaForEditModel>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result != null)
-                            result.Status = (int)HttpStatusCode.OK;
-                    }
-                    else
-                    {
-                        result.Status = (int)HttpStatusCode.NotFound;
-                        result.Errors = new List<string>() { $"Erro: {responseResult}" };
-
-                    }
-                }
-
-            }
-            catch (HttpRequestException err)
-            {
-                _logger.LogError(err, err.Message);
-                if (result != null)
-                {
-                    result.Errors.Add($"Erro: {err.Message}");
-                    result.Status = (int)HttpStatusCode.InternalServerError;
-                }
-            }
-
-            return result;
+            _logger.LogInformation($"{DateTime.Now} - Buscando reserva via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.EditarReserva(id);
         }
 
         public async Task<Models.ResultModel<List<InventarioModel>>?> ConsultarInventarios_Esol(InventarioSearchModel searchModel)
@@ -1740,54 +1386,8 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
             if (searchModel.Agendamentoid.GetValueOrDefault(0) <= 0)
                 throw new ArgumentException("Deve ser informado o AgendamentoId");
 
-            _logger.LogInformation($"{DateTime.Now} - Buscando inventários na API");
-            var result = new Models.ResultModel<List<InventarioModel>>();
-
-            try
-            {
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var consultarReservaUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:ConsultarInventarios");
-                var fullUrl = $"{baseUrl}{consultarReservaUrl}?{searchModel.ToQueryString()}";
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.GetAsync(fullUrl);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        result = System.Text.Json.JsonSerializer.Deserialize<Models.ResultModel<List<InventarioModel>>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result != null)
-                            result.Status = (int)HttpStatusCode.OK;
-                    }
-                    else
-                    {
-                        result.Status = (int)HttpStatusCode.NotFound;
-                        result.Errors = new List<string>() { $"Erro: {responseResult}" };
-
-                    }
-                }
-
-            }
-            catch (HttpRequestException err)
-            {
-                _logger.LogError(err, err.Message);
-                if (result != null)
-                {
-                    result.Errors.Add($"Erro: {err.Message}");
-                    result.Status = (int)HttpStatusCode.InternalServerError;
-                    result.Message = err.Message;
-                }
-            }
-
-            return result;
+            _logger.LogInformation($"{DateTime.Now} - Buscando inventários via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.ConsultarInventarios(searchModel);
         }
 
         public async Task<Models.ResultModel<bool>?> RetirarSemanaPool_Esol(AgendamentoInventarioModel modelAgendamentoPool)
@@ -1861,45 +1461,10 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                     }
                 }
 
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var retirarSemanaPoolUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:RetirarSemanaPool");
-                var fullUrl = baseUrl + retirarSemanaPoolUrl;
-                var token = await _serviceBase.getToken();
+                _logger.LogInformation("Retirando semana do pool via ReservaEsolInternalService (modo local)");
+                result = await _reservaEsolInternalService.RetirarSemanaPool(modelAgendamentoPool);
 
-                using (HttpClient client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, modelAgendamentoPool);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    _logger.LogInformation(resultMessage);
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        result = System.Text.Json.JsonSerializer.Deserialize<Models.ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result != null)
-                        {
-                            result.Status = (int)HttpStatusCode.OK;
-                            result.Success = true;
-                        }
-                    }
-                    else
-                    {
-                        result = System.Text.Json.JsonSerializer.Deserialize<Models.ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (result != null)
-                        {
-                            result.Status = (int)HttpStatusCode.NotFound;
-                            result.Success = false;
-                        }
-                    }
-
-                }
-
-                if (modelAgendamentoPool.AcaoInterna.GetValueOrDefault(false) == false)
+                if (result != null && result.Success && modelAgendamentoPool.AcaoInterna.GetValueOrDefault(false) == false)
                 {
 
                     var historicoRetiraPool = new HistoricoRetiradaPool()
@@ -1931,193 +1496,12 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         public async Task<ResultModel<bool>?> LiberarSemanaPool_Esol(LiberacaoAgendamentoInputModel modelAgendamentoPool)
         {
-
-            throw new NotImplementedException();
-            //var result = new ResultModel<bool>();
-
-            //try
-            //{
-            //    _repositorySystem.BeginTransaction();
-
-            //    var loggedUser = await _repositorySystem.GetLoggedUser();
-            //    if (string.IsNullOrEmpty(loggedUser.Value.userId))
-            //        throw new FileNotFoundException("Não foi possível identificar o usuário logado.");
-
-            //    var empresa = (await _repositorySystem.FindByHql<Domain.Entities.Core.Framework.Empresa>("From Empresa e Where 1 = 1 Order by e.Id desc")).FirstOrDefault();
-
-            //    if (empresa == null)
-            //        throw new FileNotFoundException("Não foi possível identificar a empresa logada no sistema.");
-
-            //    if (modelAgendamentoPool.AgendamentoId.GetValueOrDefault(0) == 0)
-            //        throw new ArgumentException("Deve ser informado o AgendamentoId");
-
-            //    if (modelAgendamentoPool.InventarioId.GetValueOrDefault(0) == 0)
-            //        throw new ArgumentException("Deve ser informado o InventárioId");
-
-            //    var agendamento = (await _repositoryPortal.FindByHql<PeriodoCotaDisponibilidade>($"From PeriodoCotaDisponibilidade Where Id = {modelAgendamentoPool.AgendamentoId.GetValueOrDefault()}")).FirstOrDefault();
-            //    if (agendamento == null)
-            //        throw new FileNotFoundException($"Não foi foi encontrado o agendamento com o Id: {modelAgendamentoPool.AgendamentoId}");
-
-            //    if (agendamento.DataInicial.GetValueOrDefault().Date <= DateTime.Today)
-            //        throw new FileNotFoundException($"A data de Check-in: {agendamento.DataInicial.GetValueOrDefault().Date:dd/MM/yyyy} do agendamento Id: {modelAgendamentoPool.AgendamentoId} não permite liberação para o POOL");
-
-
-            //    if (!loggedUser.Value.isAdm)
-            //    {
-            //        var usuarioProvider = await _serviceBase.GetPessoaProviderVinculadaUsuarioSistema(int.Parse(loggedUser.Value.userId));
-            //        if (usuarioProvider != null)
-            //        {
-            //            if (agendamento != null)
-            //            {
-            //                var cotaAtual = await GetCotaAccessCenterPelosDadosPortal(new GetHtmlValuesModel() { PeriodoCotaDisponibilidadeId = agendamento.Id, UhCondominioId = agendamento.UhCondominio, CotaOrContratoId = agendamento.Cota });
-            //                if (cotaAtual != null)
-            //                {
-            //                    if (!string.IsNullOrEmpty(usuarioProvider.PessoaProvider))
-            //                    {
-            //                        var propCache = await _serviceBase.GetContratos(new List<int>() { int.Parse(usuarioProvider.PessoaProvider!) });
-            //                        if (propCache != null && propCache.Any(b => b.frAtendimentoStatusCrcModels.Any(b => cotaAtual.FrAtendimentoVenda.GetValueOrDefault() == b.FrAtendimentoVendaId.GetValueOrDefault() &&
-            //                        (b.BloquearCobrancaPagRec == "S" || b.BloqueaRemissaoBoletos == "S") && b.AtendimentoStatusCrcStatus == "A")))
-            //                        {
-            //                            throw new ArgumentException("Não foi possível localizar as disponibilidades, motivo 0001BL");
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-
-
-            //    var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-            //    var liberarPoolUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:LiberarSemanaPool");
-            //    var fullUrl = baseUrl + liberarPoolUrl;
-            //    var token = await _serviceBase.getToken();
-
-            //    using (HttpClient client = new HttpClient())
-            //    {
-            //        client.BaseAddress = new Uri(fullUrl);
-            //        client.DefaultRequestHeaders.Clear();
-            //        client.DefaultRequestHeaders.Add("accept", "application/json");
-            //        client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-            //        HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, modelAgendamentoPool);
-
-            //        string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-            //        _logger.LogInformation(resultMessage);
-
-            //        if (responseResult.IsSuccessStatusCode)
-            //        {
-            //            result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            //            if (result != null)
-            //                result.Status = (int)HttpStatusCode.OK;
-            //        }
-            //        else
-            //        {
-            //            result = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-            //            if (result != null)
-            //            {
-            //                result.Status = (int)HttpStatusCode.NotFound;
-            //                result.Success = false;
-            //            }
-            //        }
-
-            //    }
-
-            //    //Ajustar formato conta, conta digito, agencia e agencia digito
-            //    if (!string.IsNullOrEmpty(modelAgendamentoPool.ContaNumero))
-            //    {
-            //        modelAgendamentoPool.ContaNumero = modelAgendamentoPool.ContaNumero.TrimEnd().TrimStart();
-            //        if (modelAgendamentoPool.ContaNumero.Contains(" "))
-            //        {
-            //            var conta = modelAgendamentoPool.ContaNumero.Split(" ")[0];
-            //            var contaDigito = "0";
-            //            if (modelAgendamentoPool.ContaNumero.Split(" ").Length > 1)
-            //            {
-            //                contaDigito = modelAgendamentoPool.ContaNumero.Split(" ")[1];
-            //            }
-            //            modelAgendamentoPool.ContaNumero = conta;
-            //            modelAgendamentoPool.ContaDigito = contaDigito;
-            //        }
-            //        else if (modelAgendamentoPool.ContaNumero.Contains("-"))
-            //        {
-            //            var conta = modelAgendamentoPool.ContaNumero.Split("-")[0];
-            //            var contaDigito = "0";
-            //            if (modelAgendamentoPool.ContaNumero.Split("-").Length > 1)
-            //            {
-            //                contaDigito = modelAgendamentoPool.ContaNumero.Split("-")[1];
-            //            }
-            //            modelAgendamentoPool.ContaNumero = conta;
-            //            modelAgendamentoPool.ContaDigito = contaDigito;
-            //        }
-            //    }
-
-            //    if (!string.IsNullOrEmpty(modelAgendamentoPool.Agencia))
-            //    {
-            //        modelAgendamentoPool.Agencia = modelAgendamentoPool.Agencia.TrimEnd().TrimStart();
-            //        if (modelAgendamentoPool.Agencia.Contains(" "))
-            //        {
-            //            var agencia = modelAgendamentoPool.Agencia.Split(" ")[0];
-            //            var agenciaDigito = "0";
-            //            if (modelAgendamentoPool.Agencia.Split(" ").Length > 1)
-            //            {
-            //                agenciaDigito = modelAgendamentoPool.Agencia.Split(" ")[1];
-            //            }
-            //            modelAgendamentoPool.Agencia = agencia;
-            //            modelAgendamentoPool.AgenciaDigito = agenciaDigito;
-            //        }
-            //        else if (modelAgendamentoPool.Agencia.Contains("-"))
-            //        {
-            //            var agencia = modelAgendamentoPool.Agencia.Split("-")[0];
-            //            var agenciaDigito = "0";
-            //            if (modelAgendamentoPool.Agencia.Split("-").Length > 1)
-            //            {
-            //                agenciaDigito = modelAgendamentoPool.Agencia.Split("-")[1];
-            //            }
-            //            modelAgendamentoPool.Agencia = agencia;
-            //            modelAgendamentoPool.AgenciaDigito = agenciaDigito;
-            //        }
-            //    }
-
-
-            //    var confirmacaoLiberacaoPool = new ConfirmacaoLiberacaoPool()
-            //    {
-            //        UsuarioCriacao = Convert.ToInt32(loggedUser.Value.userId),
-            //        DataHoraCriacao = DateTime.Now,
-            //        Empresa = new Domain.Entities.Core.Framework.Empresa() { Id = empresa.Id },
-            //        AgendamentoId = modelAgendamentoPool.AgendamentoId,
-            //        LiberacaoConfirmada = Domain.Enumns.EnumSimNao.Sim,
-            //        LiberacaoDiretaPeloCliente = Domain.Enumns.EnumSimNao.Não,
-            //        Banco = modelAgendamentoPool.CodigoBanco,
-            //        Conta = modelAgendamentoPool.ContaNumero,
-            //        ContaDigito = modelAgendamentoPool.ContaDigito,
-            //        Agencia = modelAgendamentoPool.Agencia,
-            //        AgenciaDigito = modelAgendamentoPool.AgenciaDigito,
-            //        ChavePix = modelAgendamentoPool.ChavePix,
-            //        Tipo = modelAgendamentoPool.Variacao,
-            //        Variacao = modelAgendamentoPool.Variacao,
-            //        TipoConta = modelAgendamentoPool.Variacao,
-            //        Preferencial = modelAgendamentoPool.Preferencial.GetValueOrDefault(false) ? "S" : "N",
-            //        TipoChavePix = modelAgendamentoPool.TipoChavePix,
-            //        IdCidade = $"{modelAgendamentoPool.IdCidade}"
-            //    };
-
-            //    await _repositorySystem.Save(confirmacaoLiberacaoPool);
-
-            //    var resultCommit = await _repositorySystem.CommitAsync();
-
-            //}
-            //catch (Exception err)
-            //{
-            //    _repositorySystem.Rollback();
-            //    _logger.LogError(err, err.Message);
-            //    if (result != null)
-            //    {
-            //        result.Message = err.Message;
-            //        result.Errors = new List<string>() { err.Message };
-            //        result.Success = false;
-            //    }
-            //}
-            //return result;
-
+            if (modelAgendamentoPool.AgendamentoId.GetValueOrDefault(0) == 0)
+                throw new ArgumentException("Deve ser informado o AgendamentoId");
+            if (modelAgendamentoPool.InventarioId.GetValueOrDefault(0) == 0)
+                throw new ArgumentException("Deve ser informado o InventárioId");
+            _logger.LogInformation("Liberando semana para pool via ReservaEsolInternalService (modo local)");
+            return await _reservaEsolInternalService.LiberarSemanaPool(modelAgendamentoPool);
         }
 
         public async Task<ResultModel<bool>?> LiberarMinhaSemanaPool_Esol(LiberacaoMeuAgendamentoInputModel modelAgendamentoPool)
@@ -2257,48 +1641,21 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
         private async Task<(bool liberacaoEfetuada, ResultModel<bool> retornoVinculo)> LiberarSemanaParaPoolExecute(LiberacaoMeuAgendamentoInputModel modelAgendamentoPool, bool liberacaoEfetuada, ResultModel<bool> retornoVinculo)
         {
-            var result = new ResultModel<bool>();
-
-            var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-            var liberarPoolUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:LiberarSemanaPool");
-            var fullUrl = baseUrl + liberarPoolUrl;
-            var token = await _serviceBase.getToken();
-
-            using (HttpClient client = new HttpClient())
+            var liberacaoModel = new LiberacaoAgendamentoInputModel
             {
-                client.BaseAddress = new Uri(fullUrl);
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Add("accept", "application/json");
-                client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, modelAgendamentoPool);
-
-                string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                _logger.LogInformation(resultMessage);
-
-                if (responseResult.IsSuccessStatusCode)
-                {
-                    retornoVinculo = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                    if (retornoVinculo != null && retornoVinculo!.Success)
-                    {
-                        retornoVinculo.Status = (int)HttpStatusCode.OK;
-                        retornoVinculo.Success = true;
-                        retornoVinculo.Data = true;
-                        liberacaoEfetuada = true;
-                    }
-                }
-                else
-                {
-                    retornoVinculo = System.Text.Json.JsonSerializer.Deserialize<ResultModel<bool>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                    if (retornoVinculo != null)
-                    {
-                        retornoVinculo.Status = (int)HttpStatusCode.NotFound;
-                        retornoVinculo.Success = false;
-                    }
-                }
-
+                AgendamentoId = modelAgendamentoPool.AgendamentoId,
+                InventarioId = modelAgendamentoPool.InventarioId
+            };
+            var result = await _reservaEsolInternalService.LiberarSemanaPool(liberacaoModel);
+            if (result != null && result.Success)
+            {
+                retornoVinculo = result;
+                liberacaoEfetuada = true;
             }
-
+            else if (result != null)
+            {
+                retornoVinculo = result;
+            }
             return (liberacaoEfetuada, retornoVinculo);
         }
 
@@ -3635,45 +2992,15 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
                 await VerificarInadimplencia(modelInput, cotaPortalUtilizar, loggedUser, usuario);
 
-                var result = new ResultModel<int?>();
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var liberarPoolUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:TrocarSemana");
-                var fullUrl = baseUrl + liberarPoolUrl;
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
+                _logger.LogInformation("Trocando semana via ReservaEsolInternalService (modo local)");
+                var resultTrocar = await _reservaEsolInternalService.TrocarSemana(model);
+                if (resultTrocar != null)
                 {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, model);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    _logger.LogInformation(resultMessage);
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        retornoVinculo = System.Text.Json.JsonSerializer.Deserialize<ResultModel<int>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (retornoVinculo != null)
-                        {
-                            retornoVinculo.Status = (int)HttpStatusCode.OK;
-                            retornoVinculo.Success = true;
-                            retornoVinculo.Data = retornoVinculo.Data;
-                        }
-                    }
-                    else
-                    {
-                        retornoVinculo = System.Text.Json.JsonSerializer.Deserialize<ResultModel<int>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (retornoVinculo != null)
-                        {
-                            retornoVinculo.Status = (int)HttpStatusCode.NotFound;
-                            retornoVinculo.Success = false;
-                        }
-                    }
-
+                    retornoVinculo.Data = resultTrocar.Data;
+                    retornoVinculo.Success = resultTrocar.Success;
+                    //retornoVinculo.Status = resultTrocar.Status ?? retornoVinculo.Status;
+                    retornoVinculo.Errors = resultTrocar.Errors;
+                    retornoVinculo.Message = resultTrocar.Message;
                 }
 
                 if (retornoVinculo != null && retornoVinculo.Data > 0 && retornoVinculo.Data != model.AgendamentoId.GetValueOrDefault())
@@ -3934,45 +3261,15 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
                     throw new FileNotFoundException("Não foi possível identificar a empresa logada no sistema.");
 
 
-                var result = new ResultModel<int?>();
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var liberarPoolUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:IncluirSemana");
-                var fullUrl = baseUrl + liberarPoolUrl;
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
+                _logger.LogInformation("Incluindo semana via ReservaEsolInternalService (modo local)");
+                var resultIncluir = await _reservaEsolInternalService.IncluirSemana(model);
+                if (resultIncluir != null)
                 {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, model);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    _logger.LogInformation(resultMessage);
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        retornoVinculo = System.Text.Json.JsonSerializer.Deserialize<ResultModel<int>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (retornoVinculo != null)
-                        {
-                            retornoVinculo.Status = (int)HttpStatusCode.OK;
-                            retornoVinculo.Success = true;
-                            retornoVinculo.Data = retornoVinculo.Data;
-                        }
-                    }
-                    else
-                    {
-                        retornoVinculo = System.Text.Json.JsonSerializer.Deserialize<ResultModel<int>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (retornoVinculo != null)
-                        {
-                            retornoVinculo.Status = (int)HttpStatusCode.NotFound;
-                            retornoVinculo.Success = false;
-                        }
-                    }
-
+                    retornoVinculo.Data = resultIncluir.Data;
+                    retornoVinculo.Success = resultIncluir.Success;
+                    //retornoVinculo.Status = resultIncluir.Status ?? retornoVinculo.Status;
+                    retornoVinculo.Errors = resultIncluir.Errors;
+                    retornoVinculo.Message = resultIncluir.Message;
                 }
 
                 if (retornoVinculo != null && retornoVinculo.Data > 0)
@@ -4845,46 +4142,15 @@ namespace SW_PortalProprietario.Application.Services.Providers.Hybrid
 
                 await VerificarInadimplencia(modelInput, cotaPortalUtilizar, loggedUser, usuario);
 
-
-                var result = new ResultModel<int?>();
-
-                var baseUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:BaseUrl");
-                var liberarPoolUrl = _configuration.GetValue<string>("ReservasEsolutionApiConfig:TrocarSemana");
-                var fullUrl = baseUrl + liberarPoolUrl;
-                var token = await _serviceBase.getToken();
-
-                using (HttpClient client = new HttpClient())
+                _logger.LogInformation("Trocando tipo uso via ReservaEsolInternalService (modo local)");
+                var resultTrocarTipo = await _reservaEsolInternalService.TrocarSemana(model);
+                if (resultTrocarTipo != null)
                 {
-                    client.BaseAddress = new Uri(fullUrl);
-                    client.DefaultRequestHeaders.Clear();
-                    client.DefaultRequestHeaders.Add("accept", "application/json");
-                    client.DefaultRequestHeaders.Add("authorization", $"Bearer {token}");
-                    HttpResponseMessage responseResult = await client.PostAsJsonAsync(fullUrl, model);
-
-                    string resultMessage = await responseResult.Content.ReadAsStringAsync();
-
-                    _logger.LogInformation(resultMessage);
-
-                    if (responseResult.IsSuccessStatusCode)
-                    {
-                        retornoVinculo = System.Text.Json.JsonSerializer.Deserialize<ResultModel<int>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (retornoVinculo != null)
-                        {
-                            retornoVinculo.Status = (int)HttpStatusCode.OK;
-                            retornoVinculo.Success = true;
-                            retornoVinculo.Data = retornoVinculo.Data;
-                        }
-                    }
-                    else
-                    {
-                        retornoVinculo = System.Text.Json.JsonSerializer.Deserialize<ResultModel<int>>(resultMessage, new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                        if (retornoVinculo != null)
-                        {
-                            retornoVinculo.Status = (int)HttpStatusCode.NotFound;
-                            retornoVinculo.Success = false;
-                        }
-                    }
-
+                    retornoVinculo.Data = resultTrocarTipo.Data;
+                    retornoVinculo.Success = resultTrocarTipo.Success;
+                    //retornoVinculo.Status = resultTrocarTipo.Status ?? retornoVinculo.Status;
+                    retornoVinculo.Errors = resultTrocarTipo.Errors;
+                    retornoVinculo.Message = resultTrocarTipo.Message;
                 }
 
                 if (retornoVinculo != null && retornoVinculo.Data > 0 && retornoVinculo.Data != model.AgendamentoId.GetValueOrDefault())
